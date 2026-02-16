@@ -1,0 +1,36 @@
+// src/app/app.config.ts
+// Configuración raíz de la aplicación Angular standalone
+import { ApplicationConfig, importProvidersFrom } from '@angular/core';
+import { provideRouter, withComponentInputBinding } from '@angular/router';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { provideAnimations } from '@angular/platform-browser/animations';
+import { provideToastr } from 'ngx-toastr';
+import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
+
+import { routes } from './app.routes';
+import { jwtInterceptor } from './core/interceptors/jwt.interceptor.interceptor';
+import { errorInterceptor } from './core/interceptors/error.interceptor.interceptor';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    // Configurar router con lazy loading y binding de inputs
+    provideRouter(routes, withComponentInputBinding()),
+
+    // Configurar HttpClient con interceptors funcionales
+    provideHttpClient(withInterceptors([jwtInterceptor, errorInterceptor])),
+
+    // Habilitar animaciones para toastr y CDK
+    provideAnimations(),
+
+    // Configurar notificaciones toast
+    provideToastr({
+      timeOut: 4000,
+      positionClass: 'toast-top-right',
+      preventDuplicates: true,
+      progressBar: true,
+    }),
+
+    // Configurar Chart.js para dashboards
+    provideCharts(withDefaultRegisterables()),
+  ],
+};

@@ -1,0 +1,272 @@
+<div class="p-6">
+  <div class="flex justify-between items-center mb-6">
+    <div class="flex flex-col">
+      <h1 class="text-2xl font-bold text-gray-100">Casos de Prueba</h1>
+      <div *ngIf="projectTitle()" class="flex items-center gap-2 mt-2">
+        <i class="fas fa-folder-open text-blue-400"></i>
+        <span class="text-blue-400 text-sm font-medium">{{ projectTitle() }}</span>
+        <span *ngIf="projectStatus()" [ngClass]="{
+            'bg-emerald-500/10 text-emerald-400 border-emerald-500/20': projectStatus() === 'Activo',
+            'bg-rose-500/10 text-rose-400 border-rose-500/20': projectStatus() === 'Inactivo'
+          }" class="px-2 py-0.5 rounded-full border text-[10px] font-bold uppercase tracking-wider">
+          {{ projectStatus() }}
+        </span>
+      </div>
+    </div>
+    <button (click)="openModal()" [disabled]="!projectId()"
+      class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl transition-all shadow-lg shadow-blue-900/20 font-bold flex items-center gap-2">
+      <i class="fas fa-plus"></i>
+      Nuevo Caso de Prueba
+    </button>
+  </div>
+
+  <!-- Project & Suite Selection -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 bg-gray-800/50 p-6 rounded-2xl border border-gray-700/50">
+    <div>
+      <label
+        class="block text-sm font-medium text-gray-400 mb-2 font-bold uppercase tracking-wider text-[10px]">Proyecto</label>
+      <select (change)="onProjectChange($event)" [value]="projectId() || ''"
+        class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all">
+        <option value="">Todos los Proyectos</option>
+        <option *ngFor="let project of projects()" [value]="project.id">{{ project.name }}</option>
+      </select>
+    </div>
+    <div>
+      <label
+        class="block text-sm font-medium text-gray-400 mb-2 font-bold uppercase tracking-wider text-[10px]">Escenario
+        (Suite)</label>
+      <select (change)="onSuiteChange($event)" [value]="testSuiteId() || ''" [disabled]="!projectId()"
+        class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all disabled:opacity-50">
+        <option value="">Todos los Escenarios</option>
+        <option *ngFor="let suite of testSuites()" [value]="suite.id">{{ suite.name }}</option>
+      </select>
+    </div>
+  </div>
+
+  <div *ngIf="loading()" class="flex justify-center items-center h-64">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+  </div>
+
+  <div *ngIf="!loading()" class="space-y-6">
+    <div *ngFor="let group of groupedTestCases()" class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
+      <div class="bg-gray-900/50 px-6 py-3 border-b border-gray-700 flex items-center">
+        <i class="fas fa-folder text-blue-400 mr-2"></i>
+        <h2 class="text-sm font-semibold text-gray-300 uppercase tracking-wider">{{ group.projectName || 'Sin Proyecto'
+          }}</h2>
+        <span class="ml-auto text-xs text-gray-500">{{ group.items.length }} casos</span>
+      </div>
+      <table class="w-full text-left">
+        <thead class="bg-gray-900/30 text-gray-400 font-medium text-xs uppercase">
+          <tr>
+            <th class="px-6 py-3">ID</th>
+            <th class="px-6 py-3">Título</th>
+            <th class="px-6 py-3">Prioridad</th>
+            <th class="px-6 py-3">Estado</th>
+            <th class="px-6 py-3">Fecha</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-700/50">
+          <tr *ngFor="let testCase of group.items" (click)="viewExecutions(testCase.id, $event)"
+            class="border-b border-gray-800 hover:bg-gray-700/30 transition-colors cursor-pointer group">
+            <td class="px-6 py-4 text-gray-400 font-mono text-sm w-20">#{{ testCase.id }}</td>
+            <td class="px-6 py-4 font-medium text-gray-200 group-hover:text-blue-400 transition-colors">
+              {{ testCase.title }}
+            </td>
+            <td class="px-6 py-4">
+              <span [ngClass]="{
+                'bg-red-900/50 text-red-400 border border-red-800': testCase.priorityCode === 'P0',
+                'bg-orange-900/50 text-orange-400 border border-orange-800': testCase.priorityCode === 'P1',
+                'bg-yellow-900/50 text-yellow-400 border border-yellow-800': testCase.priorityCode === 'P2'
+              }" class="px-2 py-1 rounded text-[10px] font-bold uppercase transition-all">
+                {{ testCase.priorityName }}
+              </span>
+            </td>
+            <td class="px-6 py-4">
+              <span class="flex items-center text-sm" [class]="testCase.isActive ? 'text-green-400' : 'text-gray-500'">
+                <span class="w-2 h-2 rounded-full mr-2"
+                  [class]="testCase.isActive ? 'bg-green-500' : 'bg-gray-600'"></span>
+                {{ testCase.isActive ? 'Activo' : 'Inactivo' }}
+              </span>
+            </td>
+            <td class="px-6 py-4 text-gray-400 text-sm italic opacity-70">{{ testCase.createdAt | date:'shortDate' }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Registration Modal -->
+  <div *ngIf="showModal()"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
+    <div class="bg-gray-900 border border-gray-800 rounded-3xl w-full max-w-3xl overflow-hidden shadow-2xl my-8">
+      <div class="p-8 max-h-[85vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-2xl font-bold text-white">Nuevo Caso de Prueba</h2>
+          <button (click)="closeModal()" class="text-gray-500 hover:text-white transition-colors">
+            <i class="fas fa-times text-xl"></i>
+          </button>
+        </div>
+
+        <form [formGroup]="testCaseForm" (ngSubmit)="onSubmit()" class="space-y-6">
+          <!-- Project ID (Hidden) -->
+          <input type="hidden" formControlName="projectId">
+
+          <!-- Basic Info Grid -->
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-400 mb-2">Escenario (Test Suite) *</label>
+              <select formControlName="testSuiteId"
+                class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all">
+                <option value="">Selecciona un escenario...</option>
+                <option *ngFor="let suite of testSuites()" [value]="suite.id">{{ suite.name }}</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-400 mb-2">Prioridad *</label>
+              <select formControlName="priorityId"
+                class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all">
+                <option value="1">Baja</option>
+                <option value="2">Media</option>
+                <option value="3">Alta</option>
+                <option value="4">Crítica</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Title -->
+          <div>
+            <label class="block text-sm font-medium text-gray-400 mb-2">Título *</label>
+            <input type="text" formControlName="title" placeholder="Ej: Verificar login con credenciales válidas"
+              class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all">
+            <div *ngIf="testCaseForm.get('title')?.touched && testCaseForm.get('title')?.invalid"
+              class="text-rose-500 text-xs mt-2 font-medium">
+              El título es requerido (mínimo 3 caracteres).
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div>
+            <label class="block text-sm font-medium text-gray-400 mb-2">Descripción</label>
+            <textarea formControlName="description" rows="3" placeholder="Describe el objetivo del caso de prueba..."
+              class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all resize-none"></textarea>
+          </div>
+
+          <!-- Preconditions -->
+          <div>
+            <label class="block text-sm font-medium text-gray-400 mb-2">Precondiciones</label>
+            <textarea formControlName="preconditions" rows="2" placeholder="Condiciones previas necesarias..."
+              class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all resize-none"></textarea>
+          </div>
+
+          <!-- Expected Result -->
+          <div>
+            <label class="block text-sm font-medium text-gray-400 mb-2">Resultado Esperado *</label>
+            <textarea formControlName="expectedResult" rows="2" placeholder="Describe el resultado esperado..."
+              class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all resize-none"></textarea>
+          </div>
+
+          <!-- Planning Section -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Test Type -->
+            <div>
+              <label class="block text-sm font-medium text-gray-400 mb-2">Tipo de Prueba *</label>
+              <select formControlName="testTypeId"
+                class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all">
+                <option value="1">Funcional Manual</option>
+                <option value="2">Funcional Automatizada</option>
+                <option value="3">No Funcional</option>
+                <option value="4">Regresión</option>
+                <option value="5">Smoke Test</option>
+              </select>
+            </div>
+
+            <!-- Estimated Time -->
+            <div>
+              <label class="block text-sm font-medium text-gray-400 mb-2">Tiempo Estimado (Horas) *</label>
+              <input type="number" formControlName="estimatedTimeHours" min="0" placeholder="Ej: 2"
+                class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all">
+            </div>
+
+            <!-- Start Date -->
+            <div>
+              <label class="block text-sm font-medium text-gray-400 mb-2">Fecha Inicio *</label>
+              <input type="date" formControlName="startDate"
+                class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all">
+            </div>
+
+            <!-- End Date -->
+            <div>
+              <label class="block text-sm font-medium text-gray-400 mb-2">Fecha Fin *</label>
+              <input type="date" formControlName="endDate"
+                class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all">
+            </div>
+
+            <!-- Certifiers -->
+            <div class="col-span-1 md:col-span-2">
+              <label class="block text-sm font-medium text-gray-400 mb-2">Certificadores *</label>
+              <select formControlName="certifierUserIds" multiple
+                class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all h-32">
+                <option *ngFor="let user of users()" [value]="user.id">{{ user.fullName }}</option>
+              </select>
+              <p class="text-xs text-gray-500 mt-1">Mantén presionado Ctrl (o Cmd en Mac) para seleccionar múltiples
+                usuarios.</p>
+            </div>
+          </div>
+
+          <!-- Steps Section -->
+          <div class="border-t border-gray-800 pt-6">
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-lg font-bold text-white">Pasos de Ejecución</h3>
+              <button type="button" (click)="addStep()"
+                class="px-3 py-1.5 bg-green-600/10 hover:bg-green-600/20 text-green-400 rounded-lg text-sm font-bold transition-all border border-green-500/20 hover:border-green-500/50 flex items-center gap-2">
+                <i class="fas fa-plus text-xs"></i>
+                Agregar Paso
+              </button>
+            </div>
+
+            <div formArrayName="steps" class="space-y-4">
+              <div *ngFor="let step of steps.controls; let i = index" [formGroupName]="i"
+                class="bg-gray-800/50 rounded-xl p-4 border border-gray-700">
+                <div class="flex justify-between items-center mb-3">
+                  <span class="text-sm font-bold text-blue-400">Paso {{ i + 1 }}</span>
+                  <button type="button" (click)="removeStep(i)" *ngIf="steps.length > 1"
+                    class="text-rose-400 hover:text-rose-300 transition-colors">
+                    <i class="fas fa-trash-alt text-sm"></i>
+                  </button>
+                </div>
+                <div class="space-y-3">
+                  <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1">Acción *</label>
+                    <input type="text" formControlName="action" placeholder="Ej: Ingresar usuario y contraseña"
+                      class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all">
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1">Resultado Esperado *</label>
+                    <input type="text" formControlName="expectedResult"
+                      placeholder="Ej: El sistema muestra el dashboard"
+                      class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="flex gap-4 pt-4">
+            <button type="button" (click)="closeModal()"
+              class="flex-1 px-6 py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-xl font-bold transition-all border border-gray-700">
+              Cancelar
+            </button>
+            <button type="submit" [disabled]="testCaseForm.invalid || isSubmitting()"
+              class="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-bold transition-all shadow-lg shadow-blue-900/20 flex items-center justify-center gap-2">
+              <span *ngIf="isSubmitting()"
+                class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+              {{ isSubmitting() ? 'Creando...' : 'Crear Caso de Prueba' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

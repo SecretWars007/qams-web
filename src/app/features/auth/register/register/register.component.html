@@ -1,0 +1,73 @@
+<div class="card">
+  <h2 class="text-2xl font-bold text-gray-900 text-center mb-6">
+    Crear Cuenta
+  </h2>
+
+  <form (ngSubmit)="onSubmit()" class="space-y-4">
+    <div>
+      <label class="form-label">Nombre Completo</label>
+      <input
+        type="text"
+        class="form-input"
+        [(ngModel)]="form.fullName"
+        name="fullName"
+        placeholder="Juan Pérez"
+        required
+      />
+    </div>
+
+    <div>
+      <label class="form-label">Usuario</label>
+      <input
+        type="text"
+        class="form-input"
+        [(ngModel)]="form.username"
+        name="username"
+        placeholder="juanperez"
+        required
+      />
+    </div>
+
+    <div>
+      <label class="form-label">Correo Electrónico</label>
+      <input
+        type="email"
+        class="form-input"
+        [(ngModel)]="form.email"
+        name="email"
+        placeholder="juan@empresa.com"
+        required
+      />
+    </div>
+
+    <div>
+      <label class="form-label">Contraseña</label>
+      <input
+        type="password"
+        class="form-input"
+        [(ngModel)]="form.password"
+        name="password"
+        placeholder="Mínimo 8 caracteres"
+        required
+      />
+      <p class="text-xs text-gray-500 mt-1">
+        Debe contener mayúscula, número y carácter especial.
+      </p>
+    </div>
+
+    <button type="submit" class="btn-primary w-full" [disabled]="loading()">
+      {{ loading() ? 'Registrando...' : 'Crear Cuenta' }}
+    </button>
+  </form>
+
+  <p class="mt-4 text-center text-sm text-gray-600">
+    ¿Ya tienes cuenta?
+    <a
+      routerLink="/auth/login"
+      class="text-primary-600 hover:text-primary-700 font-medium"
+    >
+      Inicia sesión
+    </a>
+  </p>
+</div>
+

@@ -1,0 +1,8 @@
+{
+  "css.lint.compatibleVendorPrefixes": "ignore",
+  "css.lint.vendorPrefix": "ignore",
+  "css.lint.unknownAtRules": "ignore",
+  "scss.lint.compatibleVendorPrefixes": "ignore",
+  "scss.lint.vendorPrefix": "ignore",
+  "scss.lint.unknownAtRules": "ignore"
+}

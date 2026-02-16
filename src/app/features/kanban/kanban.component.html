@@ -1,0 +1,75 @@
+<div class="h-full flex flex-col p-6 overflow-hidden">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold text-gray-100">Tablero Kanban</h1>
+    <div class="flex space-x-2">
+      <button class="px-3 py-2 text-sm bg-gray-700 text-gray-300 rounded hover:bg-gray-600">Filtrar</button>
+      <button class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">+ Nueva Tarea</button>
+    </div>
+  </div>
+
+  <div *ngIf="loading()" class="flex justify-center items-center h-full">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+  </div>
+
+  <div *ngIf="!loading() && board()" class="flex-1 overflow-x-auto overflow-y-hidden" cdkDropListGroup>
+    <div class="flex h-full space-x-6 min-w-max pb-4">
+
+      <!-- Columns -->
+      <div *ngFor="let column of board()?.columns"
+        class="w-80 flex flex-col bg-gray-900 rounded-xl overflow-hidden border border-gray-800">
+        <!-- Column Header -->
+        <div class="p-4 bg-gray-800 border-b border-gray-700 flex justify-between items-center sticky top-0">
+          <h3 class="font-semibold text-gray-200">{{ column.name }}</h3>
+          <span class="bg-gray-700 text-gray-400 text-xs px-2 py-1 rounded-full">{{ column.tasks.length }}</span>
+        </div>
+
+        <!-- Task List -->
+        <div cdkDropList [cdkDropListData]="column.tasks" (cdkDropListDropped)="drop($event)"
+          class="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar min-h-[100px]">
+
+          <div *ngFor="let task of column.tasks" cdkDrag (click)="openExecution(task)"
+            class="bg-gray-800 p-4 rounded-lg border border-gray-700 hover:border-blue-500 cursor-pointer shadow-sm transition-all group relative">
+
+            <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <i class="fas fa-external-link-alt text-gray-500 hover:text-blue-400"></i>
+            </div>
+            <div class="flex justify-between items-start mb-2">
+              <span [ngClass]="{
+                'bg-red-900 text-red-300': task.priorityCode === 'P0' || task.priorityCode === 'P1',
+                'bg-yellow-900 text-yellow-300': task.priorityCode === 'P2',
+                'bg-blue-900 text-blue-300': task.priorityCode === 'P3'
+              }" class="text-xs px-2 py-0.5 rounded">
+                {{ task.priorityName }}
+              </span>
+              <button class="text-gray-500 hover:text-white opacity-0 group-hover:opacity-100">
+                <i class="fas fa-ellipsis-h"></i>
+              </button>
+            </div>
+
+            <h4 class="text-white font-medium mb-2">{{ task.title }}</h4>
+
+            <div class="flex justify-between items-center text-xs text-gray-400 mt-3 pt-3 border-t border-gray-700">
+              <div class="flex items-center">
+                <div
+                  class="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold mr-2 text-xs">
+                  {{ task.assigneeName?.charAt(0) }}
+                </div>
+                <span>{{ task.assigneeName }}</span>
+              </div>
+              <span>{{ task.dueDate | date:'dd MMM' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Add Task Footer -->
+        <div class="p-3 bg-gray-800 border-t border-gray-700">
+          <button
+            class="w-full py-2 text-sm text-gray-400 hover:text-white hover:bg-gray-700 rounded dashed-border flex items-center justify-center">
+            <span class="mr-1">+</span> Añadir tarea
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

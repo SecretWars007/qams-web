@@ -1,0 +1,88 @@
+# GitLab CI/CD Pipeline para QAMS Web
+
+stages:
+  - build
+  - test
+  - push
+  - deploy
+
+variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: "/certs"
+  CI_REGISTRY_IMAGE: $CI_REGISTRY_IMAGE
+  IMAGE_TAG: $CI_COMMIT_SHORT_SHA
+
+build:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:dind
+  before_script:
+    - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+  script:
+    - docker build -t $CI_REGISTRY_IMAGE:$IMAGE_TAG .
+    - docker build -t $CI_REGISTRY_IMAGE:latest .
+  after_script:
+    - docker logout $CI_REGISTRY
+  retry:
+    max: 2
+    when: runner_system_failure
+
+test:
+  stage: test
+  image: node:20-alpine
+  cache:
+    paths:
+      - node_modules/
+  before_script:
+    - npm ci
+  script:
+    - npm run build -- --configuration production
+    - npm run test -- --watch=false --browsers=ChromeHeadless
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 1 day
+  retry:
+    max: 2
+
+push:
+  stage: push
+  image: docker:latest
+  services:
+    - docker:dind
+  before_script:
+    - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+  script:
+    - docker build -t $CI_REGISTRY_IMAGE:$IMAGE_TAG .
+    - docker push $CI_REGISTRY_IMAGE:$IMAGE_TAG
+    - |
+      if [ "$CI_COMMIT_BRANCH" == "main" ]; then
+        docker tag $CI_REGISTRY_IMAGE:$IMAGE_TAG $CI_REGISTRY_IMAGE:latest
+        docker push $CI_REGISTRY_IMAGE:latest
+      fi
+  only:
+    - main
+    - develop
+  after_script:
+    - docker logout $CI_REGISTRY
+
+deploy:
+  stage: deploy
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache openssh-client
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+  script:
+    - ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa $DEPLOY_USER@$DEPLOY_HOST "
+        cd $DEPLOY_PATH &&
+        docker pull $CI_REGISTRY_IMAGE:latest &&
+        docker-compose down &&
+        docker-compose up -d
+      "
+  only:
+    - main
+  when: manual

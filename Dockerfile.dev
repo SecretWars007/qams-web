@@ -1,0 +1,20 @@
+# Dockerfile para desarrollo con ng serve
+
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copiar archivos de dependencias
+COPY package*.json ./
+
+# Instalar dependencias
+RUN npm ci
+
+# Copiar el código
+COPY . .
+
+# Exponer puerto
+EXPOSE 4200
+
+# Comando para servir en desarrollo
+CMD ["npm", "start"]

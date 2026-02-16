@@ -1,0 +1,166 @@
+<div class="space-y-6">
+  <!-- Título -->
+  <div>
+    <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
+    <p class="text-gray-500 text-sm mt-1">
+      Resumen general del sistema QAMS
+    </p>
+  </div>
+
+  @if (summary()) {
+    <!-- Tarjetas de métricas -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <!-- Total Proyectos -->
+      <div class="card flex items-center gap-4">
+        <div
+          class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center"
+        >
+          <svg
+            class="w-6 h-6 text-blue-600"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
+            />
+          </svg>
+        </div>
+        <div>
+          <p class="text-2xl font-bold text-gray-900">
+            {{ summary()!.totalProjects }}
+          </p>
+          <p class="text-sm text-gray-500">Proyectos</p>
+        </div>
+      </div>
+
+      <!-- Total Casos -->
+      <div class="card flex items-center gap-4">
+        <div
+          class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center"
+        >
+          <svg
+            class="w-6 h-6 text-purple-600"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+            />
+          </svg>
+        </div>
+        <div>
+          <p class="text-2xl font-bold text-gray-900">
+            {{ summary()!.totalTestCases }}
+          </p>
+          <p class="text-sm text-gray-500">Casos de Prueba</p>
+        </div>
+      </div>
+
+      <!-- Tasa de Aprobación -->
+      <div class="card flex items-center gap-4">
+        <div
+          class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center"
+        >
+          <svg
+            class="w-6 h-6 text-green-600"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+        </div>
+        <div>
+          <p class="text-2xl font-bold text-gray-900">
+            {{ summary()!.passRate }}%
+          </p>
+          <p class="text-sm text-gray-500">Tasa de Aprobación</p>
+        </div>
+      </div>
+
+      <!-- Ejecuciones Pendientes -->
+      <div class="card flex items-center gap-4">
+        <div
+          class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center"
+        >
+          <svg
+            class="w-6 h-6 text-yellow-600"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+        </div>
+        <div>
+          <p class="text-2xl font-bold text-gray-900">
+            {{ summary()!.pendingExecutions }}
+          </p>
+          <p class="text-sm text-gray-500">Pendientes</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Gráfico Doughnut: Ejecuciones por Estado -->
+      <div class="card">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">
+          Ejecuciones por Estado
+        </h3>
+        <div class="h-64 flex items-center justify-center">
+          <canvas
+            baseChart
+            [data]="doughnutData"
+            [options]="doughnutOptions"
+            type="doughnut"
+          >
+          </canvas>
+        </div>
+      </div>
+
+      <!-- Gráfico Bar: Progreso Kanban -->
+      <div class="card">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">
+          Progreso Kanban
+        </h3>
+        <div class="h-64">
+          <canvas
+            baseChart
+            [data]="barData"
+            [options]="barOptions"
+            type="bar"
+          >
+          </canvas>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <!-- Loading -->
+    <div class="flex items-center justify-center h-64">
+      <div
+        class="animate-spin w-8 h-8 border-4 border-primary-500
+                  border-t-transparent rounded-full"
+      ></div>
+    </div>
+  }
+</div>
+

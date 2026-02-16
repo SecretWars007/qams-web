@@ -1,0 +1,98 @@
+<div class="p-6 max-w-7xl mx-auto">
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">Gestión de Usuarios</h1>
+            <p class="text-gray-500 text-sm">Administra los accesos y roles de los miembros del equipo.</p>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading()"
+        class="bg-white rounded-2xl border border-gray-100 shadow-sm p-12 text-center text-gray-400">
+        <div class="animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent mx-auto mb-4"></div>
+        <p>Cargando información...</p>
+    </div>
+
+    <!-- Table -->
+    <div *ngIf="!isLoading()" class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="bg-gray-50/50 border-b border-gray-100">
+                        <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Usuario</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Email</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Estado</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Roles</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Registro</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider text-right">
+                            Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50">
+                    <tr *ngFor="let user of users()" class="hover:bg-gray-50/50 transition-colors group">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 font-bold text-sm">
+                                    {{ user.fullName ? user.fullName.substring(0,1).toUpperCase() : 'U' }}
+                                </div>
+                                <div>
+                                    <div class="font-bold text-gray-900 leading-tight">{{ user.fullName || 'Usuario' }}
+                                    </div>
+                                    <div class="text-[10px] text-gray-400 font-mono tracking-tighter uppercase">{{
+                                        user.id.substring(0, 8) }}...</div>
+                                    <div class="text-xs text-gray-400">{{ user.username }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="text-sm text-gray-600">{{ user.email }}</div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span
+                                [ngClass]="user.isActive ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-rose-50 text-rose-700 border-rose-100'"
+                                class="px-2 py-1 rounded-full text-[10px] font-bold border whitespace-nowrap">
+                                {{ user.isActive ? 'ACTIVO' : 'INACTIVO' }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="flex flex-wrap gap-1 max-w-[200px]">
+                                <span *ngFor="let role of user.roles"
+                                    class="px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 text-[10px] font-bold border border-blue-100">
+                                    {{ role }}
+                                </span>
+                                <span *ngIf="user.roles.length === 0" class="text-xs text-gray-400 italic">Sin
+                                    roles</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-xs text-gray-500 whitespace-nowrap">
+                            {{ user.createdAt | date:'dd/MM/yyyy' }}
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex items-center justify-end gap-2">
+                                <select (change)="onAssignRole(user.id, $event)"
+                                    class="text-xs px-2 py-1.5 rounded-lg border border-gray-200 bg-white hover:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all cursor-pointer">
+                                    <option value="">+ Rol</option>
+                                    <option *ngFor="let role of roles()" [value]="role.id">{{ role.name }}</option>
+                                </select>
+
+                                <button (click)="onDeleteUser(user.id)"
+                                    class="p-2 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
+                                    title="Eliminar usuario">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div *ngIf="users().length === 0" class="p-12 text-center bg-gray-50 border-t border-gray-100">
+            <p class="text-gray-400 italic text-sm">No se encontraron usuarios registrados.</p>
+        </div>
+    </div>
+</div>

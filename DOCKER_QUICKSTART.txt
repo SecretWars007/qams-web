@@ -1,0 +1,217 @@
+📦 QAMS Web - Estructura Docker
+================================
+
+📁 Proyecto
+├── 📄 Dockerfile                    ← Build para producción (Node → Nginx)
+├── 📄 Dockerfile.dev                ← Build para desarrollo (Node + ng serve)
+├── 📄 docker-compose.yml            ← Orquestación producción
+├── 📄 docker-compose.dev.yml        ← Orquestación desarrollo (con hot reload)
+├── 📄 docker-compose.prod.yml       ← Ejemplo: producción con API + DB + Redis
+├── 📄 nginx.conf                    ← Configuración Nginx
+├── 📄 .dockerignore                 ← Archivos a excluir
+├── 📄 .env.docker                   ← Variables de ambiente
+├── 📄 docker.sh                     ← Script gestión (Linux/Mac)
+├── 📄 docker.bat                    ← Script gestión (Windows)
+├── 📄 README.DOCKER.md              ← Guía completa Docker
+├── 📄 DOCKER_SETUP.md               ← Resumen setup
+├── 📁 .github/workflows
+│   └── 📄 docker-build.yml          ← GitHub Actions CI/CD
+└── 📄 .gitlab-ci.yml                ← GitLab CI/CD
+
+═══════════════════════════════════════════════════════════
+
+🚀 COMANDOS RÁPIDOS
+═══════════════════════════════════════════════════════════
+
+📍 PRODUCCIÓN (Nginx)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  # Windows
+  docker.bat start
+  docker.bat logs
+  docker.bat stop
+
+  # Linux/Mac
+  ./docker.sh start
+  ./docker.sh logs
+  ./docker.sh stop
+
+  # Docker Compose directo
+  docker-compose up -d
+  docker-compose logs -f
+  docker-compose down
+
+═══════════════════════════════════════════════════════════
+
+🔧 DESARROLLO (ng serve)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  docker-compose -f docker-compose.dev.yml up
+  # Acceso: http://localhost:4200 (con hot reload)
+
+═══════════════════════════════════════════════════════════
+
+📊 COMPARATIVA
+═══════════════════════════════════════════════════════════
+
+┌─────────────────┬──────────────┬──────────────┐
+│    Aspecto      │ Producción   │ Desarrollo   │
+├─────────────────┼──────────────┼──────────────┤
+│ Base            │ Nginx Alpine │ Node 20      │
+│ Tamaño          │ ~100-120MB   │ ~500MB       │
+│ Hot Reload      │ ✗            │ ✓            │
+│ Performance     │ ★★★★★       │ ★★           │
+│ Puertos         │ 80/443       │ 4200         │
+│ Caso de Uso     │ Producción   │ Desarrollo   │
+└─────────────────┴──────────────┴──────────────┘
+
+═══════════════════════════════════════════════════════════
+
+🏗️ ARQUITECTURA
+═══════════════════════════════════════════════════════════
+
+PRODUCCIÓN (Multi-stage):
+
+  ┌─────────────────────────────────────┐
+  │  Stage 1: Builder (Node 20)         │
+  │  - npm install                      │
+  │  - npm run build                    │
+  │  - Genera /dist                     │
+  │  (Descartado en imagen final)       │
+  └──────────────────┬──────────────────┘
+                     │
+                     ↓
+  ┌─────────────────────────────────────┐
+  │  Stage 2: Runtime (Nginx Alpine)    │
+  │  - COPY --from=builder /dist        │
+  │  - Sirve archivos estáticos         │
+  │  - Imagen final: ~100MB             │
+  │  - Puerto: 80                       │
+  └─────────────────────────────────────┘
+
+DESARROLLO (Single-stage):
+
+  ┌─────────────────────────────────────┐
+  │  Node 20 Alpine                     │
+  │  - npm install                      │
+  │  - npm start (ng serve)             │
+  │  - Hot reload habilitado            │
+  │  - CHOKIDAR_USEPOLLING=true         │
+  │  - Puerto: 4200                     │
+  │  - Volúmenes: ./src → /app/src      │
+  └─────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════
+
+✨ CARACTERÍSTICAS
+═══════════════════════════════════════════════════════════
+
+✓ Multi-stage build (optimizado)
+✓ Compresión Gzip para assets
+✓ Cache HTTP headers (30 días)
+✓ SPA routing (fallback a index.html)
+✓ Healthcheck automático
+✓ Volúmenes para desarrollo
+✓ Environment variables
+✓ Redes Docker para comunicación
+✓ Hot reload en desarrollo
+✓ Scripts de gestión (bash + batch)
+✓ CI/CD listo (GitHub + GitLab)
+✓ Seguridad (sin root, archivos bloqueados)
+
+═══════════════════════════════════════════════════════════
+
+🔐 SEGURIDAD
+═══════════════════════════════════════════════════════════
+
+✓ Base Alpine (atackt surface mínima)
+✓ Sin permiso root
+✓ Archivos sensibles bloqueados
+✓ Cache headers seguros
+✓ SSL/TLS ready
+✓ CORS configurable
+
+═══════════════════════════════════════════════════════════
+
+📖 DOCUMENTACIÓN
+═══════════════════════════════════════════════════════════
+
+Consulta los siguientes archivos:
+
+  1️⃣  README.DOCKER.md    - Guía completa
+  2️⃣  DOCKER_SETUP.md     - Este resumen
+  3️⃣  docker.sh / docker.bat - Scripts ayuda
+  4️⃣  docker-compose.yml  - Config producción
+  5️⃣  docker-compose.dev.yml - Config desarrollo
+  6️⃣  docker-compose.prod.yml - Ejemplo completo
+
+═══════════════════════════════════════════════════════════
+
+🎯 CASOS DE USO
+═══════════════════════════════════════════════════════════
+
+LOCAL (sin Docker):
+  npm install && npm start
+  → http://localhost:4200
+
+DESARROLLO (con Docker):
+  docker-compose -f docker-compose.dev.yml up
+  → http://localhost:4200 (con hot reload)
+
+PRODUCCIÓN (con Docker):
+  docker-compose up -d
+  → http://localhost
+
+CI/CD (Automático):
+  GitHub Actions / GitLab CI
+  → Build, Test, Push, Deploy
+
+═══════════════════════════════════════════════════════════
+
+💡 TIPS
+═══════════════════════════════════════════════════════════
+
+1. Ver logs en tiempo real:
+   docker-compose logs -f qams-web
+
+2. Ejecutar comandos en contenedor:
+   docker-compose exec qams-web sh
+
+3. Reconstruir sin caché:
+   docker-compose build --no-cache
+
+4. Limpiar todo:
+   docker-compose down -v
+
+5. Ver tamaño de imagen:
+   docker images | grep qams-web
+
+6. Cambiar puerto (Puerto 8080):
+   Edita docker-compose.yml:
+   ports:
+     - "8080:80"
+
+═══════════════════════════════════════════════════════════
+
+✅ ESTADO
+═══════════════════════════════════════════════════════════
+
+☑️  Dockerfile producción      - LISTO
+☑️  Dockerfile desarrollo      - LISTO
+☑️  docker-compose.yml         - LISTO
+☑️  docker-compose.dev.yml     - LISTO
+☑️  docker-compose.prod.yml    - LISTO
+☑️  nginx.conf                 - LISTO
+☑️  docker.sh                  - LISTO
+☑️  docker.bat                 - LISTO
+☑️  GitHub Actions             - LISTO
+☑️  GitLab CI/CD               - LISTO
+☑️  Documentación              - LISTO
+
+═══════════════════════════════════════════════════════════
+
+Fecha: 14 de Febrero, 2026
+Versión: 1.0
+Estado: ✅ LISTO PARA PRODUCCIÓN
+
+═══════════════════════════════════════════════════════════
