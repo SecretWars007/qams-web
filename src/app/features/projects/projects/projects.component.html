@@ -1,237 +1,336 @@
-<div class="p-6 max-w-7xl mx-auto">
+<div class="p-4 sm:p-6 max-w-7xl mx-auto animate-in fade-in duration-500">
   <!-- Header -->
-  <div class="flex justify-between items-center mb-8">
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
     <div>
-      <h1 class="text-3xl font-bold text-gray-100 mb-2">Proyectos</h1>
-      <p class="text-gray-400">Gestiona tus espacios de trabajo y casos de prueba.</p>
+      <h1 class="text-3xl font-black text-white tracking-tight">Proyectos</h1>
+      <p class="text-gray-500 text-sm mt-1">Gestiona tus espacios de trabajo y casos de prueba.</p>
     </div>
     <button (click)="openModal()"
-      class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all shadow-lg shadow-blue-900/20 font-bold flex items-center gap-2">
-      <i class="fas fa-plus"></i>
-      Nuevo Proyecto
+      class="w-full sm:w-auto px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl transition-all shadow-lg shadow-indigo-900/20 font-bold flex items-center justify-center gap-2 group">
+      <i class="fas fa-plus group-hover:rotate-90 transition-transform"></i>
+      <span>Nuevo Proyecto</span>
     </button>
   </div>
 
   <!-- Loading State -->
-  <div *ngIf="loading()" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
-    <div *ngFor="let i of [1,2,3]" class="h-56 bg-gray-800/50 rounded-2xl border border-gray-700"></div>
+  <div *ngIf="loading()" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
+    <div *ngFor="let i of [1,2,3]" class="h-64 bg-gray-900/50 rounded-3xl border border-white/5"></div>
   </div>
 
   <!-- Empty State -->
   <div *ngIf="!loading() && projects().length === 0"
-    class="flex flex-col items-center justify-center py-20 bg-gray-900/50 rounded-3xl border border-dashed border-gray-700">
-    <div class="w-20 h-20 bg-gray-800 rounded-full flex items-center justify-center mb-6">
-      <i class="fas fa-folder-open text-3xl text-gray-600"></i>
+    class="flex flex-col items-center justify-center py-20 bg-gray-900/40 rounded-3xl border-2 border-dashed border-white/5">
+    <div class="w-20 h-20 bg-gray-900 rounded-full flex items-center justify-center mb-6 border border-white/5">
+      <i class="fas fa-folder-open text-3xl text-gray-700"></i>
     </div>
     <h2 class="text-xl font-bold text-white mb-2">No hay proyectos todavía</h2>
-    <p class="text-gray-500 mb-8">Comienza creando tu primer proyecto de pruebas.</p>
-    <button (click)="openModal()" class="text-blue-500 font-bold hover:underline">
+    <p class="text-gray-500 mb-8 max-w-xs text-center">Comienza creando tu primer proyecto de pruebas para empezar el
+      monitoreo.</p>
+    <button (click)="openModal()"
+      class="text-indigo-400 font-bold hover:text-indigo-300 transition-colors flex items-center gap-2">
+      <i class="fas fa-plus-circle"></i>
       Crear proyecto ahora
     </button>
   </div>
 
   <!-- Projects Grid -->
-  <div *ngIf="!loading()" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  <div *ngIf="!loading()" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
     <div *ngFor="let project of projects()" (dblclick)="openProject(project.id)"
-      class="bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-800 hover:border-blue-500/50 transition-all hover:shadow-2xl hover:shadow-blue-900/10 group cursor-pointer relative overflow-hidden">
+      class="bg-gray-900 border border-white/5 rounded-3xl p-6 hover:border-indigo-500/30 transition-all hover:shadow-2xl hover:shadow-black/40 group cursor-pointer relative overflow-hidden flex flex-col h-full">
 
-      <!-- Project Actions -->
-      <div class="absolute top-4 right-4 z-10 flex gap-2">
-        <button (click)="onToggleStatus(project, $event)"
-          class="p-2 text-gray-400 hover:text-emerald-500 hover:bg-emerald-500/10 rounded-lg transition-all"
-          [title]="project.isActive ? 'Desactivar proyecto' : 'Activar proyecto'">
-          <!-- Status Toggle SVG -->
-          <svg *ngIf="project.isActive" class="w-5 h-5 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M2 10a8 8 0 1116 0 8 8 0 01-16 0zm12-4a4 4 0 100 8 4 4 0 000-8z"
-              clip-rule="evenodd" />
-          </svg>
-          <svg *ngIf="!project.isActive" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        </button>
-        <button (click)="onDeleteProject(project.id, $event)"
-          class="p-2 text-gray-400 hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-all group/delete"
-          title="Eliminar proyecto">
-          <!-- Trash SVG -->
-          <svg class="w-5 h-5 group-hover/delete:scale-110 transition-transform" fill="none" stroke="currentColor"
-            viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-          </svg>
-        </button>
+      <!-- Status Badge -->
+      <div class="absolute top-0 right-0 z-10">
+        <span (click)="onToggleStatus(project, $event)" [ngClass]="{
+            'bg-emerald-500/10 text-emerald-400 border-emerald-500/10': project.isActive,
+            'bg-rose-500/10 text-rose-400 border-rose-500/10': !project.isActive
+          }"
+          class="px-4 py-1.5 rounded-bl-2xl border-b border-l text-[10px] font-black uppercase tracking-widest cursor-pointer hover:brightness-125 transition-all backdrop-blur-md">
+          {{ project.isActive ? 'Activo' : 'Inactivo' }}
+        </span>
       </div>
 
-      <div class="flex flex-col h-full relative">
-        <!-- Status Badge (Absolute) -->
-        <div class="absolute top-0 right-0">
-          <span (click)="onToggleStatus(project, $event)" [ngClass]="{
-              'bg-emerald-500/10 text-emerald-400 border-emerald-500/20': project.isActive,
-              'bg-rose-500/10 text-rose-400 border-rose-500/20': !project.isActive
-            }"
-            class="px-3 py-1 rounded-bl-2xl border-b border-l font-bold text-xs uppercase tracking-wider cursor-pointer hover:bg-opacity-20 transition-all backdrop-blur-md">
-            {{ project.isActive ? 'Activo' : 'Inactivo' }}
-          </span>
-        </div>
-
-        <!-- Header content -->
-        <div class="mb-4 pr-24"> <!-- Padding right for badge and actions -->
-          <div class="flex items-start gap-4">
-            <div
-              class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600/20 to-purple-600/20 border border-blue-500/20 flex items-center justify-center text-blue-400 shadow-lg shadow-blue-900/10 group-hover:scale-110 transition-transform duration-300">
-              <i class="fas fa-cube text-xl"></i>
-            </div>
-            <div>
-              <h3 class="text-xl font-bold text-white group-hover:text-blue-400 transition-colors leading-tight mb-1">
-                {{ project.name }}
-              </h3>
-              <div class="flex items-center gap-2 text-xs text-gray-400">
-                <span class="px-2 py-0.5 rounded-md bg-gray-800 border border-gray-700 text-gray-300">
-                  {{ project.projectStatusName || 'Sin Estado' }}
-                </span>
-                <span>•</span>
-                <span>{{ project.createdAt | date:'MMM d, y' }}</span>
-              </div>
+      <!-- Content -->
+      <div class="mb-5 pr-16"> <!-- Space for badge -->
+        <div class="flex items-start gap-4">
+          <div
+            class="w-12 h-12 shrink-0 rounded-2xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 shadow-lg shadow-indigo-500/5 group-hover:scale-110 transition-transform duration-500">
+            <i class="fas fa-cube text-xl"></i>
+          </div>
+          <div class="min-w-0">
+            <h3
+              class="text-lg font-bold text-white group-hover:text-indigo-400 transition-colors leading-tight mb-1 truncate"
+              [title]="project.name">
+              {{ project.name }}
+            </h3>
+            <div class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-gray-500">
+              <span class="text-indigo-500/70">{{ project.projectStatusName || 'PENDIENTE' }}</span>
+              <span>•</span>
+              <span>{{ project.createdAt | date:'MMM d, y' }}</span>
             </div>
           </div>
         </div>
+      </div>
 
-        <!-- Description -->
-        <p class="text-gray-400 text-sm mb-6 line-clamp-2 leading-relaxed h-10">
-          {{ project.description || 'Sin descripción disponible.' }}
-        </p>
+      <!-- Description -->
+      <p class="text-gray-500 text-sm mb-6 line-clamp-2 leading-relaxed min-h-[2.5rem]">
+        {{ project.description || 'Sin descripción detallada disponible.' }}
+      </p>
 
-        <!-- Metadata Grid -->
-        <div class="grid grid-cols-2 gap-4 mb-6">
-          <div class="bg-gray-800/30 rounded-xl p-3 border border-gray-700/50">
-            <p class="text-[10px] text-gray-500 uppercase tracking-wider font-bold mb-1">Fechas</p>
-            <div class="flex items-center gap-2 text-xs text-gray-300">
-              <i class="far fa-calendar text-blue-500/70"></i>
-              <span>{{ project.startDate | date:'dd/MM' }} - {{ project.endDate | date:'dd/MM' }}</span>
-            </div>
-          </div>
-          <div class="bg-gray-800/30 rounded-xl p-3 border border-gray-700/50">
-            <p class="text-[10px] text-gray-500 uppercase tracking-wider font-bold mb-1">Creado por</p>
-            <div class="flex items-center gap-2 text-xs text-gray-300">
-              <i class="far fa-user text-purple-500/70"></i>
-              <span class="truncate">{{ project.createdByUserName || 'Desconocido' }}</span>
-            </div>
+      <!-- Metadata Grid -->
+      <div class="grid grid-cols-2 gap-3 mb-6">
+        <div class="bg-gray-950/50 rounded-2xl p-3 border border-white/5">
+          <p class="text-[9px] text-gray-600 uppercase tracking-widest font-black mb-1">Duración</p>
+          <div class="flex items-center gap-2 text-[11px] text-gray-400 font-medium">
+            <i class="far fa-calendar-alt text-indigo-500/50"></i>
+            <span>{{ project.startDate | date:'dd/MM' }} - {{ project.endDate | date:'dd/MM' }}</span>
           </div>
         </div>
+        <div class="bg-gray-950/50 rounded-2xl p-3 border border-white/5">
+          <p class="text-[9px] text-gray-600 uppercase tracking-widest font-black mb-1">Responsable</p>
+          <div class="flex items-center gap-2 text-[11px] text-gray-400 font-medium truncate">
+            <i class="far fa-user text-purple-500/50"></i>
+            <span class="truncate">{{ project.createdByUserName || 'Sistema' }}</span>
+          </div>
+        </div>
+      </div>
 
-        <!-- Testers Avatars (Stacked) -->
-        <div class="mb-6" *ngIf="project.testerNames.length">
-          <p class="text-[10px] text-gray-500 uppercase tracking-wider font-bold mb-2">Equipo de QA</p>
-          <div class="flex -space-x-2 overflow-hidden py-1">
+      <!-- Equipo y Métricas Wrapper -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <!-- Testers -->
+        <div *ngIf="project.testerNames.length">
+          <p class="text-[9px] text-gray-600 uppercase tracking-widest font-black mb-2">Equipo QA</p>
+          <div class="flex -space-x-2">
             <div *ngFor="let name of project.testerNames.slice(0, 4)"
-              class="inline-block h-8 w-8 rounded-full ring-2 ring-gray-900 bg-gray-800 flex items-center justify-center text-xs font-bold text-gray-300 border border-gray-700"
-              title="{{name}}">
-              {{ name.charAt(0).toUpperCase() }}
+              class="h-8 w-8 rounded-full border-2 border-gray-900 bg-gray-800 flex items-center justify-center text-[10px] font-black text-indigo-400"
+              [title]="name">
+              {{ name.charAt(0) }}
             </div>
             <div *ngIf="project.testerNames.length > 4"
-              class="inline-block h-8 w-8 rounded-full ring-2 ring-gray-900 bg-gray-700 flex items-center justify-center text-xs font-bold text-white border border-gray-600">
+              class="h-8 w-8 rounded-full border-2 border-gray-900 bg-gray-800 flex items-center justify-center text-[10px] font-black text-white">
               +{{ project.testerNames.length - 4 }}
             </div>
           </div>
         </div>
-        <div class="mb-6 text-xs text-gray-500 italic" *ngIf="!project.testerNames.length">
-          Sin testers asignados
-        </div>
 
-        <!-- Footer Actions & Metrics -->
-        <div class="mt-auto pt-4 border-t border-gray-800 flex justify-between items-center">
-          <div class="flex gap-4 text-xs text-gray-400">
-            <div class="flex items-center gap-1.5" title="Test Suites">
-              <i class="fas fa-layer-group text-blue-500"></i>
-              <span class="font-mono font-bold text-gray-200">{{ project.testSuiteCount || 0 }}</span>
-            </div>
-            <div class="flex items-center gap-1.5" title="Kanban Boards">
-              <i class="fas fa-columns text-purple-500"></i>
-              <span class="font-mono font-bold text-gray-200">{{ project.kanbanBoardCount || 0 }}</span>
-            </div>
+        <!-- Metrics (Compact on mobile) -->
+        <div class="flex items-center gap-4 py-2 px-3 bg-gray-950/30 rounded-2xl border border-white/5">
+          <div class="flex flex-col items-center px-1" title="Suites">
+            <span class="text-[10px] font-black text-gray-600 leading-none mb-1">S</span>
+            <span class="text-xs font-black text-white leading-none">{{ project.testSuiteCount || 0 }}</span>
           </div>
-
-          <div class="flex items-center gap-2">
-            <button (click)="onDeleteProject(project.id, $event)"
-              class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors">
-              <i class="fas fa-trash-alt text-sm"></i>
-            </button>
-            <button (click)="viewKanban(project.id, $event)"
-              class="px-3 py-1.5 bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 rounded-lg text-xs font-bold transition-all border border-blue-500/20 hover:border-blue-500/50 flex items-center gap-2">
-              Kanban
-              <i class="fas fa-arrow-right text-[10px]"></i>
-            </button>
+          <div class="w-px h-4 bg-white/5"></div>
+          <div class="flex flex-col items-center px-1" title="Boards">
+            <span class="text-[10px] font-black text-gray-600 leading-none mb-1">B</span>
+            <span class="text-xs font-black text-white leading-none">{{ project.kanbanBoardCount || 0 }}</span>
+          </div>
+          <div class="w-px h-4 bg-white/5"></div>
+          <div class="flex flex-col items-center px-1" title="Devoluciones"
+            (click)="openDevolutionModal(project, $event)">
+            <span class="text-[10px] font-black text-rose-500/50 leading-none mb-1">D</span>
+            <span class="text-xs font-black text-rose-500 leading-none">{{ project.devolucionesCounter || 0 }}</span>
           </div>
         </div>
+      </div>
 
+      <!-- Footer Actions -->
+      <div class="mt-auto pt-5 border-t border-white/5 flex gap-2">
+        <button (click)="viewKanban(project.id, $event)"
+          class="flex-1 py-3 bg-indigo-500/5 hover:bg-indigo-500/10 text-indigo-400 rounded-2xl text-xs font-black uppercase tracking-widest transition-all border border-indigo-500/10 flex items-center justify-center gap-2 group/btn">
+          <i class="fas fa-columns text-[10px] group-hover/btn:scale-110 transition-transform"></i>
+          <span>Kanban</span>
+        </button>
+
+        <button (click)="openDevolutionModal(project, $event)"
+          class="flex-1 py-3 bg-rose-500/5 hover:bg-rose-500/10 text-rose-400 rounded-2xl text-xs font-black uppercase tracking-widest transition-all border border-rose-500/10 flex items-center justify-center gap-2 group/btn">
+          <i class="fas fa-undo text-[10px] group-hover/btn:scale-110 transition-transform"></i>
+          <span>Devolver</span>
+        </button>
+
+        <button (click)="onDeleteProject(project.id, $event)"
+          class="px-4 py-3 bg-gray-950 hover:bg-rose-950 text-gray-600 hover:text-rose-400 rounded-2xl border border-white/5 hover:border-rose-500/20 transition-all flex items-center justify-center group/btn"
+          title="Eliminar">
+          <i class="fas fa-trash-alt text-xs group-hover/btn:scale-110 transition-transform"></i>
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- Registration Modal -->
-  <div *ngIf="showModal()" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-    <div class="bg-gray-900 border border-gray-800 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl">
-      <div class="p-8">
-        <div class="flex justify-between items-center mb-6">
-          <h2 class="text-2xl font-bold text-white">Nuevo Proyecto</h2>
-          <button (click)="closeModal()" class="text-gray-500 hover:text-white transition-colors">
+  <!-- Registration Modal - Full Screen Mobile -->
+  <div *ngIf="showModal()"
+    class="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-xl animate-in fade-in duration-300">
+    <div
+      class="bg-gray-900 border-0 sm:border border-white/10 rounded-none sm:rounded-[2rem] w-full max-w-lg h-full sm:h-auto overflow-y-auto shadow-2xl flex flex-col">
+      <div class="p-8 sm:p-10 flex-1">
+        <div class="flex justify-between items-center mb-10">
+          <div>
+            <h2 class="text-2xl font-black text-white tracking-tight">Nuevo Proyecto</h2>
+            <p class="text-gray-500 text-xs font-bold uppercase tracking-widest mt-1">Configuración inicial</p>
+          </div>
+          <button (click)="closeModal()"
+            class="w-10 h-10 rounded-2xl bg-white/5 text-gray-500 hover:text-white transition-all flex items-center justify-center">
             <i class="fas fa-times text-xl"></i>
           </button>
         </div>
 
-        <form [formGroup]="projectForm" (ngSubmit)="onSubmit()" class="space-y-6">
-          <div>
-            <label class="block text-sm font-medium text-gray-400 mb-2">Nombre del Proyecto</label>
-            <input type="text" formControlName="name" placeholder="Ej: QAMS E-commerce"
-              class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all">
+        <form [formGroup]="projectForm" (ngSubmit)="onSubmit()" class="space-y-8">
+          <div class="space-y-2">
+            <label class="text-[10px] font-black text-gray-600 uppercase tracking-widest px-1">Nombre Comercial</label>
+            <input type="text" formControlName="name" placeholder="Ej: QAMS E-commerce Integration"
+              class="w-full bg-gray-950 border border-white/5 rounded-2xl px-5 py-4 text-white placeholder-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-medium">
             <div *ngIf="projectForm.get('name')?.touched && projectForm.get('name')?.invalid"
-              class="text-rose-500 text-xs mt-2 font-medium">
-              El nombre es requerido (mínimo 3 caracteres).
+              class="text-rose-500 text-[10px] font-black uppercase tracking-widest mt-1 ml-1">
+              Nombre inválido (min. 3 caracteres)
             </div>
           </div>
 
-          <div>
-            <label class="block text-sm font-medium text-gray-400 mb-2">Descripción (Opcional)</label>
-            <textarea formControlName="description" rows="3"
-              placeholder="Describe brevemente el objetivo del proyecto..."
-              class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all resize-none"></textarea>
+          <div class="space-y-2">
+            <label class="text-[10px] font-black text-gray-600 uppercase tracking-widest px-1">Objetivos del
+              Proyecto</label>
+            <textarea formControlName="description" rows="4" placeholder="Define el alcance y metas principales..."
+              class="w-full bg-gray-950 border border-white/5 rounded-2xl px-5 py-4 text-white placeholder-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all resize-none font-medium leading-relaxed"></textarea>
           </div>
 
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-400 mb-2">Fecha Inicio</label>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div class="space-y-2">
+              <label class="text-[10px] font-black text-gray-600 uppercase tracking-widest px-1">Fecha
+                Lanzamiento</label>
               <input type="date" formControlName="startDate"
-                class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all">
+                class="w-full bg-gray-950 border border-white/5 rounded-2xl px-5 py-4 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-medium">
             </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-400 mb-2">Fecha Fin</label>
+            <div class="space-y-2">
+              <label class="text-[10px] font-black text-gray-600 uppercase tracking-widest px-1">Fecha Cierre</label>
               <input type="date" formControlName="endDate"
-                class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all">
+                class="w-full bg-gray-950 border border-white/5 rounded-2xl px-5 py-4 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-medium">
             </div>
           </div>
 
-          <div>
-            <label class="block text-sm font-medium text-gray-400 mb-2">Testers Asignados</label>
+          <div class="space-y-2">
+            <label class="text-[10px] font-black text-gray-600 uppercase tracking-widest px-1">Liderazgo QA
+              (Multiple)</label>
             <select formControlName="testerIds" multiple
-              class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all h-32">
-              <option *ngFor="let user of users()" [value]="user.id">{{ user.username }}</option>
+              class="w-full bg-gray-950 border border-white/5 rounded-2xl px-5 py-4 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all h-40 custom-scrollbar font-medium">
+              <option *ngFor="let user of users()" [value]="user.id"
+                class="py-2 px-2 rounded-lg my-1 hover:bg-white/5 transition-all">{{ user.username }}</option>
             </select>
-            <p class="text-xs text-gray-500 mt-1">Mantén presionado Ctrl para seleccionar múltiples.</p>
+            <p class="text-[10px] text-gray-700 font-bold italic px-1">Tip: Usa CMD/Ctrl para selecciones múltiples.</p>
           </div>
 
-          <div class="flex gap-4 pt-4">
+          <div class="flex flex-col sm:flex-row gap-4 pt-6 border-t border-white/5">
             <button type="button" (click)="closeModal()"
-              class="flex-1 px-6 py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-xl font-bold transition-all border border-gray-700">
+              class="flex-1 px-8 py-4 bg-gray-950 hover:bg-gray-800 text-gray-400 rounded-2xl font-black uppercase tracking-widest transition-all border border-white/5">
               Cancelar
             </button>
             <button type="submit" [disabled]="projectForm.invalid || isSubmitting()"
-              class="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-bold transition-all shadow-lg shadow-blue-900/20 flex items-center justify-center gap-2">
+              class="flex-1 px-8 py-4 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-2xl font-black uppercase tracking-widest transition-all shadow-xl shadow-indigo-900/40 flex items-center justify-center gap-3">
               <span *ngIf="isSubmitting()"
-                class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-              {{ isSubmitting() ? 'Creando...' : 'Crear Proyecto' }}
+                class="w-5 h-5 border-3 border-white/20 border-t-white rounded-full animate-spin"></span>
+              {{ isSubmitting() ? 'Iniciando...' : 'Desplegar Proyecto' }}
             </button>
           </div>
         </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Devolution Modal - Full Screen Mobile -->
+  <div *ngIf="showDevolutionModal()"
+    class="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 bg-black/90 backdrop-blur-xl animate-in zoom-in duration-300">
+    <div
+      class="bg-gray-950 border-0 sm:border border-white/10 rounded-none sm:rounded-[2.5rem] w-full max-w-3xl h-full sm:h-auto max-h-[95vh] overflow-hidden shadow-2xl flex flex-col">
+      <div class="p-8 sm:p-12 flex flex-col h-full overflow-hidden">
+        <div class="flex justify-between items-start mb-10 shrink-0">
+          <div>
+            <h2 class="text-3xl font-black text-white tracking-tight">Devolución de Proyecto</h2>
+            <div class="flex items-center gap-2 mt-2">
+              <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+              <p class="text-rose-500/80 text-[10px] font-black uppercase tracking-widest">Protocolo de Incumplimiento
+              </p>
+            </div>
+            <p class="text-gray-500 font-bold text-xs mt-4">Sistema: <span class="text-white">{{
+                selectedProjectForDevolution()?.name }}</span></p>
+          </div>
+          <button (click)="closeDevolutionModal()"
+            class="w-12 h-12 rounded-2xl bg-white/5 text-gray-600 hover:text-white transition-all flex items-center justify-center border border-white/5">
+            <i class="fas fa-times text-xl"></i>
+          </button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-10 group/modal">
+          <!-- Historic Devolutions -->
+          <div *ngIf="selectedProjectForDevolution()?.historicDevolutions?.length" class="space-y-6">
+            <div class="flex items-center gap-4">
+              <p class="text-[10px] font-black text-gray-600 uppercase tracking-widest">Historial de Auditoría</p>
+              <div class="flex-1 h-px bg-white/5"></div>
+            </div>
+            <div class="space-y-4">
+              <div *ngFor="let dev of selectedProjectForDevolution()?.historicDevolutions"
+                class="bg-gray-900 border border-white/5 rounded-3xl p-6 relative overflow-hidden group/dev hover:border-rose-500/20 transition-all">
+                <div class="absolute top-0 right-0 p-4">
+                  <span *ngIf="dev.responseDate"
+                    class="px-2 py-0.5 rounded-lg text-[8px] font-black bg-emerald-500/10 text-emerald-400 border border-emerald-500/10 uppercase">Resuelto</span>
+                  <span *ngIf="!dev.responseDate"
+                    class="px-2 py-0.5 rounded-lg text-[8px] font-black bg-rose-500/10 text-rose-500 border border-rose-500/10 uppercase">Pendiente</span>
+                </div>
+
+                <div class="flex items-start gap-4 mb-4">
+                  <div
+                    class="w-10 h-10 shrink-0 bg-rose-500/10 rounded-xl flex items-center justify-center text-rose-500">
+                    <i class="fas fa-undo text-sm"></i>
+                  </div>
+                  <div>
+                    <p class="text-xs font-black text-white tracking-tight leading-none mb-1">{{ dev.createdByUserName
+                      }}</p>
+                    <p class="text-[9px] text-gray-600 font-bold uppercase tracking-widest">{{ dev.devolutionDate |
+                      date:'longDate' }}</p>
+                  </div>
+                </div>
+
+                <p class="text-sm text-gray-400 leading-relaxed pl-14">{{ dev.notes }}</p>
+
+                <!-- Response Component -->
+                <div *ngIf="dev.responseNotes"
+                  class="mt-6 ml-14 p-5 bg-emerald-500/5 rounded-2xl border border-emerald-500/10 animate-in slide-in-from-left-2">
+                  <div class="flex items-center gap-2 mb-2">
+                    <i class="fas fa-check-double text-[10px] text-emerald-500"></i>
+                    <p class="text-[9px] text-emerald-500 font-black uppercase tracking-widest">Resolución Aplicada • {{
+                      dev.responseDate | date:'dd/MM/yyyy' }}</p>
+                  </div>
+                  <p class="text-xs text-gray-300/80 leading-relaxed font-medium">{{ dev.responseNotes }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- New Devolution Input -->
+          <div class="space-y-4">
+            <div class="flex items-center gap-4">
+              <p class="text-[10px] font-black text-gray-600 uppercase tracking-widest">Nuevo Registro de Hallazgo</p>
+              <div class="flex-1 h-px bg-white/5"></div>
+            </div>
+            <textarea [(ngModel)]="devolutionNotes" [ngModelOptions]="{standalone: true}" rows="5"
+              placeholder="Describe los motivos técnicos para la devolución. Se notificará inmediatamente al equipo responsable..."
+              class="w-full bg-gray-900 border border-white/5 rounded-3xl px-6 py-5 text-white placeholder-gray-700 focus:outline-none focus:ring-2 focus:ring-rose-500/50 focus:border-rose-500 transition-all resize-none text-sm leading-relaxed font-medium"></textarea>
+            <div class="flex items-start gap-3 p-4 bg-rose-500/5 rounded-2xl border border-rose-500/10">
+              <i class="fas fa-info-circle text-rose-500 mt-0.5"></i>
+              <p class="text-[10px] text-rose-500/70 font-bold uppercase tracking-widest leading-normal">
+                Nota: Esta acción bloqueará el estado del proyecto y requerirá una respuesta formal del líder técnico.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-10 flex flex-col sm:flex-row gap-4 shrink-0">
+          <button type="button" (click)="closeDevolutionModal()"
+            class="flex-1 px-8 py-4 bg-gray-900 hover:bg-gray-800 text-gray-500 rounded-2xl font-black uppercase tracking-widest transition-all border border-white/5">
+            Cerrar Panel
+          </button>
+          <button type="button" (click)="onRegisterDevolution()" [disabled]="!devolutionNotes.trim() || isSubmitting()"
+            class="flex-1 px-8 py-4 bg-rose-600 hover:bg-rose-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-2xl font-black uppercase tracking-widest transition-all shadow-xl shadow-rose-950/40 flex items-center justify-center gap-3">
+            <span *ngIf="isSubmitting()"
+              class="w-5 h-5 border-3 border-white/20 border-t-white rounded-full animate-spin"></span>
+            {{ isSubmitting() ? 'Ejecutando...' : 'Formalizar Devolución' }}
+          </button>
+        </div>
       </div>
     </div>
   </div>

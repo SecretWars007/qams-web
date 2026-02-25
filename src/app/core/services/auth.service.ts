@@ -75,9 +75,30 @@ export class AuthService {
    * Renueva el access token usando el API real
    */
   refreshToken(): Observable<LoginResponse> {
+    if (environment.useMock) {
+      return this.authMockService.refreshToken().pipe(
+        tap(res => this.authMockService.setSession(res))
+      );
+    }
+
+    const accessToken = this.getAccessToken();
     const refreshToken = this.getRefreshToken();
-    return this.http.post<LoginResponse>(`${this.apiUrl}/refresh-token`, { refreshToken }).pipe(
+
+    if (!accessToken || !refreshToken) {
+      this.logout();
+      return throwError(() => new Error('No tokens available for refresh'));
+    }
+
+    return this.http.post<LoginResponse>(`${this.apiUrl}/refresh`, {
+      accessToken,
+      refreshToken
+    }).pipe(
+      tap(res => {
+        console.log('AuthService: Token refrescado con éxito');
+        this.authMockService.setSession(res);
+      }),
       catchError((error) => {
+        console.error('AuthService: Error al refrescar token:', error);
         this.logout();
         return throwError(() => error);
       })
@@ -133,6 +154,11 @@ export class AuthService {
   /** Obtiene el ID del usuario desde el token */
   getUserId(): string | null {
     const user = this.currentUser();
-    return user?.nameid ?? null;
+    // Probar varios posibles nombres de claim para el ID (nameid, sub, unique_name si es GUID)
+    const id = user?.nameid || user?.sub || (user?.unique_name?.includes('-') ? user.unique_name : null);
+    if (!id) {
+      console.warn('AuthService: No se pudo encontrar un ID de usuario válido en los claims:', user);
+    }
+    return id ?? null;
   }
 }

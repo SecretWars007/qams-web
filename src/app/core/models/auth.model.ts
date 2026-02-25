@@ -32,11 +32,12 @@ export interface RefreshTokenRequest {
 
 /** Datos del usuario decodificados del JWT */
 export interface DecodedToken {
-  nameid: string; // User ID
-  unique_name: string; // Username
-  email: string;
-  FullName: string;
-  permission: string[]; // Lista de permisos
-  role: string[]; // Lista de roles
+  nameid?: string; // User ID
+  sub?: string;    // User ID (Alternative)
+  unique_name?: string; // Username
+  email?: string;
+  FullName?: string;
+  permission?: string[]; // Lista de permisos
+  role?: string[]; // Lista de roles
   exp: number; // Expiración
 }

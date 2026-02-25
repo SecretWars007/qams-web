@@ -296,28 +296,6 @@ export class AuthMockService {
         permissions = [permissions];
       }
 
-      // Fallback: Si no hay permisos pero hay roles, intentar mapear desde MOCK_USERS
-      if (permissions.length === 0 && decoded.role) {
-        console.log('AuthMockService: No hay permisos explícitos. Intentando mapear desde roles:', decoded.role);
-        const roles = Array.isArray(decoded.role) ? decoded.role : [decoded.role];
-
-        // Buscar el primer usuario mock que coincida con alguno de los roles
-        const templateUser = MOCK_USERS.find(u =>
-          u.role.some(r => roles.some(userRole => userRole.toLowerCase() === r.toLowerCase()))
-        );
-
-        if (templateUser) {
-          permissions = templateUser.permissions;
-          console.log('AuthMockService: Permisos heredados del template mock:', templateUser.username);
-        }
-      }
-
-      // Último recurso: si sigue vacío pero está autenticado, dar permisos básicos
-      if (permissions.length === 0) {
-        console.warn('AuthMockService: Sin permisos ni roles mapeables. Asignando permisos básicos de lectura.');
-        permissions = ['DASHBOARD_VIEW', 'PROJECTS_VIEW', 'TEST_CASES_VIEW', 'EXECUTIONS_VIEW', 'KANBAN_VIEW'];
-      }
-
       console.log('AuthMockService: FINAL permissions to set:', permissions);
 
       this.currentUserSignal.set(decoded);

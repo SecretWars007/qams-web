@@ -9,10 +9,24 @@ export interface TestExecution {
   statusName: string;
   statusCode: string;
   notes: string | null;
+  actualTimeHours?: number | null;
   executionDate: string;
   completedAt: string | null;
   stepResults: StepResult[];
   evidences: Evidence[];
+}
+
+export interface Observation {
+  id: string;
+  executionStepResultId: string;
+  observation: string;
+  response: string | null;
+  createdByUserName: string;
+  createdAt: string;
+  respondedByUserName: string | null;
+  respondedAt: string | null;
+  fileName: string | null;
+  filePath: string | null;
 }
 
 export interface StepResult {
@@ -24,6 +38,8 @@ export interface StepResult {
   statusName: string;
   actualResult: string | null;
   notes: string | null;
+  evidences?: Evidence[];
+  observations?: Observation[];
 }
 
 export interface UpdateStepResult {
@@ -42,6 +58,7 @@ export interface Evidence {
   fileSize: number;
   description: string | null;
   uploadedAt: string;
+  executionStepResultId?: string;
 }
 
 export interface CreateTestExecution {

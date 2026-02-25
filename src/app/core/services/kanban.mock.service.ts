@@ -17,26 +17,26 @@ export class KanbanMockService {
                 // Create columns
                 const columns = [
                     {
-                        id: 'col-pending',
-                        name: 'Pendiente',
+                        id: 'col-todo',
+                        name: 'Por Hacer',
                         orderIndex: 0,
                         tasks: [] as KanbanTask[]
                     },
                     {
                         id: 'col-progress',
-                        name: 'En Ejecución',
+                        name: 'En Progreso',
                         orderIndex: 1,
                         tasks: [] as KanbanTask[]
                     },
                     {
-                        id: 'col-passed',
-                        name: 'Aprobado',
+                        id: 'col-review',
+                        name: 'En Revisión',
                         orderIndex: 2,
                         tasks: [] as KanbanTask[]
                     },
                     {
-                        id: 'col-failed',
-                        name: 'Fallido',
+                        id: 'col-done',
+                        name: 'Completado',
                         orderIndex: 3,
                         tasks: [] as KanbanTask[]
                     }
@@ -63,6 +63,9 @@ export class KanbanMockService {
                     const column = columns.find(c => c.id === task.kanbanColumnId);
                     if (column) {
                         column.tasks.push(task);
+                    } else {
+                        // Fallback to todo if column doesn't exist
+                        columns[0].tasks.push(task);
                     }
                 });
 
@@ -82,24 +85,41 @@ export class KanbanMockService {
     private getColumnIdForStatus(statusCode: string): string {
         switch (statusCode) {
             case 'PENDING':
-            case 'SCHEDULED':
-                return 'col-pending';
+                return 'col-todo';
             case 'IN_PROGRESS':
-            case 'RUNNING':
                 return 'col-progress';
-            case 'PASSED':
-                return 'col-passed';
-            case 'FAILED':
             case 'BLOCKED':
             case 'SKIPPED':
-                return 'col-failed';
+                return 'col-review';
+            case 'PASSED':
+                return 'col-done';
+            case 'FAILED':
+                return 'col-todo'; // Re-test or keep in todo? Let's say review for now
             default:
-                return 'col-pending';
+                return 'col-todo';
         }
     }
 
     updateBoard(board: KanbanBoard): Observable<KanbanBoard> {
         // In a real app, this would update execution statuses based on column changes
         return of(board).pipe(delay(300));
+    }
+
+    moveTask(taskId: string, targetColumnId: string, newOrder: number): Observable<any> {
+        // Map column ID to execution status
+        const columnToStatus: any = {
+            'col-todo': 'PENDING',
+            'col-progress': 'IN_PROGRESS',
+            'col-review': 'BLOCKED',
+            'col-done': 'PASSED'
+        };
+
+        const newStatus = columnToStatus[targetColumnId];
+        if (newStatus) {
+            // Update the underlying execution
+            return this.executionsService.updateExecution(taskId, { statusCode: newStatus });
+        }
+
+        return of({ success: true }).pipe(delay(300));
     }
 }

@@ -1,9 +1,9 @@
-// src/app/layouts/main-layout/main-layout.component.ts
-import { Component, signal } from '@angular/core';
-import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { Component, signal, inject, effect } from '@angular/core';
+import { RouterOutlet, RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../core/services/auth.service';
-import { HasPermissionDirective } from '../../shared/directives/has-permission.directive.directive';
+import { HasPermissionDirective } from '../../shared/directives/has-permission.directive';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-main-layout',
@@ -16,193 +16,121 @@ import { HasPermissionDirective } from '../../shared/directives/has-permission.d
     HasPermissionDirective,
   ],
   template: `
-    <div class="min-h-screen bg-gray-50 flex">
+    <div class="min-h-screen bg-gray-50 flex overflow-hidden">
       <!-- ============ SIDEBAR ============ -->
       <aside
-        class="fixed inset-y-0 left-0 z-30 w-64 bg-sidebar text-white
-               transform transition-transform duration-300 lg:translate-x-0"
+        class="fixed inset-y-0 left-0 z-40 w-72 bg-gray-900 text-white
+               transform transition-all duration-300 ease-in-out lg:translate-x-0 border-r border-white/5 shadow-2xl shadow-black/50"
         [class.-translate-x-full]="!sidebarOpen()"
         [class.translate-x-0]="sidebarOpen()"
       >
         <!-- Logo -->
-        <div class="flex items-center gap-3 px-6 py-5 border-b border-white/10">
+        <div class="flex items-center gap-3 px-8 py-6 border-b border-white/5 mb-2">
           <div
-            class="w-9 h-9 bg-primary-500 rounded-lg flex items-center justify-center"
+            class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20"
           >
-            <svg
-              class="w-5 h-5 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
+            <i class="fas fa-microscope text-lg"></i>
           </div>
-          <span class="text-lg font-bold">QAMS</span>
+          <div>
+            <span class="text-xl font-black tracking-tight block">QAMS</span>
+            <span class="text-[10px] text-indigo-400 font-bold uppercase tracking-widest">Quality Assurance</span>
+          </div>
         </div>
 
         <!-- Navegación -->
-        <nav class="mt-4 px-3 space-y-1">
+        <nav class="mt-2 px-4 space-y-1 h-[calc(100vh-100px)] overflow-y-auto custom-scrollbar pb-10">
+          <p class="px-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 mt-6">Menú Principal</p>
+          
           <!-- Dashboard -->
           <a
             routerLink="/dashboard"
-            routerLinkActive="bg-sidebar-active"
-            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm
-                    text-gray-300 hover:bg-sidebar-hover hover:text-white transition-colors"
+            routerLinkActive="bg-white/10 text-white border-l-4 border-indigo-500"
+            [routerLinkActiveOptions]="{exact: true}"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
+                    text-gray-400 hover:bg-white/5 hover:text-white transition-all group"
           >
-            <svg
-              class="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
-              />
-            </svg>
-            Dashboard
+            <i class="fas fa-home-alt w-5 text-center group-hover:scale-110 transition-transform"></i>
+            <span class="font-semibold">Dashboard</span>
           </a>
 
           <!-- Proyectos -->
           <a
             *hasPermission="'PROJECTS_VIEW'"
             routerLink="/projects"
-            routerLinkActive="bg-sidebar-active"
-            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm
-                    text-gray-300 hover:bg-sidebar-hover hover:text-white transition-colors"
+            routerLinkActive="bg-white/10 text-white border-l-4 border-indigo-500"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
+                    text-gray-400 hover:bg-white/5 hover:text-white transition-all group"
           >
-            <svg
-              class="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
-              />
-            </svg>
-            Proyectos
+            <i class="fas fa-project-diagram w-5 text-center group-hover:scale-110 transition-transform"></i>
+            <span class="font-semibold">Proyectos</span>
           </a>
 
           <!-- Escenarios -->
           <a
             *hasPermission="'TEST_CASES_VIEW'"
             routerLink="/test-scenarios"
-            routerLinkActive="bg-sidebar-active"
-            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm
-                    text-gray-300 hover:bg-sidebar-hover hover:text-white transition-colors"
+            routerLinkActive="bg-white/10 text-white border-l-4 border-indigo-500"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
+                    text-gray-400 hover:bg-white/5 hover:text-white transition-all group"
           >
-            <svg
-              class="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-              />
-            </svg>
-            Escenarios
+            <i class="fas fa-layer-group w-5 text-center group-hover:scale-110 transition-transform"></i>
+            <span class="font-semibold">Escenarios</span>
           </a>
 
           <!-- Casos de Prueba -->
           <a
             *hasPermission="'TEST_CASES_VIEW'"
             routerLink="/test-cases"
-            routerLinkActive="bg-sidebar-active"
-            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm
-                    text-gray-300 hover:bg-sidebar-hover hover:text-white transition-colors"
+            routerLinkActive="bg-white/10 text-white border-l-4 border-indigo-500"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
+                    text-gray-400 hover:bg-white/5 hover:text-white transition-all group"
           >
-            <svg
-              class="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
-              />
-            </svg>
-            Casos de Prueba
+            <i class="fas fa-clipboard-list w-5 text-center group-hover:scale-110 transition-transform"></i>
+            <span class="font-semibold">Casos de Prueba</span>
           </a>
 
           <!-- Ejecuciones -->
           <a
             *hasPermission="'EXECUTIONS_VIEW'"
             routerLink="/test-executions"
-            routerLinkActive="bg-sidebar-active"
-            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm
-                    text-gray-300 hover:bg-sidebar-hover hover:text-white transition-colors"
+            routerLinkActive="bg-white/10 text-white border-l-4 border-indigo-500"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
+                    text-gray-400 hover:bg-white/5 hover:text-white transition-all group"
           >
-            <svg
-              class="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
-              />
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            Ejecuciones
+            <i class="fas fa-play-circle w-5 text-center group-hover:scale-110 transition-transform"></i>
+            <span class="font-semibold">Ejecuciones</span>
           </a>
 
           <!-- Kanban -->
           <a
             *hasPermission="'KANBAN_VIEW'"
             routerLink="/kanban"
-            routerLinkActive="bg-sidebar-active"
-            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm
-                    text-gray-300 hover:bg-sidebar-hover hover:text-white transition-colors"
+            routerLinkActive="bg-white/10 text-white border-l-4 border-indigo-500"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
+                    text-gray-400 hover:bg-white/5 hover:text-white transition-all group"
           >
-            <svg
-              class="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7"
-              />
-            </svg>
-            Tablero Kanban
+            <i class="fas fa-columns w-5 text-center group-hover:scale-110 transition-transform"></i>
+            <span class="font-semibold">Tablero Kanban</span>
+          </a>
+
+          <!-- Reportes -->
+          <a
+            *hasPermission="'DASHBOARD_VIEW'"
+            routerLink="/reports"
+            routerLinkActive="bg-white/10 text-white border-l-4 border-indigo-500"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
+                    text-gray-400 hover:bg-white/5 hover:text-white transition-all group"
+          >
+            <i class="fas fa-file-invoice-dollar w-5 text-center group-hover:scale-110 transition-transform"></i>
+            <span class="font-semibold">Reportes</span>
           </a>
 
           <!-- Separador Admin -->
-          <div *hasPermission="'USERS_VIEW'" class="pt-4 pb-2">
+          <div *hasPermission="'USERS_VIEW'" class="pt-8 pb-2">
             <p
-              class="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider"
+              class="px-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest"
             >
-              Administración
+              Seguridad y Control
             </p>
           </div>
 
@@ -210,119 +138,74 @@ import { HasPermissionDirective } from '../../shared/directives/has-permission.d
           <a
             *hasPermission="'USERS_VIEW'"
             routerLink="/admin/users"
-            routerLinkActive="bg-sidebar-active"
-            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm
-                    text-gray-300 hover:bg-sidebar-hover hover:text-white transition-colors"
+            routerLinkActive="bg-white/10 text-white border-l-4 border-indigo-500"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
+                    text-gray-400 hover:bg-white/5 hover:text-white transition-all group"
           >
-            <svg
-              class="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
-              />
-            </svg>
-            Usuarios
+            <i class="fas fa-users w-5 text-center group-hover:scale-110 transition-transform"></i>
+            <span class="font-semibold">Usuarios</span>
           </a>
 
           <!-- Roles -->
           <a
             *hasPermission="'ROLES_VIEW'"
             routerLink="/admin/roles"
-            routerLinkActive="bg-sidebar-active"
-            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm
-                    text-gray-300 hover:bg-sidebar-hover hover:text-white transition-colors"
+            routerLinkActive="bg-white/10 text-white border-l-4 border-indigo-500"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
+                    text-gray-400 hover:bg-white/5 hover:text-white transition-all group"
           >
-            <svg
-              class="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-              />
-            </svg>
-            Roles y Permisos
+            <i class="fas fa-user-shield w-5 text-center group-hover:scale-110 transition-transform"></i>
+            <span class="font-semibold">Roles y Permisos</span>
           </a>
 
           <!-- Catálogos -->
           <a
             *hasPermission="'CATALOGS_VIEW'"
             routerLink="/admin/catalogs"
-            routerLinkActive="bg-sidebar-active"
-            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm
-                    text-gray-300 hover:bg-sidebar-hover hover:text-white transition-colors"
+            routerLinkActive="bg-white/10 text-white border-l-4 border-indigo-500"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
+                    text-gray-400 hover:bg-white/5 hover:text-white transition-all group"
           >
-            <svg
-              class="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"
-              />
-            </svg>
-            Catálogos
+            <i class="fas fa-database w-5 text-center group-hover:scale-110 transition-transform"></i>
+            <span class="font-semibold">Catálogos</span>
           </a>
         </nav>
       </aside>
 
       <!-- ============ CONTENIDO PRINCIPAL ============ -->
-      <div class="flex-1 lg:ml-64">
+      <div class="flex-1 flex flex-col min-w-0 transition-all duration-300 lg:ml-72 bg-gray-950">
         <!-- Navbar Superior -->
         <header
-          class="sticky top-0 z-20 bg-white border-b border-gray-200 px-4 sm:px-6 lg:px-8"
+          class="sticky top-0 z-30 bg-gray-950/80 backdrop-blur-xl border-b border-white/5 px-4 sm:px-6 lg:px-8 shadow-sm"
         >
-          <div class="flex items-center justify-between h-16">
+          <div class="flex items-center justify-between h-20">
             <!-- Botón hamburguesa (móvil) -->
             <button
-              (click)="toggleSidebar()"
-              class="lg:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100"
+              (click)="toggleSidebar($event)"
+              class="lg:hidden p-3 rounded-2xl bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white transition-all border border-white/10"
             >
-              <svg
-                class="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
+              <i class="fas" [class.fa-bars]="!sidebarOpen()" [class.fa-times]="sidebarOpen()"></i>
             </button>
 
             <!-- Espaciador -->
             <div class="flex-1"></div>
 
             <!-- Información del usuario y logout -->
-            <div class="flex items-center gap-4">
-              <div class="text-right hidden sm:block">
-                <p class="text-sm font-medium text-gray-900">
+            <div class="flex items-center gap-3 sm:gap-6">
+              <div class="flex flex-col items-end hidden sm:flex">
+                <p class="text-sm font-bold text-white tracking-tight leading-tight">
                   {{ authService.fullName() }}
                 </p>
-                <p class="text-xs text-gray-500">Conectado</p>
+                <div class="flex items-center gap-1.5">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <p class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Online</p>
+                </div>
               </div>
 
-              <!-- Avatar -->
+              <!-- Avatar con Menú (Simplificado) -->
               <div
-                class="w-9 h-9 bg-primary-100 text-primary-700 rounded-full
-                          flex items-center justify-center font-semibold text-sm"
+                class="w-11 h-11 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 text-indigo-400 rounded-2xl
+                          flex items-center justify-center font-black text-sm border border-indigo-500/20 shadow-lg shadow-indigo-500/10"
               >
                 {{ getInitials() }}
               </div>
@@ -330,52 +213,57 @@ import { HasPermissionDirective } from '../../shared/directives/has-permission.d
               <!-- Botón Logout -->
               <button
                 (click)="authService.logout()"
-                class="p-2 rounded-lg text-gray-500 hover:bg-red-50 hover:text-red-600
-                             transition-colors"
+                class="w-11 h-11 rounded-2xl bg-white/5 text-gray-500 hover:bg-rose-500/10 hover:text-rose-400
+                             transition-all border border-white/10 flex items-center justify-center group"
                 title="Cerrar Sesión"
               >
-                <svg
-                  class="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                  />
-                </svg>
+                <i class="fas fa-sign-out-alt group-hover:scale-110 transition-transform"></i>
               </button>
             </div>
           </div>
         </header>
 
         <!-- Área de contenido -->
-        <main class="p-4 sm:p-6 lg:p-8">
-          <router-outlet />
+        <main class="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 lg:p-10">
+          <div class="max-w-screen-2xl mx-auto animate-in fade-in duration-500">
+            <router-outlet />
+          </div>
         </main>
       </div>
 
       <!-- Overlay para cerrar sidebar en móvil -->
-      @if (sidebarOpen()) {
-        <div
-          (click)="toggleSidebar()"
-          class="fixed inset-0 z-20 bg-black/50 lg:hidden"
-        ></div>
-      }
+      <div
+        *ngIf="sidebarOpen()"
+        (click)="toggleSidebar($event)"
+        class="fixed inset-0 z-30 bg-black/60 backdrop-blur-sm lg:hidden transition-all duration-300"
+      ></div>
     </div>
   `,
+  styles: [`
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+  `]
 })
 export class MainLayoutComponent {
   // Señal para controlar visibilidad del sidebar en móvil
   sidebarOpen = signal(false);
 
-  constructor(public authService: AuthService) { }
+  private router = inject(Router);
+
+  constructor(public authService: AuthService) {
+    // Escuchar cambios de ruta para cerrar el sidebar en móvil
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe(() => {
+      this.sidebarOpen.set(false);
+    });
+  }
 
   /** Alterna visibilidad del sidebar en móvil */
-  toggleSidebar(): void {
+  toggleSidebar(event?: Event): void {
+    if (event) event.stopPropagation();
     this.sidebarOpen.update((v) => !v);
   }
 
@@ -383,11 +271,8 @@ export class MainLayoutComponent {
   getInitials(): string {
     const name = this.authService.fullName();
     if (!name) return '?';
-    return name
-      .split(' ')
-      .map((word) => word[0])
-      .join('')
-      .substring(0, 2)
-      .toUpperCase();
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
   }
 }

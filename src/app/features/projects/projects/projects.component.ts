@@ -1,7 +1,7 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { ProjectsService } from '../../../core/services/projects.service';
 import { UsersService } from '../../../core/services/users.service';
 import { Project } from '../../../core/models/project.model';
@@ -10,7 +10,7 @@ import { User } from '../../../core/models/user.model';
 @Component({
   selector: 'app-projects',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './projects.component.html',
   styleUrls: ['./projects.component.scss']
 })
@@ -20,6 +20,9 @@ export class ProjectsComponent implements OnInit {
   loading = signal<boolean>(true);
   showModal = signal<boolean>(false);
   isSubmitting = signal<boolean>(false);
+  showDevolutionModal = signal<boolean>(false);
+  selectedProjectForDevolution = signal<Project | null>(null);
+  devolutionNotes: string = '';
   projectForm!: FormGroup;
 
   private projectsService = inject(ProjectsService);
@@ -158,6 +161,39 @@ export class ProjectsComponent implements OnInit {
       },
       error: (err) => {
         console.error('ProjectsComponent: Error al actualizar estado:', err);
+      }
+    });
+  }
+
+  openDevolutionModal(project: Project, event: Event) {
+    event.stopPropagation();
+    this.selectedProjectForDevolution.set(project);
+    this.devolutionNotes = '';
+    this.showDevolutionModal.set(true);
+  }
+
+  closeDevolutionModal() {
+    this.showDevolutionModal.set(false);
+    this.selectedProjectForDevolution.set(null);
+  }
+
+  onRegisterDevolution() {
+    const project = this.selectedProjectForDevolution();
+    const notes = this.devolutionNotes;
+    if (!project || !notes.trim()) return;
+
+    this.isSubmitting.set(true);
+    this.projectsService.registerDevolution(project.id, notes).subscribe({
+      next: () => {
+        console.log('ProjectsComponent: Devolución registrada con éxito');
+        this.loadProjects();
+        this.closeDevolutionModal();
+        this.isSubmitting.set(false);
+      },
+      error: (err) => {
+        console.error('ProjectsComponent: Error al registrar devolución:', err);
+        this.isSubmitting.set(false);
+        alert('Error al registrar la devolución.');
       }
     });
   }

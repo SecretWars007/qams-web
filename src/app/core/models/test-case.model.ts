@@ -4,6 +4,7 @@ export interface TestCase {
   projectId: string; // Relación directa con el proyecto
   projectName: string; // Nombre del proyecto para visualización rápida
   testSuiteId: string;
+  testSuiteName: string; // Nombre de la suite para visualización rápida
   title: string;
   description: string | null;
   preconditions: string | null;

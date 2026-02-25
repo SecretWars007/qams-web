@@ -23,7 +23,9 @@ export class ProjectsMockService {
             createdByUserName: 'Admin',
             createdAt: '2026-01-10T09:00:00Z',
             testSuiteCount: 12,
-            kanbanBoardCount: 2
+            kanbanBoardCount: 2,
+            devolucionesCounter: 0,
+            historicDevolutions: []
         },
         {
             id: '2',
@@ -40,7 +42,9 @@ export class ProjectsMockService {
             createdByUserName: 'Admin',
             createdAt: '2026-01-15T14:30:00Z',
             testSuiteCount: 8,
-            kanbanBoardCount: 1
+            kanbanBoardCount: 1,
+            devolucionesCounter: 0,
+            historicDevolutions: []
         },
         {
             id: '3',
@@ -57,7 +61,9 @@ export class ProjectsMockService {
             createdByUserName: 'Dev Lead',
             createdAt: '2026-02-01T10:15:00Z',
             testSuiteCount: 5,
-            kanbanBoardCount: 1
+            kanbanBoardCount: 1,
+            devolucionesCounter: 0,
+            historicDevolutions: []
         },
         {
             id: '4',
@@ -74,7 +80,39 @@ export class ProjectsMockService {
             createdByUserName: 'Admin',
             createdAt: '2025-11-20T11:00:00Z',
             testSuiteCount: 3,
-            kanbanBoardCount: 1
+            kanbanBoardCount: 1,
+            devolucionesCounter: 1,
+            historicDevolutions: [
+                {
+                    id: 'dev1',
+                    projectId: '4',
+                    devolutionDate: '2025-12-15T10:00:00Z',
+                    notes: 'Faltan evidencias en la suite de reportes.',
+                    responseDate: '2025-12-20T15:00:00Z',
+                    responseNotes: 'Evidencias agregadas y verificado.',
+                    createdByUserName: 'QA Lead',
+                    observationsCount: 2
+                }
+            ]
+        },
+        {
+            id: '10',
+            name: 'Kanban Integration 141736',
+            description: 'Project matching user screenshot for verification.',
+            startDate: '2026-02-17',
+            endDate: '2026-12-31',
+            testerIds: [],
+            testerNames: ['Current User'],
+            isActive: true,
+            priority: 1,
+            projectStatusId: 1,
+            projectStatusName: 'In Progress',
+            createdByUserName: 'Admin',
+            createdAt: new Date().toISOString(),
+            testSuiteCount: 1,
+            kanbanBoardCount: 1,
+            devolucionesCounter: 0,
+            historicDevolutions: []
         }
     ];
 
@@ -100,7 +138,9 @@ export class ProjectsMockService {
             createdByUserName: 'Current User',
             createdAt: new Date().toISOString(),
             testSuiteCount: 0,
-            kanbanBoardCount: 0
+            kanbanBoardCount: 0,
+            devolucionesCounter: 0,
+            historicDevolutions: []
         };
         this.projects.unshift(newProject);
         return of(newProject).pipe(delay(400));
@@ -123,5 +163,35 @@ export class ProjectsMockService {
     deleteProject(id: string): Observable<void> {
         this.projects = this.projects.filter(p => p.id !== id);
         return of(void 0).pipe(delay(300));
+    }
+
+    registerDevolution(projectId: string, notes: string): Observable<any> {
+        const project = this.projects.find(p => p.id === projectId);
+        if (project) {
+            project.devolucionesCounter = (project.devolucionesCounter || 0) + 1;
+            project.historicDevolutions = project.historicDevolutions || [];
+            project.historicDevolutions.unshift({
+                id: Math.random().toString(36).substr(2, 9),
+                projectId,
+                devolutionDate: new Date().toISOString(),
+                notes,
+                responseDate: null,
+                responseNotes: null,
+                createdByUserName: 'Current User',
+                observationsCount: 0
+            });
+        }
+        return of({ success: true }).pipe(delay(400));
+    }
+
+    respondDevolution(devolutionId: string, response: string): Observable<any> {
+        this.projects.forEach(p => {
+            const dev = p.historicDevolutions?.find(d => d.id === devolutionId);
+            if (dev) {
+                dev.responseDate = new Date().toISOString();
+                dev.responseNotes = response;
+            }
+        });
+        return of({ success: true }).pipe(delay(400));
     }
 }

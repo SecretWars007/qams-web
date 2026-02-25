@@ -1,8 +1,8 @@
 // src/app/app.routes.ts
 // Configuración de rutas con lazy loading y guards de seguridad
 import { Routes } from '@angular/router';
-import { authGuard } from './core/guards/auth.guard.guard';
-import { permissionGuard } from './core/guards/permission.guard.guard';
+import { authGuard } from './core/guards/auth.guard';
+import { permissionGuard } from './core/guards/permission.guard';
 
 export const routes: Routes = [
   // ====== RUTAS PÚBLICAS (Sin autenticación) ======
@@ -106,6 +106,28 @@ export const routes: Routes = [
             (m) => m.ExecutionDetailComponent,
           ),
         data: { permission: 'EXECUTIONS_VIEW' },
+        canActivate: [permissionGuard],
+      },
+
+      // Reportes
+      {
+        path: 'reports',
+        loadComponent: () =>
+          import('./features/reports/reports.component').then(
+            (m) => m.ReportsComponent,
+          ),
+        data: { permission: 'DASHBOARD_VIEW' },
+        canActivate: [permissionGuard],
+      },
+
+      // Reporte Burndown
+      {
+        path: 'burndown-report',
+        loadComponent: () =>
+          import('./features/burndown-report/burndown-report.component').then(
+            (m) => m.BurndownReportComponent,
+          ),
+        data: { permission: 'DASHBOARD_VIEW' },
         canActivate: [permissionGuard],
       },
 

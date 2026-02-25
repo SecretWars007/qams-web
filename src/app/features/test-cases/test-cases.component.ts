@@ -30,17 +30,21 @@ export class TestCasesComponent implements OnInit {
   testSuites = signal<TestSuite[]>([]);
   showModal = signal<boolean>(false);
   isSubmitting = signal<boolean>(false);
+  showStepsModal = signal<boolean>(false);
+  selectedTestCaseSteps = signal<any[]>([]);
+  selectedTestCaseTitle = signal<string>('');
+  editingTestCaseId = signal<string | null>(null);
   testCaseForm!: FormGroup;
 
   // Computed signal for grouped test cases
   groupedTestCases = computed(() => {
     const cases = this.testCases();
-    const groups: { projectName: string; items: TestCase[] }[] = [];
+    const groups: { projectName: string; testSuiteName: string; items: TestCase[] }[] = [];
 
     cases.forEach(tc => {
-      let group = groups.find(g => g.projectName === tc.projectName);
+      let group = groups.find(g => g.projectName === tc.projectName && g.testSuiteName === tc.testSuiteName);
       if (!group) {
-        group = { projectName: tc.projectName, items: [] };
+        group = { projectName: tc.projectName, testSuiteName: tc.testSuiteName, items: [] };
         groups.push(group);
       }
       group.items.push(tc);
@@ -87,12 +91,12 @@ export class TestCasesComponent implements OnInit {
       description: [''],
       preconditions: [''],
       expectedResult: ['', Validators.required],
-      priorityId: [3, Validators.required],
+      priorityId: [3, Validators.required], // 3: High
+      testTypeId: [1, Validators.required],  // 1: Functional Manual
       estimatedTimeHours: [0, [Validators.required, Validators.min(0)]],
       startDate: [new Date().toISOString().split('T')[0], Validators.required],
       endDate: [new Date().toISOString().split('T')[0], Validators.required],
-      testTypeId: [1, Validators.required],
-      certifierUserIds: [[], Validators.required],
+      certifierUserIds: [[]],
       steps: this.fb.array([this.createStepFormGroup(1)])
     });
   }
@@ -203,6 +207,96 @@ export class TestCasesComponent implements OnInit {
     this.router.navigate(['/test-executions'], { queryParams: { testCaseId } });
   }
 
+  viewSteps(testCaseId: string, title: string, event: Event) {
+    event.stopPropagation();
+    this.selectedTestCaseTitle.set(title);
+    this.testCasesService.getTestSteps(testCaseId).subscribe({
+      next: (steps) => {
+        this.selectedTestCaseSteps.set(steps);
+        this.showStepsModal.set(true);
+      },
+      error: (err) => {
+        console.error('Error fetching test steps:', err);
+        alert('Error al cargar los pasos del caso de prueba');
+      }
+    });
+  }
+
+  closeStepsModal() {
+    this.showStepsModal.set(false);
+    this.selectedTestCaseSteps.set([]);
+    this.selectedTestCaseTitle.set('');
+  }
+
+  editTestCase(testCase: TestCase, event: Event) {
+    event.stopPropagation();
+
+    this.isSubmitting.set(true);
+
+    this.testCasesService.getTestCaseById(testCase.id).subscribe({
+      next: (fullTestCase) => {
+        if (!fullTestCase) {
+          this.isSubmitting.set(false);
+          return;
+        }
+
+        this.editingTestCaseId.set(testCase.id);
+
+        this.testCasesService.getTestSteps(testCase.id).subscribe({
+          next: (steps) => {
+            this.showModal.set(true);
+            this.steps.clear();
+            if (steps && steps.length > 0) {
+              steps.forEach(step => {
+                const stepGroup = this.fb.group({
+                  stepOrder: [step.stepOrder || this.steps.length + 1],
+                  action: [step.action, Validators.required],
+                  expectedResult: [step.expectedResult, Validators.required]
+                });
+                this.steps.push(stepGroup);
+              });
+            } else {
+              this.steps.push(this.createStepFormGroup(1));
+            }
+
+            const formatDate = (dateStr?: string) => {
+              if (!dateStr) return new Date().toISOString().split('T')[0];
+              try {
+                return new Date(dateStr).toISOString().split('T')[0];
+              } catch {
+                return new Date().toISOString().split('T')[0];
+              }
+            };
+
+            this.testCaseForm.patchValue({
+              projectId: fullTestCase.projectId || this.projectId(),
+              testSuiteId: fullTestCase.testSuiteId || '',
+              title: fullTestCase.title || '',
+              description: fullTestCase.description || '',
+              preconditions: fullTestCase.preconditions || '',
+              expectedResult: fullTestCase.expectedResult || '',
+              priorityId: fullTestCase.priorityId || 3,
+              testTypeId: (fullTestCase as any).testTypeId || 1,
+              estimatedTimeHours: (fullTestCase as any).estimatedTimeHours || 0,
+              startDate: formatDate((fullTestCase as any).startDate || fullTestCase.createdAt),
+              endDate: formatDate((fullTestCase as any).endDate || fullTestCase.createdAt),
+              certifierUserIds: (fullTestCase as any).certifierUserIds || []
+            });
+            this.isSubmitting.set(false);
+          },
+          error: (err) => {
+            console.error('Error fetching steps', err);
+            this.isSubmitting.set(false);
+          }
+        });
+      },
+      error: (err) => {
+        console.error('Error fetching testcase details', err);
+        this.isSubmitting.set(false);
+      }
+    });
+  }
+
   openModal() {
     this.testCaseForm.patchValue({
       projectId: this.projectId() || ''
@@ -212,6 +306,7 @@ export class TestCasesComponent implements OnInit {
 
   closeModal() {
     this.showModal.set(false);
+    this.editingTestCaseId.set(null);
     this.testCaseForm.reset();
     this.steps.clear();
     this.steps.push(this.createStepFormGroup(1));
@@ -235,24 +330,46 @@ export class TestCasesComponent implements OnInit {
         testTypeId: Number(formValue.testTypeId),
         estimatedTimeHours: Number(formValue.estimatedTimeHours),
         startDate: new Date(formValue.startDate).toISOString(),
-        endDate: new Date(formValue.endDate).toISOString()
+        endDate: new Date(formValue.endDate).toISOString(),
+        // Map steps to include stepOrder
+        steps: (formValue.steps || []).map((step: any, index: number) => ({
+          ...step,
+          stepOrder: index + 1
+        }))
       };
 
-      console.log('TestCasesComponent: Creating test case with payload:', payload);
+      if (this.editingTestCaseId()) {
+        console.log('TestCasesComponent: Updating test case with payload:', payload);
+        this.testCasesService.updateTestCase(this.editingTestCaseId()!, payload).subscribe({
+          next: () => {
+            console.log('TestCasesComponent: Test case updated successfully');
+            this.loadTestCases();
+            this.closeModal();
+            this.isSubmitting.set(false);
+          },
+          error: (err) => {
+            console.error('TestCasesComponent: Error updating test case:', err);
+            this.isSubmitting.set(false);
+            alert('Error al actualizar el caso de prueba. Verifica los datos.');
+          }
+        });
+      } else {
+        console.log('TestCasesComponent: Creating test case with payload:', payload);
 
-      this.testCasesService.createTestCase(payload).subscribe({
-        next: (newTestCase) => {
-          console.log('TestCasesComponent: Test case created successfully:', newTestCase);
-          this.loadTestCases();
-          this.closeModal();
-          this.isSubmitting.set(false);
-        },
-        error: (err) => {
-          console.error('TestCasesComponent: Error creating test case:', err);
-          this.isSubmitting.set(false);
-          alert('Error al crear el caso de prueba. Verifica los datos.');
-        }
-      });
+        this.testCasesService.createTestCase(payload).subscribe({
+          next: (newTestCase) => {
+            console.log('TestCasesComponent: Test case created successfully:', newTestCase);
+            this.loadTestCases();
+            this.closeModal();
+            this.isSubmitting.set(false);
+          },
+          error: (err) => {
+            console.error('TestCasesComponent: Error creating test case:', err);
+            this.isSubmitting.set(false);
+            alert('Error al crear el caso de prueba. Verifica los datos.');
+          }
+        });
+      }
     }
   }
 }
