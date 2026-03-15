@@ -15,11 +15,15 @@
           id="username"
           [(ngModel)]="form.username" 
           name="username" 
+          #username="ngModel"
           placeholder="Tu nombre de usuario"
           (focus)="setFieldFocus('username', true)"
           (blur)="setFieldFocus('username', false)"
           required 
           autofocus />
+      </div>
+      <div *ngIf="username.touched && username.invalid" class="text-rose-500 text-[10px] font-bold uppercase mt-1 ml-1">
+        El usuario es obligatorio
       </div>
     </div>
 
@@ -36,10 +40,14 @@
           id="password"
           [(ngModel)]="form.password" 
           name="password" 
+          #password="ngModel"
           placeholder="••••••••••••"
           (focus)="setFieldFocus('password', true)"
           (blur)="setFieldFocus('password', false)"
           required />
+      </div>
+      <div *ngIf="password.touched && password.invalid" class="text-rose-500 text-[10px] font-bold uppercase mt-1 ml-1">
+        La contraseña es obligatoria
       </div>
     </div>
 

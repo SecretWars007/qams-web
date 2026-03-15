@@ -2,8 +2,8 @@
   <!-- Header -->
   <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
     <div>
-      <h1 class="text-3xl font-black text-white tracking-tight">Proyectos</h1>
-      <p class="text-gray-500 text-sm mt-1">Gestiona tus espacios de trabajo y casos de prueba.</p>
+      <h1 class="text-3xl font-black text-slate-900 tracking-tight">Proyectos</h1>
+      <p class="text-slate-500 text-sm mt-1">Gestiona tus espacios de trabajo y casos de prueba.</p>
     </div>
     <button (click)="openModal()"
       class="w-full sm:w-auto px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl transition-all shadow-lg shadow-indigo-900/20 font-bold flex items-center justify-center gap-2 group">
@@ -19,11 +19,11 @@
 
   <!-- Empty State -->
   <div *ngIf="!loading() && projects().length === 0"
-    class="flex flex-col items-center justify-center py-20 bg-gray-900/40 rounded-3xl border-2 border-dashed border-white/5">
-    <div class="w-20 h-20 bg-gray-900 rounded-full flex items-center justify-center mb-6 border border-white/5">
-      <i class="fas fa-folder-open text-3xl text-gray-700"></i>
+    class="flex flex-col items-center justify-center py-20 bg-slate-100 rounded-3xl border-2 border-dashed border-slate-200">
+    <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-6 border border-slate-100 shadow-sm">
+      <i class="fas fa-folder-open text-3xl text-slate-300"></i>
     </div>
-    <h2 class="text-xl font-bold text-white mb-2">No hay proyectos todavía</h2>
+    <h2 class="text-xl font-bold text-slate-900 mb-2">No hay proyectos todavía</h2>
     <p class="text-gray-500 mb-8 max-w-xs text-center">Comienza creando tu primer proyecto de pruebas para empezar el
       monitoreo.</p>
     <button (click)="openModal()"
@@ -195,12 +195,22 @@
               <label class="text-[10px] font-black text-gray-600 uppercase tracking-widest px-1">Fecha
                 Lanzamiento</label>
               <input type="date" formControlName="startDate"
-                class="w-full bg-gray-950 border border-white/5 rounded-2xl px-5 py-4 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-medium">
+                class="w-full bg-gray-950 border border-white/5 rounded-2xl px-5 py-4 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-medium"
+                [class.border-rose-500]="projectForm.get('startDate')?.touched && projectForm.get('startDate')?.invalid">
+              <div *ngIf="projectForm.get('startDate')?.touched && projectForm.get('startDate')?.invalid"
+                class="text-rose-500 text-[10px] font-black uppercase tracking-widest mt-1 ml-1">
+                La fecha de inicio es requerida
+              </div>
             </div>
             <div class="space-y-2">
               <label class="text-[10px] font-black text-gray-600 uppercase tracking-widest px-1">Fecha Cierre</label>
               <input type="date" formControlName="endDate"
-                class="w-full bg-gray-950 border border-white/5 rounded-2xl px-5 py-4 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-medium">
+                class="w-full bg-gray-950 border border-white/5 rounded-2xl px-5 py-4 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-medium"
+                [class.border-rose-500]="projectForm.get('endDate')?.touched && projectForm.get('endDate')?.invalid">
+              <div *ngIf="projectForm.get('endDate')?.touched && projectForm.get('endDate')?.invalid"
+                class="text-rose-500 text-[10px] font-black uppercase tracking-widest mt-1 ml-1">
+                La fecha de cierre es requerida
+              </div>
             </div>
           </div>
 
@@ -208,10 +218,15 @@
             <label class="text-[10px] font-black text-gray-600 uppercase tracking-widest px-1">Liderazgo QA
               (Multiple)</label>
             <select formControlName="testerIds" multiple
-              class="w-full bg-gray-950 border border-white/5 rounded-2xl px-5 py-4 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all h-40 custom-scrollbar font-medium">
+              class="w-full bg-gray-950 border border-white/5 rounded-2xl px-5 py-4 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all h-40 custom-scrollbar font-medium"
+              [class.border-rose-500]="projectForm.get('testerIds')?.touched && projectForm.get('testerIds')?.invalid">
               <option *ngFor="let user of users()" [value]="user.id"
                 class="py-2 px-2 rounded-lg my-1 hover:bg-white/5 transition-all">{{ user.username }}</option>
             </select>
+            <div *ngIf="projectForm.get('testerIds')?.touched && projectForm.get('testerIds')?.invalid"
+              class="text-rose-500 text-[10px] font-black uppercase tracking-widest mt-1 ml-1">
+              Seleccione al menos un especialista QA
+            </div>
             <p class="text-[10px] text-gray-700 font-bold italic px-1">Tip: Usa CMD/Ctrl para selecciones múltiples.</p>
           </div>
 

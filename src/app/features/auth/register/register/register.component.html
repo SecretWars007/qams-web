@@ -10,7 +10,10 @@
       <div class="relative flex items-center group">
         <i class="fas fa-id-card absolute left-4 text-slate-500 group-focus-within:text-indigo-400 transition-colors"></i>
         <input type="text" class="w-full bg-slate-900/50 border border-slate-700/50 rounded-2xl py-3 pl-12 pr-4 text-slate-100 placeholder:text-slate-600 focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all outline-none" 
-          [(ngModel)]="form.fullName" name="fullName" placeholder="Juan Pérez" required />
+          [(ngModel)]="form.fullName" name="fullName" #fullName="ngModel" placeholder="Juan Pérez" required />
+      </div>
+      <div *ngIf="fullName.touched && fullName.invalid" class="text-rose-500 text-[10px] font-bold uppercase mt-1 ml-1">
+        El nombre completo es obligatorio
       </div>
     </div>
 
@@ -20,7 +23,10 @@
       <div class="relative flex items-center group">
         <i class="fas fa-user absolute left-4 text-slate-500 group-focus-within:text-indigo-400 transition-colors"></i>
         <input type="text" class="w-full bg-slate-900/50 border border-slate-700/50 rounded-2xl py-3 pl-12 pr-4 text-slate-100 placeholder:text-slate-600 focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all outline-none" 
-          [(ngModel)]="form.username" name="username" placeholder="juanperez" required />
+          [(ngModel)]="form.username" name="username" #username="ngModel" placeholder="juanperez" required minlength="3" />
+      </div>
+      <div *ngIf="username.touched && username.invalid" class="text-rose-500 text-[10px] font-bold uppercase mt-1 ml-1">
+        El usuario es obligatorio (min. 3 caract.)
       </div>
     </div>
 
@@ -30,7 +36,10 @@
       <div class="relative flex items-center group">
         <i class="fas fa-envelope absolute left-4 text-slate-500 group-focus-within:text-indigo-400 transition-colors"></i>
         <input type="email" class="w-full bg-slate-900/50 border border-slate-700/50 rounded-2xl py-3 pl-12 pr-4 text-slate-100 placeholder:text-slate-600 focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all outline-none" 
-          [(ngModel)]="form.email" name="email" placeholder="juan@empresa.com" required />
+          [(ngModel)]="form.email" name="email" #email="ngModel" placeholder="juan@empresa.com" required email />
+      </div>
+      <div *ngIf="email.touched && email.invalid" class="text-rose-500 text-[10px] font-bold uppercase mt-1 ml-1">
+        Ingrese un correo electrónico válido
       </div>
     </div>
 
@@ -40,7 +49,10 @@
       <div class="relative flex items-center group">
         <i class="fas fa-lock absolute left-4 text-slate-500 group-focus-within:text-indigo-400 transition-colors"></i>
         <input type="password" class="w-full bg-slate-900/50 border border-slate-700/50 rounded-2xl py-3 pl-12 pr-4 text-slate-100 placeholder:text-slate-600 focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all outline-none" 
-          [(ngModel)]="form.password" name="password" placeholder="Mínimo 8 caracteres" required />
+          [(ngModel)]="form.password" name="password" #password="ngModel" placeholder="Mínimo 8 caracteres" required minlength="8" />
+      </div>
+      <div *ngIf="password.touched && password.invalid" class="text-rose-500 text-[10px] font-bold uppercase mt-1 ml-1">
+        La contraseña requiere al menos 8 caracteres
       </div>
       <p class="text-[10px] uppercase font-bold text-slate-500 mt-1 ml-1 flex items-center gap-1">
         <i class="fas fa-info-circle"></i> Debe contener mayúscula, número y carácter especial.

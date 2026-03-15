@@ -7,7 +7,7 @@
         <i class="fas fa-arrow-left"></i>
       </button>
       <div class="min-w-0">
-        <h1 class="text-2xl font-black text-white tracking-tight flex items-center truncate">
+        <h1 class="text-2xl font-black text-slate-900 tracking-tight flex items-center truncate">
           <i class="fas fa-play-circle mr-3 text-indigo-500 shrink-0"></i>
           Ejecuciones
         </h1>
@@ -157,72 +157,64 @@
       </div>
     </div>
 
-    <!-- Desktop Table View (Stitch Premium Glassmorphism UI) -->
-    <div class="hidden sm:block bg-white/80 backdrop-blur-md border border-[#150fbd]/10 rounded-2xl overflow-hidden shadow-xl shadow-[#150fbd]/5 mb-10">
+    <!-- Desktop Table View (Stitch Premium Dark Design) -->
+    <div class="hidden sm:block bg-gray-900 border border-white/5 rounded-3xl overflow-hidden shadow-2xl mb-10">
       <div class="overflow-x-auto">
         <table class="w-full text-left border-collapse">
           <thead>
-            <tr class="bg-[#150fbd]/5">
-              <th class="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-[#150fbd]/70">Identificador</th>
-              <th class="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-[#150fbd]/70">Caso de Prueba</th>
-              <th class="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-[#150fbd]/70 text-center">Estatus</th>
-              <th class="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-[#150fbd]/70">Especialista QA</th>
-              <th class="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-[#150fbd]/70">Fecha Reporte</th>
-              <th class="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-[#150fbd]/70 text-right">Gestión</th>
+            <tr class="bg-white/5">
+              <th class="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-gray-500">Identificador</th>
+              <th class="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-gray-500">Caso de Prueba</th>
+              <th class="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-gray-500 text-center">Estatus</th>
+              <th class="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-gray-500">Especialista QA</th>
+              <th class="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-gray-500">Fecha Reporte</th>
+              <th class="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-gray-500 text-right">Gestión</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-[#150fbd]/5">
+          <tbody class="divide-y divide-white/5">
             <tr *ngFor="let execution of executions()" (dblclick)="editExecution(execution)"
-              class="bg-white/40 hover:bg-[#150fbd]/[0.02] transition-colors cursor-pointer group">
-              <td class="px-4 py-5">
-                <span class="text-slate-500 font-mono text-xs font-semibold">#{{ execution.id }}</span>
+              class="bg-transparent hover:bg-white/[0.02] transition-colors cursor-pointer group">
+              <td class="px-6 py-5">
+                <span class="text-gray-600 font-mono text-[10px] font-black">#{{ execution.id }}</span>
               </td>
-              <td class="px-4 py-5">
+              <td class="px-6 py-5">
                 <div class="flex flex-col">
-                  <span class="text-slate-900 font-semibold text-sm tracking-tight group-hover:text-[#150fbd] transition-colors">{{ execution.testCase.title }}</span>
-                  <span class="text-[10px] text-slate-500 font-medium mt-0.5">Validación de Funcionalidad</span>
+                  <span class="text-white font-bold text-sm tracking-tight group-hover:text-indigo-400 transition-colors">{{ execution.testCase.title }}</span>
+                  <span class="text-[9px] text-gray-600 font-black uppercase tracking-widest mt-1">Validación de Funcionalidad</span>
                 </div>
               </td>
-              <td class="px-4 py-5 text-center">
+              <td class="px-6 py-5 text-center">
                 <span [ngClass]="{
-                    'bg-emerald-100 text-emerald-800': execution.status.code === 'PASSED',
-                    'bg-rose-100 text-rose-800': execution.status.code === 'FAILED',
-                    'bg-amber-100 text-amber-800': execution.status.code === 'BLOCKED',
-                    'bg-[#150fbd]/10 text-[#150fbd]': execution.status.code === 'IN_PROGRESS',
-                    'bg-slate-100 text-slate-500': execution.status.code === 'PENDING'
-                  }" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest">
+                    'bg-emerald-500/10 text-emerald-400 border-emerald-500/10': execution.status.code === 'PASSED',
+                    'bg-rose-500/10 text-rose-400 border-rose-500/10': execution.status.code === 'FAILED',
+                    'bg-amber-500/10 text-amber-500 border-amber-500/10': execution.status.code === 'BLOCKED',
+                    'bg-indigo-500/10 text-indigo-400 border-indigo-500/10': execution.status.code === 'IN_PROGRESS',
+                    'bg-gray-800 text-gray-500 border-white/5': execution.status.code === 'PENDING'
+                  }" class="inline-flex items-center px-2.5 py-1 rounded-lg text-[9px] font-black border uppercase tracking-widest">
                   {{ execution.status.code }}
                 </span>
               </td>
-              <td class="px-4 py-5">
+              <td class="px-6 py-5">
                 <div class="flex items-center gap-3">
-                  <div class="w-8 h-8 rounded-lg bg-[#150fbd]/10 flex items-center justify-center text-xs font-bold text-[#150fbd]">
+                  <div class="w-8 h-8 rounded-xl bg-indigo-500/10 border border-indigo-500/10 flex items-center justify-center text-[10px] font-black text-indigo-400">
                     {{ (execution.executedBy || 'U').slice(0,1) }}
                   </div>
-                  <span class="text-xs text-slate-600 font-medium">{{ execution.executedBy || 'No Asignado' }}</span>
+                  <span class="text-xs text-gray-400 font-bold">{{ execution.executedBy || 'No Asignado' }}</span>
                 </div>
               </td>
-              <td class="px-4 py-5">
-                <span class="text-xs text-slate-500">{{ execution.executionDate | date:'MMM d, HH:mm' }}</span>
+              <td class="px-6 py-5">
+                <span class="text-[10px] text-gray-500 font-bold uppercase">{{ execution.executionDate | date:'MMM d, HH:mm' }}</span>
               </td>
-              <td class="px-4 py-5 text-right">
-                <div class="flex justify-end gap-2 text-[10px] font-bold uppercase tracking-widest">
+              <td class="px-6 py-5 text-right">
+                <div class="flex justify-end gap-2 text-[10px] font-black uppercase tracking-widest">
                   <button (click)="editExecution(execution, $event)"
-                    class="px-3 py-1.5 flex items-center justify-center gap-1.5 text-slate-400 hover:text-[#150fbd] hover:bg-[#150fbd]/5 rounded-lg transition-all">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z">
-                      </path>
-                    </svg>
+                    class="px-4 py-2 flex items-center justify-center gap-2 text-gray-500 hover:text-amber-500 hover:bg-amber-500/5 rounded-xl transition-all border border-transparent hover:border-amber-500/10">
+                    <i class="fas fa-edit"></i>
                     <span>Editar</span>
                   </button>
                   <button (click)="openDetailsModal(execution)"
-                    class="px-3 py-1.5 flex items-center justify-center gap-1.5 text-slate-400 hover:text-[#150fbd] hover:bg-[#150fbd]/5 rounded-lg transition-all">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm-3 7c5.25 0 9.5-4.25 9.5-9s-4.25-9-9.5-9S3 7.25 3 12s4.25 9 9.5 9z">
-                      </path>
-                    </svg>
+                    class="px-4 py-2 flex items-center justify-center gap-2 text-gray-500 hover:text-indigo-400 hover:bg-indigo-400/5 rounded-xl transition-all border border-transparent hover:border-indigo-400/10">
+                    <i class="fas fa-eye"></i>
                     <span>Detalles</span>
                   </button>
                 </div>
@@ -260,10 +252,15 @@
               <label class="px-1 text-[9px] font-black text-gray-600 uppercase tracking-widest">Caso de Prueba</label>
               <div class="relative group">
                 <select formControlName="testCaseId"
-                  class="w-full bg-gray-950 border border-white/5 rounded-2xl px-5 py-4 text-xs font-bold text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all appearance-none cursor-pointer hover:bg-gray-900/80">
+                  class="w-full bg-gray-950 border border-white/5 rounded-2xl px-5 py-4 text-xs font-bold text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all appearance-none cursor-pointer hover:bg-gray-900/80"
+                  [class.border-rose-500]="executionForm.get('testCaseId')?.touched && executionForm.get('testCaseId')?.invalid">
                   <option value="">Seleccionar caso...</option>
                   <option *ngFor="let tc of testCases()" [value]="tc.id">{{ tc.title }}</option>
                 </select>
+                <div *ngIf="executionForm.get('testCaseId')?.touched && executionForm.get('testCaseId')?.invalid"
+                  class="text-rose-500 text-[10px] font-black uppercase tracking-widest mt-1 ml-1">
+                  El caso de prueba es obligatorio
+                </div>
                 <svg
                   class="absolute right-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-600 group-hover:text-indigo-400 transition-colors pointer-events-none"
                   fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -297,7 +294,12 @@
                 (Horas)</label>
               <input type="number" formControlName="actualTimeHours" step="0.5" min="0"
                 class="w-full bg-gray-950 border border-white/5 rounded-2xl px-5 py-4 text-xs font-bold text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all hover:bg-gray-900/80 uppercase tracking-wider placeholder-gray-700"
-                placeholder="Ej. 1.5">
+                placeholder="Ej. 1.5"
+                [class.border-rose-500]="executionForm.get('actualTimeHours')?.touched && executionForm.get('actualTimeHours')?.invalid">
+              <div *ngIf="executionForm.get('actualTimeHours')?.touched && executionForm.get('actualTimeHours')?.invalid"
+                class="text-rose-500 text-[10px] font-black uppercase tracking-widest mt-1 ml-1">
+                Esfuerzo inválido
+              </div>
             </div>
           </div>
 
@@ -358,7 +360,12 @@
                       Obtenido</label>
                     <input type="text" formControlName="actualResult"
                       class="w-full bg-gray-900 border border-white/5 rounded-2xl px-5 py-3.5 text-xs text-gray-200 outline-none focus:ring-1 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-medium placeholder-gray-700 hover:bg-gray-800 shadow-inner"
-                      placeholder="¿Qué observaste?">
+                      placeholder="¿Qué observaste?"
+                      [class.border-rose-500]="step.get('actualResult')?.touched && step.get('actualResult')?.invalid">
+                    <div *ngIf="step.get('actualResult')?.touched && step.get('actualResult')?.invalid"
+                      class="text-rose-500 text-[9px] font-black uppercase tracking-widest mt-1 ml-1">
+                      Resultado requerido
+                    </div>
                   </div>
                   <div class="space-y-2">
                     <label class="px-2 text-[8px] font-black text-gray-600 uppercase tracking-widest">Anotación
