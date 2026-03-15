@@ -186,6 +186,25 @@ export class AuthService {
     return permissionCodes.some((code) => currentPermissions.includes(code));
   }
 
+  /**
+   * Verifica si el usuario actual tiene el rol de Administrador.
+   */
+  isAdmin(): boolean {
+    const user = this.currentUser();
+    if (!user) return false;
+
+    // Verificar en la lista de roles si existe "Admin" o "Administrador"
+    const roles = user.role;
+    if (Array.isArray(roles)) {
+      return roles.some(r => r.toLowerCase() === 'admin' || r.toLowerCase() === 'administrador');
+    } else if (typeof roles === 'string') {
+      const roleStr = (roles as string).toLowerCase();
+      return roleStr === 'admin' || roleStr === 'administrador';
+    }
+
+    return false;
+  }
+
   /** Obtiene el access token almacenado en localStorage */
   getAccessToken(): string | null {
     return localStorage.getItem('access_token');

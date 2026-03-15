@@ -124,61 +124,57 @@ import { filter } from 'rxjs/operators';
           </a>
 
           <!-- Separador Admin -->
-          <div *hasPermission="'USERS_VIEW'" class="pt-6 pb-2">
-            <p
-              class="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest"
+          <ng-container *ngIf="authService.isAdmin()">
+            <div class="pt-6 pb-2">
+              <p class="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                Configuración
+              </p>
+            </div>
+
+            <!-- Usuarios -->
+            <a
+              routerLink="/admin/users"
+              routerLinkActive="bg-[#150fbd]/20 text-white border-l-4 border-[#150fbd] shadow-[inset_0_0_20px_rgba(21,15,189,0.15)]"
+              class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
+                      text-slate-400 hover:text-white hover:bg-white/5 transition-all group"
             >
-              Configuración
-            </p>
-          </div>
+              <i class="fas fa-users w-5 text-center group-hover:scale-110 transition-transform"></i>
+              <span class="font-medium group-[.active]:font-semibold">Usuarios</span>
+            </a>
 
-          <!-- Usuarios -->
-          <a
-            *hasPermission="'USERS_VIEW'"
-            routerLink="/admin/users"
-            routerLinkActive="bg-[#150fbd]/20 text-white border-l-4 border-[#150fbd] shadow-[inset_0_0_20px_rgba(21,15,189,0.15)]"
-            class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
-                    text-slate-400 hover:text-white hover:bg-white/5 transition-all group"
-          >
-            <i class="fas fa-users w-5 text-center group-hover:scale-110 transition-transform"></i>
-            <span class="font-medium group-[.active]:font-semibold">Usuarios</span>
-          </a>
+            <!-- Roles -->
+            <a
+              routerLink="/admin/roles"
+              routerLinkActive="bg-[#150fbd]/20 text-white border-l-4 border-[#150fbd] shadow-[inset_0_0_20px_rgba(21,15,189,0.15)]"
+              class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
+                      text-slate-400 hover:text-white hover:bg-white/5 transition-all group"
+            >
+              <i class="fas fa-shield-alt w-5 text-center group-hover:scale-110 transition-transform"></i>
+              <span class="font-medium group-[.active]:font-semibold">Roles y Permisos</span>
+            </a>
 
-          <!-- Roles -->
-          <a
-            *hasPermission="'ROLES_VIEW'"
-            routerLink="/admin/roles"
-            routerLinkActive="bg-[#150fbd]/20 text-white border-l-4 border-[#150fbd] shadow-[inset_0_0_20px_rgba(21,15,189,0.15)]"
-            class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
-                    text-slate-400 hover:text-white hover:bg-white/5 transition-all group"
-          >
-            <i class="fas fa-shield-alt w-5 text-center group-hover:scale-110 transition-transform"></i>
-            <span class="font-medium group-[.active]:font-semibold">Roles y Permisos</span>
-          </a>
+            <!-- Catálogos -->
+            <a
+              routerLink="/admin/catalogs"
+              routerLinkActive="bg-[#150fbd]/20 text-white border-l-4 border-[#150fbd] shadow-[inset_0_0_20px_rgba(21,15,189,0.15)]"
+              class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
+                      text-slate-400 hover:text-white hover:bg-white/5 transition-all group"
+            >
+              <i class="fas fa-database w-5 text-center group-hover:scale-110 transition-transform"></i>
+              <span class="font-medium group-[.active]:font-semibold">Catálogos</span>
+            </a>
 
-          <!-- Catálogos -->
-          <a
-            *hasPermission="'CATALOGS_VIEW'"
-            routerLink="/admin/catalogs"
-            routerLinkActive="bg-[#150fbd]/20 text-white border-l-4 border-[#150fbd] shadow-[inset_0_0_20px_rgba(21,15,189,0.15)]"
-            class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
-                    text-slate-400 hover:text-white hover:bg-white/5 transition-all group"
-          >
-            <i class="fas fa-database w-5 text-center group-hover:scale-110 transition-transform"></i>
-            <span class="font-medium group-[.active]:font-semibold">Catálogos</span>
-          </a>
-
-          <!-- Test Reset Password (Admin Solo) -->
-          <a
-            *hasPermission="'USERS_VIEW'"
-            routerLink="/auth/reset-password"
-            routerLinkActive="bg-[#150fbd]/20 text-white border-l-4 border-[#150fbd] shadow-[inset_0_0_20px_rgba(21,15,189,0.15)]"
-            class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
-                    text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-all group mt-6 border border-rose-500/10"
-          >
-            <i class="fas fa-key w-5 text-center group-hover:scale-110 transition-transform"></i>
-            <span class="font-medium group-[.active]:font-semibold">Test Reset Password</span>
-          </a>
+            <!-- Test Reset Password -->
+            <a
+              routerLink="/auth/reset-password"
+              routerLinkActive="bg-[#150fbd]/20 text-white border-l-4 border-[#150fbd] shadow-[inset_0_0_20px_rgba(21,15,189,0.15)]"
+              class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
+                      text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-all group mt-6 border border-rose-500/10"
+            >
+              <i class="fas fa-key w-5 text-center group-hover:scale-110 transition-transform"></i>
+              <span class="font-medium group-[.active]:font-semibold">Test Reset Password</span>
+            </a>
+          </ng-container>
         </nav>
       </aside>
 

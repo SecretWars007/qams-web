@@ -59,6 +59,24 @@ export class RolesService {
     }
 
     /**
+     * Alterna el estado (Activo/Inactivo) de un rol.
+     * @param id - ID del rol
+     */
+    toggleRoleStatus(id: string): Observable<void> {
+        console.log(this.LOG_TAG, 'Cambiando estado del rol:', id);
+        return this.http.post<void>(`${this.apiUrl}/${id}/toggle-status`, {});
+    }
+
+    /**
+     * Duplica un rol existente junto con sus permisos.
+     * @param id - ID del rol a duplicar
+     */
+    duplicateRole(id: string): Observable<Role> {
+        console.log(this.LOG_TAG, 'Duplicando rol:', id);
+        return this.http.post<Role>(`${this.apiUrl}/${id}/duplicate`, {});
+    }
+
+    /**
      * Obtiene todos los permisos disponibles del sistema.
      * En modo mock, retorna una lista estática.
      */
@@ -90,5 +108,27 @@ export class RolesService {
         return this.http.post<void>(`${this.apiUrl}/${roleId}/permissions`, {
             permissionIds
         });
+    }
+
+    /**
+     * Añade un permiso específico a un rol.
+     * @param roleId - ID del rol
+     * @param permissionId - ID del permiso a añadir
+     */
+    addPermission(roleId: string, permissionId: string): Observable<void> {
+        if (environment.useMock) return of(undefined);
+        console.log(this.LOG_TAG, `Añadiendo permiso ${permissionId} al rol ${roleId}`);
+        return this.http.post<void>(`${this.apiUrl}/${roleId}/permissions/add`, { permissionId });
+    }
+
+    /**
+     * Remueve un permiso específico de un rol.
+     * @param roleId - ID del rol
+     * @param permissionId - ID del permiso a remover
+     */
+    removePermission(roleId: string, permissionId: string): Observable<void> {
+        if (environment.useMock) return of(undefined);
+        console.log(this.LOG_TAG, `Removiendo permiso ${permissionId} del rol ${roleId}`);
+        return this.http.post<void>(`${this.apiUrl}/${roleId}/permissions/remove`, { permissionId });
     }
 }

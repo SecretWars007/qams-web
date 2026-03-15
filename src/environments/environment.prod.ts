@@ -1,4 +1,5 @@
 export const environment = {
   production: true,
-  apiUrl: '/api',
+  useMock: false,
+  apiUrl: 'https://qams-api-palz.onrender.com/api',
 };
