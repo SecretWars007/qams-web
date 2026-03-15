@@ -42,3 +42,8 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+# Documentation and temporary files
+*.txt
+*.bat
+*.sh

@@ -1,20 +1,11 @@
 services:
-  # QAMS Web (Angular Static Site)
-  - type: static
+  - type: web
     name: qams-web
-    env: static
+    env: docker
     plan: free
-    buildCommand: "npm install && npm run build:prod"
-    publishDir: dist/qams-web/browser
-    envVars:
-      - key: API_URL
-        value: https://qams-api.onrender.com/api # Cambiar por la URL real de tu API en Render
-    staticPublishCustomHeaders:
-      - path: "/*"
-        headers:
-          - key: Cache-Control
-            value: "no-cache"
-    routes:
-      - type: rewrite
-        source: "/*"
-        destination: "/index.html"
+    region: oregon
+    healthCheckPath: /
+    autoDeploy: true
+    # Por defecto escucha en el puerto 80 del contenedor si se especifica en el Dockerfile
+    dockerContext: .
+    dockerfilePath: ./Dockerfile
