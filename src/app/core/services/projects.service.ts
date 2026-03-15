@@ -28,7 +28,7 @@ export class ProjectsService {
         if (environment.useMock) {
             return this.mockService.getProjects();
         }
-        console.log(this.LOG_TAG, 'Obteniendo lista de proyectos');
+
         return this.http.get<ProjectDto[]>(this.apiUrl).pipe(
             map(dtos => dtos.map(dto => ProjectMapper.fromDto(dto)))
         );

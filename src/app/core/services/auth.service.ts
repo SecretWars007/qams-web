@@ -191,18 +191,30 @@ export class AuthService {
    */
   isAdmin(): boolean {
     const user = this.currentUser();
-    if (!user) return false;
-
-    // Verificar en la lista de roles si existe "Admin" o "Administrador"
-    const roles = user.role;
-    if (Array.isArray(roles)) {
-      return roles.some(r => r.toLowerCase() === 'admin' || r.toLowerCase() === 'administrador');
-    } else if (typeof roles === 'string') {
-      const roleStr = (roles as string).toLowerCase();
-      return roleStr === 'admin' || roleStr === 'administrador';
+    if (!user) {
+      console.warn(this.LOG_TAG, 'isAdmin: No current user found');
+      return false;
     }
 
-    return false;
+    const roles = user.role;
+    if (!roles) {
+      console.warn(this.LOG_TAG, 'isAdmin: No roles found in user claims');
+      return false;
+    }
+
+    // Normalizar a array si viene como string
+    const roleList = Array.isArray(roles) ? roles : [roles];
+    
+    // Lista de nombres de rol permitidos para administración
+    const adminRoles = ['admin', 'administrador', 'administrator', 'superadmin'];
+    
+    const isUserAdmin = roleList.some(r => 
+      typeof r === 'string' && adminRoles.includes(r.toLowerCase().trim())
+    );
+
+
+
+    return isUserAdmin;
   }
 
   /** Obtiene el access token almacenado en localStorage */

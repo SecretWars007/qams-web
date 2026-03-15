@@ -102,30 +102,14 @@
 
   <!-- Contenedores de Gráficos Dual Section -->
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-    <!-- Chart Principal (Ejecuciones) -->
+    <!-- Chart Principal (Ejecuciones) - OCULTO POR SOLICITUD
     <div class="lg:col-span-8 card !p-0 overflow-hidden">
-      <div class="p-8 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
-        <div>
-          <h3 class="text-xl font-bold text-slate-900 flex items-center gap-2">
-            <i class="ri-line-chart-line text-blue-600"></i>
-            Tendencias de Ejecución
-          </h3>
-          <p class="text-xs font-medium text-slate-400 mt-1">Historial acumulado de pass/fail</p>
-        </div>
-        <div class="flex gap-2">
-          <button class="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-blue-600 transition-colors">
-            <i class="ri-more-2-fill"></i>
-          </button>
-        </div>
-      </div>
-      <div class="p-8 h-[400px]">
-        <canvas baseChart [data]="burndownData" [options]="burndownOptions" type="line">
-        </canvas>
-      </div>
+      ...
     </div>
+    -->
 
     <!-- Chart Secundario (Distribución) -->
-    <div class="lg:col-span-4 card !p-0 overflow-hidden">
+    <div class="lg:col-span-12 card !p-0 overflow-hidden">
       <div class="p-8 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
         <h3 class="text-xl font-bold text-slate-900 flex items-center gap-2">
           <i class="ri-pie-chart-2-line text-purple-600"></i>
@@ -140,16 +124,12 @@
   </div>
 
   <!-- Timeline y Burndown Grid -->
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+  <div class="grid grid-cols-1 gap-8">
+    <!-- Cronograma de Pruebas - OCULTO POR SOLICITUD
     <div class="card">
-        <div class="flex items-center justify-between mb-8">
-            <h3 class="text-xl font-bold text-slate-900">Cronograma de Pruebas</h3>
-            <span class="text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full uppercase tracking-tighter">Timeline</span>
-        </div>
-        <div class="h-80">
-            <canvas baseChart [data]="timelineData" [options]="timelineOptions" type="bar"></canvas>
-        </div>
+        ...
     </div>
+    -->
     <div class="card">
         <div class="flex items-center justify-between mb-8">
             <h3 class="text-xl font-bold text-slate-900">Estadística de Tareas</h3>

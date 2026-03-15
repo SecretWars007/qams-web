@@ -31,31 +31,18 @@ export class DashboardService {
      */
     getSummary(): Observable<DashboardSummary> {
         if (environment.useMock) {
-            console.log(this.LOG_TAG, 'Usando MOCK para resumen');
             return this.mockService.getSummary();
         }
 
-        const userId = this.authService.getUserId();
-        if (!userId) {
-            console.error(this.LOG_TAG, 'No se encontró userId — ¿el usuario está logueado?');
-            return of(this.getEmptySummary());
-        }
-
-        const params = new HttpParams().set('userId', userId);
-        console.log(this.LOG_TAG, 'Solicitando resumen al backend para userId:', userId);
-
-        return this.http.get<DashboardSummaryDto>(this.apiUrl, { params }).pipe(
+        // El backend obtiene el usuario del token JWT, no es necesario pasarlo por query string
+        // según el Swagger del usuario.
+        return this.http.get<DashboardSummaryDto>(this.apiUrl).pipe(
             map(dto => {
-                if (!dto) {
-                    console.warn(this.LOG_TAG, 'El backend retornó un resumen vacío');
-                    return this.getEmptySummary();
-                }
+                if (!dto) return this.getEmptySummary();
                 return DashboardMapper.fromSummaryDto(dto);
             }),
             switchMap(summary => {
-                // Si el backend no devuelve timeline, reconstruirlo desde los proyectos
                 if (!summary.projectTimeline || summary.projectTimeline.length === 0) {
-                    console.log(this.LOG_TAG, 'Reconstruyendo timeline desde ProjectsService (fallback)');
                     return this.projectsService.getProjects().pipe(
                         map(projects => {
                             summary.projectTimeline = projects.map(p => ({
@@ -104,7 +91,6 @@ export class DashboardService {
         }
 
         const url = `${this.apiUrl}/project/${projectId}/timeline-chart`;
-        console.log(this.LOG_TAG, 'Obteniendo timeline para proyecto:', projectId);
         return this.http.get<any>(url).pipe(
             catchError(err => {
                 console.error(this.LOG_TAG, 'Error al obtener timeline:', err.status);
@@ -122,7 +108,6 @@ export class DashboardService {
             return of([]).pipe(delay(500));
         }
         const url = `${this.apiUrl}/project/${projectId}/drawdown`;
-        console.log(this.LOG_TAG, 'Obteniendo drawdown para proyecto:', projectId);
         return this.http.get<any[]>(url).pipe(
             catchError(err => {
                 console.error(this.LOG_TAG, 'Error al obtener drawdown:', err.status);
@@ -137,7 +122,6 @@ export class DashboardService {
      */
     getBurndownData(projectId: string): Observable<any[]> {
         const url = `${this.apiUrl}/project/${projectId}/burndown`;
-        console.log(this.LOG_TAG, 'Obteniendo burndown para proyecto:', projectId);
         return this.http.get<any[]>(url).pipe(
             catchError(err => {
                 console.error(this.LOG_TAG, 'Error al obtener burndown:', err.status);
