@@ -12,7 +12,11 @@ import { Project } from '../../core/models/project.model';
 import { TestSuite } from '../../core/models/test-suite.model';
 import { TestCase } from '../../core/models/test-case.model';
 import { FormsModule } from '@angular/forms';
+import { ToastrService } from 'ngx-toastr';
 
+/**
+ * Componente para visualizar, crear, editar y subir evidencias a Ejecuciones de Prueba.
+ */
 @Component({
   selector: 'app-test-executions',
   standalone: true,
@@ -59,6 +63,7 @@ export class TestExecutionsComponent implements OnInit {
   private scenariosService = inject(TestSuitesService);
   private route = inject(ActivatedRoute);
   private location = inject(Location);
+  private toastr = inject(ToastrService);
 
   ngOnInit(): void {
     this.initForm();
@@ -229,9 +234,14 @@ export class TestExecutionsComponent implements OnInit {
       next: () => {
         this.isSubmitting.set(false);
         this.showModal.set(false);
+        this.toastr.success('Ejecución guardada exitosamente.', 'Éxito');
         this.loadExecutions();
       },
-      error: () => this.isSubmitting.set(false)
+      error: (err) => {
+        this.isSubmitting.set(false);
+        console.error('[TestExecutionsComponent] Error guardando ejecución:', err);
+        this.toastr.error('Error al guardar la ejecución.', 'Error');
+      }
     });
   }
 
@@ -425,13 +435,15 @@ export class TestExecutionsComponent implements OnInit {
       next: () => {
         this.isSubmitting.set(false);
         this.closeObservationModal();
+        this.toastr.success('Observación agregada.', 'Éxito');
         if (this.selectedExecution()) {
           this.openDetailsModal(this.selectedExecution()!);
         }
       },
       error: (err) => {
-        console.error('TestExecutionsComponent: Error adding observation:', err);
+        console.error('[TestExecutionsComponent] Error adding observation:', err);
         this.isSubmitting.set(false);
+        this.toastr.error('Error al agregar observación.', 'Error');
       }
     });
   }
@@ -440,9 +452,14 @@ export class TestExecutionsComponent implements OnInit {
     if (!response.trim()) return;
     this.executionsService.respondToObservation(observationId, response).subscribe({
       next: () => {
+        this.toastr.success('Respuesta guardada.', 'Éxito');
         if (this.selectedExecution()) {
           this.openDetailsModal(this.selectedExecution()!);
         }
+      },
+      error: (err) => {
+        console.error('[TestExecutionsComponent] Error al responder observación:', err);
+        this.toastr.error('Error al guardar la respuesta.', 'Error');
       }
     });
   }

@@ -1,3 +1,6 @@
+// src/app/core/guards/auth.guard.ts
+// Guard funcional que protege rutas que requieren autenticación.
+// Redirige al login si el usuario no está autenticado o su token expiró.
 import { CanActivateFn, Router } from '@angular/router';
 import { inject } from '@angular/core';
 import { AuthService } from '../services/auth.service';
@@ -6,7 +9,6 @@ export const authGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  // ⚠ IMPORTANTE: isAuthenticated es una SIGNAL → se llama como función
   const isLoggedIn = authService.isAuthenticated();
   const tokenExpired = authService.isTokenExpired();
 
@@ -14,7 +16,8 @@ export const authGuard: CanActivateFn = () => {
     return true;
   }
 
-  // Si no está autenticado o el token expiró
+  // Usuario no autenticado o token expirado → redirigir al login
+  console.warn('[AuthGuard] Acceso denegado: no autenticado o token expirado');
   router.navigate(['/auth/login']);
   return false;
 };

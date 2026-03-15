@@ -1,6 +1,7 @@
 // src/app/features/dashboard/dashboard.component.ts
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { tap, switchMap } from 'rxjs';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration } from 'chart.js';
@@ -12,7 +13,7 @@ import { Project } from '../../../core/models/project.model';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, BaseChartDirective],
+  imports: [CommonModule, FormsModule, BaseChartDirective],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
@@ -262,32 +263,33 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+  /** Carga y renderiza los datos de todas las métricas del proyecto */
   private loadProjectMetrics(projectId: string): void {
     // Cargar timeline
     this.dashboardService.getProjectTimeline(projectId).subscribe({
       next: (data) => {
-        console.log('📅 [Dashboard] Timeline data:', data);
+        console.log('[DashboardComponent] Timeline data:', data);
         this.renderTimeline(data);
       },
-      error: (err) => console.error('DashboardComponent: Error cargando timeline:', err)
+      error: (err) => console.error('[DashboardComponent] Error cargando timeline:', err)
     });
 
     // Cargar burndown
     this.dashboardService.getBurndownData(projectId).subscribe({
       next: (data) => {
-        console.log('📉 [Dashboard] Burndown data:', data);
+        console.log('[DashboardComponent] Burndown data:', data);
         this.renderBurndown(data);
       },
-      error: (err) => console.error('DashboardComponent: Error cargando burndown:', err)
+      error: (err) => console.error('[DashboardComponent] Error cargando burndown:', err)
     });
 
     // Cargar drawdown
     this.dashboardService.getDrawdownData(projectId).subscribe({
       next: (data) => {
-        console.log('📉 [Dashboard] Drawdown data:', data);
+        console.log('[DashboardComponent] Drawdown data:', data);
         this.renderDrawdown(data);
       },
-      error: (err) => console.error('DashboardComponent: Error cargando drawdown:', err)
+      error: (err) => console.error('[DashboardComponent] Error cargando drawdown:', err)
     });
   }
 

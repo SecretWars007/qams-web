@@ -1,126 +1,178 @@
-<div class="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-  <!-- Título y Header -->
-  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-    <div>
-      <h1 class="text-3xl font-black text-slate-900 tracking-tight">Dashboard</h1>
-      <p class="text-slate-500 text-sm mt-1 font-medium">
-        Monitoreo en tiempo real del ecosistema QAMS
+<div class="space-y-10 animate-in fade-in slide-in-from-bottom-6 duration-1000">
+  <!-- Título y Header Premium -->
+  <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+    <div class="space-y-1">
+      <h1 class="text-4xl font-black text-slate-900 tracking-tight leading-none">
+        Analytics <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-emerald-500">Dashboard</span>
+      </h1>
+      <p class="text-slate-500 text-base font-medium">
+        Insights en tiempo real sobre el ecosistema de calidad QAMS.
       </p>
     </div>
-    <div
-      class="flex items-center gap-3 bg-white/60 p-1.5 px-4 rounded-[1.5rem] border border-slate-200/60 backdrop-blur-md shadow-sm">
-      <span class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Hoy</span>
-      <div class="h-4 w-px bg-slate-200"></div>
-      <span class="text-[10px] font-black text-[#150fbd] uppercase tracking-widest">{{ today | date:'dd MMM, yyyy'
-        }}</span>
+    
+    <div class="flex items-center gap-4">
+      <!-- Selector de Proyecto Premium -->
+      <div class="flex items-center gap-2 px-4 py-2 bg-white rounded-2xl border border-slate-200 shadow-sm">
+        <i class="ri-folder-open-line text-blue-600"></i>
+        <select 
+          [ngModel]="selectedProjectId()" 
+          (ngModelChange)="onProjectChange($event)"
+          class="bg-transparent border-none outline-none text-sm font-bold text-slate-700 pr-4 cursor-pointer">
+          <option *ngFor="let p of projects()" [value]="p.id">{{ p.name }}</option>
+        </select>
+      </div>
+
+      <div class="flex items-center gap-3 bg-white/80 p-2 px-5 rounded-2xl border border-slate-200 backdrop-blur-md shadow-sm">
+        <span class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Hoy</span>
+        <div class="h-4 w-px bg-slate-200"></div>
+        <span class="text-sm font-bold text-blue-700">{{ today | date:'dd MMM, yyyy' }}</span>
+      </div>
     </div>
   </div>
 
   @if (summary()) {
-  <!-- Tarjetas de métricas - Grid Responsivo -->
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+  <!-- Tarjetas de métricas - Grid Responsivo Glassmorphism -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
     <!-- Total Proyectos -->
-    <div class="bg-white/80 backdrop-blur-md border border-white/40 rounded-2xl p-6 shadow-sm flex flex-col gap-2 relative overflow-hidden group">
-      <div class="absolute inset-0 bg-gradient-to-br from-blue-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+    <div class="glass-card p-6 relative overflow-hidden group hover:-translate-y-1">
+      <div class="absolute -right-4 -top-4 w-24 h-24 bg-blue-500/5 rounded-full blur-2xl group-hover:bg-blue-500/10 transition-all"></div>
       <div class="flex items-center justify-between relative z-10">
-        <div class="w-10 h-10 rounded-xl bg-[#150fbd]/10 flex items-center justify-center">
-          <i class="fas fa-folder-tree text-[#150fbd] text-lg"></i>
+        <div class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center border border-blue-100/50">
+          <i class="ri-folder-info-fill text-blue-600 text-xl"></i>
         </div>
+        <span class="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded-lg border border-blue-100">GENERAL</span>
       </div>
-      <div class="relative z-10 mt-2">
-        <p class="text-xs font-semibold text-slate-500 uppercase tracking-widest">Proyectos</p>
-        <p class="text-3xl font-black text-slate-900 mt-1">{{ summary()!.totalProjects }}</p>
+      <div class="relative z-10 mt-4">
+        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Proyectos Activos</p>
+        <p class="text-4xl font-black text-slate-900 mt-1">{{ summary()!.totalProjects }}</p>
       </div>
     </div>
 
     <!-- Total Casos -->
-    <div class="bg-white/80 backdrop-blur-md border border-white/40 rounded-2xl p-6 shadow-sm flex flex-col gap-2 relative overflow-hidden group">
-      <div class="absolute inset-0 bg-gradient-to-br from-purple-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+    <div class="glass-card p-6 relative overflow-hidden group hover:-translate-y-1">
+      <div class="absolute -right-4 -top-4 w-24 h-24 bg-purple-500/5 rounded-full blur-2xl group-hover:bg-purple-500/10 transition-all"></div>
       <div class="flex items-center justify-between relative z-10">
-        <div class="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
-          <i class="fas fa-vial-circle-check text-purple-600 text-lg"></i>
+        <div class="w-12 h-12 rounded-2xl bg-purple-50 flex items-center justify-center border border-purple-100/50">
+          <i class="ri-test-tube-fill text-purple-600 text-xl"></i>
         </div>
+        <span class="text-[10px] font-black text-purple-600 bg-purple-50 px-2 py-0.5 rounded-lg border border-purple-100">TESTING</span>
       </div>
-      <div class="relative z-10 mt-2">
-        <p class="text-xs font-semibold text-slate-500 uppercase tracking-widest">Test Cases</p>
-        <p class="text-3xl font-black text-slate-900 mt-1">{{ summary()!.totalTestCases }}</p>
+      <div class="relative z-10 mt-4">
+        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Casos de Prueba</p>
+        <p class="text-4xl font-black text-slate-900 mt-1">{{ summary()!.totalTestCases }}</p>
       </div>
     </div>
 
     <!-- Tasa de Aprobación -->
-    <div class="bg-white/80 backdrop-blur-md border border-white/40 rounded-2xl p-6 shadow-sm flex flex-col gap-2 relative overflow-hidden group">
-      <div class="absolute inset-0 bg-gradient-to-br from-emerald-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+    <div class="glass-card p-6 relative overflow-hidden group hover:-translate-y-1">
+      <div class="absolute -right-4 -top-4 w-24 h-24 bg-emerald-500/5 rounded-full blur-2xl group-hover:bg-emerald-500/10 transition-all"></div>
       <div class="flex items-center justify-between relative z-10">
-        <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
-          <i class="fas fa-percent text-emerald-600 text-lg"></i>
+        <div class="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center border border-emerald-100/50">
+          <i class="ri-checkbox-circle-fill text-emerald-600 text-xl"></i>
+        </div>
+        <div class="flex items-center gap-1.5 px-2 py-0.5 bg-emerald-50 rounded-lg border border-emerald-100">
+          <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+          <span class="text-[10px] font-black text-emerald-600">HEALTHY</span>
         </div>
       </div>
-      <div class="relative z-10 mt-2">
-        <p class="text-xs font-semibold text-slate-500 uppercase tracking-widest">Pass Rate</p>
-        <p class="text-3xl font-black text-slate-900 mt-1">{{ summary()!.passRate }}%</p>
+      <div class="relative z-10 mt-4">
+        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Pass Rate</p>
+        <div class="flex items-baseline gap-1">
+          <p class="text-4xl font-black text-slate-900 mt-1">{{ summary()!.passRate }}</p>
+          <span class="text-xl font-bold text-slate-400">%</span>
+        </div>
       </div>
     </div>
 
-    <!-- Casos de Prueba Pendientes -->
-    <div class="bg-white/80 backdrop-blur-md border border-white/40 rounded-2xl p-6 shadow-sm flex flex-col gap-2 relative overflow-hidden group">
-      <div class="absolute inset-0 bg-gradient-to-br from-amber-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+    <!-- Pendientes -->
+    <div class="glass-card p-6 relative overflow-hidden group hover:-translate-y-1 border-l-4 border-amber-400">
+      <div class="absolute -right-4 -top-4 w-24 h-24 bg-amber-500/5 rounded-full blur-2xl group-hover:bg-amber-500/10 transition-all"></div>
       <div class="flex items-center justify-between relative z-10">
-        <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
-          <i class="fas fa-hourglass-half text-amber-600 text-lg"></i>
+        <div class="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center border border-amber-100/50">
+          <i class="ri-time-fill text-amber-600 text-xl"></i>
         </div>
+        <span class="text-[10px] font-black text-amber-600 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-100">QUEUE</span>
       </div>
-      <div class="relative z-10 mt-2">
-        <p class="text-xs font-semibold text-slate-500 uppercase tracking-widest">Pendientes</p>
-        <p class="text-3xl font-black text-slate-900 mt-1">{{ summary()!.pendingTestCases }}</p>
+      <div class="relative z-10 mt-4">
+        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Pendientes</p>
+        <p class="text-4xl font-black text-slate-900 mt-1">{{ summary()!.pendingTestCases }}</p>
       </div>
     </div>
   </div>
 
-  <!-- Contenedores de Gráficos -->
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-    <!-- Gráfico Doughnut -->
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 flex flex-col">
-      <div class="flex items-center justify-between mb-8">
-        <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-          <i class="fas fa-chart-pie text-[#150fbd]"></i>
-          Desglose de Ejecuciones
-        </h3>
-        <span class="px-3 py-1 bg-slate-50 rounded-lg text-xs font-semibold text-slate-500 border border-slate-100">Estado Actual</span>
+  <!-- Contenedores de Gráficos Dual Section -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <!-- Chart Principal (Ejecuciones) -->
+    <div class="lg:col-span-8 card !p-0 overflow-hidden">
+      <div class="p-8 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
+        <div>
+          <h3 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+            <i class="ri-line-chart-line text-blue-600"></i>
+            Tendencias de Ejecución
+          </h3>
+          <p class="text-xs font-medium text-slate-400 mt-1">Historial acumulado de pass/fail</p>
+        </div>
+        <div class="flex gap-2">
+          <button class="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-blue-600 transition-colors">
+            <i class="ri-more-2-fill"></i>
+          </button>
+        </div>
       </div>
-      <div class="h-72 w-full flex items-center justify-center relative flex-1">
+      <div class="p-8 h-[400px]">
+        <canvas baseChart [data]="burndownData" [options]="burndownOptions" type="line">
+        </canvas>
+      </div>
+    </div>
+
+    <!-- Chart Secundario (Distribución) -->
+    <div class="lg:col-span-4 card !p-0 overflow-hidden">
+      <div class="p-8 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
+        <h3 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+          <i class="ri-pie-chart-2-line text-purple-600"></i>
+          Status Mix
+        </h3>
+      </div>
+      <div class="p-8 h-[400px] flex items-center justify-center">
         <canvas baseChart [data]="doughnutData" [options]="doughnutOptions" type="doughnut">
         </canvas>
       </div>
     </div>
+  </div>
 
-    <!-- Gráfico Bar -->
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 flex flex-col">
-      <div class="flex items-center justify-between mb-8">
-        <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-          <i class="fas fa-chart-bar text-amber-500"></i>
-          Progreso Kanban
-        </h3>
-        <span class="px-3 py-1 bg-slate-50 rounded-lg text-xs font-semibold text-slate-500 border border-slate-100">Por Columna</span>
-      </div>
-      <div class="h-72 w-full flex-1">
-        <canvas baseChart [data]="barData" [options]="barOptions" type="bar">
-        </canvas>
-      </div>
+  <!-- Timeline y Burndown Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div class="card">
+        <div class="flex items-center justify-between mb-8">
+            <h3 class="text-xl font-bold text-slate-900">Cronograma de Pruebas</h3>
+            <span class="text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full uppercase tracking-tighter">Timeline</span>
+        </div>
+        <div class="h-80">
+            <canvas baseChart [data]="timelineData" [options]="timelineOptions" type="bar"></canvas>
+        </div>
+    </div>
+    <div class="card">
+        <div class="flex items-center justify-between mb-8">
+            <h3 class="text-xl font-bold text-slate-900">Estadística de Tareas</h3>
+            <span class="text-xs font-bold text-amber-600 bg-amber-50 px-3 py-1 rounded-full uppercase tracking-tighter">Kanban Progress</span>
+        </div>
+        <div class="h-80">
+            <canvas baseChart [data]="barData" [options]="barOptions" type="bar"></canvas>
+        </div>
     </div>
   </div>
 
   } @else {
-  <!-- Loading State Premium -->
-  <div class="flex flex-col items-center justify-center h-96 gap-6 bg-white/50 backdrop-blur-sm rounded-3xl border border-white/40">
+  <!-- Loading State Ultra Premium -->
+  <div class="flex flex-col items-center justify-center h-[500px] gap-8 bg-white border border-slate-100 rounded-[2.5rem] shadow-xl shadow-slate-200/50">
     <div class="relative">
-      <div class="w-16 h-16 border-4 border-[#150fbd]/20 border-t-[#150fbd] rounded-full animate-spin"></div>
+      <div class="w-24 h-24 border-8 border-blue-50 border-t-blue-600 rounded-full animate-spin"></div>
       <div class="absolute inset-0 flex items-center justify-center">
-        <i class="fas fa-microscope text-[#150fbd]"></i>
+        <i class="ri-flashlight-line text-3xl text-blue-600 animate-pulse"></i>
       </div>
     </div>
-    <div class="text-center">
-      <p class="text-slate-900 font-bold text-lg tracking-tight">Sincronizando Sistema</p>
-      <p class="text-slate-500 text-sm mt-1">Cargando métricas de calidad...</p>
+    <div class="text-center space-y-2">
+      <h2 class="text-2xl font-black text-slate-900 tracking-tight">Analizando Datos...</h2>
+      <p class="text-slate-400 font-medium">Sincronizando el motor de calidad QAMS</p>
     </div>
   </div>
   }

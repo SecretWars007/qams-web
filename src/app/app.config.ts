@@ -1,9 +1,10 @@
 // src/app/app.config.ts
 // Configuración raíz de la aplicación Angular standalone
 import { ApplicationConfig, importProvidersFrom } from '@angular/core';
-import { provideRouter, withComponentInputBinding } from '@angular/router';
+import { provideRouter, withComponentInputBinding, withPreloading, PreloadAllModules } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideAnimations } from '@angular/platform-browser/animations';
+import { provideClientHydration } from '@angular/platform-browser';
 import { provideToastr } from 'ngx-toastr';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 
@@ -13,8 +14,15 @@ import { errorInterceptor } from './core/interceptors/error.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    // Configurar router con lazy loading y binding de inputs
-    provideRouter(routes, withComponentInputBinding()),
+    // Configurar router con lazy loading, preloading y binding de inputs
+    provideRouter(
+      routes, 
+      withComponentInputBinding(),
+      withPreloading(PreloadAllModules)
+    ),
+
+    // Habilitar hidratación para mejorar tiempos de carga inicial y SEO
+    provideClientHydration(),
 
     // Configurar HttpClient con interceptors funcionales
     provideHttpClient(withInterceptors([jwtInterceptor, errorInterceptor])),

@@ -1,10 +1,163 @@
-<div class="p-6 max-w-7xl mx-auto">
-  <div class="mb-8">
-    <h1 class="text-3xl font-bold text-gray-900 mb-2">Gestión de Catálogos</h1>
-    <p class="text-gray-500">Administra los valores de los catálogos del sistema.</p>
-  </div>
+<div class="catalogs-container animate-in fade-in slide-in-from-right-6 duration-700">
+  <!-- Sidebar de Selección de Catálogos Premium -->
+  <aside class="catalogs-sidebar glass-card">
+    <div class="sidebar-header space-y-4">
+      <div class="w-14 h-14 rounded-2xl bg-indigo-50 flex items-center justify-center border border-indigo-100">
+        <i class="ri-settings-5-line text-2xl text-indigo-600"></i>
+      </div>
+      <div class="header-text">
+        <h2 class="text-xl font-black text-slate-800 tracking-tight">System Catalogs</h2>
+        <p class="text-xs font-semibold text-slate-400 uppercase tracking-widest mt-1">Configure Data Types</p>
+      </div>
+    </div>
 
-  <div class="bg-white rounded-2xl border border-gray-100 p-12 text-center text-gray-400">
-    Próximamente: Lista de catálogos editables.
+    <nav class="catalog-nav mt-8">
+      <button *ngFor="let cat of availableCatalogs" 
+              (click)="selectCatalog(cat)"
+              [class.active]="selectedCatalog.name === cat.name"
+              class="nav-item group">
+        <div class="flex items-center gap-3">
+            <i [class]="cat.icon" class="nav-icon text-lg group-hover:scale-110 transition-transform"></i>
+            <span class="text-sm font-bold">{{ cat.displayName }}</span>
+        </div>
+        <i class="ri-arrow-right-s-line arrow-icon"></i>
+      </button>
+    </nav>
+  </aside>
+
+  <!-- Área Principal de Contenido -->
+  <main class="catalogs-main space-y-8">
+    <header class="main-header">
+      <div class="title-section space-y-2">
+        <div class="inline-block px-3 py-1 bg-indigo-50 border border-indigo-100 rounded-full">
+            <span class="text-[10px] font-black text-indigo-600 tracking-widest uppercase">Admin Console</span>
+        </div>
+        <h1 class="text-4xl font-black text-slate-900 tracking-tight leading-none">{{ selectedCatalog.displayName }}</h1>
+        <p class="text-slate-500 font-medium">Gestiona los valores permitidos para el catálogo <code class="bg-slate-100 px-1.5 py-0.5 rounded text-indigo-600 text-sm font-bold">{{ selectedCatalog.name }}</code></p>
+      </div>
+
+      <div class="action-section flex gap-4">
+        <div class="search-box relative">
+          <i class="ri-search-2-line absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+          <input type="text" placeholder="Filtrar elementos..." class="form-input !pl-12 !w-64">
+        </div>
+        <button (click)="openAddModal()" class="btn-primary">
+          <i class="ri-add-circle-line text-lg"></i>
+          <span>Nuevo Registro</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Tabla de Ítems (Premium Glassmorphism) -->
+    <div class="table-container glass-card overflow-hidden">
+      <div *ngIf="loading" class="loader-overlay">
+        <div class="w-12 h-12 border-4 border-indigo-50 border-t-indigo-600 rounded-full animate-spin"></div>
+      </div>
+
+      <table class="premium-table w-full">
+        <thead>
+          <tr class="bg-slate-50/50">
+            <th class="!pl-8">ID</th>
+            <th>CÓDIGO / NOMBRE</th>
+            <th>DESCRIPCIÓN</th>
+            <th>ESTADO</th>
+            <th class="text-right !pr-8">ACCIONES</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of items" [class.inactive]="!item.isActive" class="hover:bg-slate-50/80 transition-colors">
+            <td class="id-col !pl-8 text-xs font-black text-slate-400">#{{ item.id }}</td>
+            <td class="name-col py-4">
+                <div class="flex flex-col">
+                    <span class="text-[10px] font-black text-indigo-500 tracking-tighter">{{ item.code }}</span>
+                    <span class="text-sm font-bold text-slate-800">{{ item.name }}</span>
+                </div>
+            </td>
+            <td class="desc-col text-sm text-slate-500 font-medium">{{ item.description || 'Sin descripción detallada' }}</td>
+            <td class="status-col">
+              <span [class]="item.isActive ? 'badge-success' : 'badge-danger'" 
+                    (click)="toggleActive(item)"
+                    class="badge clickable cursor-pointer hover:scale-105 transition-transform">
+                {{ item.isActive ? 'Activo' : 'Inactivo' }}
+              </span>
+            </td>
+            <td class="actions-col !pr-8">
+              <div class="flex justify-end gap-2">
+                <button (click)="openEditModal(item)" class="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:border-indigo-200 hover:bg-indigo-50 transition-all">
+                  <i class="ri-edit-2-line"></i>
+                </button>
+                <button class="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50 transition-all">
+                  <i class="ri-delete-bin-6-line"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="items.length === 0 && !loading">
+            <td colspan="5" class="py-20 text-center">
+              <div class="flex flex-col items-center gap-4 text-slate-300">
+                  <i class="ri-inbox-archive-line text-6xl"></i>
+                  <p class="text-lg font-bold">Catálogo vacío</p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Modal de Edición/Creación Ultra Premium -->
+  <div *ngIf="showModal" class="modal-backdrop animate-in fade-in duration-300">
+    <div class="modal-card !max-w-xl !rounded-[2.5rem] !p-0 overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-10 duration-500">
+      <div class="bg-gradient-to-r from-indigo-600 to-blue-600 p-10 text-white relative">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-3xl"></div>
+        <h3 class="text-3xl font-black tracking-tight relative z-10">{{ isEdit ? 'Edición de Registro' : 'Nuevo Registro' }}</h3>
+        <p class="text-indigo-100 font-medium mt-2 relative z-10">Completa la información para el catálogo {{ selectedCatalog.displayName }}</p>
+        
+        <button (click)="closeModal()" class="absolute top-8 right-8 w-10 h-10 rounded-full bg-black/10 hover:bg-black/20 flex items-center justify-center transition-colors">
+          <i class="ri-close-line text-xl"></i>
+        </button>
+      </div>
+
+      <form [formGroup]="itemForm" (ngSubmit)="saveItem()" class="p-10 space-y-8 bg-white">
+        <div class="grid grid-cols-2 gap-6">
+          <div class="space-y-2">
+            <label class="form-label">Código Interno</label>
+            <input type="text" formControlName="code" placeholder="p.ej. ALTA" [readonly]="isEdit" class="form-input">
+          </div>
+          <div class="space-y-2">
+            <label class="form-label">Nombre Visual</label>
+            <input type="text" formControlName="name" placeholder="p.ej. Prioridad Alta" class="form-input">
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <label class="form-label">Descripción</label>
+          <textarea formControlName="description" rows="3" placeholder="Describe brevemente el propósito de este valor..." class="form-input resize-none"></textarea>
+        </div>
+
+        <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+          <div class="flex items-center gap-4">
+              <div class="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center">
+                  <i class="ri-toggle-line text-indigo-600"></i>
+              </div>
+              <div>
+                  <p class="text-sm font-bold text-slate-800">Estado del Registro</p>
+                  <p class="text-xs text-slate-400 font-medium">Define si el valor está disponible actualmente</p>
+              </div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" formControlName="isActive">
+            <span class="slider round"></span>
+          </label>
+        </div>
+
+        <div class="flex justify-end gap-3 pt-4">
+          <button type="button" (click)="closeModal()" class="btn-secondary">Descartar</button>
+          <button type="submit" [disabled]="itemForm.invalid || loading" class="btn-primary min-w-[160px]">
+            {{ loading ? 'Sincronizando...' : 'Guardar Cambios' }}
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
 </div>

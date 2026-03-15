@@ -1,1 +1,25 @@
-<p>auth-layout works!</p>
+<div class="auth-layout-container">
+  <!-- Elementos decorativos animados en el fondo -->
+  <div class="glow-sphere sphere-1"></div>
+  <div class="glow-sphere sphere-2"></div>
+  <div class="glow-sphere sphere-3"></div>
+  
+  <div class="auth-content-wrapper">
+    <!-- Logo o Branding superior (opcional en el layout) -->
+    <div class="auth-branding">
+      <div class="logo-placeholder">
+        <i class="ri-shield-flash-line"></i>
+        <span>QAMS</span>
+      </div>
+    </div>
+
+    <!-- Contenido dinámico (Login, Registro, etc.) -->
+    <main class="auth-main-content">
+      <router-outlet></router-outlet>
+    </main>
+
+    <footer class="auth-footer">
+      <p>&copy; 2025 QAMS - Quality Assurance Management System</p>
+    </footer>
+  </div>
+</div>

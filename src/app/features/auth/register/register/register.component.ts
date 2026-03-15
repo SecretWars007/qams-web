@@ -7,6 +7,10 @@ import { ToastrService } from 'ngx-toastr';
 import { AuthService } from '../../../../core/services/auth.service';
 import { RegisterRequest } from '../../../../core/models/auth.model';
 
+/**
+ * Componente que gestiona el registro de nuevos usuarios en el sistema.
+ * Recopila nombre, email, usuario (username) y contraseña mediante `AuthService`.
+ */
 @Component({
   selector: 'app-register',
   standalone: true,
@@ -30,6 +34,10 @@ export class RegisterComponent {
     private toastr: ToastrService,
   ) { }
 
+  /**
+   * Envía los datos del formulario al servicio de autenticación.
+   * Maneja el estado de carga y notificaciones de éxito/error.
+   */
   onSubmit(): void {
     if (
       !this.form.username ||
@@ -45,10 +53,12 @@ export class RegisterComponent {
 
     this.authService.register(this.form).subscribe({
       next: () => {
+        console.log('[RegisterComponent] Registro exitoso, procediendo a dashboard');
         this.toastr.success('Cuenta creada exitosamente.', '¡Bienvenido!');
         this.router.navigate(['/dashboard']);
       },
-      error: () => {
+      error: (err) => {
+        console.error('[RegisterComponent] Error durante el registro:', err);
         this.loading.set(false);
       },
     });

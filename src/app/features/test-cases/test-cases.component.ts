@@ -10,6 +10,7 @@ import { User } from '../../core/models/user.model';
 import { Project } from '../../core/models/project.model';
 import { ProjectsService } from '../../core/services/projects.service';
 import { UsersService } from '../../core/services/users.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-test-cases',
@@ -60,6 +61,7 @@ export class TestCasesComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private fb = inject(FormBuilder);
+  private toastr = inject(ToastrService);
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
@@ -217,7 +219,7 @@ export class TestCasesComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error fetching test steps:', err);
-        alert('Error al cargar los pasos del caso de prueba');
+        this.toastr.error('Error al cargar los pasos del caso de prueba', 'Error');
       }
     });
   }
@@ -350,7 +352,7 @@ export class TestCasesComponent implements OnInit {
           error: (err) => {
             console.error('TestCasesComponent: Error updating test case:', err);
             this.isSubmitting.set(false);
-            alert('Error al actualizar el caso de prueba. Verifica los datos.');
+            this.toastr.error('Error al actualizar el caso de prueba. Verifica los datos.', 'Error');
           }
         });
       } else {
@@ -366,7 +368,7 @@ export class TestCasesComponent implements OnInit {
           error: (err) => {
             console.error('TestCasesComponent: Error creating test case:', err);
             this.isSubmitting.set(false);
-            alert('Error al crear el caso de prueba. Verifica los datos.');
+            this.toastr.error('Error al crear el caso de prueba. Verifica los datos.', 'Error');
           }
         });
       }

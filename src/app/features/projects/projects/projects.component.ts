@@ -1,6 +1,7 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { ToastrService } from 'ngx-toastr';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { ProjectsService } from '../../../core/services/projects.service';
 import { UsersService } from '../../../core/services/users.service';
@@ -29,6 +30,7 @@ export class ProjectsComponent implements OnInit {
   private usersService = inject(UsersService);
   private router = inject(Router);
   private fb = inject(FormBuilder);
+  private toastr = inject(ToastrService);
 
   ngOnInit(): void {
     this.initForm();
@@ -119,7 +121,7 @@ export class ProjectsComponent implements OnInit {
         error: (err) => {
           console.error('ProjectsComponent: Error al crear proyecto:', err);
           this.isSubmitting.set(false);
-          alert('Error al crear el proyecto. Verifica los datos y permisos.');
+          this.toastr.error('Error al crear el proyecto. Verifica los datos y permisos.', 'Error');
         }
       });
     }
@@ -144,7 +146,7 @@ export class ProjectsComponent implements OnInit {
           // Revertir cambio local si falló
           this.projects.set(currentProjects);
           this.loading.set(false);
-          alert('No se pudo eliminar el proyecto del servidor. Revisa los permisos o la conexión.');
+          this.toastr.error('No se pudo eliminar el proyecto. Revisa los permisos o la conexión.', 'Error');
         }
       });
     }
@@ -193,7 +195,7 @@ export class ProjectsComponent implements OnInit {
       error: (err) => {
         console.error('ProjectsComponent: Error al registrar devolución:', err);
         this.isSubmitting.set(false);
-        alert('Error al registrar la devolución.');
+        this.toastr.error('Error al registrar la devolución.', 'Error');
       }
     });
   }

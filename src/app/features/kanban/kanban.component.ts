@@ -1,13 +1,15 @@
+// src/app/features/kanban/kanban.component.ts
+// Componente que renderiza el tablero Kanban interactivo para el seguimiento de ejecuciones.
+// Permite mover tareas (casos de prueba/ejecuciones) entre columnas asociadas a estados.
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DragDropModule, CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
+import { Router, ActivatedRoute } from '@angular/router';
+import { ToastrService } from 'ngx-toastr';
 import { KanbanService } from '../../core/services/kanban.service';
-import { KanbanBoard, KanbanColumn, KanbanTask } from '../../core/models/kanban.model';
-import { Router } from '@angular/router';
-import { ActivatedRoute } from '@angular/router';
+import { KanbanBoard, KanbanTask } from '../../core/models/kanban.model';
 import { ProjectsService } from '../../core/services/projects.service';
 import { Project } from '../../core/models/project.model';
-import { TestExecutionsService } from '../../core/services/test-executions.service';
 
 @Component({
   selector: 'app-kanban',
@@ -17,6 +19,7 @@ import { TestExecutionsService } from '../../core/services/test-executions.servi
   styleUrls: ['./kanban.component.scss']
 })
 export class KanbanComponent implements OnInit {
+  /** Tablero kanban actual con sus columnas y tareas */
   board = signal<KanbanBoard | null>(null);
   loading = signal<boolean>(true);
   projectId = signal<string | null>(null);
@@ -24,9 +27,9 @@ export class KanbanComponent implements OnInit {
 
   private kanbanService = inject(KanbanService);
   private projectsService = inject(ProjectsService);
-  private testExecutionsService = inject(TestExecutionsService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private toastr = inject(ToastrService);
 
   ngOnInit(): void {
     this.loadProjects();
@@ -41,13 +44,15 @@ export class KanbanComponent implements OnInit {
     });
   }
 
+  /** Carga la lista de proyectos para el selector superior */
   loadProjects(): void {
     this.projectsService.getProjects().subscribe({
       next: (data) => this.projects.set(data),
-      error: (err) => console.error('KanbanComponent: Error cargando proyectos:', err)
+      error: (err) => console.error('[KanbanComponent] Error cargando proyectos:', err)
     });
   }
 
+  /** Maneja el cambio de proyecto seleccionado */
   onProjectChange(event: Event): void {
     const projectId = (event.target as HTMLSelectElement).value;
     this.projectId.set(projectId || null);
@@ -58,11 +63,11 @@ export class KanbanComponent implements OnInit {
     }
   }
 
+  /** Carga los datos del tablero Kanban para el proyecto actual */
   loadBoard(): void {
     const projectId = this.projectId();
-
     if (!projectId) {
-      console.warn('KanbanComponent: No se proporcionó projectId');
+      console.warn('[KanbanComponent] No se proporcionó projectId');
       this.loading.set(false);
       return;
     }
@@ -74,17 +79,24 @@ export class KanbanComponent implements OnInit {
         this.loading.set(false);
       },
       error: (err) => {
-        console.error('KanbanComponent: Error cargando tablero:', err);
+        console.error('[KanbanComponent] Error cargando tablero:', err);
         this.loading.set(false);
+        this.toastr.error('Error al cargar el tablero Kanban.', 'Error');
       }
     });
   }
 
+  /**
+   * Maneja el evento drag & drop de Angular CDK al mover una tarea.
+   * Actualiza el backend automáticamente tras el movimiento en la UI.
+   */
   drop(event: CdkDragDrop<KanbanTask[]>) {
+    // Si se mueve en la misma columna, solo reordenar localmente
     if (event.previousContainer === event.container) {
       if (event.previousIndex === event.currentIndex) return;
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
     } else {
+      // Transferir a la nueva columna
       transferArrayItem(
         event.previousContainer.data,
         event.container.data,
@@ -97,22 +109,22 @@ export class KanbanComponent implements OnInit {
     const targetColumn = this.board()?.columns.find(col => col.tasks === event.container.data);
 
     if (targetColumn) {
-      console.log('KanbanComponent: Task movida:', task.id, 'a columna', targetColumn.name);
+      console.log(`[KanbanComponent] Tarea movida: ${task.id} a columna ${targetColumn.name}`);
 
-      // 1. Persistir movimiento en el tablero
       this.kanbanService.moveTask(task.id, targetColumn.id, event.currentIndex).subscribe({
-        next: () => console.log('KanbanComponent: Movimiento persistido con éxito'),
-        error: (err) => console.error('KanbanComponent: Error persistiendo movimiento:', err)
+        next: () => console.log('[KanbanComponent] Movimiento persistido con éxito'),
+        error: (err) => {
+          console.error('[KanbanComponent] Error persistiendo movimiento:', err);
+          this.toastr.error('Ocurrió un error al mover la tarea.', 'Error de sincronización');
+        }
       });
-
-      // 2. Sincronizar estado de la ejecución
-      // Nota: No llamamos a testExecutionsService.updateExecution aquí porque el backend 
-      // ya realiza esta sincronización automáticamente en KanbanService.MoveTaskAsync
-      // usando el TestCaseId vinculado a la tarea.
-      console.log('KanbanComponent: Sincronización de ejecución delegada al backend');
     }
   }
 
+  /**
+   * Abre los detalles de la ejecución de prueba asociada a la tarea seleccionada.
+   * @param task - La tarea/tarjeta del Kanban seleccionada
+   */
   openExecution(task: KanbanTask) {
     if (task.id) {
       this.router.navigate(['/test-executions'], {
@@ -122,7 +134,7 @@ export class KanbanComponent implements OnInit {
         }
       });
     } else {
-      alert('Esta tarea no está vinculada a una Ejecución.');
+      this.toastr.warning('Esta tarea no está vinculada a una Ejecución.', 'Aviso');
     }
   }
 }

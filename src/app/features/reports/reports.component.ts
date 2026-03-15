@@ -20,6 +20,10 @@ interface TaskStatusOption {
     label: string;
 }
 
+/**
+ * Componente para la generación y descarga de reportes PDF.
+ * Permite filtrar por proyecto, fechas, estados de ejecución y tareas.
+ */
 @Component({
     selector: 'app-reports',
     standalone: true,
@@ -72,6 +76,7 @@ export class ReportsComponent implements OnInit {
         this.loadProjects();
     }
 
+    /** Carga la lista de proyectos para los filtros de reportes */
     loadProjects(): void {
         this.loading.set(true);
         this.projectsService.getProjects().subscribe({
@@ -83,6 +88,7 @@ export class ReportsComponent implements OnInit {
         });
     }
 
+    /** Alterna la selección de un estado de ejecución en los filtros */
     toggleExecStatus(id: number): void {
         const set = new Set(this.selectedExecStatuses());
         if (set.has(id)) set.delete(id); else set.add(id);
@@ -107,6 +113,10 @@ export class ReportsComponent implements OnInit {
         return !!this.filterForm.get('projectId')?.value;
     }
 
+    /**
+     * Genera un reporte basado en el tipo seleccionado y los filtros.
+     * @param type - Tipo de reporte a generar
+     */
     generateReport(type: 'general' | 'observations' | 'compliance' | 'burndown' = 'general'): void {
         const { projectId, startDate, endDate } = this.filterForm.value;
         if (!projectId) return;
@@ -156,6 +166,7 @@ export class ReportsComponent implements OnInit {
     }
 
 
+    /** Descarga el reporte PDF generado al equipo local */
     downloadReport(): void {
         const url = this.pdfUrl();
         if (!url) return;

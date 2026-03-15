@@ -1,97 +1,272 @@
-/* You can add global styles to this file, and also import other style files */
-// qams-web/src/styles.scss
+/**
+ * QAMS | Global Stylesheet
+ * This file contains the foundational design system for the QAMS application.
+ * It implements a premium "Glassmorphism" aesthetic using Tailwind CSS.
+ */
 
-// Importar estilos de toastr primero
+// 1. External dependencies
 @use 'ngx-toastr/toastr';
 
-// Importar las directivas de Tailwind CSS
+// 2. Core Framework Styles
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-// Importar fuente Inter desde Google Fonts
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+// 3. Typography Integration
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap');
 
-// Estilos base globales
+// 4. Design System Tokens (CSS Variables)
+:root {
+  // Glassmorphism tokens
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.3);
+  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+  
+  // Dark mode glass tokens
+  --dark-glass-bg: rgba(17, 24, 39, 0.7);
+  --dark-glass-border: rgba(255, 255, 255, 0.1);
+  
+  // Brand color gradients
+  --primary-gradient: linear-gradient(135deg, #135bec 0%, #13ecb6 100%);
+  --accent-gradient: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+// 5. Global Base Overrides
 @layer base {
   body {
-    @apply font-sans bg-gray-50 text-gray-900 antialiased;
+    @apply font-sans bg-slate-50 text-slate-900 antialiased;
+    font-family: 'Inter', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply tracking-tight;
+    font-family: 'Outfit', sans-serif;
   }
 }
 
-// Componentes reutilizables con Tailwind
+// 6. Common Components & Layout Entities
 @layer components {
 
-  // Botón primario reutilizable
+  /**
+   * Glass Card: The primary container for the modern UI.
+   * provides frosted glass effect and subtle elevation.
+   */
+  .glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    border-radius: 1rem;
+    @apply transition-all duration-300;
+  }
+
+  .dark-glass-card {
+    background: var(--dark-glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--dark-glass-border);
+    border-radius: 1rem;
+    @apply text-white;
+  }
+
+  // Auth Glass Container
+  .auth-glass-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 2.5rem;
+    padding: 3.5rem 3rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    position: relative;
+    overflow: hidden;
+    z-index: 10;
+  }
+
+  // Action Elements
   .btn-primary {
-    @apply bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors duration-200 font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed;
+    background: var(--primary-gradient);
+    @apply text-white px-5 py-2.5 rounded-xl hover:opacity-90 active:scale-95 focus:ring-4 focus:ring-blue-500/30 transition-all duration-200 font-semibold text-sm shadow-lg shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed border-none;
   }
 
-  // Botón secundario
   .btn-secondary {
-    @apply bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors duration-200 font-medium text-sm;
+    @apply bg-white text-slate-700 px-5 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 transition-all duration-200 font-semibold text-sm shadow-sm;
   }
 
-  // Botón de peligro
   .btn-danger {
-    @apply bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors duration-200 font-medium text-sm;
+    @apply bg-rose-600 text-white px-5 py-2.5 rounded-xl hover:bg-rose-700 transition-all duration-200 font-semibold text-sm shadow-lg shadow-rose-600/20;
   }
 
-  // Input de formulario
+  // Shared Modal Classes
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.3);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+  }
+
+  .modal-card {
+    background: white;
+    width: 100%;
+    max-width: 600px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    border-radius: 1.5rem;
+  }
+
+  // Shared Table Classes
+  .table-container {
+    position: relative;
+    min-height: 400px;
+  }
+
+  .premium-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+
+    thead th {
+      padding: 1.25rem 2rem;
+      text-align: left;
+      font-size: 0.65rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #94a3b8;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    tbody td {
+      padding: 1.25rem 2rem;
+      border-bottom: 1px solid #f8fafc;
+      vertical-align: middle;
+    }
+
+    tr:last-child td { border-bottom: none; }
+  }
+
+  // Loader Overlay
+  .loader-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 50;
+  }
+
+  // Form Elements
   .form-input {
-    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-colors duration-200 text-sm placeholder:text-gray-400;
+    @apply w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all duration-200 text-sm placeholder:text-slate-400;
   }
 
-  // Label de formulario
   .form-label {
-    @apply block text-sm font-medium text-gray-700 mb-1;
+    @apply block text-sm font-semibold text-slate-600 mb-1.5 ml-0.5;
   }
 
-  // Tarjeta contenedora
+  // Custom Toggle Switch
+  .toggle {
+    position: relative;
+    display: inline-block;
+    width: 52px;
+    height: 28px;
+    
+    input { opacity: 0; width: 0; height: 0; }
+    
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #e2e8f0;
+      transition: .4s;
+      border-radius: 34px;
+      
+      &:before {
+        position: absolute;
+        content: "";
+        height: 20px; width: 20px;
+        left: 4px; bottom: 4px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+    }
+    
+    input:checked + .slider {
+      background: #6366f1;
+      &:before { transform: translateX(24px); }
+    }
+  }
+
+  // Standard Information Container
   .card {
-    @apply bg-white rounded-xl shadow-sm border border-gray-200 p-6;
+    @apply bg-white rounded-2xl shadow-sm border border-slate-100 p-6 transition-all duration-300 hover:shadow-md;
   }
 
-  // Badge de estado
+  // Status Indication Badges
   .badge {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-bold tracking-wide uppercase;
   }
 
-  .badge-success {
-    @apply bg-green-100 text-green-800;
+  .badge-success { @apply bg-emerald-100/80 text-emerald-700 border border-emerald-200; }
+  .badge-danger { @apply bg-rose-100/80 text-rose-700 border border-rose-200; }
+  .badge-warning { @apply bg-amber-100/80 text-amber-700 border border-amber-200; }
+  .badge-info { @apply bg-sky-100/80 text-sky-700 border border-sky-200; }
+  .badge-gray { @apply bg-slate-100/80 text-slate-700 border border-slate-200; }
+}
+
+// 7. Utility Classes & Micro-animations
+@layer utilities {
+  .animate-in {
+    animation-duration: 750ms;
+    animation-fill-mode: both;
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  .badge-danger {
-    @apply bg-red-100 text-red-800;
+  .fade-in { animation-name: fadeIn; }
+  .slide-in-from-bottom-6 { animation-name: slideInBottom6; }
+  .slide-in-from-right-6 { animation-name: slideInRight6; }
+  .zoom-in-95 { animation-name: zoomIn95; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
 
-  .badge-warning {
-    @apply bg-yellow-100 text-yellow-800;
+  @keyframes slideInBottom6 {
+    from { transform: translateY(1.5rem); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
   }
 
-  .badge-info {
-    @apply bg-blue-100 text-blue-800;
+  @keyframes slideInRight6 {
+    from { transform: translateX(1.5rem); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
   }
 
-  .badge-gray {
-    @apply bg-gray-100 text-gray-800;
+  @keyframes zoomIn95 {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
   }
 }
 
-// Scrollbar personalizado
+// 8. Visual Polishing: Scrollbars
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-gray-100;
+  @apply bg-slate-50;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-gray-300 rounded-full;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  @apply bg-gray-400;
+  @apply bg-slate-300 rounded-full border-4 border-slate-50;
+  &:hover { @apply bg-slate-400; }
 }
