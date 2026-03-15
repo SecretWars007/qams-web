@@ -4,7 +4,9 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, combineLatest, of } from 'rxjs';
 import { map, catchError, switchMap, delay } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
+import { DashboardSummaryDto } from '../dto/dashboard.dto';
 import { DashboardSummary } from '../models/dashboard.model';
+import { DashboardMapper } from '../mappers/dashboard.mapper';
 import { ProjectsService } from './projects.service';
 import { TestCasesService } from './test-cases.service';
 import { TestExecutionsService } from './test-executions.service';
@@ -30,21 +32,19 @@ export class DashboardService {
         const userId = this.authService.getUserId();
         if (!userId) {
             console.error('DashboardService: No se encontró userId para el dashboard. ¿Está logueado?');
-            // Intentar recuperar el resumen sin userId como fallback descriptivo si el backend lo permite
-            // o simplemente retornar un resumen vacío pero estructurado
             return of(this.getEmptySummary());
         }
 
         const params = new HttpParams().set('userId', userId);
         console.log('DashboardService: Solicitando resumen al backend:', this.apiUrl, { userId });
 
-        return this.http.get<DashboardSummary>(this.apiUrl, { params }).pipe(
-            map(summary => {
-                if (!summary) {
+        return this.http.get<DashboardSummaryDto>(this.apiUrl, { params }).pipe(
+            map(dto => {
+                if (!dto) {
                     console.warn('DashboardService: El backend retornó un resumen nulo o vacío');
                     return this.getEmptySummary();
                 }
-                return summary;
+                return DashboardMapper.fromSummaryDto(dto);
             }),
             switchMap(summary => {
                 // Si el backend no devuelve timeline o está vacío, construirlo desde los proyectos
@@ -54,8 +54,8 @@ export class DashboardService {
                         map(projects => {
                             summary.projectTimeline = projects.map(p => ({
                                 projectName: p.name,
-                                startDate: p.startDate || new Date().toISOString(),
-                                endDate: p.endDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+                                startDate: p.startDate || new Date(),
+                                endDate: p.endDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
                             }));
                             return summary;
                         }),
@@ -133,28 +133,28 @@ export class DashboardService {
             this.testExecutionsService.getExecutions().pipe(catchError(() => of([]))),
         ]).pipe(
             map(([projects, testCases, executions]) => {
-                const passed = executions.filter((e: any) =>
+                const passed = (executions || []).filter((e: any) =>
                     e.statusCode === 'PASSED' || e.status?.code === 'PASSED'
                 ).length;
-                const failed = executions.filter((e: any) =>
+                const failed = (executions || []).filter((e: any) =>
                     e.statusCode === 'FAILED' || e.status?.code === 'FAILED'
                 ).length;
-                const pending = executions.filter((e: any) =>
+                const pending = (executions || []).filter((e: any) =>
                     e.statusCode === 'PENDING' || e.status?.code === 'PENDING' ||
                     e.statusCode === 'IN_PROGRESS' || e.status?.code === 'IN_PROGRESS'
                 ).length;
-                const total = executions.length;
+                const total = (executions || []).length;
 
-                const passedTestCasesCount = executions
+                const passedTestCasesCount = (executions || [])
                     .filter((e: any) => e.statusCode === 'PASSED' || e.status?.code === 'PASSED')
                     .map((e: any) => e.testCaseId)
-                    .filter((v, i, a) => a.indexOf(v) === i)
+                    .filter((v: any, i: number, a: any[]) => a.indexOf(v) === i)
                     .length;
 
                 return {
-                    totalProjects: projects.length,
-                    totalTestCases: testCases.length,
-                    pendingTestCases: Math.max(0, testCases.length - passedTestCasesCount),
+                    totalProjects: (projects || []).length,
+                    totalTestCases: (testCases || []).length,
+                    pendingTestCases: Math.max(0, (testCases || []).length - passedTestCasesCount),
                     totalExecutions: total,
                     passedExecutions: passed,
                     failedExecutions: failed,
@@ -166,10 +166,10 @@ export class DashboardService {
                         { statusName: 'Failed', statusCode: 'FAILED', count: failed },
                         { statusName: 'Pending', statusCode: 'PENDING', count: pending },
                     ],
-                    projectTimeline: projects.map(p => ({
+                    projectTimeline: (projects || []).map((p: any) => ({
                         projectName: p.name,
-                        startDate: p.startDate,
-                        endDate: p.endDate
+                        startDate: new Date(p.startDate),
+                        endDate: new Date(p.endDate)
                     }))
                 } as DashboardSummary;
             })

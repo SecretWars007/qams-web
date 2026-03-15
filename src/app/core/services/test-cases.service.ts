@@ -1,9 +1,11 @@
 // src/app/core/services/test-cases.service.ts
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { TestCaseDto, CreateTestCaseDto } from '../dto/test-case.dto';
 import { TestCase } from '../models/test-case.model';
+import { TestCaseMapper } from '../mappers/test-case.mapper';
 import { TestCasesMockService } from './test-cases.mock.service';
 
 @Injectable({ providedIn: 'root' })
@@ -20,28 +22,36 @@ export class TestCasesService {
         if (projectId) {
             params = params.set('projectId', projectId);
         }
-        return this.http.get<TestCase[]>(this.apiUrl, { params });
+        return this.http.get<TestCaseDto[]>(this.apiUrl, { params }).pipe(
+            map(dtos => dtos.map(dto => TestCaseMapper.fromDto(dto)))
+        );
     }
 
-    createTestCase(testCase: any): Observable<TestCase> {
+    createTestCase(testCase: CreateTestCaseDto): Observable<TestCase> {
         if (environment.useMock) {
-            return this.mockService.createTestCase(testCase);
+            return this.mockService.createTestCase(testCase as any);
         }
-        return this.http.post<TestCase>(this.apiUrl, testCase);
+        return this.http.post<TestCaseDto>(this.apiUrl, testCase).pipe(
+            map(dto => TestCaseMapper.fromDto(dto))
+        );
     }
 
     updateTestCase(id: string, testCase: any): Observable<TestCase> {
         if (environment.useMock) {
             return this.mockService.updateTestCase(id, testCase);
         }
-        return this.http.put<TestCase>(`${this.apiUrl}/${id}`, testCase);
+        return this.http.put<TestCaseDto>(`${this.apiUrl}/${id}`, testCase).pipe(
+            map(dto => TestCaseMapper.fromDto(dto))
+        );
     }
 
     getTestCaseById(id: string): Observable<TestCase | undefined> {
         if (environment.useMock) {
             return this.mockService.getTestCaseById(id);
         }
-        return this.http.get<TestCase>(`${this.apiUrl}/${id}`);
+        return this.http.get<TestCaseDto>(`${this.apiUrl}/${id}`).pipe(
+            map(dto => TestCaseMapper.fromDto(dto))
+        );
     }
 
     getTestSteps(testCaseId: string): Observable<any[]> {

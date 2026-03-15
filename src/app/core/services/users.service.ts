@@ -3,6 +3,9 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { User, UpdateUser } from '../models/user.model';
+import { UserDto } from '../dto/user.dto';
+import { UserMapper } from '../mappers/user.mapper';
+import { map } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
 export class UsersService {
@@ -10,15 +13,21 @@ export class UsersService {
     private http = inject(HttpClient);
 
     getUsers(): Observable<User[]> {
-        return this.http.get<User[]>(this.apiUrl);
+        return this.http.get<UserDto[]>(this.apiUrl).pipe(
+            map(dtos => dtos.map(dto => UserMapper.fromDto(dto)))
+        );
     }
 
     getUserById(id: string): Observable<User> {
-        return this.http.get<User>(`${this.apiUrl}/${id}`);
+        return this.http.get<UserDto>(`${this.apiUrl}/${id}`).pipe(
+            map(dto => UserMapper.fromDto(dto))
+        );
     }
 
     updateUser(id: string, user: UpdateUser): Observable<User> {
-        return this.http.put<User>(`${this.apiUrl}/${id}`, user);
+        return this.http.put<UserDto>(`${this.apiUrl}/${id}`, user).pipe(
+            map(dto => UserMapper.fromDto(dto))
+        );
     }
 
     deleteUser(id: string): Observable<void> {

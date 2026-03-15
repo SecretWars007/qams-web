@@ -18,10 +18,10 @@ export class DashboardMockService {
             pendingExecutions: 2,
             passRate: 78,
             taskProgress: [
-                { columnName: 'Backlog', taskCount: 5 },
-                { columnName: 'In Progress', taskCount: 3 },
-                { columnName: 'Review', taskCount: 2 },
-                { columnName: 'Done', taskCount: 8 }
+                { columnName: 'Backlog', count: 5 },
+                { columnName: 'In Progress', count: 3 },
+                { columnName: 'Review', count: 2 },
+                { columnName: 'Done', count: 8 }
             ],
             executionsByStatus: [
                 { statusName: 'Passed', statusCode: 'PASSED', count: 18 },
@@ -29,10 +29,10 @@ export class DashboardMockService {
                 { statusName: 'Pending', statusCode: 'PENDING', count: 2 }
             ],
             projectTimeline: [
-                { projectName: 'Proyecto Alfa', startDate: '2025-01-01', endDate: '2025-03-31' },
-                { projectName: 'Proyecto Beta', startDate: '2025-02-15', endDate: '2025-05-15' },
-                { projectName: 'Proyecto Gamma', startDate: '2025-04-01', endDate: '2025-06-30' },
-                { projectName: 'Proyecto Delta', startDate: '2025-03-10', endDate: '2025-04-20' }
+                { projectName: 'Proyecto Alfa', startDate: new Date('2025-01-01'), endDate: new Date('2025-03-31') },
+                { projectName: 'Proyecto Beta', startDate: new Date('2025-02-15'), endDate: new Date('2025-05-15') },
+                { projectName: 'Proyecto Gamma', startDate: new Date('2025-04-01'), endDate: new Date('2025-06-30') },
+                { projectName: 'Proyecto Delta', startDate: new Date('2025-03-10'), endDate: new Date('2025-04-20') }
             ]
         };
 

@@ -63,7 +63,7 @@
               {{ project.name }}
             </h3>
             <div class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-gray-500">
-              <span class="text-indigo-500/70">{{ project.projectStatusName || 'PENDIENTE' }}</span>
+              <span class="text-indigo-500/70">{{ project.status.name || 'PENDIENTE' }}</span>
               <span>•</span>
               <span>{{ project.createdAt | date:'MMM d, y' }}</span>
             </div>
@@ -89,7 +89,7 @@
           <p class="text-[9px] text-gray-600 uppercase tracking-widest font-black mb-1">Responsable</p>
           <div class="flex items-center gap-2 text-[11px] text-gray-400 font-medium truncate">
             <i class="far fa-user text-purple-500/50"></i>
-            <span class="truncate">{{ project.createdByUserName || 'Sistema' }}</span>
+            <span class="truncate">{{ project.createdBy || 'Sistema' }}</span>
           </div>
         </div>
       </div>
@@ -97,7 +97,7 @@
       <!-- Equipo y Métricas Wrapper -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <!-- Testers -->
-        <div *ngIf="project.testerNames.length">
+        <div *ngIf="project.testerNames && project.testerNames.length">
           <p class="text-[9px] text-gray-600 uppercase tracking-widest font-black mb-2">Equipo QA</p>
           <div class="flex -space-x-2">
             <div *ngFor="let name of project.testerNames.slice(0, 4)"
@@ -116,18 +116,18 @@
         <div class="flex items-center gap-4 py-2 px-3 bg-gray-950/30 rounded-2xl border border-white/5">
           <div class="flex flex-col items-center px-1" title="Suites">
             <span class="text-[10px] font-black text-gray-600 leading-none mb-1">S</span>
-            <span class="text-xs font-black text-white leading-none">{{ project.testSuiteCount || 0 }}</span>
+            <span class="text-xs font-black text-white leading-none">{{ project.stats.suites || 0 }}</span>
           </div>
           <div class="w-px h-4 bg-white/5"></div>
           <div class="flex flex-col items-center px-1" title="Boards">
             <span class="text-[10px] font-black text-gray-600 leading-none mb-1">B</span>
-            <span class="text-xs font-black text-white leading-none">{{ project.kanbanBoardCount || 0 }}</span>
+            <span class="text-xs font-black text-white leading-none">{{ project.stats.kanbanTasks || 0 }}</span>
           </div>
           <div class="w-px h-4 bg-white/5"></div>
           <div class="flex flex-col items-center px-1" title="Devoluciones"
             (click)="openDevolutionModal(project, $event)">
             <span class="text-[10px] font-black text-rose-500/50 leading-none mb-1">D</span>
-            <span class="text-xs font-black text-rose-500 leading-none">{{ project.devolucionesCounter || 0 }}</span>
+            <span class="text-xs font-black text-rose-500 leading-none">{{ project.stats.devolutions || 0 }}</span>
           </div>
         </div>
       </div>
@@ -278,10 +278,8 @@
                     <i class="fas fa-undo text-sm"></i>
                   </div>
                   <div>
-                    <p class="text-xs font-black text-white tracking-tight leading-none mb-1">{{ dev.createdByUserName
-                      }}</p>
-                    <p class="text-[9px] text-gray-600 font-bold uppercase tracking-widest">{{ dev.devolutionDate |
-                      date:'longDate' }}</p>
+                    <p class="text-xs font-black text-white tracking-tight leading-none mb-1">{{ dev.createdBy }}</p>
+                    <p class="text-[9px] text-gray-600 font-bold uppercase tracking-widest">{{ dev.date | date:'longDate' }}</p>
                   </div>
                 </div>
 

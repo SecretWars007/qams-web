@@ -85,7 +85,12 @@ interface TestUser {
 
         <!-- Password -->
         <div>
-          <label class="form-label">Contraseña</label>
+          <div class="flex items-center justify-between">
+            <label class="form-label">Contraseña</label>
+            <a routerLink="/auth/forgot-password" class="text-sm text-primary-600 hover:text-primary-700 font-medium">
+              ¿Olvidaste tu contraseña?
+            </a>
+          </div>
           <input
             type="password"
             class="form-input"

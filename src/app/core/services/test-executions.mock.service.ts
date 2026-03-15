@@ -10,150 +10,137 @@ export class TestExecutionsMockService {
     private testCasesService = inject(TestCasesMockService);
 
     private executions: TestExecution[] = [
-        // PASSED Executions
-        {
-            id: '1',
-            testCaseId: '1',
-            testCaseTitle: 'Verify Login with Valid Credentials',
-            testerId: 'u1',
-            testerName: 'John Doe',
-            statusId: 1,
-            statusName: 'Passed',
-            statusCode: 'PASSED',
-            notes: 'Login successful within 2 seconds.',
-            actualTimeHours: 0.5,
-            executionDate: '2026-02-10T09:15:00Z',
-            completedAt: '2026-02-10T09:15:05Z',
-            stepResults: [
-                { id: 'sr1', testStepId: 's1', stepOrder: 1, action: 'Open login page', statusId: 1, statusName: 'Passed', actualResult: 'Page opened', notes: 'Fast load' },
-                { id: 'sr2', testStepId: 's2', stepOrder: 2, action: 'Enter valid credentials', statusId: 1, statusName: 'Passed', actualResult: 'Credentials entered', notes: '' }
+        new TestExecution(
+            '1',
+            { id: '1', title: 'Verify Login with Valid Credentials' },
+            { id: '1', name: 'E-Commerce Platform v2.0' },
+            { id: 1, name: 'Passed', code: 'PASSED' },
+            new Date('2026-02-10T09:15:00Z'),
+            'John Doe',
+            0.5,
+            'Login successful within 2 seconds.',
+            [
+                { 
+                  id: 'sr1', 
+                  stepId: 's1', 
+                  stepOrder: 1, 
+                  action: 'Open login page', 
+                  status: { id: 1, name: 'Passed', code: 'PASSED' }, 
+                  actualResult: 'Page opened', 
+                  notes: 'Fast load',
+                  evidences: [],
+                  observations: []
+                },
+                { 
+                  id: 'sr2', 
+                  stepId: 's2', 
+                  stepOrder: 2, 
+                  action: 'Enter valid credentials', 
+                  status: { id: 1, name: 'Passed', code: 'PASSED' }, 
+                  actualResult: 'Credentials entered', 
+                  notes: '',
+                  evidences: [],
+                  observations: []
+                }
             ],
-            evidences: []
-        },
-        {
-            id: '4',
-            testCaseId: '2',
-            testCaseTitle: 'Verify Logout Functionality',
-            testerId: 'u1',
-            testerName: 'John Doe',
-            statusId: 1,
-            statusName: 'Passed',
-            statusCode: 'PASSED',
-            notes: 'User logged out successfully.',
-            executionDate: '2026-02-13T10:00:00Z',
-            completedAt: '2026-02-13T10:00:15Z',
-            stepResults: [],
-            evidences: []
-        },
-        // FAILED Executions
-        {
-            id: '2',
-            testCaseId: '1',
-            testCaseTitle: 'Verify Login with Valid Credentials',
-            testerId: 'u2',
-            testerName: 'Jane Smith',
-            statusId: 2,
-            statusName: 'Failed',
-            statusCode: 'FAILED',
-            notes: 'Login page timeout.',
-            executionDate: '2026-02-11T14:00:00Z',
-            completedAt: '2026-02-11T14:00:10Z',
-            stepResults: [],
-            evidences: []
-        },
-        // BLOCKED Executions
-        {
-            id: '3',
-            testCaseId: '3',
-            testCaseTitle: 'Checkout - Process Payment',
-            testerId: 'u1',
-            testerName: 'John Doe',
-            statusId: 3,
-            statusName: 'Blocked',
-            statusCode: 'BLOCKED',
-            notes: 'Payment gateway sandbox is down.',
-            executionDate: '2026-02-12T11:30:00Z',
-            completedAt: '2026-02-12T11:30:00Z',
-            stepResults: [],
-            evidences: []
-        },
-        // IN_PROGRESS Executions
-        {
-            id: '5',
-            testCaseId: '4',
-            testCaseTitle: 'Search Product by Name',
-            testerId: 'u2',
-            testerName: 'Jane Smith',
-            statusId: 4,
-            statusName: 'In Progress',
-            statusCode: 'IN_PROGRESS',
-            notes: 'Currently executing test steps.',
-            executionDate: '2026-02-14T08:00:00Z',
-            completedAt: null,
-            stepResults: [],
-            evidences: []
-        },
-        {
-            id: '6',
-            testCaseId: '5',
-            testCaseTitle: 'Add Item to Shopping Cart',
-            testerId: 'u3',
-            testerName: 'QA Team',
-            statusId: 4,
-            statusName: 'In Progress',
-            statusCode: 'IN_PROGRESS',
-            notes: 'Testing cart functionality.',
-            executionDate: '2026-02-14T09:30:00Z',
-            completedAt: null,
-            stepResults: [],
-            evidences: []
-        },
-        // PENDING Executions
-        {
-            id: '7',
-            testCaseId: '6',
-            testCaseTitle: 'Verify Email Notifications',
-            testerId: 'u1',
-            testerName: 'John Doe',
-            statusId: 5,
-            statusName: 'Pending',
-            statusCode: 'PENDING',
-            notes: 'Scheduled for execution.',
-            executionDate: '2026-02-15T10:00:00Z',
-            completedAt: null,
-            stepResults: [],
-            evidences: []
-        },
-        {
-            id: '8',
-            testCaseId: '7',
-            testCaseTitle: 'Password Reset Flow',
-            testerId: 'u2',
-            testerName: 'Jane Smith',
-            statusId: 5,
-            statusName: 'Pending',
-            statusCode: 'PENDING',
-            notes: 'Awaiting test environment setup.',
-            executionDate: '2026-02-16T14:00:00Z',
-            completedAt: null,
-            stepResults: [],
-            evidences: []
-        },
-        {
-            id: '9',
-            testCaseId: '8',
-            testCaseTitle: 'Multi-language Support',
-            testerId: 'u3',
-            testerName: 'QA Team',
-            statusId: 5,
-            statusName: 'Pending',
-            statusCode: 'PENDING',
-            notes: 'Pending localization data.',
-            executionDate: '2026-02-17T11:00:00Z',
-            completedAt: null,
-            stepResults: [],
-            evidences: []
-        }
+            []
+        ),
+        new TestExecution(
+            '4',
+            { id: '2', title: 'Verify Logout Functionality' },
+            { id: '1', name: 'E-Commerce Platform v2.0' },
+            { id: 1, name: 'Passed', code: 'PASSED' },
+            new Date('2026-02-13T10:00:00Z'),
+            'John Doe',
+            0.2,
+            'User logged out successfully.',
+            [],
+            []
+        ),
+        new TestExecution(
+            '2',
+            { id: '1', title: 'Verify Login with Valid Credentials' },
+            { id: '1', name: 'E-Commerce Platform v2.0' },
+            { id: 2, name: 'Failed', code: 'FAILED' },
+            new Date('2026-02-11T14:00:00Z'),
+            'Jane Smith',
+            0.1,
+            'Login page timeout.',
+            [],
+            []
+        ),
+        new TestExecution(
+            '3',
+            { id: '3', title: 'Checkout - Process Payment' },
+            { id: '1', name: 'E-Commerce Platform v2.0' },
+            { id: 3, name: 'Blocked', code: 'BLOCKED' },
+            new Date('2026-02-12T11:30:00Z'),
+            'John Doe',
+            0,
+            'Payment gateway sandbox is down.',
+            [],
+            []
+        ),
+        new TestExecution(
+            '5',
+            { id: '4', title: 'Search Product by Name' },
+            { id: '1', name: 'E-Commerce Platform v2.0' },
+            { id: 4, name: 'In Progress', code: 'IN_PROGRESS' },
+            new Date('2026-02-14T08:00:00Z'),
+            'Jane Smith',
+            0,
+            'Currently executing test steps.',
+            [],
+            []
+        ),
+        new TestExecution(
+            '6',
+            { id: '5', title: 'Add Item to Shopping Cart' },
+            { id: '1', name: 'E-Commerce Platform v2.0' },
+            { id: 4, name: 'In Progress', code: 'IN_PROGRESS' },
+            new Date('2026-02-14T09:30:00Z'),
+            'QA Team',
+            0,
+            'Testing cart functionality.',
+            [],
+            []
+        ),
+        new TestExecution(
+            '7',
+            { id: '6', title: 'Verify Email Notifications' },
+            { id: '1', name: 'E-Commerce Platform v2.0' },
+            { id: 5, name: 'Pending', code: 'PENDING' },
+            new Date('2026-02-15T10:00:00Z'),
+            'John Doe',
+            0,
+            'Scheduled for execution.',
+            [],
+            []
+        ),
+        new TestExecution(
+            '8',
+            { id: '7', title: 'Password Reset Flow' },
+            { id: '1', name: 'E-Commerce Platform v2.0' },
+            { id: 5, name: 'Pending', code: 'PENDING' },
+            new Date('2026-02-16T14:00:00Z'),
+            'Jane Smith',
+            0,
+            'Awaiting test environment setup.',
+            [],
+            []
+        ),
+        new TestExecution(
+            '9',
+            { id: '8', title: 'Multi-language Support' },
+            { id: '1', name: 'E-Commerce Platform v2.0' },
+            { id: 5, name: 'Pending', code: 'PENDING' },
+            new Date('2026-02-17T11:00:00Z'),
+            'QA Team',
+            0,
+            'Pending localization data.',
+            [],
+            []
+        )
     ];
 
     constructor() { }
@@ -169,7 +156,7 @@ export class TestExecutionsMockService {
                 }
 
                 if (testSuiteId) {
-                    filteredCases = filteredCases.filter(tc => tc.testSuiteId === testSuiteId);
+                    filteredCases = filteredCases.filter(tc => tc.suite.id === testSuiteId);
                 }
 
                 if (testCaseId) {
@@ -177,7 +164,7 @@ export class TestExecutionsMockService {
                 }
 
                 const validTestCaseIds = new Set(filteredCases.map(tc => tc.id));
-                return this.executions.filter(e => validTestCaseIds.has(e.testCaseId));
+                return this.executions.filter(e => validTestCaseIds.has(e.testCase.id));
             }),
             delay(400)
         );
@@ -219,13 +206,21 @@ export class TestExecutionsMockService {
                 };
             }
 
-            this.executions[index] = {
-                ...this.executions[index],
-                ...execution,
-                ...statusUpdate,
-                stepResults: execution.stepResults || this.executions[index].stepResults
-            };
-            return of(this.executions[index]).pipe(delay(500));
+            const existing = this.executions[index];
+            const updated = new TestExecution(
+                existing.id,
+                execution.testCase || existing.testCase,
+                existing.project,
+                (statusUpdate as any).status || existing.status,
+                existing.executionDate,
+                existing.executedBy,
+                execution.actualTimeHours !== undefined ? execution.actualTimeHours : existing.actualTimeHours,
+                execution.notes !== undefined ? execution.notes : existing.notes,
+                execution.stepResults || existing.stepResults,
+                existing.evidences
+            );
+            this.executions[index] = updated;
+            return of(updated).pipe(delay(500));
         }
         return of({} as TestExecution).pipe(delay(500));
     }
@@ -233,22 +228,18 @@ export class TestExecutionsMockService {
     createExecution(execution: any): Observable<TestExecution> {
         return this.testCasesService.getTestCaseById(execution.testCaseId).pipe(
             map(testCase => {
-                const newExecution: TestExecution = {
-                    id: (this.executions.length + 10).toString(),
-                    testCaseId: execution.testCaseId,
-                    testCaseTitle: testCase?.title || execution.testCaseTitle || 'N/A',
-                    testerId: 'u1',
-                    testerName: 'John Doe (Current)',
-                    statusId: execution.statusId || 1,
-                    statusName: execution.statusName || 'Passed',
-                    statusCode: execution.statusCode || 'PASSED',
-                    notes: execution.notes || '',
-                    actualTimeHours: execution.actualTimeHours || null,
-                    executionDate: new Date().toISOString(),
-                    completedAt: new Date().toISOString(),
-                    stepResults: execution.stepResults || [],
-                    evidences: []
-                };
+                const newExecution = new TestExecution(
+                    (this.executions.length + 10).toString(),
+                    { id: execution.testCaseId, title: testCase?.title || 'N/A' },
+                    { id: '1', name: 'Project 1' },
+                    { id: execution.statusId || 4, name: 'In Progress', code: 'IN_PROGRESS' },
+                    new Date(),
+                    'John Doe (Current)',
+                    0,
+                    execution.notes || '',
+                    execution.stepResults || [],
+                    []
+                );
                 this.executions.unshift(newExecution);
                 return newExecution;
             }),
@@ -261,13 +252,12 @@ export class TestExecutionsMockService {
 
         const newEvidence: Evidence = {
             id: (Math.random() * 1000).toString(),
-            fileTypeId: 1, // Assuming image/generic
-            fileTypeName: 'Image',
             fileName: file.name,
             fileUrl: 'https://via.placeholder.com/600x400', // Mock URL
+            fileTypeName: 'Image',
             fileSize: file.size,
             description: description || null,
-            uploadedAt: new Date().toISOString()
+            uploadedAt: new Date()
         };
 
         if (execution) {

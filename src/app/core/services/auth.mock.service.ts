@@ -9,6 +9,9 @@ import {
   LoginResponse,
   RegisterRequest,
   DecodedToken,
+  ForgotPasswordRequest,
+  ResetPasswordRequest,
+  ChangePasswordRequest,
 } from '../models/auth.model';
 
 /**
@@ -439,6 +442,35 @@ export class AuthMockService {
     };
 
     return of(response).pipe(delay(200));
+  }
+
+  /**
+   * Mock Forgot Password
+   */
+  forgotPassword(request: ForgotPasswordRequest): Observable<string> {
+    const user = this.getUserByUsername(request.email) || MOCK_USERS.find(u => u.email === request.email);
+    if (!user) {
+      // Por seguridad, no revelamos si el correo existe o no
+      return of('Si el correo existe, se han enviado las instrucciones.').pipe(delay(1000));
+    }
+    console.log('AuthMockService: Mock Forgot Password requested for', request.email);
+    return of('Instrucciones enviadas con éxito mock').pipe(delay(1000));
+  }
+
+  /**
+   * Mock Reset Password
+   */
+  resetPassword(request: ResetPasswordRequest): Observable<void> {
+    console.log('AuthMockService: Mock Reset Password executed for', request.email);
+    return of(void 0).pipe(delay(1000));
+  }
+
+  /**
+   * Mock Change Password
+   */
+  changePassword(request: ChangePasswordRequest): Observable<void> {
+    console.log('AuthMockService: Mock Change Password executed');
+    return of(void 0).pipe(delay(1000));
   }
 
   /**

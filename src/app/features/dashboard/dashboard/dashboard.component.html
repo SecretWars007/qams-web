@@ -2,16 +2,16 @@
   <!-- Título y Header -->
   <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
     <div>
-      <h1 class="text-3xl font-black text-white tracking-tight">Dashboard</h1>
-      <p class="text-gray-500 text-sm mt-1 font-medium">
+      <h1 class="text-3xl font-black text-slate-900 tracking-tight">Dashboard</h1>
+      <p class="text-slate-500 text-sm mt-1 font-medium">
         Monitoreo en tiempo real del ecosistema QAMS
       </p>
     </div>
     <div
-      class="flex items-center gap-3 bg-gray-900/40 p-1.5 px-4 rounded-[1.5rem] border border-white/5 backdrop-blur-md shadow-lg">
-      <span class="text-[10px] font-black text-gray-600 uppercase tracking-[0.2em]">Hoy</span>
-      <div class="h-4 w-px bg-white/10"></div>
-      <span class="text-[10px] font-black text-indigo-400 uppercase tracking-widest">{{ today | date:'dd MMM, yyyy'
+      class="flex items-center gap-3 bg-white/60 p-1.5 px-4 rounded-[1.5rem] border border-slate-200/60 backdrop-blur-md shadow-sm">
+      <span class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Hoy</span>
+      <div class="h-4 w-px bg-slate-200"></div>
+      <span class="text-[10px] font-black text-[#150fbd] uppercase tracking-widest">{{ today | date:'dd MMM, yyyy'
         }}</span>
     </div>
   </div>
@@ -20,172 +20,90 @@
   <!-- Tarjetas de métricas - Grid Responsivo -->
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
     <!-- Total Proyectos -->
-    <div
-      class="bg-gray-900 border border-white/5 rounded-3xl p-6 hover:border-blue-500/30 transition-all group shadow-xl shadow-black/20">
-      <div class="flex justify-between items-start mb-4">
-        <div
-          class="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-400 border border-blue-500/20 group-hover:scale-110 transition-transform">
-          <i class="fas fa-folder-tree text-xl"></i>
+    <div class="bg-white/80 backdrop-blur-md border border-white/40 rounded-2xl p-6 shadow-sm flex flex-col gap-2 relative overflow-hidden group">
+      <div class="absolute inset-0 bg-gradient-to-br from-blue-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+      <div class="flex items-center justify-between relative z-10">
+        <div class="w-10 h-10 rounded-xl bg-[#150fbd]/10 flex items-center justify-center">
+          <i class="fas fa-folder-tree text-[#150fbd] text-lg"></i>
         </div>
-        <span class="text-[10px] font-black text-blue-500/50 uppercase tracking-tighter">Proyectos</span>
       </div>
-      <h3 class="text-3xl font-black text-white tabular-nums">{{ summary()! .totalProjects }}</h3>
-      <p class="text-gray-500 text-xs font-bold mt-1 uppercase tracking-widest">Activos en plataforma</p>
+      <div class="relative z-10 mt-2">
+        <p class="text-xs font-semibold text-slate-500 uppercase tracking-widest">Proyectos</p>
+        <p class="text-3xl font-black text-slate-900 mt-1">{{ summary()!.totalProjects }}</p>
+      </div>
     </div>
 
     <!-- Total Casos -->
-    <div
-      class="bg-gray-900 border border-white/5 rounded-3xl p-6 hover:border-purple-500/30 transition-all group shadow-xl shadow-black/20">
-      <div class="flex justify-between items-start mb-4">
-        <div
-          class="w-12 h-12 bg-purple-500/10 rounded-2xl flex items-center justify-center text-purple-400 border border-purple-500/20 group-hover:scale-110 transition-transform">
-          <i class="fas fa-vial-circle-check text-xl"></i>
+    <div class="bg-white/80 backdrop-blur-md border border-white/40 rounded-2xl p-6 shadow-sm flex flex-col gap-2 relative overflow-hidden group">
+      <div class="absolute inset-0 bg-gradient-to-br from-purple-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+      <div class="flex items-center justify-between relative z-10">
+        <div class="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
+          <i class="fas fa-vial-circle-check text-purple-600 text-lg"></i>
         </div>
-        <span class="text-[10px] font-black text-purple-500/50 uppercase tracking-tighter">Test Cases</span>
       </div>
-      <h3 class="text-3xl font-black text-white tabular-nums">{{ summary()! .totalTestCases }}</h3>
-      <p class="text-gray-500 text-xs font-bold mt-1 uppercase tracking-widest">Definidos y listos</p>
+      <div class="relative z-10 mt-2">
+        <p class="text-xs font-semibold text-slate-500 uppercase tracking-widest">Test Cases</p>
+        <p class="text-3xl font-black text-slate-900 mt-1">{{ summary()!.totalTestCases }}</p>
+      </div>
     </div>
 
     <!-- Tasa de Aprobación -->
-    <div
-      class="bg-gray-900 border border-white/5 rounded-3xl p-6 hover:border-emerald-500/30 transition-all group shadow-xl shadow-black/20">
-      <div class="flex justify-between items-start mb-4">
-        <div
-          class="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-400 border border-emerald-500/20 group-hover:scale-110 transition-transform">
-          <i class="fas fa-percent text-xl"></i>
+    <div class="bg-white/80 backdrop-blur-md border border-white/40 rounded-2xl p-6 shadow-sm flex flex-col gap-2 relative overflow-hidden group">
+      <div class="absolute inset-0 bg-gradient-to-br from-emerald-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+      <div class="flex items-center justify-between relative z-10">
+        <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
+          <i class="fas fa-percent text-emerald-600 text-lg"></i>
         </div>
-        <span class="text-[10px] font-black text-emerald-500/50 uppercase tracking-tighter">Pass Rate</span>
       </div>
-      <h3 class="text-3xl font-black text-white tabular-nums">{{ summary()! .passRate }}%</h3>
-      <p class="text-gray-500 text-xs font-bold mt-1 uppercase tracking-widest">Calidad global</p>
+      <div class="relative z-10 mt-2">
+        <p class="text-xs font-semibold text-slate-500 uppercase tracking-widest">Pass Rate</p>
+        <p class="text-3xl font-black text-slate-900 mt-1">{{ summary()!.passRate }}%</p>
+      </div>
     </div>
 
     <!-- Casos de Prueba Pendientes -->
-    <div
-      class="bg-gray-900 border border-white/5 rounded-3xl p-6 hover:border-amber-500/30 transition-all group shadow-xl shadow-black/20">
-      <div class="flex justify-between items-start mb-4">
-        <div
-          class="w-12 h-12 bg-amber-500/10 rounded-2xl flex items-center justify-center text-amber-400 border border-amber-500/20 group-hover:scale-110 transition-transform">
-          <i class="fas fa-hourglass-half text-xl"></i>
+    <div class="bg-white/80 backdrop-blur-md border border-white/40 rounded-2xl p-6 shadow-sm flex flex-col gap-2 relative overflow-hidden group">
+      <div class="absolute inset-0 bg-gradient-to-br from-amber-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+      <div class="flex items-center justify-between relative z-10">
+        <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
+          <i class="fas fa-hourglass-half text-amber-600 text-lg"></i>
         </div>
-        <span class="text-[10px] font-black text-amber-500/50 uppercase tracking-tighter">Pendientes</span>
       </div>
-      <h3 class="text-3xl font-black text-white tabular-nums">{{ summary()! .pendingTestCases }}</h3>
-      <p class="text-gray-500 text-xs font-bold mt-1 uppercase tracking-widest">Por ejecutar</p>
+      <div class="relative z-10 mt-2">
+        <p class="text-xs font-semibold text-slate-500 uppercase tracking-widest">Pendientes</p>
+        <p class="text-3xl font-black text-slate-900 mt-1">{{ summary()!.pendingTestCases }}</p>
+      </div>
     </div>
   </div>
 
   <!-- Contenedores de Gráficos -->
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
     <!-- Gráfico Doughnut -->
-    <div class="bg-gray-900 border border-white/5 rounded-3xl p-8 shadow-xl shadow-black/20">
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 flex flex-col">
       <div class="flex items-center justify-between mb-8">
-        <h3 class="text-lg font-bold text-white flex items-center gap-2">
-          <i class="fas fa-chart-pie text-indigo-500"></i>
-          Ejecuciones
+        <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+          <i class="fas fa-chart-pie text-[#150fbd]"></i>
+          Desglose de Ejecuciones
         </h3>
-        <span class="px-2 py-1 bg-white/5 rounded text-[10px] font-bold text-gray-500 uppercase">Estado Actual</span>
+        <span class="px-3 py-1 bg-slate-50 rounded-lg text-xs font-semibold text-slate-500 border border-slate-100">Estado Actual</span>
       </div>
-      <div class="h-72 w-full flex items-center justify-center relative">
+      <div class="h-72 w-full flex items-center justify-center relative flex-1">
         <canvas baseChart [data]="doughnutData" [options]="doughnutOptions" type="doughnut">
         </canvas>
       </div>
     </div>
 
     <!-- Gráfico Bar -->
-    <div class="bg-gray-900 border border-white/5 rounded-3xl p-8 shadow-xl shadow-black/20">
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 flex flex-col">
       <div class="flex items-center justify-between mb-8">
-        <h3 class="text-lg font-bold text-white flex items-center gap-2">
+        <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
           <i class="fas fa-chart-bar text-amber-500"></i>
           Progreso Kanban
         </h3>
-        <span class="px-2 py-1 bg-white/5 rounded text-[10px] font-bold text-gray-500 uppercase">Por Columna</span>
+        <span class="px-3 py-1 bg-slate-50 rounded-lg text-xs font-semibold text-slate-500 border border-slate-100">Por Columna</span>
       </div>
-      <div class="h-72 w-full">
+      <div class="h-72 w-full flex-1">
         <canvas baseChart [data]="barData" [options]="barOptions" type="bar">
-        </canvas>
-      </div>
-    </div>
-  </div>
-
-  <!-- Gráfico Timeline Full Width -->
-  <div *ngIf="false" class="bg-gray-900 border border-white/5 rounded-3xl p-8 shadow-xl shadow-black/20">
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
-      <div>
-        <h3 class="text-lg font-bold text-white flex items-center gap-2">
-          <i class="fas fa-timeline text-blue-500"></i>
-          Cronograma de Ejecuciones
-        </h3>
-        <p class="text-xs text-gray-500 mt-1">Avance temporal detallado por proyecto</p>
-      </div>
-      <div
-        class="flex items-center gap-4 bg-gray-950 p-2 rounded-[1.5rem] border border-white/5 shadow-inner w-full md:w-auto">
-        <label for="projectSelect"
-          class="text-[9px] font-black text-gray-700 uppercase tracking-[0.2em] pl-4 hidden sm:block">Especificar
-          Proyecto</label>
-        <div class="relative flex-1 sm:flex-initial">
-          <select id="projectSelect"
-            class="w-full sm:w-64 bg-gray-900 border border-white/5 text-xs text-white rounded-2xl focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 py-3 px-5 font-black uppercase tracking-widest cursor-pointer appearance-none transition-all hover:bg-gray-800"
-            [value]="selectedProjectId()" (change)="onProjectChange($any($event.target).value)">
-            @for (project of projects(); track project.id) {
-            <option [value]="project.id">{{ project.name }}</option>
-            }
-          </select>
-          <i
-            class="fas fa-chevron-down absolute right-5 top-1/2 -translate-y-1/2 text-gray-700 text-[10px] pointer-events-none"></i>
-        </div>
-      </div>
-      <div class="h-96 w-full overflow-hidden">
-        <canvas baseChart [data]="timelineData" [options]="timelineOptions" type="bar">
-        </canvas>
-      </div>
-    </div>
-  </div>
-
-  <!-- Métricas Avanzadas (Burndown & Drawdown) en Grid -->
-  <div *ngIf="false" class="grid grid-cols-1 lg:grid-cols-2 gap-8 pb-10">
-    <!-- Burndown -->
-    <div class="bg-gray-900 border border-white/5 rounded-3xl p-8 shadow-xl shadow-black/20">
-      <div class="flex items-center justify-between mb-8">
-        <div>
-          <h3 class="text-lg font-bold text-white">Burndown Chart</h3>
-          <p class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mt-1">Horas vs Avance Ideal</p>
-        </div>
-        <div class="flex items-center gap-4 text-[10px] font-black text-gray-500">
-          <span class="flex items-center gap-2">
-            <span class="w-3 h-0.5 border-t-2 border-dashed border-indigo-500"></span>
-            IDEAL
-          </span>
-          <span class="flex items-center gap-2">
-            <span class="w-3 h-2 bg-amber-400 rounded-sm"></span>
-            REAL
-          </span>
-        </div>
-      </div>
-      <div class="h-80 w-full">
-        <canvas baseChart [data]="burndownData" [options]="burndownOptions" type="line">
-        </canvas>
-      </div>
-    </div>
-
-    <!-- Drawdown -->
-    <div class="bg-gray-900 border border-white/5 rounded-3xl p-8 shadow-xl shadow-black/20">
-      <div class="flex items-center justify-between mb-8">
-        <div>
-          <h3 class="text-lg font-bold text-white">Drawdown %</h3>
-          <p class="text-[10px] text-gray-500 uppercase tracking-widest font-bold mt-1">Análisis de Riesgo y
-            Desviación
-          </p>
-        </div>
-        <div
-          class="flex items-center gap-2 px-2 py-1 bg-rose-500/10 rounded-lg text-rose-500 text-[10px] font-black border border-rose-500/20">
-          <i class="fas fa-triangle-exclamation animate-pulse"></i>
-          INDICADOR DE RIESGO
-        </div>
-      </div>
-      <div class="h-80 w-full">
-        <canvas baseChart [data]="drawdownData" [options]="drawdownOptions" type="line">
         </canvas>
       </div>
     </div>
@@ -193,16 +111,16 @@
 
   } @else {
   <!-- Loading State Premium -->
-  <div class="flex flex-col items-center justify-center h-96 gap-6">
+  <div class="flex flex-col items-center justify-center h-96 gap-6 bg-white/50 backdrop-blur-sm rounded-3xl border border-white/40">
     <div class="relative">
-      <div class="w-20 h-20 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
+      <div class="w-16 h-16 border-4 border-[#150fbd]/20 border-t-[#150fbd] rounded-full animate-spin"></div>
       <div class="absolute inset-0 flex items-center justify-center">
-        <i class="fas fa-microscope text-indigo-500 text-xl"></i>
+        <i class="fas fa-microscope text-[#150fbd]"></i>
       </div>
     </div>
     <div class="text-center">
-      <p class="text-white font-black text-lg tracking-tight">Sincronizando Sistema</p>
-      <p class="text-gray-500 text-sm mt-1">Cargando métricas de calidad...</p>
+      <p class="text-slate-900 font-bold text-lg tracking-tight">Sincronizando Sistema</p>
+      <p class="text-slate-500 text-sm mt-1">Cargando métricas de calidad...</p>
     </div>
   </div>
   }

@@ -119,24 +119,24 @@
         <div class="flex justify-between items-start mb-4">
           <span class="text-[10px] font-black text-gray-600 font-mono tracking-tighter">#{{ execution.id }}</span>
           <span [ngClass]="{
-              'bg-emerald-500/10 text-emerald-400 border-emerald-500/10': execution.statusCode === 'PASSED',
-              'bg-rose-500/10 text-rose-400 border-rose-500/10': execution.statusCode === 'FAILED',
-              'bg-amber-500/10 text-amber-500 border-amber-500/10': execution.statusCode === 'BLOCKED',
-              'bg-indigo-500/10 text-indigo-400 border-indigo-500/10': execution.statusCode === 'IN_PROGRESS',
-              'bg-gray-800 text-gray-400 border-white/5': execution.statusCode === 'PENDING'
+              'bg-emerald-500/10 text-emerald-400 border-emerald-500/10': execution.status.code === 'PASSED',
+              'bg-rose-500/10 text-rose-400 border-rose-500/10': execution.status.code === 'FAILED',
+              'bg-amber-500/10 text-amber-500 border-amber-500/10': execution.status.code === 'BLOCKED',
+              'bg-indigo-500/10 text-indigo-400 border-indigo-500/10': execution.status.code === 'IN_PROGRESS',
+              'bg-gray-800 text-gray-400 border-white/5': execution.status.code === 'PENDING'
             }" class="px-2 py-0.5 rounded-lg text-[8px] font-black border uppercase tracking-widest">
-            {{ execution.statusCode }}
+            {{ execution.status.code }}
           </span>
         </div>
-        <h3 class="text-white font-bold text-sm mb-4 line-clamp-2 leading-tight">{{ execution.testCaseTitle }}</h3>
+        <h3 class="text-white font-bold text-sm mb-4 line-clamp-2 leading-tight">{{ execution.testCase.title }}</h3>
 
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
             <div
               class="w-6 h-6 rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-[10px] font-black text-indigo-400">
-              {{ execution.testerName.slice(0,1) }}
+              {{ (execution.executedBy || 'U').slice(0,1) }}
             </div>
-            <span class="text-xs text-gray-500 font-medium">{{ execution.testerName }}</span>
+            <span class="text-xs text-gray-500 font-medium">{{ execution.executedBy }}</span>
           </div>
           <span class="text-[10px] text-gray-600 font-bold uppercase">{{ execution.executionDate | date:'MMM d, HH:mm'
             }}</span>
@@ -157,84 +157,80 @@
       </div>
     </div>
 
-    <!-- Desktop Table View -->
-    <div class="hidden sm:block bg-gray-900 rounded-[2rem] border border-white/5 overflow-hidden shadow-2xl">
-      <table class="w-full text-left">
-        <thead class="bg-gray-950/50 text-gray-600 text-[10px] font-black uppercase tracking-[0.2em]">
-          <tr>
-            <th class="p-5">Identificador</th>
-            <th class="p-5">Caso de Prueba</th>
-            <th class="p-5 text-center">Estatus</th>
-            <th class="p-5">Especialista QA</th>
-            <th class="p-5">Fecha Reporte</th>
-            <th class="p-5 text-right">Gestión</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-white/5">
-          <tr *ngFor="let execution of executions()" (dblclick)="editExecution(execution)"
-            class="group hover:bg-indigo-500/[0.02] transition-colors cursor-pointer">
-            <td class="p-5">
-              <span class="text-gray-600 font-mono text-[10px] font-black">#{{ execution.id }}</span>
-            </td>
-            <td class="p-5">
-              <div class="flex flex-col">
-                <span
-                  class="text-gray-200 font-bold text-sm tracking-tight group-hover:text-indigo-400 transition-colors">{{
-                  execution.testCaseTitle }}</span>
-                <span class="text-[10px] text-gray-600 font-bold uppercase tracking-wider mt-0.5">Validación de
-                  Funcionalidad</span>
-              </div>
-            </td>
-            <td class="p-5 text-center">
-              <span [ngClass]="{
-                  'bg-emerald-500/10 text-emerald-400 border-emerald-500/10': execution.statusCode === 'PASSED',
-                  'bg-rose-500/10 text-rose-400 border-rose-500/10': execution.statusCode === 'FAILED',
-                  'bg-amber-500/10 text-amber-500 border-amber-500/10': execution.statusCode === 'BLOCKED',
-                  'bg-indigo-500/10 text-indigo-400 border-indigo-500/10': execution.statusCode === 'IN_PROGRESS',
-                  'bg-gray-800 text-gray-400 border-white/5': execution.statusCode === 'PENDING'
-                }" class="px-3 py-1 rounded-full text-[9px] font-black border uppercase tracking-widest inline-block">
-                {{ execution.statusCode }}
-              </span>
-            </td>
-            <td class="p-5">
-              <div class="flex items-center gap-3">
-                <div
-                  class="w-8 h-8 rounded-2xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/20 flex items-center justify-center text-[10px] font-black text-indigo-400">
-                  {{ (execution.testerName || 'U').slice(0,1) }}
+    <!-- Desktop Table View (Stitch Premium Glassmorphism UI) -->
+    <div class="hidden sm:block bg-white/80 backdrop-blur-md border border-[#150fbd]/10 rounded-2xl overflow-hidden shadow-xl shadow-[#150fbd]/5 mb-10">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-[#150fbd]/5">
+              <th class="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-[#150fbd]/70">Identificador</th>
+              <th class="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-[#150fbd]/70">Caso de Prueba</th>
+              <th class="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-[#150fbd]/70 text-center">Estatus</th>
+              <th class="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-[#150fbd]/70">Especialista QA</th>
+              <th class="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-[#150fbd]/70">Fecha Reporte</th>
+              <th class="px-4 py-4 text-[10px] font-bold uppercase tracking-widest text-[#150fbd]/70 text-right">Gestión</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-[#150fbd]/5">
+            <tr *ngFor="let execution of executions()" (dblclick)="editExecution(execution)"
+              class="bg-white/40 hover:bg-[#150fbd]/[0.02] transition-colors cursor-pointer group">
+              <td class="px-4 py-5">
+                <span class="text-slate-500 font-mono text-xs font-semibold">#{{ execution.id }}</span>
+              </td>
+              <td class="px-4 py-5">
+                <div class="flex flex-col">
+                  <span class="text-slate-900 font-semibold text-sm tracking-tight group-hover:text-[#150fbd] transition-colors">{{ execution.testCase.title }}</span>
+                  <span class="text-[10px] text-slate-500 font-medium mt-0.5">Validación de Funcionalidad</span>
                 </div>
-                <span class="text-xs text-gray-400 font-bold tracking-tight">{{ execution.testerName || 'No Asignado'
-                  }}</span>
-              </div>
-            </td>
-            <td class="p-5">
-              <span class="text-[10px] text-gray-500 font-black uppercase">{{ execution.executionDate | date:'MMM d,
-                HH:mm' }}</span>
-            </td>
-            <td class="p-5">
-              <div class="flex justify-end gap-2 text-[10px] font-black uppercase tracking-widest">
-                <button (click)="editExecution(execution, $event)"
-                  class="px-3 py-1.5 flex items-center justify-center gap-2 bg-amber-500/5 text-amber-500 hover:bg-amber-500 hover:text-white rounded-xl transition-all border border-amber-500/10">
-                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z">
-                    </path>
-                  </svg>
-                  <span>Editar</span>
-                </button>
-                <button (click)="openDetailsModal(execution)"
-                  class="px-3 py-1.5 flex items-center justify-center gap-2 bg-indigo-500/5 text-indigo-400 hover:bg-indigo-500 hover:text-white rounded-xl transition-all border border-indigo-500/10">
-                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm-3 7c5.25 0 9.5-4.25 9.5-9s-4.25-9-9.5-9S3 7.25 3 12s4.25 9 9.5 9z">
-                    </path>
-                  </svg>
-                  <span>Detalles</span>
-                </button>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+              </td>
+              <td class="px-4 py-5 text-center">
+                <span [ngClass]="{
+                    'bg-emerald-100 text-emerald-800': execution.status.code === 'PASSED',
+                    'bg-rose-100 text-rose-800': execution.status.code === 'FAILED',
+                    'bg-amber-100 text-amber-800': execution.status.code === 'BLOCKED',
+                    'bg-[#150fbd]/10 text-[#150fbd]': execution.status.code === 'IN_PROGRESS',
+                    'bg-slate-100 text-slate-500': execution.status.code === 'PENDING'
+                  }" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest">
+                  {{ execution.status.code }}
+                </span>
+              </td>
+              <td class="px-4 py-5">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-lg bg-[#150fbd]/10 flex items-center justify-center text-xs font-bold text-[#150fbd]">
+                    {{ (execution.executedBy || 'U').slice(0,1) }}
+                  </div>
+                  <span class="text-xs text-slate-600 font-medium">{{ execution.executedBy || 'No Asignado' }}</span>
+                </div>
+              </td>
+              <td class="px-4 py-5">
+                <span class="text-xs text-slate-500">{{ execution.executionDate | date:'MMM d, HH:mm' }}</span>
+              </td>
+              <td class="px-4 py-5 text-right">
+                <div class="flex justify-end gap-2 text-[10px] font-bold uppercase tracking-widest">
+                  <button (click)="editExecution(execution, $event)"
+                    class="px-3 py-1.5 flex items-center justify-center gap-1.5 text-slate-400 hover:text-[#150fbd] hover:bg-[#150fbd]/5 rounded-lg transition-all">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z">
+                      </path>
+                    </svg>
+                    <span>Editar</span>
+                  </button>
+                  <button (click)="openDetailsModal(execution)"
+                    class="px-3 py-1.5 flex items-center justify-center gap-1.5 text-slate-400 hover:text-[#150fbd] hover:bg-[#150fbd]/5 rounded-lg transition-all">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm-3 7c5.25 0 9.5-4.25 9.5-9s-4.25-9-9.5-9S3 7.25 3 12s4.25 9 9.5 9z">
+                      </path>
+                    </svg>
+                    <span>Detalles</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
@@ -409,18 +405,18 @@
                 class="px-3 py-1 bg-indigo-500/10 text-indigo-400 border border-indigo-500/10 rounded-lg text-[10px] font-black uppercase tracking-widest">Auditoría
                 #{{ selectedExecution()?.id }}</span>
               <span [ngClass]="{
-                    'bg-emerald-500/10 text-emerald-400 border-emerald-500/10': selectedExecution()?.statusCode === 'PASSED',
-                    'bg-rose-500/10 text-rose-400 border-rose-500/10': selectedExecution()?.statusCode === 'FAILED',
-                    'bg-amber-500/10 text-amber-500 border-amber-500/10': selectedExecution()?.statusCode === 'BLOCKED'
+                    'bg-emerald-500/10 text-emerald-400 border-emerald-500/10': selectedExecution()?.status?.code === 'PASSED',
+                    'bg-rose-500/10 text-rose-400 border-rose-500/10': selectedExecution()?.status?.code === 'FAILED',
+                    'bg-amber-500/10 text-amber-500 border-amber-500/10': selectedExecution()?.status?.code === 'BLOCKED'
                   }" class="px-3 py-1 rounded-lg text-[10px] font-black border uppercase tracking-widest">
-                {{ selectedExecution()?.statusCode }}
+                {{ selectedExecution()?.status?.code }}
               </span>
             </div>
-            <h2 class="text-3xl font-black text-white tracking-tight truncate">{{ selectedExecution()?.testCaseTitle }}
+            <h2 class="text-3xl font-black text-white tracking-tight truncate">{{ selectedExecution()?.testCase?.title }}
             </h2>
             <div class="flex items-center gap-4 mt-4 text-[10px] font-bold text-gray-600 uppercase tracking-widest">
               <div class="flex items-center gap-1.5"><i class="far fa-user text-indigo-500/50"></i> {{
-                selectedExecution()?.testerName }}</div>
+                selectedExecution()?.executedBy }}</div>
               <div class="flex items-center gap-1.5"><i class="far fa-clock text-indigo-500/50"></i> {{
                 selectedExecution()?.executionDate | date:'longDate' }}</div>
             </div>
@@ -478,7 +474,7 @@
                               <p class="text-[11px] text-gray-300 font-medium leading-relaxed">{{ obs.observation }}</p>
                               <div
                                 class="flex items-center gap-2 mt-2 text-[9px] text-gray-600 font-black uppercase tracking-widest">
-                                <span>{{ obs.createdByUserName }}</span>
+                                <span>{{ obs.createdBy }}</span>
                                 <span>•</span>
                                 <span>{{ obs.createdAt | date:'shortTime' }}</span>
                               </div>
@@ -511,11 +507,11 @@
                   <div
                     class="md:w-32 shrink-0 flex flex-col md:items-end gap-3 justify-center border-t md:border-t-0 md:border-l border-white/5 pt-4 md:pt-0 md:pl-6">
                     <span [ngClass]="{
-                          'text-emerald-400': step.statusId === 1,
-                          'text-rose-400': step.statusId === 2,
-                          'text-amber-500': step.statusId === 3
+                          'text-emerald-400': step.status.id === 1,
+                          'text-rose-400': step.status.id === 2,
+                          'text-amber-500': step.status.id === 3
                         }" class="text-[9px] font-black uppercase tracking-[0.2em]">
-                      {{ step.statusId === 1 ? 'PASSED' : step.statusId === 2 ? 'FAILED' : 'BLOCKED' }}
+                      {{ step.status.id === 1 ? 'PASSED' : step.status.id === 2 ? 'FAILED' : 'BLOCKED' }}
                     </span>
                     <div class="flex gap-2">
                       <button (click)="openUploadModal(selectedExecution()!, undefined, step.id)"

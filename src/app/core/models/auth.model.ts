@@ -41,3 +41,21 @@ export interface DecodedToken {
   role?: string[]; // Lista de roles
   exp: number; // Expiración
 }
+
+/** DTO para solicitar el restablecimiento de contraseña mediante correo electrónico */
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+/** DTO para restablecer la contraseña usando el token recibido por correo */
+export interface ResetPasswordRequest {
+  email: string;
+  resetToken: string;
+  newPassword: string;
+}
+
+/** DTO para que un usuario autenticado cambie su contraseña actual */
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}

@@ -9,32 +9,26 @@ import { RouterOutlet } from '@angular/router';
   template: `
     <!-- Layout de pantalla completa para login/register -->
     <div
-      class="min-h-screen bg-gradient-to-br from-primary-900 via-primary-800 to-primary-950
-                flex items-center justify-center p-4"
+      class="min-h-screen relative flex items-center justify-center p-4
+             bg-gradient-to-br from-[#0a0a1a] via-slate-900 to-indigo-900/40 overflow-hidden"
     >
-      <!-- Logo y nombre del sistema -->
-      <div class="w-full max-w-md">
+      <!-- Abstract Background Details (Stitch Inspired) -->
+      <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[100px] -z-10 pointer-events-none"></div>
+      <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-indigo-900/20 rounded-full blur-[120px] -z-10 pointer-events-none"></div>
+
+      <!-- Contenedor central -->
+      <div class="w-full max-w-md z-10">
+        <!-- Logo y nombre del sistema -->
         <div class="text-center mb-8">
           <div
-            class="inline-flex items-center justify-center w-16 h-16
-                      bg-white/10 backdrop-blur-sm rounded-2xl mb-4"
+            class="inline-flex items-center justify-center w-20 h-20
+                      bg-white rounded-[2rem] mb-6 border border-white/20
+                      shadow-[0_20px_50px_-10px_rgba(79,70,229,0.5)] overflow-hidden p-3"
           >
-            <svg
-              class="w-8 h-8 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
+            <img src="/images/logo.png" alt="QAMS logo" class="w-full h-full object-contain" />
           </div>
-          <h1 class="text-3xl font-bold text-white">QAMS</h1>
-          <p class="text-primary-200 mt-1">
+          <h1 class="text-3xl font-black text-slate-100 tracking-tight">QAMS</h1>
+          <p class="text-indigo-200/70 mt-1 uppercase text-xs font-bold tracking-widest">
             Quality Assurance Management System
           </p>
         </div>

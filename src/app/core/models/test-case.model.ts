@@ -1,46 +1,32 @@
 // src/app/core/models/test-case.model.ts
-export interface TestCase {
+
+export class TestCase {
+  constructor(
+    public id: string,
+    public projectId: string,
+    public projectName: string,
+    public suite: {
+      id: string;
+      name: string;
+    },
+    public title: string,
+    public description: string,
+    public preconditions: string,
+    public expectedResult: string,
+    public priority: {
+      id: number;
+      name: string;
+      code: string;
+    },
+    public isActive: boolean,
+    public createdAt: Date,
+    public createdBy: string,
+    public steps: TestCaseStep[] = []
+  ) {}
+}
+
+export interface TestCaseStep {
   id: string;
-  projectId: string; // Relación directa con el proyecto
-  projectName: string; // Nombre del proyecto para visualización rápida
-  testSuiteId: string;
-  testSuiteName: string; // Nombre de la suite para visualización rápida
-  title: string;
-  description: string | null;
-  preconditions: string | null;
-  expectedResult: string;
-  priorityId: number;
-  priorityName: string;
-  priorityCode: string;
-  isActive: boolean;
-  createdAt: string;
-  steps: TestStep[];
-}
-
-export interface TestStep {
-  id: string;
-  stepOrder: number;
-  action: string;
-  expectedResult: string;
-}
-
-export interface CreateTestCase {
-  projectId: string;
-  testSuiteId: string;
-  title: string;
-  description: string | null;
-  preconditions: string | null;
-  expectedResult: string;
-  priorityId: number;
-  estimatedTimeHours: number;
-  startDate: string;
-  endDate: string;
-  testTypeId: number;
-  certifierUserIds: string[];
-  steps: CreateTestStep[];
-}
-
-export interface CreateTestStep {
   stepOrder: number;
   action: string;
   expectedResult: string;

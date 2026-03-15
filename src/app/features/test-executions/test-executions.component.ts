@@ -75,8 +75,8 @@ export class TestExecutionsComponent implements OnInit {
           if (tc) {
             this.selectedProjectId.set(tc.projectId);
             this.loadScenarios(tc.projectId);
-            this.selectedScenarioId.set(tc.testSuiteId);
-            this.loadTestCases(tc.testSuiteId);
+            this.selectedScenarioId.set(tc.suite.id);
+            this.loadTestCases(tc.suite.id);
           }
         });
       }
@@ -170,14 +170,14 @@ export class TestExecutionsComponent implements OnInit {
       next: (fullExecution) => {
         this.isEditing.set(true);
         this.editingExecutionId.set(fullExecution.id);
-        this.loadTestCaseTitle(fullExecution.testCaseId);
+        this.loadTestCaseTitle(fullExecution.testCase.id);
 
         this.executionForm.patchValue({
-          testCaseId: fullExecution.testCaseId,
+          testCaseId: fullExecution.testCase.id,
           notes: fullExecution.notes,
           actualTimeHours: fullExecution.actualTimeHours,
-          statusId: fullExecution.statusId,
-          statusCode: fullExecution.statusCode
+          statusId: fullExecution.status.id,
+          statusCode: fullExecution.status.code
         });
 
         this.stepResults.clear();
@@ -255,7 +255,7 @@ export class TestExecutionsComponent implements OnInit {
     }
     // We filter local test cases or fetch from service if it supports it
     this.testCasesService.getTestCases(this.selectedProjectId()).subscribe(data => {
-      this.testCases.set(data.filter(tc => tc.testSuiteId === scenarioId));
+      this.testCases.set(data.filter(tc => tc.suite.id === scenarioId));
     });
   }
 

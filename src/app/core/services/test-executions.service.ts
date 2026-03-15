@@ -1,9 +1,10 @@
-// src/app/core/services/test-executions.service.ts
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { TestExecutionDto, CreateTestExecutionDto } from '../dto/test-execution.dto';
 import { TestExecution } from '../models/test-execution.model';
+import { TestExecutionMapper } from '../mappers/test-execution.mapper';
 import { TestExecutionsMockService } from './test-executions.mock.service';
 
 @Injectable({ providedIn: 'root' })
@@ -17,28 +18,28 @@ export class TestExecutionsService {
             return this.mockService.getExecutions(testCaseId, projectId, testSuiteId);
         }
 
-        // Si tenemos testCaseId, usamos el endpoint específico del backend
         if (testCaseId) {
             const url = `${this.apiUrl}/testcase/${testCaseId}`;
-            console.log('TestExecutionsService: Llamando a endpoint por testCaseId:', url);
-            return this.http.get<TestExecution[]>(url);
+            return this.http.get<TestExecutionDto[]>(url).pipe(
+                map(dtos => dtos.map(dto => TestExecutionMapper.fromDto(dto)))
+            );
         }
 
-        // Si no hay testCaseId, el backend no permite listar todo. 
-        // Usamos "my-executions" como vista por defecto para evitar el error 405.
         const url = `${this.apiUrl}/my-executions`;
-        console.log('TestExecutionsService: Llamando a mis ejecuciones por defecto:', url);
-        return this.http.get<TestExecution[]>(url);
+        return this.http.get<TestExecutionDto[]>(url).pipe(
+            map(dtos => dtos.map(dto => TestExecutionMapper.fromDto(dto)))
+        );
     }
 
     getExecutionById(id: string): Observable<TestExecution> {
         if (environment.useMock) {
-            // Unir la búsqueda mock si es necesario, por ahora retornamos de la lista local
             return this.mockService.getExecutions().pipe(
                 map((list: TestExecution[]) => list.find((e: TestExecution) => e.id === id)!)
             );
         }
-        return this.http.get<TestExecution>(`${this.apiUrl}/${id}`);
+        return this.http.get<TestExecutionDto>(`${this.apiUrl}/${id}`).pipe(
+            map(dto => TestExecutionMapper.fromDto(dto))
+        );
     }
 
     createExecution(execution: any): Observable<TestExecution> {

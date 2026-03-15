@@ -241,28 +241,22 @@ export class DashboardComponent implements OnInit {
     // 3. Inicializar primer proyecto si existe
     this.dashboardService.getSummary().pipe(
       tap((data: DashboardSummary) => {
-        console.log('📊 [Dashboard] Respuesta completa del backend:', data);
-        console.log('📊 [Dashboard] Summary detalle:', JSON.stringify(data, null, 2));
         this.summary.set(data);
         this.buildCharts(data);
       }),
       switchMap(() => this.projectsService.getProjects()),
       tap((projects: Project[]) => {
-        console.log('📂 [Dashboard] Proyectos cargados:', projects.length);
         this.projects.set(projects);
         if (projects.length > 0 && !this.selectedProjectId()) {
           const firstProjectId = projects[0].id;
-          console.log('📂 [Dashboard] Seleccionando primer proyecto por defecto:', firstProjectId);
           this.selectedProjectId.set(firstProjectId);
           this.loadProjectMetrics(firstProjectId);
-        } else if (projects.length === 0) {
-          console.warn('📂 [Dashboard] No hay proyectos disponibles para cargar métricas');
         }
       })
     ).subscribe({
       next: () => this.loading.set(false),
       error: (err) => {
-        console.error('DashboardComponent: Error en el flujo de carga inicial:', err);
+        console.error('DashboardComponent: Error loading initial data:', err);
         this.loading.set(false);
       }
     });
@@ -456,7 +450,7 @@ export class DashboardComponent implements OnInit {
 
     const chartData = standardColumns.map(colName => {
       const found = progressData.find(t => t.columnName.toLowerCase() === colName.toLowerCase());
-      return found ? found.taskCount : 0;
+      return found ? found.count : 0;
     });
 
     this.barData = {

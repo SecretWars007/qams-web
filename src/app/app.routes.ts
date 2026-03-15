@@ -28,6 +28,20 @@ export const routes: Routes = [
             (m) => m.RegisterComponent,
           ),
       },
+      {
+        path: 'forgot-password',
+        loadComponent: () =>
+          import('./features/auth/forgot-password/forgot-password/forgot-password.component').then(
+            (m) => m.ForgotPasswordComponent,
+          ),
+      },
+      {
+        path: 'reset-password',
+        loadComponent: () =>
+          import('./features/auth/reset-password/reset-password/reset-password.component').then(
+            (m) => m.ResetPasswordComponent,
+          ),
+      },
       { path: '', redirectTo: 'login', pathMatch: 'full' },
     ],
   },
@@ -52,6 +66,15 @@ export const routes: Routes = [
           ),
         data: { permission: 'DASHBOARD_VIEW' },
         canActivate: [permissionGuard],
+      },
+
+      // Cambiar Contraseña (Cualquier usuario autenticado)
+      {
+        path: 'change-password',
+        loadComponent: () =>
+          import('./features/auth/change-password/change-password/change-password.component').then(
+            (m) => m.ChangePasswordComponent,
+          ),
       },
 
       // Proyectos

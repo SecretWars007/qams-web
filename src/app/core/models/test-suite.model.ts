@@ -1,11 +1,12 @@
-// src/app/core/models/test-suite.model.ts
-export interface TestSuite {
-    id: string;
-    projectId: string;
-    name: string;
-    description: string | null;
-    isActive: boolean;
-    createdAt: string;
+export class TestSuite {
+    constructor(
+        public id: string,
+        public projectId: string,
+        public name: string,
+        public description: string | null,
+        public isActive: boolean,
+        public createdAt: Date
+    ) {}
 }
 
 export interface CreateTestSuite {

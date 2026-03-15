@@ -42,9 +42,9 @@ export class TestCasesComponent implements OnInit {
     const groups: { projectName: string; testSuiteName: string; items: TestCase[] }[] = [];
 
     cases.forEach(tc => {
-      let group = groups.find(g => g.projectName === tc.projectName && g.testSuiteName === tc.testSuiteName);
+      let group = groups.find(g => g.projectName === tc.projectName && g.testSuiteName === tc.suite.name);
       if (!group) {
-        group = { projectName: tc.projectName, testSuiteName: tc.testSuiteName, items: [] };
+        group = { projectName: tc.projectName, testSuiteName: tc.suite.name, items: [] };
         groups.push(group);
       }
       group.items.push(tc);
@@ -193,7 +193,7 @@ export class TestCasesComponent implements OnInit {
       next: (data: TestCase[]) => {
         let filteredData = data;
         if (testSuiteId) {
-          filteredData = data.filter(tc => tc.testSuiteId === testSuiteId);
+          filteredData = data.filter(tc => tc.suite.id === testSuiteId);
         }
         this.testCases.set(filteredData);
         this.loading.set(false);
@@ -270,12 +270,12 @@ export class TestCasesComponent implements OnInit {
 
             this.testCaseForm.patchValue({
               projectId: fullTestCase.projectId || this.projectId(),
-              testSuiteId: fullTestCase.testSuiteId || '',
+              testSuiteId: fullTestCase.suite.id || '',
               title: fullTestCase.title || '',
               description: fullTestCase.description || '',
               preconditions: fullTestCase.preconditions || '',
               expectedResult: fullTestCase.expectedResult || '',
-              priorityId: fullTestCase.priorityId || 3,
+              priorityId: fullTestCase.priority.id || 3,
               testTypeId: (fullTestCase as any).testTypeId || 1,
               estimatedTimeHours: (fullTestCase as any).estimatedTimeHours || 0,
               startDate: formatDate((fullTestCase as any).startDate || fullTestCase.createdAt),

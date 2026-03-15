@@ -1,0 +1,20 @@
+services:
+  # QAMS Web (Angular Static Site)
+  - type: static
+    name: qams-web
+    env: static
+    plan: free
+    buildCommand: "npm install && npm run build:prod"
+    publishDir: dist/qams-web/browser
+    envVars:
+      - key: API_URL
+        value: https://qams-api.onrender.com/api # Cambiar por la URL real de tu API en Render
+    staticPublishCustomHeaders:
+      - path: "/*"
+        headers:
+          - key: Cache-Control
+            value: "no-cache"
+    routes:
+      - type: rewrite
+        source: "/*"
+        destination: "/index.html"

@@ -1,3 +1,43 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  body {
+    @apply bg-[#F6F6F8] text-slate-900 leading-relaxed;
+ /* Global Typography Polish */
+h1, h2, h3, h4, h5, h6 {
+  @apply tracking-tight font-black text-slate-900 mb-2;
+  font-family: 'Inter', sans-serif;
+}
+
+h1 { @apply text-4xl sm:text-5xl leading-[1.1]; }
+h2 { @apply text-2xl sm:text-3xl leading-[1.2]; }
+h3 { @apply text-xl sm:text-2xl leading-[1.3]; }
+
+p {
+  @apply leading-relaxed text-slate-600;
+}
+
+.text-premium-gradient {
+  @apply bg-clip-text text-transparent bg-gradient-to-br from-slate-900 via-slate-800 to-[#150fbd];
+}
+
+.tracking-premium {
+  @apply tracking-[-0.02em];
+}  }
+}
+
+@layer components {
+  .font-display {
+    font-family: 'Inter', sans-serif;
+  }
+}

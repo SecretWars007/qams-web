@@ -11,6 +11,9 @@ import {
   LoginResponse,
   RegisterRequest,
   DecodedToken,
+  ForgotPasswordRequest,
+  ResetPasswordRequest,
+  ChangePasswordRequest,
 } from '../models/auth.model';
 import { environment } from '../../../environments/environment';
 import { AuthMockService } from './auth.mock.service';
@@ -100,6 +103,51 @@ export class AuthService {
       catchError((error) => {
         console.error('AuthService: Error al refrescar token:', error);
         this.logout();
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * Solicita el restablecimiento de contraseña
+   */
+  forgotPassword(request: ForgotPasswordRequest): Observable<string> {
+    if (environment.useMock) {
+      return this.authMockService.forgotPassword(request);
+    }
+    return this.http.post(`${this.apiUrl}/forgot-password`, request, { responseType: 'text' }).pipe(
+      catchError((error) => {
+        console.error('AuthService: forgotPassword error:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * Restablece la contraseña usando el token de recuperación
+   */
+  resetPassword(request: ResetPasswordRequest): Observable<void> {
+    if (environment.useMock) {
+      return this.authMockService.resetPassword(request);
+    }
+    return this.http.post<void>(`${this.apiUrl}/reset-password`, request).pipe(
+      catchError((error) => {
+        console.error('AuthService: resetPassword error:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * Cambia la contraseña del usuario actualmente autenticado
+   */
+  changePassword(userId: string, request: ChangePasswordRequest): Observable<void> {
+    if (environment.useMock) {
+      return this.authMockService.changePassword(request);
+    }
+    return this.http.post<void>(`${this.apiUrl}/change-password`, request).pipe(
+      catchError((error) => {
+        console.error('AuthService: changePassword error:', error);
         return throwError(() => error);
       })
     );

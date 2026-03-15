@@ -1,0 +1,125 @@
+<div class="min-h-screen bg-gray-950 p-6">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <div class="flex items-center gap-3 mb-1">
+                <div
+                    class="w-10 h-10 bg-orange-600/20 rounded-xl flex items-center justify-center border border-orange-500/30">
+                    <i class="fas fa-fire-alt text-orange-400 text-lg"></i>
+                </div>
+                <h1 class="text-2xl font-bold text-white">Reporte Burndown</h1>
+            </div>
+            <p class="text-gray-400 text-sm ml-13">Visualiza el progreso del tablero en un gráfico de quemado (Burndown
+                Chart)</p>
+        </div>
+
+        <button *ngIf="reportGenerated()" (click)="resetReport()"
+            class="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-xl text-gray-300 text-sm font-medium transition-all border border-gray-700">
+            <i class="fas fa-redo text-xs"></i>
+            Nuevo Reporte
+        </button>
+    </div>
+
+    <!-- Layout -->
+    <div class="grid grid-cols-1 xl:grid-cols-5 gap-6">
+        <!-- Filters Panel -->
+        <div class="xl:col-span-2 space-y-5">
+            <div class="bg-gray-900 rounded-2xl border border-gray-800 p-6">
+                <h2 class="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <i class="fas fa-folder-open text-blue-400"></i> Proyecto
+                </h2>
+
+                <div *ngIf="loading()" class="flex justify-center py-4">
+                    <span
+                        class="w-6 h-6 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"></span>
+                </div>
+
+                <form *ngIf="!loading()" [formGroup]="filterForm">
+                    <select formControlName="projectId"
+                        class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all text-sm">
+                        <option value="">-- Selecciona un proyecto --</option>
+                        <option *ngFor="let p of projects()" [value]="p.id">{{ p.name }}</option>
+                    </select>
+                </form>
+            </div>
+
+            <button (click)="generateReport()" [disabled]="!hasProject || generating()" class="w-full py-4 bg-orange-600 hover:bg-orange-700 disabled:opacity-40 disabled:cursor-not-allowed
+                text-white font-bold rounded-2xl transition-all shadow-lg shadow-orange-900/30
+                flex items-center justify-center gap-3 text-base">
+                <span *ngIf="generating()"
+                    class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                <i *ngIf="!generating()" class="fas fa-chart-line text-lg"></i>
+                {{ generating() ? 'Generando reporte...' : 'Generar Burndown PDF' }}
+            </button>
+        </div>
+
+        <!-- Preview Panel -->
+        <div class="xl:col-span-3">
+            <!-- Empty state -->
+            <div *ngIf="!reportGenerated() && !generating() && !error()"
+                class="flex flex-col items-center justify-center h-full min-h-96 bg-gray-900 rounded-2xl border border-dashed border-gray-700 text-center p-12">
+                <div
+                    class="w-20 h-20 bg-orange-600/10 rounded-2xl flex items-center justify-center border border-orange-500/20 mb-6">
+                    <i class="fas fa-fire-alt text-orange-400 text-3xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-300 mb-2">Reporte no generado</h3>
+                <p class="text-gray-500 text-sm max-w-xs">
+                    Selecciona un proyecto y presiona <strong class="text-gray-400">Generar Burndown PDF</strong> para
+                    visualizar el documento aquí.
+                </p>
+            </div>
+
+            <!-- Generating loader -->
+            <div *ngIf="generating()"
+                class="flex flex-col items-center justify-center h-full min-h-96 bg-gray-900 rounded-2xl border border-gray-800">
+                <div class="relative mb-6">
+                    <div class="w-20 h-20 border-4 border-orange-500/20 border-t-orange-500 rounded-full animate-spin">
+                    </div>
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <i class="fas fa-fire-alt text-orange-400 text-xl"></i>
+                    </div>
+                </div>
+                <p class="text-white font-bold text-lg">Generando PDF...</p>
+            </div>
+
+            <!-- Error state -->
+            <div *ngIf="error() && !generating()"
+                class="flex flex-col items-center justify-center h-full min-h-96 bg-gray-900 rounded-2xl border border-rose-500/20 p-12 text-center">
+                <div
+                    class="w-16 h-16 bg-rose-500/10 rounded-2xl flex items-center justify-center border border-rose-500/20 mb-4">
+                    <i class="fas fa-triangle-exclamation text-rose-400 text-2xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-rose-400 mb-2">Error al generar</h3>
+                <p class="text-gray-400 text-sm max-w-sm">{{ error() }}</p>
+                <button (click)="generateReport()"
+                    class="mt-6 px-6 py-2.5 bg-rose-600/10 hover:bg-rose-600/20 text-rose-400 rounded-xl border border-rose-500/30 text-sm font-bold transition-all">
+                    <i class="fas fa-rotate-right mr-2"></i> Reintentar
+                </button>
+            </div>
+
+            <!-- PDF Viewer -->
+            <div *ngIf="reportGenerated() && pdfUrl() && !generating()" class="space-y-4">
+                <div class="flex items-center justify-between bg-gray-900 rounded-2xl border border-gray-800 px-5 py-3">
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="w-8 h-8 bg-emerald-500/10 rounded-lg flex items-center justify-center border border-emerald-500/20">
+                            <i class="fas fa-check text-emerald-400 text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="text-white text-sm font-bold">Reporte generado con éxito</p>
+                            <p class="text-gray-500 text-xs">{{ today | date:'dd/MM/yyyy HH:mm' }}</p>
+                        </div>
+                    </div>
+                    <button (click)="downloadReport()"
+                        class="flex items-center gap-2 px-5 py-2.5 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-sm font-bold transition-all shadow-lg shadow-orange-900/30">
+                        <i class="fas fa-download"></i> Descargar PDF
+                    </button>
+                </div>
+                <div class="bg-gray-900 rounded-2xl border border-gray-800 overflow-hidden" style="height: 70vh;">
+                    <iframe [src]="pdfUrl() | safeUrl" class="w-full h-full border-none"
+                        title="Reporte Burndown PDF"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

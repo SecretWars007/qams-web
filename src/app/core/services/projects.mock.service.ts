@@ -8,112 +8,92 @@ import { Project, CreateProject, UpdateProject } from '../models/project.model';
 export class ProjectsMockService {
     // Maintain state for the session
     private projects: Project[] = [
-        {
-            id: '1',
-            name: 'E-Commerce Platform v2.0',
-            description: 'New microservices-based architecture for the main store.',
-            startDate: '2026-01-01',
-            endDate: '2026-06-30',
-            testerIds: [],
-            testerNames: ['Jane Doe', 'John Smith'],
-            isActive: true,
-            priority: 1,
-            projectStatusId: 1,
-            projectStatusName: 'In Progress',
-            createdByUserName: 'Admin',
-            createdAt: '2026-01-10T09:00:00Z',
-            testSuiteCount: 12,
-            kanbanBoardCount: 2,
-            devolucionesCounter: 0,
-            historicDevolutions: []
-        },
-        {
-            id: '2',
-            name: 'Mobile App - iOS',
-            description: 'Native iOS application for customer loyalty program.',
-            startDate: '2026-02-01',
-            endDate: '2026-08-15',
-            testerIds: [],
-            testerNames: ['Mobile Tester'],
-            isActive: true,
-            priority: 2,
-            projectStatusId: 2,
-            projectStatusName: 'Planning',
-            createdByUserName: 'Admin',
-            createdAt: '2026-01-15T14:30:00Z',
-            testSuiteCount: 8,
-            kanbanBoardCount: 1,
-            devolucionesCounter: 0,
-            historicDevolutions: []
-        },
-        {
-            id: '3',
-            name: 'API Gateway Refactor',
-            description: 'Security hardening and performance optimization.',
-            startDate: '2026-03-01',
-            endDate: '2026-05-30',
-            testerIds: [],
-            testerNames: [],
-            isActive: true,
-            priority: 3,
-            projectStatusId: 1,
-            projectStatusName: 'In Progress',
-            createdByUserName: 'Dev Lead',
-            createdAt: '2026-02-01T10:15:00Z',
-            testSuiteCount: 5,
-            kanbanBoardCount: 1,
-            devolucionesCounter: 0,
-            historicDevolutions: []
-        },
-        {
-            id: '4',
-            name: 'Dashboard Analytics',
-            description: 'Internal reporting tool for stakeholders.',
-            startDate: '2025-11-01',
-            endDate: '2025-12-31',
-            testerIds: [],
-            testerNames: [],
-            isActive: false,
-            priority: 2,
-            projectStatusId: 3,
-            projectStatusName: 'Completed',
-            createdByUserName: 'Admin',
-            createdAt: '2025-11-20T11:00:00Z',
-            testSuiteCount: 3,
-            kanbanBoardCount: 1,
-            devolucionesCounter: 1,
-            historicDevolutions: [
+        new Project(
+            '1',
+            'E-Commerce Platform v2.0',
+            'New microservices-based architecture for the main store.',
+            new Date('2026-01-01'),
+            new Date('2026-06-30'),
+            ['Jane Doe', 'John Smith'],
+            true,
+            1,
+            { id: 1, name: 'In Progress' },
+            new Date('2026-01-10T09:00:00Z'),
+            'Admin',
+            { suites: 12, kanbanTasks: 2, devolutions: 0 },
+            []
+        ),
+        new Project(
+            '2',
+            'Mobile App - iOS',
+            'Native iOS application for customer loyalty program.',
+            new Date('2026-02-01'),
+            new Date('2026-08-15'),
+            ['Mobile Tester'],
+            true,
+            2,
+            { id: 2, name: 'Planning' },
+            new Date('2026-01-15T14:30:00Z'),
+            'Admin',
+            { suites: 8, kanbanTasks: 1, devolutions: 0 },
+            []
+        ),
+        new Project(
+            '3',
+            'API Gateway Refactor',
+            'Security hardening and performance optimization.',
+            new Date('2026-03-01'),
+            new Date('2026-05-30'),
+            [],
+            true,
+            3,
+            { id: 1, name: 'In Progress' },
+            new Date('2026-02-01T10:15:00Z'),
+            'Dev Lead',
+            { suites: 5, kanbanTasks: 1, devolutions: 0 },
+            []
+        ),
+        new Project(
+            '4',
+            'Dashboard Analytics',
+            'Internal reporting tool for stakeholders.',
+            new Date('2025-11-01'),
+            new Date('2025-12-31'),
+            [],
+            false,
+            2,
+            { id: 3, name: 'Completed' },
+            new Date('2025-11-20T11:00:00Z'),
+            'Admin',
+            { suites: 3, kanbanTasks: 1, devolutions: 1 },
+            [
                 {
                     id: 'dev1',
                     projectId: '4',
-                    devolutionDate: '2025-12-15T10:00:00Z',
+                    date: new Date('2025-12-15T10:00:00Z'),
                     notes: 'Faltan evidencias en la suite de reportes.',
-                    responseDate: '2025-12-20T15:00:00Z',
+                    responseDate: new Date('2025-12-20T15:00:00Z'),
                     responseNotes: 'Evidencias agregadas y verificado.',
-                    createdByUserName: 'QA Lead',
+                    createdBy: 'QA Lead',
                     observationsCount: 2
                 }
             ]
-        },
-        {
-            id: '10',
-            name: 'Kanban Integration 141736',
-            description: 'Project matching user screenshot for verification.',
-            startDate: '2026-02-17',
-            endDate: '2026-12-31',
-            testerIds: [],
-            testerNames: ['Current User'],
-            isActive: true,
-            priority: 1,
-            projectStatusId: 1,
-            projectStatusName: 'In Progress',
-            createdByUserName: 'Admin',
-            createdAt: new Date().toISOString(),
-            testSuiteCount: 1,
-            kanbanBoardCount: 1,
-            devolucionesCounter: 0,
-            historicDevolutions: []
-        }
+        ),
+        new Project(
+            '10',
+            'Kanban Integration 141736',
+            'Project matching user screenshot for verification.',
+            new Date('2026-02-17'),
+            new Date('2026-12-31'),
+            ['Current User'],
+            true,
+            1,
+            { id: 1, name: 'In Progress' },
+            new Date(),
+            'Admin',
+            { suites: 1, kanbanTasks: 1, devolutions: 0 },
+            []
+        )
     ];
 
     constructor() { }
@@ -123,25 +103,21 @@ export class ProjectsMockService {
     }
 
     createProject(project: CreateProject): Observable<Project> {
-        const newProject: Project = {
-            id: (this.projects.length + 1).toString(),
-            name: project.name,
-            description: project.description,
-            startDate: project.startDate,
-            endDate: project.endDate,
-            testerIds: project.testerIds,
-            testerNames: [],
-            isActive: true,
-            priority: 1,
-            projectStatusId: 1,
-            projectStatusName: 'New',
-            createdByUserName: 'Current User',
-            createdAt: new Date().toISOString(),
-            testSuiteCount: 0,
-            kanbanBoardCount: 0,
-            devolucionesCounter: 0,
-            historicDevolutions: []
-        };
+        const newProject = new Project(
+            (this.projects.length + 1).toString(),
+            project.name,
+            project.description,
+            project.startDate ? new Date(project.startDate) : null,
+            project.endDate ? new Date(project.endDate) : null,
+            [],
+            true,
+            1,
+            { id: 1, name: 'New' },
+            new Date(),
+            'Current User',
+            { suites: 0, kanbanTasks: 0, devolutions: 0 },
+            []
+        );
         this.projects.unshift(newProject);
         return of(newProject).pipe(delay(400));
     }
@@ -154,8 +130,24 @@ export class ProjectsMockService {
     updateProject(id: string, project: UpdateProject): Observable<Project> {
         const index = this.projects.findIndex(p => p.id === id);
         if (index !== -1) {
-            this.projects[index] = { ...this.projects[index], ...project };
-            return of(this.projects[index]).pipe(delay(300));
+            const existing = this.projects[index];
+            const updated = new Project(
+                existing.id,
+                project.name || existing.name,
+                project.description !== undefined ? project.description : existing.description,
+                project.startDate ? new Date(project.startDate) : existing.startDate,
+                project.endDate ? new Date(project.endDate) : existing.endDate,
+                existing.testerNames,
+                project.isActive !== undefined ? project.isActive : existing.isActive,
+                existing.priority,
+                existing.status,
+                existing.createdAt,
+                existing.createdBy,
+                existing.stats,
+                existing.historicDevolutions
+            );
+            this.projects[index] = updated;
+            return of(updated).pipe(delay(300));
         }
         throw new Error('Project not found');
     }
@@ -168,16 +160,16 @@ export class ProjectsMockService {
     registerDevolution(projectId: string, notes: string): Observable<any> {
         const project = this.projects.find(p => p.id === projectId);
         if (project) {
-            project.devolucionesCounter = (project.devolucionesCounter || 0) + 1;
+            project.stats.devolutions = (project.stats.devolutions || 0) + 1;
             project.historicDevolutions = project.historicDevolutions || [];
             project.historicDevolutions.unshift({
                 id: Math.random().toString(36).substr(2, 9),
                 projectId,
-                devolutionDate: new Date().toISOString(),
+                date: new Date(),
                 notes,
                 responseDate: null,
                 responseNotes: null,
-                createdByUserName: 'Current User',
+                createdBy: 'Current User',
                 observationsCount: 0
             });
         }
@@ -188,7 +180,7 @@ export class ProjectsMockService {
         this.projects.forEach(p => {
             const dev = p.historicDevolutions?.find(d => d.id === devolutionId);
             if (dev) {
-                dev.responseDate = new Date().toISOString();
+                dev.responseDate = new Date();
                 dev.responseNotes = response;
             }
         });

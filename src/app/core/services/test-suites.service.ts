@@ -5,6 +5,9 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { TestSuite, CreateTestSuite } from '../models/test-suite.model';
 import { TestSuitesMockService } from './test-suites.mock.service';
+import { TestSuiteDto } from '../dto/test-suite.dto';
+import { TestSuiteMapper } from '../mappers/test-suite.mapper';
+import { map } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
 export class TestSuitesService {
@@ -16,21 +19,27 @@ export class TestSuitesService {
         if (environment.useMock) {
             return this.mockService.getTestSuitesByProjectId(projectId);
         }
-        return this.http.get<TestSuite[]>(`${this.apiUrl}/project/${projectId}`);
+        return this.http.get<TestSuiteDto[]>(`${this.apiUrl}/project/${projectId}`).pipe(
+            map(dtos => dtos.map(dto => TestSuiteMapper.fromDto(dto)))
+        );
     }
 
     createTestSuite(testSuite: CreateTestSuite): Observable<TestSuite> {
         if (environment.useMock) {
             return this.mockService.createTestSuite(testSuite);
         }
-        return this.http.post<TestSuite>(this.apiUrl, testSuite);
+        return this.http.post<TestSuiteDto>(this.apiUrl, testSuite).pipe(
+            map(dto => TestSuiteMapper.fromDto(dto))
+        );
     }
 
     getTestSuiteById(id: string): Observable<TestSuite | undefined> {
         if (environment.useMock) {
             return this.mockService.getTestSuiteById(id);
         }
-        return this.http.get<TestSuite>(`${this.apiUrl}/${id}`);
+        return this.http.get<TestSuiteDto>(`${this.apiUrl}/${id}`).pipe(
+            map(dto => TestSuiteMapper.fromDto(dto))
+        );
     }
 
     updateTestSuite(id: string, testSuite: any): Observable<TestSuite> {

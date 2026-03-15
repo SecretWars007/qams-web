@@ -3,8 +3,10 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Project, CreateProject, UpdateProject } from '../models/project.model';
+import { ProjectDto, CreateProjectDto, UpdateProjectDto } from '../dto/project.dto';
+import { Project } from '../models/project.model';
 import { TestCase } from '../models/test-case.model';
+import { ProjectMapper } from '../mappers/project.mapper';
 import { ProjectsMockService } from './projects.mock.service';
 import { TestCasesMockService } from './test-cases.mock.service';
 
@@ -19,14 +21,18 @@ export class ProjectsService {
         if (environment.useMock) {
             return this.mockService.getProjects();
         }
-        return this.http.get<Project[]>(this.apiUrl);
+        return this.http.get<ProjectDto[]>(this.apiUrl).pipe(
+            map(dtos => dtos.map(dto => ProjectMapper.fromDto(dto)))
+        );
     }
 
-    createProject(project: CreateProject): Observable<Project> {
+    createProject(project: CreateProjectDto): Observable<Project> {
         if (environment.useMock) {
-            return this.mockService.createProject(project);
+            return this.mockService.createProject(project as any);
         }
-        return this.http.post<Project>(this.apiUrl, project);
+        return this.http.post<ProjectDto>(this.apiUrl, project).pipe(
+            map(dto => ProjectMapper.fromDto(dto))
+        );
     }
 
     getProjectById(id: string): Observable<Project> {
@@ -38,14 +44,18 @@ export class ProjectsService {
                 })
             );
         }
-        return this.http.get<Project>(`${this.apiUrl}/${id}`);
+        return this.http.get<ProjectDto>(`${this.apiUrl}/${id}`).pipe(
+            map(dto => ProjectMapper.fromDto(dto))
+        );
     }
 
-    updateProject(id: string, project: UpdateProject): Observable<Project> {
+    updateProject(id: string, project: UpdateProjectDto): Observable<Project> {
         if (environment.useMock) {
-            return this.mockService.updateProject(id, project);
+            return this.mockService.updateProject(id, project as any);
         }
-        return this.http.put<Project>(`${this.apiUrl}/${id}`, project);
+        return this.http.put<ProjectDto>(`${this.apiUrl}/${id}`, project).pipe(
+            map(dto => ProjectMapper.fromDto(dto))
+        );
     }
 
     deleteProject(id: string): Observable<void> {

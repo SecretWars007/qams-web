@@ -1,4 +1,8 @@
 // src/app/core/models/dashboard.model.ts
+
+/**
+ * Entidad de dominio Dashboard.
+ */
 export interface DashboardSummary {
   totalProjects: number;
   totalTestCases: number;
@@ -15,13 +19,13 @@ export interface DashboardSummary {
 
 export interface ProjectTimeline {
   projectName: string;
-  startDate: string;
-  endDate: string;
+  startDate: Date;
+  endDate: Date;
 }
 
 export interface TaskProgress {
   columnName: string;
-  taskCount: number;
+  count: number;
 }
 
 export interface ExecutionsByStatus {

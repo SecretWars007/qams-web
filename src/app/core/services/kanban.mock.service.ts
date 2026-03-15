@@ -46,16 +46,16 @@ export class KanbanMockService {
                 executions.forEach((exec, index) => {
                     const task: KanbanTask = {
                         id: exec.id,
-                        kanbanColumnId: this.getColumnIdForStatus(exec.statusCode),
-                        title: exec.testCaseTitle,
+                        kanbanColumnId: this.getColumnIdForStatus(exec.status.code),
+                        title: exec.testCase.title,
                         description: exec.notes || 'Sin notas',
-                        assigneeId: exec.testerId,
-                        assigneeName: exec.testerName,
-                        testCaseId: exec.testCaseId,
+                        assigneeId: exec.executedBy || 'u1',
+                        assigneeName: exec.executedBy || 'John Doe',
+                        testCaseId: exec.testCase.id,
                         priorityId: 2,
                         priorityName: 'Medium',
                         priorityCode: 'P2',
-                        dueDate: exec.executionDate,
+                        dueDate: exec.executionDate.toISOString(),
                         orderIndex: index
                     };
 
