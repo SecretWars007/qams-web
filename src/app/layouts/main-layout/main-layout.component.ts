@@ -53,7 +53,7 @@ import { filter } from 'rxjs/operators';
             class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
                     text-slate-400 hover:text-white hover:bg-white/5 transition-all group"
           >
-            <i class="fas fa-home-alt w-5 text-center group-hover:scale-110 transition-transform"></i>
+            <i class="fas fa-th-large w-5 text-center group-hover:scale-110 transition-transform"></i>
             <span class="font-semibold">Dashboard</span>
           </a>
 
@@ -65,7 +65,7 @@ import { filter } from 'rxjs/operators';
             class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
                     text-slate-400 hover:text-white hover:bg-white/5 transition-all group"
           >
-            <i class="fas fa-folder w-5 text-center group-hover:scale-110 transition-transform"></i>
+            <i class="fas fa-project-diagram w-5 text-center group-hover:scale-110 transition-transform"></i>
             <span class="font-medium group-[.active]:font-semibold">Proyectos</span>
           </a>
 
@@ -77,7 +77,7 @@ import { filter } from 'rxjs/operators';
             class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
                     text-slate-400 hover:text-white hover:bg-white/5 transition-all group"
           >
-            <i class="fas fa-layer-group w-5 text-center group-hover:scale-110 transition-transform"></i>
+            <i class="fas fa-vials w-5 text-center group-hover:scale-110 transition-transform"></i>
             <span class="font-medium group-[.active]:font-semibold">Escenarios</span>
           </a>
 
@@ -89,7 +89,7 @@ import { filter } from 'rxjs/operators';
             class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
                     text-slate-400 hover:text-white hover:bg-white/5 transition-all group"
           >
-            <i class="fas fa-clipboard-check w-5 text-center group-hover:scale-110 transition-transform"></i>
+            <i class="fas fa-flask w-5 text-center group-hover:scale-110 transition-transform"></i>
             <span class="font-medium group-[.active]:font-semibold">Casos de Prueba</span>
           </a>
 
@@ -101,7 +101,7 @@ import { filter } from 'rxjs/operators';
             class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
                     text-slate-400 hover:text-white hover:bg-white/5 transition-all group"
           >
-            <i class="fas fa-play-circle w-5 text-center group-hover:scale-110 transition-transform"></i>
+            <i class="fas fa-rocket w-5 text-center group-hover:scale-110 transition-transform"></i>
             <span class="font-medium group-[.active]:font-semibold">Ejecuciones</span>
           </a>
 
@@ -113,7 +113,7 @@ import { filter } from 'rxjs/operators';
             class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
                     text-slate-400 hover:text-white hover:bg-white/5 transition-all group"
           >
-            <i class="fas fa-columns w-5 text-center group-hover:scale-110 transition-transform"></i>
+            <i class="fab fa-trello w-5 text-center group-hover:scale-110 transition-transform"></i>
             <span class="font-medium group-[.active]:font-semibold">Tablero Kanban</span>
           </a>
 
@@ -125,7 +125,7 @@ import { filter } from 'rxjs/operators';
             class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
                     text-slate-400 hover:text-white hover:bg-white/5 transition-all group"
           >
-            <i class="fas fa-chart-pie w-5 text-center group-hover:scale-110 transition-transform"></i>
+            <i class="fas fa-file-signature w-5 text-center group-hover:scale-110 transition-transform"></i>
             <span class="font-medium group-[.active]:font-semibold">Reportes</span>
           </a>
 
@@ -144,7 +144,7 @@ import { filter } from 'rxjs/operators';
               class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
                       text-slate-400 hover:text-white hover:bg-white/5 transition-all group"
             >
-              <i class="fas fa-users w-5 text-center group-hover:scale-110 transition-transform"></i>
+              <i class="fas fa-user-gear w-5 text-center group-hover:scale-110 transition-transform"></i>
               <span class="font-medium group-[.active]:font-semibold">Usuarios</span>
             </a>
 
@@ -155,7 +155,7 @@ import { filter } from 'rxjs/operators';
               class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
                       text-slate-400 hover:text-white hover:bg-white/5 transition-all group"
             >
-              <i class="fas fa-shield-alt w-5 text-center group-hover:scale-110 transition-transform"></i>
+              <i class="fas fa-user-shield w-5 text-center group-hover:scale-110 transition-transform"></i>
               <span class="font-medium group-[.active]:font-semibold">Roles y Permisos</span>
             </a>
 
@@ -166,7 +166,7 @@ import { filter } from 'rxjs/operators';
               class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
                       text-slate-400 hover:text-white hover:bg-white/5 transition-all group"
             >
-              <i class="fas fa-database w-5 text-center group-hover:scale-110 transition-transform"></i>
+              <i class="fas fa-tags w-5 text-center group-hover:scale-110 transition-transform"></i>
               <span class="font-medium group-[.active]:font-semibold">Catálogos</span>
             </a>
 

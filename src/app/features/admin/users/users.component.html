@@ -60,9 +60,8 @@
                         </select>
                         <i class="fas fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[8px] text-slate-400 pointer-events-none"></i>
                     </div>
-                    <button (click)="onDeleteUser(user.id)"
-                        class="w-10 h-10 flex items-center justify-center bg-rose-50 text-rose-500 rounded-lg shrink-0">
-                        <i class="fas fa-trash-alt text-xs"></i>
+                    <button (click)="onDeleteUser(user.id)" class="btn-icon btn-icon-danger">
+                        <i class="fas fa-trash-can"></i>
                     </button>
                 </div>
             </div>
@@ -129,13 +128,8 @@
                                     <option *ngFor="let role of roles()" [value]="role.id">{{ role.name }}</option>
                                 </select>
 
-                                <button (click)="onDeleteUser(user.id)"
-                                    class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
-                                    title="Eliminar usuario">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
+                                <button (click)="onDeleteUser(user.id)" class="btn-icon btn-icon-danger" title="Eliminar usuario">
+                                    <i class="fas fa-trash-can"></i>
                                 </button>
                             </div>
                         </td>
