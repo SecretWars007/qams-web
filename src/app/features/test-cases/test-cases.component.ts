@@ -10,7 +10,7 @@ import { User } from '../../core/models/user.model';
 import { Project } from '../../core/models/project.model';
 import { ProjectsService } from '../../core/services/projects.service';
 import { UsersService } from '../../core/services/users.service';
-import { ToastrService } from 'ngx-toastr';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-test-cases',
@@ -61,7 +61,7 @@ export class TestCasesComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private fb = inject(FormBuilder);
-  private toastr = inject(ToastrService);
+  private toastr = inject(ToastService);
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {

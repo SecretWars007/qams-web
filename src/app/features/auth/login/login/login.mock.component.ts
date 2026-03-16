@@ -4,7 +4,7 @@ import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { ToastrService } from 'ngx-toastr';
+import { ToastService } from '../../../../core/services/toast.service';
 import { AuthMockService } from '../../../../core/services/auth.mock.service';
 import { LoginRequest } from '../../../../core/models/auth.model';
 
@@ -197,7 +197,7 @@ export class LoginMockComponent {
   constructor(
     private authService: AuthMockService,
     private router: Router,
-    private toastr: ToastrService,
+    private toastr: ToastService,
   ) { }
 
   selectTestUser(user: TestUser): void {

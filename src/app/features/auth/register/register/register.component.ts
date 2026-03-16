@@ -3,7 +3,7 @@ import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { ToastrService } from 'ngx-toastr';
+import { ToastService } from '../../../../core/services/toast.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { RegisterRequest } from '../../../../core/models/auth.model';
 
@@ -31,7 +31,7 @@ export class RegisterComponent {
   constructor(
     private authService: AuthService,
     private router: Router,
-    private toastr: ToastrService,
+    private toastr: ToastService,
   ) { }
 
   /**
@@ -53,12 +53,13 @@ export class RegisterComponent {
 
     this.authService.register(this.form).subscribe({
       next: () => {
-        console.log('[RegisterComponent] Registro exitoso, procediendo a dashboard');
-        this.toastr.success('Cuenta creada exitosamente.', '¡Bienvenido!');
-        this.router.navigate(['/dashboard']);
+        console.log('[RegisterComponent] Registro exitoso, redirigiendo a login');
+        this.toastr.success('Usuario registrado correctamente.', 'Registro Exitoso');
+        this.router.navigate(['/auth/login']);
       },
       error: (err) => {
         console.error('[RegisterComponent] Error durante el registro:', err);
+        this.toastr.error('Ocurrió un error en el registro. Verifique sus datos e intente nuevamente.', 'Error de Registro');
         this.loading.set(false);
       },
     });

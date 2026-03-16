@@ -2,7 +2,7 @@ import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { ToastrService } from 'ngx-toastr';
+import { ToastService } from '../../../../core/services/toast.service';
 import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
@@ -19,7 +19,7 @@ export class ForgotPasswordComponent {
   constructor(
     private authService: AuthService,
     private router: Router,
-    private toastr: ToastrService,
+    private toastr: ToastService,
   ) { }
 
   onSubmit(): void {

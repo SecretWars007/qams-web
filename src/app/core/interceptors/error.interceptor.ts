@@ -4,11 +4,11 @@
 import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { catchError, throwError, switchMap } from 'rxjs';
-import { ToastrService } from 'ngx-toastr';
+import { ToastService } from '../services/toast.service';
 import { AuthService } from '../services/auth.service';
 
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
-  const toastr = inject(ToastrService);
+  const toastr = inject(ToastService);
   const authService = inject(AuthService);
 
   return next(req).pipe(
@@ -31,7 +31,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
             // Si falla el refresh, cerrar sesión
             console.error('[ErrorInterceptor] Refresh fallido, cerrando sesión');
             authService.logout();
-            toastr.error('Su sesión ha expirado. Inicie sesión nuevamente.');
+            toastr.error('Su sesión ha expirado por inactividad. Por favor, inicie sesión nuevamente.', 'Sesión Expirada');
             return throwError(() => refreshError);
           }),
         );
@@ -41,31 +41,31 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
       switch (error.status) {
         case 400:
           const message = error.error?.error || 'Solicitud inválida.';
-          toastr.warning(message, 'Atención');
+          toastr.warning(message, 'Petición Inválida');
           break;
         case 403:
           toastr.error(
-            'No tiene permisos para realizar esta acción.',
-            'Acceso Denegado',
+            'No cuenta con los privilegios necesarios para realizar esta acción.',
+            'Acceso Restringido',
           );
           break;
         case 404:
           toastr.warning(
-            'El recurso solicitado no fue encontrado.',
-            'No Encontrado',
+            'El recurso no está disponible o ha sido eliminado.',
+            'Recurso No Encontrado',
           );
           break;
         case 500:
           toastr.error(
-            'Error interno del servidor. Contacte al administrador.',
-            'Error',
+            'Se ha producido un error interno. Intente nuevamente más tarde o contacte a soporte.',
+            'Error del Sistema',
           );
           break;
         default:
           if (error.status !== 0) {
             console.warn('[ErrorInterceptor] Error HTTP no manejado:', error.status);
           }
-          toastr.error('Ocurrió un error inesperado.', 'Error');
+          toastr.error('Ha ocurrido un error inesperado de comunicación.', 'Error de Conexión');
       }
 
       return throwError(() => error);

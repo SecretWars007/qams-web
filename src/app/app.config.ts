@@ -5,7 +5,7 @@ import { provideRouter, withComponentInputBinding, withPreloading, PreloadAllMod
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideClientHydration } from '@angular/platform-browser';
-import { provideToastr } from 'ngx-toastr';
+
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 
 import { routes } from './app.routes';
@@ -30,13 +30,6 @@ export const appConfig: ApplicationConfig = {
     // Habilitar animaciones para toastr y CDK
     provideAnimations(),
 
-    // Configurar notificaciones toast
-    provideToastr({
-      timeOut: 4000,
-      positionClass: 'toast-top-right',
-      preventDuplicates: true,
-      progressBar: true,
-    }),
 
     // Configurar Chart.js para dashboards
     provideCharts(withDefaultRegisterables()),

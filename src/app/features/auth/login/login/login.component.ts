@@ -3,7 +3,7 @@ import { Component, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { ToastrService } from 'ngx-toastr';
+import { ToastService } from '../../../../core/services/toast.service';
 import { AuthService } from '../../../../core/services/auth.service';
 
 /**
@@ -30,7 +30,7 @@ export class LoginComponent {
   constructor(
     private authService: AuthService,
     private router: Router,
-    private toastr: ToastrService,
+    private toastr: ToastService,
   ) { }
 
   setFieldFocus(fieldName: string, isFocused: boolean) {
@@ -48,7 +48,7 @@ export class LoginComponent {
   onSubmit(): void {
     // Validar que los campos no estén vacíos
     if (!this.form.username || !this.form.password) {
-      this.toastr.warning('Complete todos los campos.', 'Atención');
+      this.toastr.warning('Todos los campos son obligatorios.', 'Atención');
       return;
     }
 
@@ -58,7 +58,7 @@ export class LoginComponent {
       next: () => {
         console.log('[LoginComponent] Login exitoso, procediendo a dashboard');
         this.loading.set(false);
-        this.toastr.success('Bienvenido al sistema.', '¡Hola!');
+        this.toastr.success('Inicio de sesión exitoso.', 'Bienvenido');
         this.router.navigate(['/dashboard']).then(nav => {
           console.log('[LoginComponent] Navegación a dashboard completa:', nav);
         }).catch(err => {

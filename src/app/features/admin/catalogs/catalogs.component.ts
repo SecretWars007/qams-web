@@ -2,7 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CatalogsService } from '../../../core/services/catalogs.service';
-import { ToastrService } from 'ngx-toastr';
+import { ToastService } from '../../../core/services/toast.service';
 import { finalize } from 'rxjs';
 
 interface CatalogConfig {
@@ -25,7 +25,7 @@ interface CatalogConfig {
 export class CatalogsComponent implements OnInit {
   private catalogsService = inject(CatalogsService);
   private fb = inject(FormBuilder);
-  private toastr = inject(ToastrService);
+  private toastr = inject(ToastService);
 
   /** Lista de catálogos disponibles conforme al backend */
   availableCatalogs: CatalogConfig[] = [

@@ -5,7 +5,7 @@ import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DragDropModule, CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { Router, ActivatedRoute } from '@angular/router';
-import { ToastrService } from 'ngx-toastr';
+import { ToastService } from '../../core/services/toast.service';
 import { KanbanService } from '../../core/services/kanban.service';
 import { KanbanBoard, KanbanTask } from '../../core/models/kanban.model';
 import { ProjectsService } from '../../core/services/projects.service';
@@ -29,7 +29,7 @@ export class KanbanComponent implements OnInit {
   private projectsService = inject(ProjectsService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
-  private toastr = inject(ToastrService);
+  private toastr = inject(ToastService);
 
   ngOnInit(): void {
     this.loadProjects();

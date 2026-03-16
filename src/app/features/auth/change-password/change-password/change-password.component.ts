@@ -2,7 +2,7 @@ import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ToastrService } from 'ngx-toastr';
+import { ToastService } from '../../../../core/services/toast.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ChangePasswordRequest } from '../../../../core/models/auth.model';
 
@@ -24,7 +24,7 @@ export class ChangePasswordComponent {
   constructor(
     private authService: AuthService,
     private router: Router,
-    private toastr: ToastrService,
+    private toastr: ToastService,
   ) { }
 
   onSubmit(): void {

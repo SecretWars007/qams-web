@@ -67,10 +67,6 @@ export class AuthService {
   register(request: RegisterRequest): Observable<LoginResponse> {
     console.log(this.LOG_TAG, 'Registro de usuario →', request.username);
     return this.http.post<LoginResponse>(`${this.apiUrl}/register`, request).pipe(
-      tap((res) => {
-        console.log(this.LOG_TAG, 'Registro exitoso, estableciendo sesión');
-        this.authMockService.setSession(res);
-      }),
       catchError((error) => {
         console.error(this.LOG_TAG, 'Error en registro:', error.status, error.message);
         return throwError(() => error);

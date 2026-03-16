@@ -3,7 +3,7 @@
 // Verifica que el usuario tenga el permiso declarado en route.data['permission'].
 import { CanActivateFn, Router, ActivatedRouteSnapshot } from '@angular/router';
 import { inject } from '@angular/core';
-import { ToastrService } from 'ngx-toastr';
+import { ToastService } from '../services/toast.service';
 import { AuthService } from '../services/auth.service';
 
 export const permissionGuard: CanActivateFn = (
@@ -11,7 +11,7 @@ export const permissionGuard: CanActivateFn = (
 ) => {
   const authService = inject(AuthService);
   const router = inject(Router);
-  const toastr = inject(ToastrService);
+  const toastr = inject(ToastService);
 
   // Obtener el permiso requerido de la data de la ruta
   const requiredPermission = route.data?.['permission'] as string;
@@ -36,8 +36,8 @@ export const permissionGuard: CanActivateFn = (
   // Sin permiso → notificar y redirigir al login
   console.warn('[PermissionGuard] Acceso DENEGADO para:', requiredPermission);
   toastr.error(
-    'No tiene permisos para acceder a esta sección.',
-    'Acceso Denegado',
+    'No cuenta con los permisos necesarios para acceder a esta sección.',
+    'Acceso Restringido',
   );
   router.navigate(['/auth/login']);
   return false;

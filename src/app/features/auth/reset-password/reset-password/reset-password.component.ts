@@ -2,7 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
-import { ToastrService } from 'ngx-toastr';
+import { ToastService } from '../../../../core/services/toast.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ResetPasswordRequest } from '../../../../core/models/auth.model';
 
@@ -26,7 +26,7 @@ export class ResetPasswordComponent implements OnInit {
     private authService: AuthService,
     private router: Router,
     private route: ActivatedRoute,
-    private toastr: ToastrService,
+    private toastr: ToastService,
   ) { }
 
   ngOnInit(): void {

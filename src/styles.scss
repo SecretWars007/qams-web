@@ -5,7 +5,7 @@
  */
 
 // 1. External dependencies
-@use 'ngx-toastr/toastr';
+
 
 // 2. Core Framework Styles
 @tailwind base;
@@ -34,9 +34,11 @@
 // 5. Global Base Overrides
 @layer base {
   body {
-    @apply font-sans bg-slate-50 text-slate-900 antialiased;
+    @apply font-sans text-slate-900 antialiased relative min-h-screen;
     font-family: 'Inter', sans-serif;
+
   }
+
 
   h1, h2, h3, h4, h5, h6 {
     @apply tracking-tight;

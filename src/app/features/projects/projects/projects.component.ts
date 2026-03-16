@@ -1,7 +1,7 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { ToastrService } from 'ngx-toastr';
+import { ToastService } from '../../../core/services/toast.service';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { ProjectsService } from '../../../core/services/projects.service';
 import { UsersService } from '../../../core/services/users.service';
@@ -30,7 +30,7 @@ export class ProjectsComponent implements OnInit {
   private usersService = inject(UsersService);
   private router = inject(Router);
   private fb = inject(FormBuilder);
-  private toastr = inject(ToastrService);
+  private toastr = inject(ToastService);
 
   ngOnInit(): void {
     this.initForm();
@@ -121,7 +121,7 @@ export class ProjectsComponent implements OnInit {
         error: (err) => {
           console.error('ProjectsComponent: Error al crear proyecto:', err);
           this.isSubmitting.set(false);
-          this.toastr.error('Error al crear el proyecto. Verifica los datos y permisos.', 'Error');
+          this.toastr.error('No se pudo crear el proyecto. Verifique sus datos e intente nuevamente.', 'Error de Creación');
         }
       });
     }
@@ -146,7 +146,7 @@ export class ProjectsComponent implements OnInit {
           // Revertir cambio local si falló
           this.projects.set(currentProjects);
           this.loading.set(false);
-          this.toastr.error('No se pudo eliminar el proyecto. Revisa los permisos o la conexión.', 'Error');
+          this.toastr.error('No se pudo eliminar el proyecto. Verifique sus permisos e intente nuevamente.', 'Error de Eliminación');
         }
       });
     }
@@ -195,7 +195,7 @@ export class ProjectsComponent implements OnInit {
       error: (err) => {
         console.error('ProjectsComponent: Error al registrar devolución:', err);
         this.isSubmitting.set(false);
-        this.toastr.error('Error al registrar la devolución.', 'Error');
+        this.toastr.error('No se pudo registrar la devolución.', 'Error de Registro');
       }
     });
   }

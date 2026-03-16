@@ -16,10 +16,16 @@ import { filter } from 'rxjs/operators';
     HasPermissionDirective,
   ],
   template: `
-    <div class="min-h-screen bg-[#F6F6F8] flex overflow-hidden font-display text-slate-800">
+    <div class="min-h-screen bg-[#F6F6F8] flex overflow-hidden font-display text-slate-800 relative">
+      <!-- Background Pattern Layer (Forced Visibility) -->
+      <div 
+        class="fixed inset-0 opacity-[0.25] pointer-events-none transition-opacity duration-700"
+        style="background-image: url('/images/bg-qa.png?v=4'); background-repeat: repeat; background-size: 800px; z-index: 1;"
+      ></div>
+
       <!-- ============ SIDEBAR ============ -->
       <aside
-        class="fixed inset-y-0 left-0 z-40 w-72 bg-[#0B0F19] text-white flex flex-col
+        class="fixed inset-y-0 left-0 z-40 w-72 bg-[#0B0F19]/95 backdrop-blur-xl text-white flex flex-col
                transform transition-all duration-300 ease-in-out lg:translate-x-0 shadow-2xl"
         [class.-translate-x-full]="!sidebarOpen()"
         [class.translate-x-0]="sidebarOpen()"
@@ -27,8 +33,8 @@ import { filter } from 'rxjs/operators';
         <!-- Logo -->
         <div class="flex flex-col px-6 py-6 border-b border-white/5 mb-4">
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-[0_0_20px_rgba(255,255,255,0.1)] overflow-hidden p-1.5">
-              <img src="/images/logo.png" alt="QAMS logo" class="w-full h-full object-contain" />
+            <div class="w-14 h-14 bg-white rounded-xl flex items-center justify-center shadow-[0_0_20px_rgba(255,255,255,0.1)] overflow-hidden">
+              <img src="/images/logo.png" alt="QAMS logo" class="w-full h-full object-cover" />
             </div>
             <span class="text-white font-bold text-xl tracking-tight">QAMS</span>
           </div>
@@ -179,7 +185,7 @@ import { filter } from 'rxjs/operators';
       </aside>
 
       <!-- ============ CONTENIDO PRINCIPAL ============ -->
-      <div class="flex-1 flex flex-col min-w-0 transition-all duration-300 lg:ml-72 bg-[#F6F6F8]">
+      <div class="flex-1 flex flex-col min-w-0 transition-all duration-300 lg:ml-72 bg-transparent">
         <!-- Header -->
         <header
           class="sticky top-0 z-30 bg-white/70 backdrop-blur-md border-b border-slate-200/60 px-6 py-4 flex items-center justify-between"
@@ -276,6 +282,13 @@ import { filter } from 'rxjs/operators';
         (click)="toggleSidebar($event)"
         class="fixed inset-0 z-30 bg-slate-900/40 backdrop-blur-sm lg:hidden transition-all duration-300"
       ></div>
+
+      <!-- Marca Personal Oculta (Easter Egg) -->
+      <div class="fixed bottom-10 left-1/2 -translate-x-1/2 z-50 pointer-events-none flex flex-col items-center group">
+        <i class="fas fa-paw text-5xl text-[#f59e0b] opacity-[0.2] drop-shadow-[0_0_25px_rgba(245,158,11,0.4)]
+                   hover:opacity-60 transition-all duration-500 filter blur-[0.5px]"></i>
+        <div class="h-1 w-12 bg-gradient-to-r from-transparent via-[#f59e0b]/20 to-transparent blur-xl mt-1"></div>
+      </div>
     </div>
   `,
   styles: [`

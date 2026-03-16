@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RolesService } from '../../../core/services/roles.service';
 import { Role, Permission } from '../../../core/models/role.model';
-import { ToastrService } from 'ngx-toastr';
+import { ToastService } from '../../../core/services/toast.service';
 import { finalize } from 'rxjs';
 
 @Component({
@@ -16,7 +16,7 @@ import { finalize } from 'rxjs';
 export class RolesComponent implements OnInit {
   private rolesService = inject(RolesService);
   private fb = inject(FormBuilder);
-  private toastr = inject(ToastrService);
+  private toastr = inject(ToastService);
 
   roles = signal<Role[]>([]);
   allPermissions = signal<any[]>([]); // System permissions

@@ -12,7 +12,7 @@ import { Project } from '../../core/models/project.model';
 import { TestSuite } from '../../core/models/test-suite.model';
 import { TestCase } from '../../core/models/test-case.model';
 import { FormsModule } from '@angular/forms';
-import { ToastrService } from 'ngx-toastr';
+import { ToastService } from '../../core/services/toast.service';
 
 /**
  * Componente para visualizar, crear, editar y subir evidencias a Ejecuciones de Prueba.
@@ -63,7 +63,7 @@ export class TestExecutionsComponent implements OnInit {
   private scenariosService = inject(TestSuitesService);
   private route = inject(ActivatedRoute);
   private location = inject(Location);
-  private toastr = inject(ToastrService);
+  private toastr = inject(ToastService);
 
   ngOnInit(): void {
     this.initForm();

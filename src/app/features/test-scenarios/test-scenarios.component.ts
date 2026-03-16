@@ -5,7 +5,7 @@ import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ToastrService } from 'ngx-toastr';
+import { ToastService } from '../../core/services/toast.service';
 import { TestSuitesService } from '../../core/services/test-suites.service';
 import { ProjectsService } from '../../core/services/projects.service';
 import { TestSuite } from '../../core/models/test-suite.model';
@@ -34,7 +34,7 @@ export class TestScenariosComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private fb = inject(FormBuilder);
-  private toastr = inject(ToastrService);
+  private toastr = inject(ToastService);
 
   ngOnInit(): void {
     this.initForm();
