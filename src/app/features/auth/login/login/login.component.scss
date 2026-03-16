@@ -4,6 +4,7 @@
 
 .login-header {
   margin-bottom: 2rem;
+  text-align: center;
   
   h2 {
     font-size: 2.5rem;
@@ -32,7 +33,7 @@
   gap: 0.5rem;
 
   label {
-    font-size: 10px;
+    font-size: 13px;
     font-weight: 800;
     color: #475569; // Slate-600
     text-transform: uppercase;
@@ -73,7 +74,7 @@
     width: 100%;
     background: transparent;
     border: none;
-    padding: 1rem 1rem 1rem 3.5rem;
+    padding: 1rem;
     color: #0f172a; // Slate-900
     font-size: 1rem;
     outline: none;
@@ -101,23 +102,22 @@
   margin-top: 1rem;
   padding: 1.125rem;
   border-radius: 1.25rem;
-  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  background: linear-gradient(135deg, #135bec 0%, #13ecb6 100%);
   color: white;
-  font-weight: 700;
+  font-weight: 800;
   font-size: 1rem;
   border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.75rem;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.4);
+  box-shadow: 0 10px 25px -5px rgba(19, 91, 236, 0.4);
 
   &:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 15px 30px -5px rgba(79, 70, 229, 0.5);
-    background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%);
+    box-shadow: 0 15px 30px -5px rgba(19, 91, 236, 0.5);
+    filter: brightness(1.1);
   }
 
   &:active:not(:disabled) {
@@ -128,15 +128,6 @@
     opacity: 0.7;
     cursor: not-allowed;
     background: #475569;
-  }
-
-  .btn-icon {
-    font-size: 1.125rem;
-    transition: transform 0.3s ease;
-  }
-
-  &:hover .btn-icon {
-    transform: translateX(4px);
   }
 }
 

@@ -42,13 +42,6 @@ import { RouterOutlet } from '@angular/router';
         <!-- Contenido dinámico (login o register) -->
         <router-outlet />
       </div>
-
-      <!-- Marca Personal Oculta (Easter Egg) -->
-      <div class="fixed bottom-14 left-1/2 -translate-x-1/2 z-50 pointer-events-none flex flex-col items-center">
-        <i class="fas fa-paw text-7xl text-[#f59e0b] opacity-[0.3] drop-shadow-[0_0_35px_rgba(245,158,11,0.4)]
-                   filter blur-[0.5px]"></i>
-        <div class="h-2 w-20 bg-gradient-to-r from-transparent via-[#f59e0b]/20 to-transparent blur-2xl mt-2"></div>
-      </div>
     </div>
   `,
 })
