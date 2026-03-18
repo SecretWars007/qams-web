@@ -1,1 +1,33 @@
-:host { display: block; }
+:host {
+  display: block;
+  width: 100%;
+}
+
+.remove-role-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  opacity: 0.5;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+  font-size: 8px;
+
+  &:hover {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.1);
+    transform: scale(1.1);
+  }
+}
+
+// Ensure the table utilizes available space
+table {
+  table-layout: auto;
+  min-width: 100%;
+}

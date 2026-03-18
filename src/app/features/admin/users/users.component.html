@@ -1,4 +1,4 @@
-<div class="p-4 sm:p-6 max-w-7xl mx-auto animate-in fade-in duration-500">
+<div class="p-4 sm:p-6 w-full mx-auto animate-in fade-in duration-500">
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
             <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 mb-1 sm:mb-2 tracking-tight">Gestión de Usuarios</h1>
@@ -45,8 +45,11 @@
 
                 <div class="flex flex-wrap gap-1.5 pt-3 border-t border-slate-50">
                     <span *ngFor="let role of user.roles"
-                        class="px-2 py-0.5 rounded-md bg-[#150fbd]/5 text-[#150fbd] text-[8px] font-bold uppercase tracking-widest">
+                        class="px-2 py-0.5 rounded-md bg-[#150fbd]/5 text-[#150fbd] text-[8px] font-bold uppercase tracking-widest flex items-center gap-1.5">
                         {{ role }}
+                        <button (click)="onRemoveRole(user.id, role)" class="remove-role-btn" title="Quitar rol">
+                            <i class="fas fa-xmark"></i>
+                        </button>
                     </span>
                     <span *ngIf="user.roles.length === 0" class="text-[8px] font-bold uppercase tracking-widest text-slate-400">Sin roles</span>
                 </div>
@@ -109,10 +112,13 @@
                             </span>
                         </td>
                         <td class="px-6 py-5">
-                            <div class="flex flex-wrap gap-1.5 max-w-[200px]">
+                            <div class="flex flex-wrap gap-1.5">
                                 <span *ngFor="let role of user.roles"
-                                    class="px-2 py-0.5 rounded-md bg-[#150fbd]/10 text-[#150fbd] text-[10px] font-bold uppercase tracking-widest">
+                                    class="px-2 py-0.5 rounded-md bg-[#150fbd]/10 text-[#150fbd] text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
                                     {{ role }}
+                                    <button (click)="onRemoveRole(user.id, role)" class="remove-role-btn" title="Quitar rol">
+                                        <i class="fas fa-xmark"></i>
+                                    </button>
                                 </span>
                                 <span *ngIf="user.roles.length === 0" class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Sin roles</span>
                             </div>

@@ -49,11 +49,21 @@ export class UsersComponent implements OnInit {
 
     this.usersService.assignRole(userId, roleId).subscribe({
       next: () => {
-        // Recargar para mostrar los nuevos roles
         this.loadData();
-        select.value = ''; // Reset select
+        select.value = '';
       }
     });
+  }
+
+  onRemoveRole(userId: string, roleName: string): void {
+    const roleObj = this.roles().find(r => r.name === roleName);
+    if (!roleObj) return;
+
+    if (confirm(`¿Estás seguro de que deseas retirar el rol "${roleName}" de este usuario?`)) {
+      this.usersService.removeRole(userId, roleObj.id).subscribe({
+        next: () => this.loadData()
+      });
+    }
   }
 
   onDeleteUser(userId: string): void {
