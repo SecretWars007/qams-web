@@ -1,28 +1,47 @@
 :host {
   display: block;
   width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.custom-scrollbar {
+  &::-webkit-scrollbar {
+    height: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(21, 15, 189, 0.1);
+    border-radius: 10px;
+    &:hover {
+      background: rgba(21, 15, 189, 0.2);
+    }
+  }
 }
 
 .remove-role-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 14px;
-  height: 14px;
-  border-radius: 4px;
+  width: 18px;
+  height: 18px;
+  border-radius: 6px;
   border: none;
-  background: transparent;
-  color: inherit;
-  opacity: 0.5;
+  background: rgba(255, 68, 68, 0.1);
+  color: #ff4444;
+  opacity: 0.8;
   cursor: pointer;
   transition: all 0.2s ease;
   padding: 0;
-  font-size: 8px;
+  font-size: 10px;
 
   &:hover {
     opacity: 1;
-    background: rgba(0, 0, 0, 0.1);
-    transform: scale(1.1);
+    background: #ff4444;
+    color: white;
+    transform: scale(1.15);
   }
 }
 
@@ -30,4 +49,14 @@
 table {
   table-layout: auto;
   min-width: 100%;
+
+  thead {
+    tr th {
+      background: #f8f9ff;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      border-bottom: 1px solid rgba(21, 15, 189, 0.05);
+    }
+  }
 }

@@ -7,13 +7,13 @@ WORKDIR /app
 COPY package*.json ./
 
 # Instalar dependencias
-RUN npm ci
+RUN npm install
 
 # Copiar código fuente
 COPY . .
 
-# Compilar la aplicación
-RUN npm run build
+# Compilar la aplicación para producción
+RUN npm run build -- --configuration production
 
 # Stage 2: Servir con Nginx
 FROM nginx:alpine
@@ -22,6 +22,7 @@ FROM nginx:alpine
 COPY nginx.conf /etc/nginx/nginx.conf
 
 # Copiar archivos compilados desde el builder
+# Nota: La ruta de salida puede variar según angular.json, ajustándola a dist/qams-web/browser
 COPY --from=builder /app/dist/qams-web/browser /usr/share/nginx/html
 
 # Exponer puerto

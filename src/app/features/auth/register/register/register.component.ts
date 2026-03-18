@@ -6,6 +6,7 @@ import { Router, RouterLink } from '@angular/router';
 import { ToastService } from '../../../../core/services/toast.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { RegisterRequest } from '../../../../core/models/auth.model';
+import Swal from 'sweetalert2';
 
 /**
  * Componente que gestiona el registro de nuevos usuarios en el sistema.

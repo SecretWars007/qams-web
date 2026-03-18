@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { ToastService } from '../../../../core/services/toast.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import Swal from 'sweetalert2';
 
 /**
  * Componente que gestiona el inicio de sesión de los usuarios.
@@ -58,7 +59,7 @@ export class LoginComponent {
       next: () => {
         console.log('[LoginComponent] Login exitoso, procediendo a dashboard');
         this.loading.set(false);
-        this.toastr.success('Inicio de sesión exitoso.', 'Bienvenido');
+        this.toastr.success('Inicio de sesión exitoso.', '¡Bienvenido!');
         this.router.navigate(['/dashboard']).then(nav => {
           console.log('[LoginComponent] Navegación a dashboard completa:', nav);
         }).catch(err => {
@@ -67,6 +68,7 @@ export class LoginComponent {
       },
       error: (err) => {
         console.error('[LoginComponent] Error en login:', err);
+        this.toastr.error('Credenciales inválidas o error de conexión.', 'Error de Acceso');
         this.loading.set(false);
       },
     });

@@ -13,56 +13,62 @@ export class ToastService {
     this.isBrowser = isPlatformBrowser(platformId);
   }
 
-  // Obtenemos la instancia de forma "lazy" (perezosa) y solo si estamos en el navegador
+  // Obtenemos la instancia de forma "lazy" y solo si estamos en el navegador
   private getToast() {
     if (!this.isBrowser) return null;
     
     if (!this.toastInstance) {
       this.toastInstance = Swal.mixin({
-        toast: true,
-        position: 'top-end',
-        showConfirmButton: false,
+        position: 'center',
+        showConfirmButton: true,
+        confirmButtonColor: '#150fbd',
         timer: 3000,
         timerProgressBar: true,
-        background: 'rgba(17, 24, 39, 0.95)', // bg-gray-900 con opacidad
-        color: '#f9fafb', // text-gray-50
+        background: '#ffffff',
+        color: '#1e293b', // slate-800
         customClass: {
-          popup: 'border border-slate-700/50 shadow-2xl backdrop-blur-md rounded-xl',
-          title: 'text-sm font-semibold tracking-wide',
-          timerProgressBar: 'bg-gradient-to-r from-blue-500 to-purple-500'
+          popup: 'rounded-3xl border border-slate-100 shadow-2xl p-6',
+          title: 'text-xl font-bold tracking-tight text-slate-900',
+          htmlContainer: 'text-sm text-slate-500 font-medium',
+          confirmButton: 'px-6 py-2.5 rounded-xl font-bold uppercase tracking-widest text-xs transition-all hover:scale-105',
+          timerProgressBar: 'bg-[#150fbd]'
         },
-        didOpen: (toast) => {
-          toast.onmouseenter = Swal.stopTimer;
-          toast.onmouseleave = Swal.resumeTimer;
-        }
+        buttonsStyling: true
       });
     }
     return this.toastInstance;
   }
 
-  success(message: string, title?: string) {
+  success(message: string, title: string = '¡Éxito!') {
     this.getToast()?.fire({
       icon: 'success',
-      title: title ? `${title} - ${message}` : message,
-      iconColor: '#10b981' // emerald-500
+      title: title,
+      text: message,
+      iconColor: '#10b981', // emerald-500
+      showConfirmButton: false,
+      timer: 2000
     });
   }
 
-  error(message: string, title?: string) {
+  error(message: string, title: string = 'Error') {
     this.getToast()?.fire({
       icon: 'error',
-      title: title ? `${title} - ${message}` : message,
+      title: title,
+      text: message,
       iconColor: '#ef4444', // red-500
-      timer: 5000 // Da más tiempo para leer errores
+      timer: undefined, // Los errores no se cierran solos
+      showConfirmButton: true
     });
   }
 
-  warning(message: string, title?: string) {
+  warning(message: string, title: string = 'Atención') {
     this.getToast()?.fire({
       icon: 'warning',
-      title: title ? `${title} - ${message}` : message,
+      title: title,
+      text: message,
       iconColor: '#f59e0b', // amber-500
-      timer: 4000
+      timer: 4000,
+      showConfirmButton: true
     });
   }
 

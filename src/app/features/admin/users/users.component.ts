@@ -4,6 +4,7 @@ import { UsersService } from '../../../core/services/users.service';
 import { RolesService } from '../../../core/services/roles.service';
 import { User } from '../../../core/models/user.model';
 import { Role } from '../../../core/models/role.model';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-users',
@@ -47,10 +48,33 @@ export class UsersComponent implements OnInit {
 
     if (!roleId) return;
 
+    const user = this.users().find(u => u.id === userId);
+    const roleObj = this.roles().find(r => r.id === roleId);
+
+    if (user && roleObj && user.roles.includes(roleObj.name)) {
+      Swal.fire({
+        title: 'Rol ya asignado',
+        text: `El usuario ya cuenta con el rol "${roleObj.name}".`,
+        icon: 'info',
+        confirmButtonColor: '#150fbd',
+        confirmButtonText: 'Entendido',
+        background: '#ffffff'
+      });
+      select.value = '';
+      return;
+    }
+
     this.usersService.assignRole(userId, roleId).subscribe({
       next: () => {
         this.loadData();
         select.value = '';
+        Swal.fire({
+          title: '¡Asignado!',
+          text: 'El rol ha sido asignado correctamente.',
+          icon: 'success',
+          timer: 2000,
+          showConfirmButton: false
+        });
       }
     });
   }
@@ -59,18 +83,73 @@ export class UsersComponent implements OnInit {
     const roleObj = this.roles().find(r => r.name === roleName);
     if (!roleObj) return;
 
-    if (confirm(`¿Estás seguro de que deseas retirar el rol "${roleName}" de este usuario?`)) {
-      this.usersService.removeRole(userId, roleObj.id).subscribe({
-        next: () => this.loadData()
-      });
-    }
+    Swal.fire({
+      title: '¿Retirar rol?',
+      text: `¿Estás seguro de que deseas retirar el rol "${roleName}" de este usuario?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#150fbd',
+      cancelButtonColor: '#ff4444',
+      confirmButtonText: 'Sí, retirar',
+      cancelButtonText: 'Cancelar',
+      background: '#ffffff'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.usersService.removeRole(userId, roleObj.id).subscribe({
+          next: () => {
+            this.loadData();
+            Swal.fire({
+              title: '¡Retirado!',
+              text: 'El rol ha sido retirado correctamente.',
+              icon: 'success',
+              timer: 2000,
+              showConfirmButton: false
+            });
+          }
+        });
+      }
+    });
   }
 
   onDeleteUser(userId: string): void {
-    if (confirm('¿Estás seguro de que deseas eliminar este usuario?')) {
-      this.usersService.deleteUser(userId).subscribe({
-        next: () => this.loadData()
+    const user = this.users().find(u => u.id === userId);
+    if (user && user.roles && user.roles.length > 0) {
+      Swal.fire({
+        title: 'Acceso Denegado',
+        text: 'No se puede eliminar un usuario que tiene roles asignados. Por favor, retira todos los roles antes de intentar eliminarlo.',
+        icon: 'error',
+        confirmButtonColor: '#150fbd',
+        confirmButtonText: 'Entendido',
+        background: '#ffffff'
       });
+      return;
     }
+
+    Swal.fire({
+      title: '¿Eliminar usuario?',
+      text: 'Esta acción no se puede deshacer.',
+      icon: 'error',
+      showCancelButton: true,
+      confirmButtonColor: '#ff4444',
+      cancelButtonColor: '#150fbd',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+      background: '#ffffff'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.usersService.deleteUser(userId).subscribe({
+          next: () => {
+            this.loadData();
+            Swal.fire({
+              title: '¡Eliminado!',
+              text: 'El usuario ha sido eliminado correctamente.',
+              icon: 'success',
+              timer: 2000,
+              showConfirmButton: false
+            });
+          }
+        });
+      }
+    });
   }
 }

@@ -270,8 +270,8 @@ import { filter } from 'rxjs/operators';
         </header>
 
         <!-- Área de contenido -->
-        <main class="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-8">
-          <div class="max-w-screen-2xl mx-auto animate-in fade-in duration-500">
+        <main class="flex-1 overflow-y-auto overflow-x-hidden p-2 sm:p-4 lg:p-6">
+          <div class="w-full animate-in fade-in duration-500">
             <router-outlet />
           </div>
         </main>
