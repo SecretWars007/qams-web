@@ -27,9 +27,9 @@ export class AuthService {
   /** URL base para endpoints de autenticación */
   private readonly apiUrl = `${environment.apiUrl}/Auth`;
 
-  private http = inject(HttpClient);
-  private router = inject(Router);
-  private authMockService = inject(AuthMockService);
+  private readonly http = inject(HttpClient);
+  private readonly router = inject(Router);
+  private readonly authMockService = inject(AuthMockService);
 
   /** Señales reactivas delegadas al Mock Service */
   readonly currentUser = this.authMockService.currentUser;
@@ -202,10 +202,10 @@ export class AuthService {
     const roleList = Array.isArray(roles) ? roles : [roles];
     
     // Lista de nombres de rol permitidos para administración
-    const adminRoles = ['admin', 'administrador', 'administrator', 'superadmin'];
+    const adminRoles = new Set(['admin', 'administrador', 'administrator', 'superadmin']);
     
     const isUserAdmin = roleList.some(r => 
-      typeof r === 'string' && adminRoles.includes(r.toLowerCase().trim())
+      typeof r === 'string' && adminRoles.has(r.toLowerCase().trim())
     );
 
 

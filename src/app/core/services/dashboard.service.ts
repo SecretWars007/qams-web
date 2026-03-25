@@ -1,7 +1,7 @@
 // src/app/core/services/dashboard.service.ts
 // Servicio del dashboard: resumen de métricas, timeline, burndown y drawdown.
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { map, catchError, switchMap, delay } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
@@ -20,10 +20,10 @@ export class DashboardService {
     /** URL base del endpoint del dashboard */
     private readonly apiUrl = `${environment.apiUrl}/Dashboard`;
 
-    private http = inject(HttpClient);
-    private authService = inject(AuthService);
-    private mockService = inject(DashboardMockService);
-    private projectsService = inject(ProjectsService);
+    private readonly http = inject(HttpClient);
+    private readonly authService = inject(AuthService);
+    private readonly mockService = inject(DashboardMockService);
+    private readonly projectsService = inject(ProjectsService);
 
     /**
      * Obtiene el resumen general del dashboard (KPIs, gráficos, timeline).

@@ -17,7 +17,7 @@ export class UsersService {
     /** URL base del endpoint de usuarios */
     private readonly apiUrl = `${environment.apiUrl}/Users`;
 
-    private http = inject(HttpClient);
+    private readonly http = inject(HttpClient);
 
     /** Obtiene la lista completa de usuarios */
     getUsers(): Observable<User[]> {

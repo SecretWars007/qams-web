@@ -14,8 +14,8 @@ export class CatalogsService {
     /** URL base del endpoint de catálogos */
     private readonly apiUrl = `${environment.apiUrl}/Catalogs`;
 
-    private http = inject(HttpClient);
-    private mock = inject(CatalogsMockService);
+    private readonly http = inject(HttpClient);
+    private readonly mock = inject(CatalogsMockService);
 
     /**
      * Obtiene los ítems activos de un catálogo específico.

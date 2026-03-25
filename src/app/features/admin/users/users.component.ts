@@ -14,8 +14,8 @@ import Swal from 'sweetalert2';
   styleUrl: './users.component.scss'
 })
 export class UsersComponent implements OnInit {
-  private usersService = inject(UsersService);
-  private rolesService = inject(RolesService);
+  private readonly usersService = inject(UsersService);
+  private readonly rolesService = inject(RolesService);
 
   users = signal<User[]>([]);
   roles = signal<Role[]>([]);
@@ -113,7 +113,7 @@ export class UsersComponent implements OnInit {
 
   onDeleteUser(userId: string): void {
     const user = this.users().find(u => u.id === userId);
-    if (user && user.roles && user.roles.length > 0) {
+    if (user?.roles?.length) {
       Swal.fire({
         title: 'Acceso Denegado',
         text: 'No se puede eliminar un usuario que tiene roles asignados. Por favor, retira todos los roles antes de intentar eliminarlo.',
@@ -143,6 +143,61 @@ export class UsersComponent implements OnInit {
             Swal.fire({
               title: '¡Eliminado!',
               text: 'El usuario ha sido eliminado correctamente.',
+              icon: 'success',
+              timer: 2000,
+              showConfirmButton: false
+            });
+          }
+        });
+      }
+    });
+  }
+
+  onToggleStatus(user: User): void {
+    const newStatus = !user.isActive;
+
+    if (!newStatus && user.roles && user.roles.length > 0) {
+      Swal.fire({
+        title: 'Acceso Denegado',
+        text: 'No se puede inactivar al usuario si tiene roles asignados. Por favor, retira todos los roles antes de inactivarlo.',
+        icon: 'error',
+        confirmButtonColor: '#150fbd',
+        confirmButtonText: 'Entendido',
+        background: '#ffffff'
+      });
+      return;
+    }
+
+    const action = newStatus ? 'activar' : 'inactivar';
+
+    Swal.fire({
+      title: `¿Deseas ${action} al usuario?`,
+      text: `El usuario será marcado como ${newStatus ? 'activo' : 'inactivo'}.`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#150fbd',
+      cancelButtonColor: '#ff4444',
+      confirmButtonText: 'Sí, confirmar',
+      cancelButtonText: 'Cancelar',
+      background: '#ffffff'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Obtenemos los roleIds actuales para el DTO
+        const roleIds = this.roles()
+          .filter(r => user.roles.includes(r.name))
+          .map(r => r.id);
+
+        this.usersService.updateUser(user.id, {
+          email: user.email,
+          fullName: user.fullName,
+          isActive: newStatus,
+          roleIds: roleIds
+        }).subscribe({
+          next: () => {
+            this.loadData();
+            Swal.fire({
+              title: '¡Actualizado!',
+              text: `El usuario ha sido ${newStatus ? 'activado' : 'inactivado'} correctamente.`,
               icon: 'success',
               timer: 2000,
               showConfirmButton: false
