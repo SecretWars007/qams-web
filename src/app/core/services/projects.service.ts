@@ -19,9 +19,9 @@ export class ProjectsService {
     /** URL base del endpoint de proyectos */
     private readonly apiUrl = `${environment.apiUrl}/Projects`;
 
-    private http = inject(HttpClient);
-    private mockService = inject(ProjectsMockService);
-    private testCasesMockService = inject(TestCasesMockService);
+    private readonly http = inject(HttpClient);
+    private readonly mockService = inject(ProjectsMockService);
+    private readonly testCasesMockService = inject(TestCasesMockService);
 
     /** Obtiene la lista completa de proyectos */
     getProjects(): Observable<Project[]> {

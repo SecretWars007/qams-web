@@ -28,6 +28,17 @@ export class UsersService {
     }
 
     /**
+     * Crea un nuevo usuario en el sistema.
+     * @param user - Datos del nuevo usuario
+     */
+    createUser(user: any): Observable<User> {
+        console.log(this.LOG_TAG, 'Creando nuevo usuario:', user.username);
+        return this.http.post<UserDto>(this.apiUrl, user).pipe(
+            map(dto => UserMapper.fromDto(dto))
+        );
+    }
+
+    /**
      * Obtiene un usuario por su ID.
      * @param id - Identificador del usuario
      */

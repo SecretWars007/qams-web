@@ -9,7 +9,7 @@ RUN npm install
 
 # Copiar código fuente y compilar
 COPY . .
-RUN npm run build -- --configuration production
+RUN npm run build -- qams-web --configuration production
 
 # Stage 2: Servir con Nginx
 FROM nginx:alpine

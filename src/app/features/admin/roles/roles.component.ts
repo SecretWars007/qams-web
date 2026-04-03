@@ -1,9 +1,9 @@
+import Swal from 'sweetalert2';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RolesService } from '../../../core/services/roles.service';
-import { Role, Permission } from '../../../core/models/role.model';
-import { ToastService } from '../../../core/services/toast.service';
+import { Role } from '../../../core/models/role.model';
 import { finalize } from 'rxjs';
 
 @Component({
@@ -14,9 +14,8 @@ import { finalize } from 'rxjs';
   styleUrls: ['./roles.component.scss']
 })
 export class RolesComponent implements OnInit {
-  private rolesService = inject(RolesService);
-  private fb = inject(FormBuilder);
-  private toastr = inject(ToastService);
+  private readonly rolesService = inject(RolesService);
+  private readonly fb = inject(FormBuilder);
 
   roles = signal<Role[]>([]);
   allPermissions = signal<any[]>([]); // System permissions
@@ -53,7 +52,12 @@ export class RolesComponent implements OnInit {
         next: (data) => this.roles.set(data),
         error: (err) => {
           console.error('[RolesComponent] Error loading roles', err);
-          this.toastr.error('Error al cargar la lista de roles');
+          Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Error al cargar la lista de roles',
+      confirmButtonColor: '#150fbd'
+    });
         }
       });
   }
@@ -109,13 +113,23 @@ export class RolesComponent implements OnInit {
 
     request$.pipe(finalize(() => this.isSubmitting.set(false))).subscribe({
       next: () => {
-        this.toastr.success(`Rol ${this.isEdit() ? 'actualizado' : 'creado'} correctamente`);
+        Swal.fire({
+          icon: 'success',
+          title: 'Éxito',
+          text: `Rol ${this.isEdit() ? 'actualizado' : 'creado'} correctamente`,
+          confirmButtonColor: '#150fbd'
+        });
         this.closeModels();
         this.loadRoles();
       },
       error: (err) => {
         console.error('[RolesComponent] Save error', err);
-        this.toastr.error('Error al guardar el rol');
+        Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Error al guardar el rol',
+      confirmButtonColor: '#150fbd'
+    });
       }
     });
   }
@@ -123,17 +137,32 @@ export class RolesComponent implements OnInit {
   /** Toggles active/inactive status of a role */
   toggleStatus(role: Role): void {
     if (role.name.toLowerCase() === 'admin' || role.name.toLowerCase() === 'administrador') {
-         this.toastr.warning('El rol principal de administrador no se puede desactivar.');
+         Swal.fire({
+      icon: 'warning',
+      title: 'Atención',
+      text: 'El rol principal de administrador no se puede desactivar.',
+      confirmButtonColor: '#150fbd'
+    });
          return;
     }
     this.rolesService.toggleRoleStatus(role.id).subscribe({
       next: () => {
-        this.toastr.success(`Rol ${role.isActive ? 'desactivado' : 'activado'} correctamente`);
+        Swal.fire({
+      icon: 'success',
+      title: 'Éxito',
+      text: `Rol ${role.isActive ? 'desactivado' : 'activado'} correctamente`,
+      confirmButtonColor: '#150fbd'
+    });
         this.loadRoles();
       },
       error: (err) => {
         console.error('[RolesComponent] Status toggle error', err);
-        this.toastr.error('Error al cambiar el estado del rol');
+        Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Error al cambiar el estado del rol',
+      confirmButtonColor: '#150fbd'
+    });
       }
     });
   }
@@ -143,12 +172,22 @@ export class RolesComponent implements OnInit {
     if (confirm(`¿Estás seguro de duplicar el rol "${role.name}"?`)) {
       this.rolesService.duplicateRole(role.id).subscribe({
         next: () => {
-          this.toastr.success('Rol duplicado correctamente');
+          Swal.fire({
+      icon: 'success',
+      title: 'Éxito',
+      text: 'Rol duplicado correctamente',
+      confirmButtonColor: '#150fbd'
+    });
           this.loadRoles();
         },
         error: (err) => {
           console.error('[RolesComponent] Duplicate error', err);
-          this.toastr.error('Error al duplicar el rol');
+          Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Error al duplicar el rol',
+      confirmButtonColor: '#150fbd'
+    });
         }
       });
     }
@@ -159,12 +198,22 @@ export class RolesComponent implements OnInit {
     if (confirm(`¿Estás seguro de eliminar el rol "${role.name}"? Esta acción no se puede deshacer.`)) {
       this.rolesService.deleteRole(role.id).subscribe({
         next: () => {
-          this.toastr.success('Rol eliminado correctamente');
+          Swal.fire({
+      icon: 'success',
+      title: 'Éxito',
+      text: 'Rol eliminado correctamente',
+      confirmButtonColor: '#150fbd'
+    });
           this.loadRoles();
         },
         error: (err) => {
           console.error('[RolesComponent] Delete error', err);
-          this.toastr.error('Error al eliminar el rol');
+          Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Error al eliminar el rol',
+      confirmButtonColor: '#150fbd'
+    });
         }
       });
     }
@@ -182,7 +231,7 @@ export class RolesComponent implements OnInit {
       // Si el backend no envía 'module', intentamos inferirlo del nombre ej: PROJECT_VIEW -> PROJECT
       let mod = p.module;
       if (!mod) {
-          const parts = p.name ? p.name.split('_') : p.code ? p.code.split('_') : ['GENERAL'];
+          const parts = (p.name || p.code || 'GENERAL').split('_');
           mod = parts[0] || 'GENERAL';
       }
 
@@ -196,7 +245,7 @@ export class RolesComponent implements OnInit {
   /** Checks if a selected role has a specific permission */
   hasPermission(permission: any): boolean {
     const role = this.selectedRole();
-    if (!role || !role.permissions) return false;
+    if (!role?.permissions) return false;
     
     // Validar por id, code o name dependiendo del payload de permissions del backend
     return role.permissions.some((p: any) => 
@@ -222,13 +271,23 @@ export class RolesComponent implements OnInit {
         } else {
           role.permissions = role.permissions.filter((p: any) => p.id !== permission.id);
         }
-        this.toastr.success(`Permiso ${isChecked ? 'añadido' : 'removido'} correctamente`);
+        Swal.fire({
+      icon: 'success',
+      title: 'Éxito',
+      text: `Permiso ${isChecked ? 'añadido' : 'removido'} correctamente`,
+      confirmButtonColor: '#150fbd'
+    });
       },
       error: (err) => {
         console.error('[RolesComponent] Permission toggle error', err);
         // Revert toggle
         (event.target as HTMLInputElement).checked = !isChecked;
-        this.toastr.error('Error al actualizar permiso');
+        Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Error al actualizar permiso',
+      confirmButtonColor: '#150fbd'
+    });
       }
     });
   }

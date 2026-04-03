@@ -165,6 +165,17 @@ export const routes: Routes = [
         canActivate: [permissionGuard],
       },
 
+      // Requisitos
+      {
+        path: 'requirements',
+        loadComponent: () =>
+          import('./features/requirements/requirements.component').then(
+            (m) => m.RequirementsComponent,
+          ),
+        data: { permission: 'PROJECTS_VIEW' },
+        canActivate: [permissionGuard],
+      },
+
       // Admin: Usuarios
       {
         path: 'admin/users',

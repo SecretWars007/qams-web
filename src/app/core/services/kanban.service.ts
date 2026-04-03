@@ -16,8 +16,8 @@ export class KanbanService {
     /** URL base del endpoint de Kanban */
     private readonly apiUrl = `${environment.apiUrl}/Kanban`;
 
-    private http = inject(HttpClient);
-    private mockService = inject(KanbanMockService);
+    private readonly http = inject(HttpClient);
+    private readonly mockService = inject(KanbanMockService);
 
     /**
      * Obtiene el tablero Kanban de un proyecto.

@@ -6,7 +6,9 @@ export class User {
     public fullName: string,
     public isActive: boolean,
     public createdAt: Date,
-    public roles: string[]
+    public roles: string[],
+    public documentoIdentidad: string = '',
+    public fechaNacimiento: string = ''
   ) {}
 }
 
@@ -15,6 +17,9 @@ export interface CreateUser {
   email: string;
   password: string;
   fullName: string;
+  documentoIdentidad: string;
+  fechaNacimiento: string; // ISO string o yyyy-MM-dd
+  telefono?: string;
   roleIds: string[];
 }
 
@@ -22,5 +27,8 @@ export interface UpdateUser {
   email: string;
   fullName: string;
   isActive: boolean;
+  documentoIdentidad?: string;
+  fechaNacimiento?: string;
+  telefono?: string;
   roleIds: string[];
 }

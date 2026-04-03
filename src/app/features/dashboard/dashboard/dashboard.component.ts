@@ -79,8 +79,8 @@ export class DashboardComponent implements OnInit {
 
 
   constructor(
-    private dashboardService: DashboardService,
-    private projectsService: ProjectsService
+    private readonly dashboardService: DashboardService,
+    private readonly projectsService: ProjectsService
   ) { }
 
   ngOnInit(): void {

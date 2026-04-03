@@ -1,8 +1,8 @@
+import Swal from 'sweetalert2';
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CatalogsService } from '../../../core/services/catalogs.service';
-import { ToastService } from '../../../core/services/toast.service';
 import { finalize } from 'rxjs';
 
 interface CatalogConfig {
@@ -23,9 +23,8 @@ interface CatalogConfig {
   styleUrls: ['./catalogs.component.scss']
 })
 export class CatalogsComponent implements OnInit {
-  private catalogsService = inject(CatalogsService);
-  private fb = inject(FormBuilder);
-  private toastr = inject(ToastService);
+  private readonly catalogsService = inject(CatalogsService);
+  private readonly fb = inject(FormBuilder);
 
   /** Lista de catálogos disponibles conforme al backend */
   availableCatalogs: CatalogConfig[] = [
@@ -78,7 +77,14 @@ export class CatalogsComponent implements OnInit {
       .pipe(finalize(() => this.loading = false))
       .subscribe({
         next: (data) => this.items = data,
-        error: (err) => this.toastr.error('Error al cargar elementos del catálogo')
+        error: (err) => {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Error al cargar elementos del catálogo',
+            confirmButtonColor: '#150fbd'
+          });
+        }
       });
   }
 
@@ -125,11 +131,23 @@ export class CatalogsComponent implements OnInit {
     request.pipe(finalize(() => this.loading = false))
       .subscribe({
         next: () => {
-          this.toastr.success(`Elemento ${this.isEdit ? 'actualizado' : 'creado'} correctamente`);
+          Swal.fire({
+      icon: 'success',
+      title: 'Éxito',
+      text: `Elemento ${this.isEdit ? 'actualizado' : 'creado'} correctamente`,
+      confirmButtonColor: '#150fbd'
+    });
           this.loadCatalogItems();
           this.closeModal();
         },
-        error: (err) => this.toastr.error('Error al guardar el elemento')
+        error: (err) => {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Error al guardar el elemento',
+            confirmButtonColor: '#150fbd'
+          });
+        }
       });
   }
 
@@ -142,10 +160,22 @@ export class CatalogsComponent implements OnInit {
     this.catalogsService.updateItem(this.selectedCatalog.name, item.id, updatedItem)
       .subscribe({
         next: () => {
-          this.toastr.success('Estado actualizado');
+          Swal.fire({
+      icon: 'success',
+      title: 'Éxito',
+      text: 'Estado actualizado',
+      confirmButtonColor: '#150fbd'
+    });
           this.loadCatalogItems();
         },
-        error: () => this.toastr.error('Error al actualizar estado')
+        error: () => {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Error al actualizar estado',
+            confirmButtonColor: '#150fbd'
+          });
+        }
       });
   }
 }

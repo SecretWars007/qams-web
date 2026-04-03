@@ -4,5 +4,6 @@
   "css.lint.unknownAtRules": "ignore",
   "scss.lint.compatibleVendorPrefixes": "ignore",
   "scss.lint.vendorPrefix": "ignore",
-  "scss.lint.unknownAtRules": "ignore"
+  "scss.lint.unknownAtRules": "ignore",
+  "compile-hero.disable-compile-files-on-did-save-code": false
 }

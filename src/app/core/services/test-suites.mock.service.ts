@@ -5,7 +5,7 @@ import { TestSuite, CreateTestSuite } from '../models/test-suite.model';
 
 @Injectable({ providedIn: 'root' })
 export class TestSuitesMockService {
-    private suites: TestSuite[] = [
+    private readonly suites: TestSuite[] = [
         new TestSuite(
             '101',
             '1',

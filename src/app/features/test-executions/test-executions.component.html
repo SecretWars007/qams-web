@@ -12,15 +12,15 @@
           Ejecuciones
         </h1>
         <div *ngIf="testCaseTitle()"
-          class="flex items-center mt-1 text-[10px] font-bold uppercase tracking-widest text-gray-500 truncate">
-          <span class="text-indigo-500/70 mr-2">CASO:</span>
+          class="flex items-center mt-1 text-[10px] font-bold tracking-widest text-gray-500 truncate">
+          <span class="text-indigo-500/70 mr-2">Caso:</span>
           <span class="truncate">{{ testCaseTitle() }}</span>
         </div>
       </div>
     </div>
     <button (click)="openModal()" class="btn-primary w-full sm:w-auto">
       <i class="fas fa-plus-circle"></i>
-      <span>Nueva Ejecución</span>
+      <span>Nueva ejecución</span>
     </button>
   </div>
 
@@ -29,16 +29,12 @@
     class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8 p-6 bg-gray-900/40 rounded-[2rem] border border-white/5 backdrop-blur-md">
     <!-- Project Filter -->
     <div class="space-y-3">
-      <label class="px-1 text-[9px] font-black text-gray-600 uppercase tracking-widest flex items-center gap-2"><i
-          class="fas fa-folder text-indigo-500/50"></i> Proyecto Principal</label>
-      <label class="px-1 text-[9px] font-black text-gray-600 uppercase tracking-widest flex items-center gap-2">
-        <svg class="w-3.5 h-3.5 text-indigo-500/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
-        </svg>
-        Proyecto Principal</label>
+      <label for="projectSelector" class="px-1 text-[9px] font-black text-gray-600 tracking-widest flex items-center gap-2">
+        <i class="fas fa-folder text-indigo-500/50"></i> 
+        Proyecto principal
+      </label>
       <div class="relative group">
-        <select [value]="selectedProjectId()" (change)="onProjectChange($event)"
+        <select id="projectSelector" [value]="selectedProjectId()" (change)="onProjectChange($event)"
           class="w-full bg-gray-950 border border-white/5 text-white text-xs rounded-2xl focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 px-5 py-4 outline-none transition-all appearance-none cursor-pointer font-bold tracking-wide hover:bg-gray-900/80">
           <option value="">Todos los proyectos</option>
           <option *ngFor="let project of projects()" [value]="project.id">{{ project.name }}</option>
@@ -53,14 +49,14 @@
 
     <!-- Scenario Filter -->
     <div class="space-y-3">
-      <label class="px-1 text-[9px] font-black text-gray-600 uppercase tracking-widest flex items-center gap-2">
+      <label for="scenarioSelector" class="px-1 text-[9px] font-black text-gray-600 tracking-widest flex items-center gap-2">
         <svg class="w-3.5 h-3.5 text-purple-500/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
         </svg>
-        Escenario / Módulo</label>
+        Escenario / módulo</label>
       <div class="relative group">
-        <select [value]="selectedScenarioId()" (change)="onScenarioChange($event)" [disabled]="!selectedProjectId()"
+        <select id="scenarioSelector" [value]="selectedScenarioId()" (change)="onScenarioChange($event)" [disabled]="!selectedProjectId()"
           class="w-full bg-gray-950 border border-white/5 text-white text-xs rounded-2xl focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 px-5 py-4 outline-none transition-all appearance-none cursor-pointer font-bold tracking-wide disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-900/80">
           <option value="">Todos los escenarios</option>
           <option *ngFor="let scenario of scenarios()" [value]="scenario.id">{{ scenario.name }}</option>
@@ -75,15 +71,15 @@
 
     <!-- Test Case Filter -->
     <div class="space-y-3">
-      <label class="px-1 text-[9px] font-black text-gray-600 uppercase tracking-widest flex items-center gap-2">
+      <label for="tcSelector" class="px-1 text-[9px] font-black text-gray-600 tracking-widest flex items-center gap-2">
         <svg class="w-3.5 h-3.5 text-emerald-500/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01">
           </path>
         </svg>
-        Caso Específico</label>
+        Caso específico</label>
       <div class="relative group">
-        <select [value]="selectedTestCaseId()" (change)="onTestCaseChange($event)" [disabled]="!selectedScenarioId()"
+        <select id="tcSelector" [value]="selectedTestCaseId()" (change)="onTestCaseChange($event)" [disabled]="!selectedScenarioId()"
           class="w-full bg-gray-950 border border-white/5 text-white text-xs rounded-2xl focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 px-5 py-4 outline-none transition-all appearance-none cursor-pointer font-bold tracking-wide disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-900/80">
           <option value="">Todos los casos</option>
           <option *ngFor="let tc of testCases()" [value]="tc.id">{{ tc.title }}</option>
@@ -123,8 +119,8 @@
               'bg-amber-500/10 text-amber-500 border-amber-500/10': execution.status.code === 'BLOCKED',
               'bg-indigo-500/10 text-indigo-400 border-indigo-500/10': execution.status.code === 'IN_PROGRESS',
               'bg-gray-800 text-gray-400 border-white/5': execution.status.code === 'PENDING'
-            }" class="px-2 py-0.5 rounded-lg text-[8px] font-black border uppercase tracking-widest">
-            {{ execution.status.code }}
+            }" class="px-2 py-0.5 rounded-lg text-[8px] font-black border tracking-widest">
+            {{ execution.status.code | titlecase }}
           </span>
         </div>
         <h3 class="text-white font-bold text-sm mb-4 line-clamp-2 leading-tight">{{ execution.testCase.title }}</h3>
@@ -137,7 +133,7 @@
             </div>
             <span class="text-xs text-gray-500 font-medium">{{ execution.executedBy }}</span>
           </div>
-          <span class="text-[10px] text-gray-600 font-bold uppercase">{{ execution.executionDate | date:'MMM d, HH:mm'
+          <span class="text-[10px] text-gray-600 font-bold">{{ execution.executionDate | date:'MMM d, HH:mm'
             }}</span>
         </div>
 
@@ -160,12 +156,12 @@
         <table class="w-full text-left border-collapse">
           <thead>
             <tr class="bg-white/5">
-              <th class="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-gray-500">Identificador</th>
-              <th class="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-gray-500">Caso de Prueba</th>
-              <th class="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-gray-500 text-center">Estatus</th>
-              <th class="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-gray-500">Especialista QA</th>
-              <th class="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-gray-500">Fecha Reporte</th>
-              <th class="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-gray-500 text-right">Gestión</th>
+              <th class="px-6 py-5 text-[10px] font-black tracking-widest text-gray-500">Identificador</th>
+              <th class="px-6 py-5 text-[10px] font-black tracking-widest text-gray-500">Caso de prueba</th>
+              <th class="px-6 py-5 text-[10px] font-black tracking-widest text-gray-500 text-center">Estatus</th>
+              <th class="px-6 py-5 text-[10px] font-black tracking-widest text-gray-500">Especialista QA</th>
+              <th class="px-6 py-5 text-[10px] font-black tracking-widest text-gray-500">Fecha reporte</th>
+              <th class="px-6 py-5 text-[10px] font-black tracking-widest text-gray-500 text-right">Gestión</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-white/5">
@@ -177,7 +173,7 @@
               <td class="px-6 py-5">
                 <div class="flex flex-col">
                   <span class="text-white font-bold text-sm tracking-tight group-hover:text-indigo-400 transition-colors">{{ execution.testCase.title }}</span>
-                  <span class="text-[9px] text-gray-600 font-black uppercase tracking-widest mt-1">Validación de Funcionalidad</span>
+                  <span class="text-[9px] text-gray-600 font-black tracking-widest mt-1">Validación de funcionalidad</span>
                 </div>
               </td>
               <td class="px-6 py-5 text-center">
@@ -187,8 +183,8 @@
                     'bg-amber-500/10 text-amber-500 border-amber-500/10': execution.status.code === 'BLOCKED',
                     'bg-indigo-500/10 text-indigo-400 border-indigo-500/10': execution.status.code === 'IN_PROGRESS',
                     'bg-gray-800 text-gray-500 border-white/5': execution.status.code === 'PENDING'
-                  }" class="inline-flex items-center px-2.5 py-1 rounded-lg text-[9px] font-black border uppercase tracking-widest">
-                  {{ execution.status.code }}
+                  }" class="inline-flex items-center px-2.5 py-1 rounded-lg text-[9px] font-black border tracking-widest">
+                  {{ execution.status.code | titlecase }}
                 </span>
               </td>
               <td class="px-6 py-5">
@@ -200,10 +196,10 @@
                 </div>
               </td>
               <td class="px-6 py-5">
-                <span class="text-[10px] text-gray-500 font-bold uppercase">{{ execution.executionDate | date:'MMM d, HH:mm' }}</span>
+                <span class="text-[10px] text-gray-500 font-bold">{{ execution.executionDate | date:'MMM d, HH:mm' }}</span>
               </td>
               <td class="px-6 py-5 text-right">
-                <div class="flex justify-end gap-2 text-[10px] font-black uppercase tracking-widest">
+                <div class="flex justify-end gap-2 text-[10px] font-black tracking-widest">
                   <button (click)="editExecution(execution, $event)" class="btn-icon btn-icon-warning" title="Editar">
                     <i class="fas fa-pen-to-square"></i>
                   </button>
@@ -227,9 +223,9 @@
       <div class="p-8 sm:p-10 flex-1 overflow-y-auto custom-scrollbar">
         <div class="flex justify-between items-start mb-8">
           <div>
-            <h2 class="text-2xl font-black text-white tracking-tight">{{ isEditing() ? 'Actualizar Ejecución #' +
-              editingExecutionId() : 'Nueva Ejecución' }}</h2>
-            <p class="text-gray-500 text-[10px] font-black uppercase tracking-[0.2em] mt-2" *ngIf="testCaseTitle()">
+            <h2 class="text-2xl font-black text-white tracking-tight">{{ isEditing() ? 'Actualizar ejecución #' +
+              editingExecutionId() : 'Nueva ejecución' }}</h2>
+            <p class="text-gray-500 text-[10px] font-black tracking-[0.2em] mt-2" *ngIf="testCaseTitle()">
               Caso: {{ testCaseTitle() }}</p>
           </div>
           <button (click)="closeModal()"
@@ -242,16 +238,16 @@
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <!-- Test Case Selection -->
             <div class="space-y-3">
-              <label class="px-1 text-[9px] font-black text-gray-600 uppercase tracking-widest">Caso de Prueba</label>
+              <label for="modalTestCaseId" class="px-1 text-[9px] font-black text-gray-600 tracking-widest">Caso de prueba</label>
               <div class="relative group">
-                <select formControlName="testCaseId"
+                <select id="modalTestCaseId" formControlName="testCaseId"
                   class="w-full bg-gray-950 border border-white/5 rounded-2xl px-5 py-4 text-xs font-bold text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all appearance-none cursor-pointer hover:bg-gray-900/80"
                   [class.border-rose-500]="executionForm.get('testCaseId')?.touched && executionForm.get('testCaseId')?.invalid">
                   <option value="">Seleccionar caso...</option>
                   <option *ngFor="let tc of testCases()" [value]="tc.id">{{ tc.title }}</option>
                 </select>
                 <div *ngIf="executionForm.get('testCaseId')?.touched && executionForm.get('testCaseId')?.invalid"
-                  class="text-rose-500 text-[10px] font-black uppercase tracking-widest mt-1 ml-1">
+                  class="text-rose-500 text-[10px] font-black tracking-widest mt-1 ml-1">
                   El caso de prueba es obligatorio
                 </div>
                 <svg
@@ -264,10 +260,10 @@
 
             <!-- Execution Status -->
             <div class="space-y-3">
-              <label class="px-1 text-[9px] font-black text-gray-600 uppercase tracking-widest">Estatus Global</label>
+              <label for="modalStatusId" class="px-1 text-[9px] font-black text-gray-600 tracking-widest">Estatus global</label>
               <div class="relative group">
-                <select formControlName="statusId"
-                  class="w-full bg-gray-950 border border-white/5 rounded-2xl px-5 py-4 text-xs font-bold text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all appearance-none cursor-pointer hover:bg-gray-900/80 uppercase tracking-wider">
+                <select id="modalStatusId" formControlName="statusId"
+                  class="w-full bg-gray-950 border border-white/5 rounded-2xl px-5 py-4 text-xs font-bold text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all appearance-none cursor-pointer hover:bg-gray-900/80 tracking-wider">
                   <option [value]="1">Passed</option>
                   <option [value]="2">Failed</option>
                   <option [value]="3">Blocked</option>
@@ -283,14 +279,14 @@
 
             <!-- Actual Time Hours -->
             <div class="space-y-3">
-              <label class="px-1 text-[9px] font-black text-gray-600 uppercase tracking-widest">Esfuerzo
-                (Horas)</label>
-              <input type="number" formControlName="actualTimeHours" step="0.5" min="0"
-                class="w-full bg-gray-950 border border-white/5 rounded-2xl px-5 py-4 text-xs font-bold text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all hover:bg-gray-900/80 uppercase tracking-wider placeholder-gray-700"
+              <label for="modalEffort" class="px-1 text-[9px] font-black text-gray-600 tracking-widest">Esfuerzo
+                (horas)</label>
+              <input id="modalEffort" type="number" formControlName="actualTimeHours" step="0.5" min="0"
+                class="w-full bg-gray-950 border border-white/5 rounded-2xl px-5 py-4 text-xs font-bold text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all hover:bg-gray-900/80 tracking-wider placeholder-gray-700"
                 placeholder="Ej. 1.5"
                 [class.border-rose-500]="executionForm.get('actualTimeHours')?.touched && executionForm.get('actualTimeHours')?.invalid">
               <div *ngIf="executionForm.get('actualTimeHours')?.touched && executionForm.get('actualTimeHours')?.invalid"
-                class="text-rose-500 text-[10px] font-black uppercase tracking-widest mt-1 ml-1">
+                class="text-rose-500 text-[10px] font-black tracking-widest mt-1 ml-1">
                 Esfuerzo inválido
               </div>
             </div>
@@ -298,9 +294,9 @@
 
           <!-- Notes -->
           <div class="space-y-3">
-            <label class="px-1 text-[9px] font-black text-gray-600 uppercase tracking-widest">Observaciones
-              Generales</label>
-            <textarea formControlName="notes" rows="3"
+            <label for="modalNotes" class="px-1 text-[9px] font-black text-gray-600 tracking-widest">Observaciones
+              generales</label>
+            <textarea id="modalNotes" formControlName="notes" rows="3"
               class="w-full bg-gray-950 border border-white/5 rounded-2xl px-5 py-4 flex-1 text-sm text-white placeholder-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all hover:bg-gray-900/80 resize-none font-medium leading-relaxed"
               placeholder="Describe el resultado global de la sesión de pruebas..."></textarea>
           </div>
@@ -310,7 +306,7 @@
             <div class="flex items-center gap-4">
               <button type="button" (click)="toggleSteps()"
                 class="flex items-center gap-2 text-lg font-black text-white hover:text-indigo-400 transition-colors">
-                <span>Cronología de Pasos</span>
+                <span>Cronología de pasos</span>
                 <i class="fas text-sm" [ngClass]="showSteps() ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
               </button>
               <div class="flex-1 h-px bg-white/5"></div>
@@ -329,15 +325,15 @@
                     </div>
                     <div>
                       <p class="text-white font-bold tracking-tight text-sm">{{ step.get('action')?.value }}</p>
-                      <p class="text-[9px] text-gray-600 font-black uppercase tracking-widest mt-1">Acción Requerida</p>
+                      <p class="text-[9px] text-gray-600 font-black tracking-widest mt-1">Acción requerida</p>
                     </div>
                   </div>
                   <div class="w-full sm:w-auto relative group">
                     <select formControlName="statusId"
-                      class="w-full sm:w-40 bg-gray-900 border border-white/5 text-[10px] font-black uppercase text-gray-300 rounded-xl pl-4 pr-8 py-3 outline-none focus:ring-1 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all appearance-none cursor-pointer hover:bg-gray-800 tracking-widest shadow-inner">
-                      <option [value]="1">PASSED</option>
-                      <option [value]="2">FAILED</option>
-                      <option [value]="3">BLOCKED</option>
+                      class="w-full sm:w-40 bg-gray-900 border border-white/5 text-[10px] font-black text-gray-300 rounded-xl pl-4 pr-8 py-3 outline-none focus:ring-1 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all appearance-none cursor-pointer hover:bg-gray-800 tracking-widest shadow-inner">
+                      <option [value]="1">Passed</option>
+                      <option [value]="2">Failed</option>
+                      <option [value]="3">Blocked</option>
                     </select>
                     <svg
                       class="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-600 group-hover:text-indigo-400 transition-colors pointer-events-none"
@@ -349,21 +345,21 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 relative z-10">
                   <div class="space-y-2">
-                    <label class="px-2 text-[8px] font-black text-gray-600 uppercase tracking-widest">Resultado
-                      Obtenido</label>
-                    <input type="text" formControlName="actualResult"
+                    <label [for]="'stepActualResult' + i" class="px-2 text-[8px] font-black text-gray-600 tracking-widest">Resultado
+                      obtenido</label>
+                    <input type="text" [id]="'stepActualResult' + i" formControlName="actualResult"
                       class="w-full bg-gray-900 border border-white/5 rounded-2xl px-5 py-3.5 text-xs text-gray-200 outline-none focus:ring-1 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-medium placeholder-gray-700 hover:bg-gray-800 shadow-inner"
                       placeholder="¿Qué observaste?"
                       [class.border-rose-500]="step.get('actualResult')?.touched && step.get('actualResult')?.invalid">
                     <div *ngIf="step.get('actualResult')?.touched && step.get('actualResult')?.invalid"
-                      class="text-rose-500 text-[9px] font-black uppercase tracking-widest mt-1 ml-1">
+                      class="text-rose-500 text-[9px] font-black tracking-widest mt-1 ml-1">
                       Resultado requerido
                     </div>
                   </div>
                   <div class="space-y-2">
-                    <label class="px-2 text-[8px] font-black text-gray-600 uppercase tracking-widest">Anotación
-                      Técnica</label>
-                    <input type="text" formControlName="notes"
+                    <label [for]="'stepTechNote' + i" class="px-2 text-[8px] font-black text-gray-600 tracking-widest">Anotación
+                      técnica</label>
+                    <input type="text" [id]="'stepTechNote' + i" formControlName="notes"
                       class="w-full bg-gray-900 border border-white/5 rounded-2xl px-5 py-3.5 text-xs text-gray-200 outline-none focus:ring-1 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-medium placeholder-gray-700 hover:bg-gray-800 shadow-inner"
                       placeholder="Detalles adicionales...">
                   </div>
@@ -381,7 +377,7 @@
             <button type="submit" [disabled]="executionForm.invalid || isSubmitting()" class="btn-primary flex-1">
               <span *ngIf="isSubmitting()" class="w-5 h-5 border-3 border-white/20 border-t-white rounded-full animate-spin"></span>
               <i *ngIf="!isSubmitting()" class="fas fa-check-circle"></i>
-              {{ isSubmitting() ? 'Sincronizando...' : (isEditing() ? 'Actualizar Reporte' : 'Finalizar Ejecución') }}
+              {{ isSubmitting() ? 'Sincronizando...' : (isEditing() ? 'Actualizar reporte' : 'Finalizar ejecución') }}
             </button>
           </div>
         </form>
@@ -401,19 +397,19 @@
           <div class="min-w-0 pr-10">
             <div class="flex items-center gap-3 mb-2">
               <span
-                class="px-3 py-1 bg-indigo-500/10 text-indigo-400 border border-indigo-500/10 rounded-lg text-[10px] font-black uppercase tracking-widest">Auditoría
+                class="px-3 py-1 bg-indigo-500/10 text-indigo-400 border border-indigo-500/10 rounded-lg text-[10px] font-black tracking-widest">Auditoría
                 #{{ selectedExecution()?.id }}</span>
               <span [ngClass]="{
                     'bg-emerald-500/10 text-emerald-400 border-emerald-500/10': selectedExecution()?.status?.code === 'PASSED',
                     'bg-rose-500/10 text-rose-400 border-rose-500/10': selectedExecution()?.status?.code === 'FAILED',
                     'bg-amber-500/10 text-amber-500 border-amber-500/10': selectedExecution()?.status?.code === 'BLOCKED'
-                  }" class="px-3 py-1 rounded-lg text-[10px] font-black border uppercase tracking-widest">
-                {{ selectedExecution()?.status?.code }}
+                  }" class="px-3 py-1 rounded-lg text-[10px] font-black border tracking-widest">
+                {{ selectedExecution()?.status?.code | titlecase }}
               </span>
             </div>
             <h2 class="text-3xl font-black text-white tracking-tight truncate">{{ selectedExecution()?.testCase?.title }}
             </h2>
-            <div class="flex items-center gap-4 mt-4 text-[10px] font-bold text-gray-600 uppercase tracking-widest">
+            <div class="flex items-center gap-4 mt-4 text-[10px] font-bold text-gray-600 tracking-widest">
               <div class="flex items-center gap-1.5"><i class="far fa-user text-indigo-500/50"></i> {{
                 selectedExecution()?.executedBy }}</div>
               <div class="flex items-center gap-1.5"><i class="far fa-clock text-indigo-500/50"></i> {{
@@ -430,7 +426,7 @@
           <!-- Step Results Section -->
           <div class="space-y-6">
             <div class="flex items-center gap-4">
-              <p class="text-[10px] font-black text-gray-600 uppercase tracking-widest">Protocolo de ejecución por pasos
+              <p class="text-[10px] font-black text-gray-600 tracking-widest">Protocolo de ejecución por pasos
               </p>
               <div class="flex-1 h-px bg-white/5"></div>
             </div>
@@ -472,7 +468,7 @@
                             <div class="min-w-0 flex-1">
                               <p class="text-[11px] text-gray-300 font-medium leading-relaxed">{{ obs.observation }}</p>
                               <div
-                                class="flex items-center gap-2 mt-2 text-[9px] text-gray-600 font-black uppercase tracking-widest">
+                                class="flex items-center gap-2 mt-2 text-[9px] text-gray-600 font-black tracking-widest">
                                 <span>{{ obs.createdBy }}</span>
                                 <span>•</span>
                                 <span>{{ obs.createdAt | date:'shortTime' }}</span>
@@ -486,7 +482,7 @@
 
                           <!-- Threaded Response -->
                           <div *ngIf="obs.response" class="mt-4 pl-4 border-l-2 border-emerald-500/30">
-                            <p class="text-[9px] text-emerald-500 font-black uppercase tracking-widest mb-1">Resolución
+                            <p class="text-[9px] text-emerald-500 font-black tracking-widest mb-1">Resolución
                             </p>
                             <p class="text-xs text-gray-400 leading-relaxed font-medium">{{ obs.response }}</p>
                           </div>
@@ -509,8 +505,8 @@
                           'text-emerald-400': step.status.id === 1,
                           'text-rose-400': step.status.id === 2,
                           'text-amber-500': step.status.id === 3
-                        }" class="text-[9px] font-black uppercase tracking-[0.2em]">
-                      {{ step.status.id === 1 ? 'PASSED' : step.status.id === 2 ? 'FAILED' : 'BLOCKED' }}
+                        }" class="text-[9px] font-black tracking-[0.2em]">
+                      {{ step.status.id === 1 ? 'Passed' : step.status.id === 2 ? 'Failed' : 'Blocked' }}
                     </span>
                     <div class="flex gap-2">
                       <button (click)="openUploadModal(selectedExecution()!, undefined, step.id)"
@@ -533,7 +529,7 @@
           <!-- General Evidence Section -->
           <div class="space-y-6">
             <div class="flex items-center gap-4">
-              <p class="text-[10px] font-black text-gray-600 uppercase tracking-widest">Repositorio de capturas globales
+              <p class="text-[10px] font-black text-gray-600 tracking-widest">Repositorio de capturas globales
               </p>
               <div class="flex-1 h-px bg-white/5"></div>
             </div>
@@ -542,7 +538,7 @@
               class="p-12 text-center bg-gray-950/30 rounded-[2.5rem] border border-white/5 border-dashed">
               <i class="fas fa-cloud-sun text-4xl text-gray-800 mb-4 block"></i>
               <p class="text-gray-600 font-bold text-sm">El repositorio de evidencias está vacío.</p>
-              <p class="text-[9px] text-gray-700 uppercase tracking-widest mt-2">No se han registrado capturas de nivel
+              <p class="text-[9px] text-gray-700 tracking-widest mt-2">No se han registrado capturas de nivel
                 global todavía</p>
             </div>
 
@@ -556,7 +552,7 @@
                 <div class="flex-1 min-w-0 pr-6">
                   <p class="text-xs font-bold text-gray-200 truncate" [title]="evidence.fileName">{{ evidence.fileName
                     }}</p>
-                  <p class="text-[9px] text-gray-600 font-black uppercase mt-1">{{ evidence.uploadedAt |
+                  <p class="text-[9px] text-gray-600 font-black mt-1">{{ evidence.uploadedAt |
                     date:'shortTime' }} • {{ evidence.uploadedAt | date:'dd MMM' }}</p>
                 </div>
                 <button
@@ -572,7 +568,7 @@
         <div class="pt-10 shrink-0">
           <button (click)="closeDetailsModal()" class="btn-secondary">
             <i class="fas fa-arrow-left"></i>
-            Volver al Listado
+            Volver al listado
           </button>
         </div>
       </div>
@@ -589,18 +585,17 @@
           class="w-20 h-20 bg-indigo-500/10 rounded-[2rem] flex items-center justify-center mx-auto mb-8 text-indigo-500 border border-indigo-500/10 shadow-inner">
           <i class="fas fa-cloud-upload-alt text-3xl"></i>
         </div>
-        <h2 class="text-2xl font-black text-white tracking-tight mb-2">Subir Evidencia</h2>
-        <p class="text-gray-600 text-[10px] font-black uppercase tracking-[0.2em] mb-10">Auditoría #{{
+        <h2 class="text-2xl font-black text-white tracking-tight mb-2">Subir evidencia</h2>
+        <p class="text-gray-600 text-[10px] font-black tracking-[0.2em] mb-10">Auditoría #{{
           selectedExecution()?.id }}</p>
 
         <form [formGroup]="uploadForm" (ngSubmit)="onUploadSubmit()" class="space-y-8 text-left">
           <div class="space-y-3">
-            <label class="px-1 text-[10px] font-black text-gray-600 uppercase tracking-widest">Contenido
-              Multimedia</label>
+            <label for="fileEvidenceUpload" class="px-1 text-[10px] font-black text-gray-600 tracking-widest">Contenido multimedia</label>
 
             <!-- ÁREA DE CARGA -->
             <div class="relative group/zone">
-              <input type="file" (change)="onFileSelected($event)" accept="image/*"
+              <input id="fileEvidenceUpload" type="file" (change)="onFileSelected($event)" accept="image/*"
                 class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
 
               <div *ngIf="!screenshotPreview()"
@@ -610,7 +605,7 @@
                 </div>
                 <div class="text-center">
                   <p class="text-sm text-gray-300 font-bold">Selecciona o pega una captura</p>
-                  <p class="text-[9px] text-gray-600 mt-2 uppercase tracking-widest font-black italic">CTRL + V
+                  <p class="text-[9px] text-gray-600 mt-2 tracking-widest font-black italic">CTRL + V
                     habilitado</p>
                 </div>
               </div>
@@ -618,13 +613,13 @@
               <!-- PREVISUALIZACIÓN -->
               <div *ngIf="screenshotPreview()"
                 class="relative rounded-[2.5rem] overflow-hidden border border-white/10 bg-black/60 aspect-video flex items-center justify-center shadow-2xl animate-in zoom-in-95">
-                <img [src]="screenshotPreview()" class="max-h-full max-w-full object-contain">
+                <img [src]="screenshotPreview()" alt="Vista previa de captura" class="max-h-full max-w-full object-contain">
                 <button type="button" (click)="clearScreenshot()"
                   class="absolute top-4 right-4 w-10 h-10 flex items-center justify-center bg-rose-600 text-white rounded-2xl hover:bg-rose-700 transition-all shadow-xl z-20 border border-rose-500/20">
                   <i class="fas fa-times"></i>
                 </button>
                 <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 to-transparent">
-                  <p class="text-[9px] text-indigo-400 font-black uppercase tracking-widest px-2">{{ selectedFile?.name
+                  <p class="text-[9px] text-indigo-400 font-black tracking-widest px-2">{{ selectedFile?.name
                     || 'CAPTURADO_DESDE_SISTEMA.PNG' }}</p>
                 </div>
               </div>
@@ -632,9 +627,9 @@
           </div>
 
           <div class="space-y-3">
-            <label class="px-1 text-[10px] font-black text-gray-600 uppercase tracking-widest">Contexto de la
-              Evidencia</label>
-            <textarea formControlName="description" rows="3"
+            <label for="evidenceDesc" class="px-1 text-[10px] font-black text-gray-600 tracking-widest">Contexto de la
+              evidencia</label>
+            <textarea id="evidenceDesc" formControlName="description" rows="3"
               class="w-full bg-gray-900 border border-white/5 rounded-2xl px-6 py-4 text-white placeholder-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all resize-none font-medium leading-relaxed text-sm"
               placeholder="Indica qué se está validando en esta imagen..."></textarea>
           </div>
@@ -663,8 +658,8 @@
       <div class="p-8 sm:p-12 flex-1">
         <div class="flex justify-between items-center mb-10">
           <div>
-            <h2 class="text-2xl font-black text-white tracking-tight">Reportar Hallazgo</h2>
-            <p class="text-gray-600 text-[10px] font-black uppercase tracking-widest mt-2">Nueva Observación Técnica</p>
+            <h2 class="text-2xl font-black text-white tracking-tight">Reportar hallazgo</h2>
+            <p class="text-gray-600 text-[10px] font-black tracking-widest mt-2">Nueva observación técnica</p>
           </div>
           <button (click)="closeObservationModal()"
             class="w-10 h-10 rounded-2xl bg-white/5 text-gray-600 hover:text-white transition-all flex items-center justify-center">
@@ -674,14 +669,14 @@
 
         <div class="space-y-8">
           <div class="space-y-3">
-            <label class="px-1 text-[10px] font-black text-gray-600 uppercase tracking-widest">Descripción del
-              Defecto</label>
-            <textarea [(ngModel)]="observationText" name="observationText" rows="5"
+            <label [for]="'observationText'" class="px-1 text-[10px] font-black text-gray-600 tracking-widest">Descripción del
+              defecto</label>
+            <textarea id="observationText" [(ngModel)]="observationText" name="observationText" rows="5"
               placeholder="Describe detalladamente el comportamiento inesperado o discrepancia observada..."
               class="w-full bg-gray-900 border border-white/5 rounded-[2rem] px-6 py-5 text-white placeholder-gray-700 focus:outline-none focus:ring-2 focus:ring-rose-500/50 focus:border-rose-500 transition-all resize-none text-sm leading-relaxed font-medium"></textarea>
             <div class="flex items-start gap-4 p-5 bg-rose-500/5 rounded-2xl border border-rose-500/10">
               <i class="fas fa-exclamation-triangle text-rose-500 mt-0.5"></i>
-              <p class="text-[10px] text-rose-500/70 font-bold uppercase tracking-widest leading-normal">
+              <p class="text-[10px] text-rose-500/70 font-bold tracking-widest leading-normal">
                 Nota: Este registro será visible para el equipo de desarrollo para su pronta resolución.
               </p>
             </div>
@@ -695,7 +690,7 @@
             <button type="button" (click)="onAddObservation()" [disabled]="!observationText.trim() || isSubmitting()" class="btn-danger flex-1">
               <span *ngIf="isSubmitting()" class="w-5 h-5 border-3 border-white/20 border-t-white rounded-full animate-spin"></span>
               <i *ngIf="!isSubmitting()" class="fas fa-comment-medical"></i>
-              {{ isSubmitting() ? 'Registrando...' : 'Publicar Hallazgo' }}
+              {{ isSubmitting() ? 'Registrando...' : 'Publicar hallazgo' }}
             </button>
           </div>
         </div>

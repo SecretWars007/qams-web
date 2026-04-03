@@ -1,17 +1,21 @@
+name: qams-frontend
+version: '3.8'
+
 services:
-  qams-web:
+  # Aplicación Web Frontend
+  frontend:
     build:
       context: .
       dockerfile: Dockerfile
-    image: qams-web:latest
-    container_name: qams-web
+    image: qams-frontend:latest
+    container_name: qams-frontend
     ports:
       - "4200:80"
     restart: unless-stopped
     networks:
       - qams-network
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1/"]
       interval: 30s
       timeout: 10s
       retries: 3

@@ -1,0 +1,125 @@
+<div class="p-4 sm:p-6 max-w-7xl mx-auto animate-in fade-in duration-500">
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+    <div>
+      <div class="flex items-center gap-2 text-slate-500 mb-1">
+        <button (click)="goBack()" class="hover:text-indigo-600 transition-colors">
+          <i class="fas fa-arrow-left"></i>
+          <span class="ml-2 text-xs font-bold tracking-widest">Proyectos</span>
+        </button>
+      </div>
+      <h1 class="text-3xl font-black text-slate-900 tracking-tight">Requisitos</h1>
+      @if (project()) {
+        <p class="text-slate-500 text-sm mt-1">
+          Gestionando el alcance para <span class="text-indigo-600 font-bold">{{ project()?.name }}</span>.
+        </p>
+      }
+    </div>
+    <div class="flex gap-2 w-full sm:w-auto">
+      <button (click)="openModal()" class="btn-primary w-full sm:w-auto">
+        <i class="fas fa-plus-circle"></i>
+        <span>Nuevo Requisito</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 animate-pulse">
+      @for (i of [1,2,3,4]; track i) {
+        <div class="h-48 bg-gray-200 rounded-3xl border border-slate-200"></div>
+      }
+    </div>
+  } @else {
+    <!-- Empty State -->
+    @if (requirements().length === 0) {
+      <div class="flex flex-col items-center justify-center py-20 bg-white rounded-3xl border-2 border-dashed border-slate-200">
+        <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-6 border border-slate-100 shadow-sm">
+          <i class="fas fa-list-check text-3xl text-slate-300"></i>
+        </div>
+        <h2 class="text-xl font-bold text-slate-900 mb-2">No hay requisitos definidos</h2>
+        <p class="text-gray-500 mb-8 max-w-xs text-center">Comienza definiendo los requisitos funcionales y técnicos del proyecto.</p>
+        <button (click)="openModal()" class="btn-secondary mt-4">
+          <i class="fas fa-plus-circle"></i>
+          Crear requisito ahora
+        </button>
+      </div>
+    } @else {
+      <!-- Requirements Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        @for (req of requirements(); track req.id) {
+          <div class="bg-white border border-slate-200 rounded-3xl p-6 hover:border-indigo-500/30 transition-all hover:shadow-xl group relative overflow-hidden flex flex-col h-full shadow-sm">
+            
+            <!-- Top Badges -->
+            <div class="flex justify-between items-start mb-4">
+              <span class="px-3 py-1 bg-slate-100 text-slate-600 text-[10px] font-black tracking-widest rounded-lg border border-slate-200">
+                {{ req.code }}
+              </span>
+              <div class="flex gap-2">
+                <span [ngClass]="{
+                  'bg-emerald-100 text-emerald-600 border-emerald-200': req.requirementStatusId === 3,
+                  'bg-amber-100 text-amber-600 border-amber-200': req.requirementStatusId === 2,
+                  'bg-slate-100 text-slate-600 border-slate-200': req.requirementStatusId === 1,
+                  'bg-rose-100 text-rose-600 border-rose-200': req.requirementStatusId === 4
+                }" class="px-3 py-1 text-[10px] font-black tracking-widest rounded-lg border">
+                  {{ req.requirementStatusName | titlecase }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Title & Content -->
+            <h3 class="text-lg font-bold text-slate-900 mb-2 leading-tight group-hover:text-indigo-600 transition-colors">
+              {{ req.title }}
+            </h3>
+            <p class="text-slate-500 text-sm mb-6 line-clamp-3 leading-relaxed flex-1">
+              {{ req.description || 'Sin descripción detallada.' }}
+            </p>
+
+            <!-- Meta Grid -->
+            <div class="grid grid-cols-3 gap-2 mb-6">
+              <div class="bg-slate-50 rounded-2xl p-2 border border-slate-100 flex flex-col items-center">
+                <span class="text-[8px] font-black text-slate-400 tracking-widest">Prioridad</span>
+                <span class="text-[10px] font-bold text-slate-700" [ngClass]="{'text-rose-500': req.requirementPriorityId === 3 || req.requirementPriorityId === 4}">
+                  {{ req.requirementPriorityName }}
+                </span>
+              </div>
+              <div class="bg-slate-50 rounded-2xl p-2 border border-slate-100 flex flex-col items-center">
+                <span class="text-[8px] font-black text-slate-400 tracking-widest">Tipo</span>
+                <span class="text-[10px] font-bold text-slate-700">{{ req.requirementTypeName }}</span>
+              </div>
+              <div class="bg-slate-50 rounded-2xl p-2 border border-slate-100 flex flex-col items-center">
+                <span class="text-[8px] font-black text-slate-400 tracking-widest">Complejidad</span>
+                <span class="text-[10px] font-bold text-slate-700">{{ req.requirementComplexityName }}</span>
+              </div>
+            </div>
+
+            <!-- Footer Actions -->
+            <div class="pt-4 border-t border-slate-100 flex justify-between items-center mt-auto">
+              <div class="flex items-center gap-2 text-[10px] font-bold text-slate-400 tracking-widest">
+                 <i class="fas fa-clock text-slate-300"></i>
+                 <span>{{ req.createdAt | date:'shortDate' }}</span>
+              </div>
+              <div class="flex gap-2">
+                <button (click)="openModal(req)" class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center hover:bg-indigo-600 hover:text-white transition-all">
+                  <i class="fas fa-edit text-xs"></i>
+                </button>
+                <button (click)="deleteRequirement(req.id)" class="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center hover:bg-rose-600 hover:text-white transition-all">
+                  <i class="fas fa-trash-can text-xs"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  }
+</div>
+
+<!-- Modal -->
+@if (showModal()) {
+  <app-requirement-modal 
+    [projectId]="projectId()!" 
+    [requirement]="selectedRequirement()" 
+    (closed)="closeModal()" 
+    (saved)="onSaved()" />
+}

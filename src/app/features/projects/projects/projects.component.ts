@@ -1,7 +1,7 @@
+import Swal from 'sweetalert2';
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { ToastService } from '../../../core/services/toast.service';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { ProjectsService } from '../../../core/services/projects.service';
 import { UsersService } from '../../../core/services/users.service';
@@ -30,7 +30,6 @@ export class ProjectsComponent implements OnInit {
   private usersService = inject(UsersService);
   private router = inject(Router);
   private fb = inject(FormBuilder);
-  private toastr = inject(ToastService);
 
   ngOnInit(): void {
     this.initForm();
@@ -67,6 +66,11 @@ export class ProjectsComponent implements OnInit {
   viewKanban(projectId: string, event: Event) {
     event.stopPropagation();
     this.router.navigate(['/kanban'], { queryParams: { projectId } });
+  }
+
+  viewRequirements(projectId: string, event: Event) {
+    event.stopPropagation();
+    this.router.navigate(['/requirements'], { queryParams: { projectId } });
   }
 
   loadProjects() {
@@ -111,7 +115,7 @@ export class ProjectsComponent implements OnInit {
 
       console.log('ProjectsComponent: Creando proyecto con payload:', payload);
 
-      this.projectsService.createProject(payload).subscribe({
+      this.projectsService.createProject(payload as any).subscribe({
         next: (newProj) => {
           console.log('ProjectsComponent: Proyecto creado correctamente:', newProj);
           this.loadProjects();
@@ -121,7 +125,12 @@ export class ProjectsComponent implements OnInit {
         error: (err) => {
           console.error('ProjectsComponent: Error al crear proyecto:', err);
           this.isSubmitting.set(false);
-          this.toastr.error('No se pudo crear el proyecto. Verifique sus datos e intente nuevamente.', 'Error de Creación');
+          Swal.fire({
+            icon: 'error',
+            title: 'Error de creación',
+            text: 'No se pudo crear el proyecto. Verifique sus datos e intente nuevamente.',
+            confirmButtonColor: '#150fbd'
+          });
         }
       });
     }
@@ -130,26 +139,42 @@ export class ProjectsComponent implements OnInit {
   onDeleteProject(projectId: string, event: Event) {
     event.stopPropagation();
     console.log('ProjectsComponent: Intentando eliminar proyecto ID:', projectId);
-    if (confirm('¿Estás seguro de que deseas eliminar este proyecto y todos sus datos relacionados?')) {
-      // Optimistic update: eliminar inmediatamente de la lista local
-      const currentProjects = this.projects();
-      this.projects.set(currentProjects.filter(p => p.id !== projectId));
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: 'Se eliminará este proyecto y todos sus datos relacionados de forma permanente.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Optimistic update: eliminar inmediatamente de la lista local
+        const currentProjects = this.projects();
+        this.projects.set(currentProjects.filter(p => p.id !== projectId));
 
-      this.loading.set(true);
-      this.projectsService.deleteProject(projectId).subscribe({
-        next: () => {
-          console.log('ProjectsComponent: Eliminación exitosa en backend para ID:', projectId);
-          this.loadProjects(); // Recargar para sincronizar estado final
-        },
-        error: (err) => {
-          console.error('ProjectsComponent: Error al eliminar proyecto en backend:', err);
-          // Revertir cambio local si falló
-          this.projects.set(currentProjects);
-          this.loading.set(false);
-          this.toastr.error('No se pudo eliminar el proyecto. Verifique sus permisos e intente nuevamente.', 'Error de Eliminación');
-        }
-      });
-    }
+        this.loading.set(true);
+        this.projectsService.deleteProject(projectId).subscribe({
+          next: () => {
+            console.log('ProjectsComponent: Eliminación exitosa en backend para ID:', projectId);
+            this.loadProjects(); // Recargar para sincronizar estado final
+          },
+          error: (err) => {
+            console.error('ProjectsComponent: Error al eliminar proyecto en backend:', err);
+            // Revertir cambio local si falló
+            this.projects.set(currentProjects);
+            this.loading.set(false);
+            Swal.fire({
+              icon: 'error',
+              title: 'Error de eliminación',
+              text: 'No se pudo eliminar el proyecto. Verifique sus permisos e intente nuevamente.',
+              confirmButtonColor: '#150fbd'
+            });
+          }
+        });
+      }
+    });
   }
 
   onToggleStatus(project: Project, event: Event) {
@@ -195,7 +220,12 @@ export class ProjectsComponent implements OnInit {
       error: (err) => {
         console.error('ProjectsComponent: Error al registrar devolución:', err);
         this.isSubmitting.set(false);
-        this.toastr.error('No se pudo registrar la devolución.', 'Error de Registro');
+        Swal.fire({
+          icon: 'error',
+          title: 'Error de registro',
+          text: 'No se pudo registrar la devolución.',
+          confirmButtonColor: '#150fbd'
+        });
       }
     });
   }

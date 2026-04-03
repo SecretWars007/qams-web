@@ -13,6 +13,9 @@ export interface RegisterRequest {
   email: string;
   password: string;
   fullName: string;
+  documentoIdentidad: string;
+  fechaNacimiento: string;
+  telefono?: string;
 }
 
 /** DTO de respuesta de login/register */

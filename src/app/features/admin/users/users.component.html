@@ -4,13 +4,17 @@
             <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 mb-1 sm:mb-2 tracking-tight">Gestión de Usuarios</h1>
             <p class="text-slate-500 text-xs sm:text-sm font-medium">Administra los accesos y roles de los miembros del equipo.</p>
         </div>
+        <button *ngIf="isAdmin()" (click)="openCreateModal()" class="btn-primary flex items-center gap-2">
+            <i class="fas fa-user-plus"></i>
+            <span>Nuevo Usuario</span>
+        </button>
     </div>
 
     <!-- Loading State -->
     <div *ngIf="isLoading()"
         class="bg-white/60 backdrop-blur-md rounded-2xl border border-white/40 shadow-sm p-12 text-center text-gray-400">
         <div class="animate-spin rounded-full h-8 w-8 border-4 border-[#150fbd] border-t-transparent mx-auto mb-4"></div>
-        <p class="text-xs font-bold uppercase tracking-widest">Sincronizando Usuarios...</p>
+        <p class="text-xs font-bold tracking-widest">Sincronizando usuarios...</p>
     </div>
 
     <!-- Table & Cards Container -->
@@ -34,36 +38,41 @@
 
                 <div class="grid grid-cols-2 gap-2 text-[10px]">
                     <div class="flex flex-col gap-1">
-                        <span class="font-black text-slate-400 uppercase tracking-widest">Email</span>
+                        <span class="font-black text-slate-400 tracking-widest">Email</span>
                         <span class="text-slate-700 font-medium truncate">{{ user.email }}</span>
                     </div>
                     <div class="flex flex-col gap-1">
-                        <span class="font-black text-slate-400 uppercase tracking-widest">Registro</span>
+                        <span class="font-black text-slate-400 tracking-widest">Registro</span>
                         <span class="text-slate-700 font-medium">{{ user.createdAt | date:'dd/MM/yyyy' }}</span>
                     </div>
                 </div>
 
                 <div class="flex flex-wrap gap-1.5 pt-3 border-t border-slate-50">
                     <span *ngFor="let role of user.roles"
-                        class="px-3 py-1 rounded-lg bg-[#150fbd]/10 text-[#150fbd] text-[10px] font-bold uppercase tracking-wider flex items-center gap-2">
+                        class="px-3 py-1 rounded-lg bg-[#150fbd]/10 text-[#150fbd] text-[10px] font-bold tracking-wider flex items-center gap-2">
                         {{ role }}
                         <button (click)="onRemoveRole(user.id, role)" class="remove-role-btn" title="Quitar rol">
                             <i class="fas fa-xmark"></i>
                         </button>
                     </span>
-                    <span *ngIf="user.roles.length === 0" class="text-[8px] font-bold uppercase tracking-widest text-slate-400">Sin roles</span>
+                    <span *ngIf="user.roles.length === 0" class="text-[8px] font-bold tracking-widest text-slate-400">Sin roles</span>
                 </div>
 
                 <div class="flex gap-2 pt-2">
                     <div class="flex-1 relative group">
                         <select (change)="onAssignRole(user.id, $event)"
-                            class="w-full text-[9px] font-black uppercase tracking-widest px-3 py-2.5 rounded-lg border border-slate-200 bg-slate-50 outline-none appearance-none">
+                            class="w-full text-[9px] font-black tracking-widest px-3 py-2.5 rounded-lg border border-slate-200 bg-slate-50 outline-none appearance-none">
                             <option value="">+ Asignar Rol</option>
                             <option *ngFor="let role of roles()" [value]="role.id">{{ role.name }}</option>
                         </select>
                         <i class="fas fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[8px] text-slate-400 pointer-events-none"></i>
                     </div>
-                    <button (click)="onDeleteUser(user.id)" class="btn-icon btn-icon-danger">
+                    <button (click)="openEditModal(user)" class="btn-icon btn-icon-warning" title="Editar información del usuario">
+                        <i class="fas fa-pen-to-square"></i>
+                    </button>
+                    <button (click)="onDeleteUser(user.id)" [disabled]="user.isActive" 
+                        class="btn-icon btn-icon-danger disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-rose-50"
+                        [title]="user.isActive ? 'Inactiva al usuario para eliminarlo' : 'Eliminar usuario'">
                         <i class="fas fa-trash-can"></i>
                     </button>
                 </div>
@@ -71,17 +80,16 @@
         </div>
 
         <!-- Desktop Table View -->
-        <div class="hidden sm:block w-full max-h-[calc(100vh-220px)] overflow-y-auto overflow-x-auto custom-scrollbar border-t border-[#150fbd]/5">
+        <div class="hidden sm:block w-full overflow-x-auto border-t border-[#150fbd]/5">
             <table class="w-full text-left border-separate border-spacing-0">
                 <thead class="sticky top-0 z-20 bg-[#f8f9ff]">
                     <tr class="bg-[#150fbd]/5">
-                        <th class="px-3 sm:px-4 py-4 text-[10px] font-bold text-[#150fbd]/70 uppercase tracking-widest">Usuario</th>
-                        <th class="px-3 sm:px-4 py-4 text-[10px] font-bold text-[#150fbd]/70 uppercase tracking-widest">Email</th>
-                        <th class="px-3 sm:px-4 py-4 text-[10px] font-bold text-[#150fbd]/70 uppercase tracking-widest">Estado</th>
-                        <th class="px-3 sm:px-4 py-4 text-[10px] font-bold text-[#150fbd]/70 uppercase tracking-widest">Roles</th>
-                        <th class="px-3 sm:px-4 py-4 text-[10px] font-bold text-[#150fbd]/70 uppercase tracking-widest">Registro</th>
-                        <th class="px-3 sm:px-4 py-4 text-[10px] font-bold text-[#150fbd]/70 uppercase tracking-widest text-right">
-                            Acciones</th>
+                        <th class="px-3 sm:px-4 py-4 text-[10px] font-bold text-[#150fbd]/70 tracking-widest">Usuario</th>
+                        <th class="px-3 sm:px-4 py-4 text-[10px] font-bold text-[#150fbd]/70 tracking-widest">Email</th>
+                        <th class="px-3 sm:px-4 py-4 text-[10px] font-bold text-[#150fbd]/70 tracking-widest">Estado</th>
+                        <th class="px-3 sm:px-4 py-4 text-[10px] font-bold text-[#150fbd]/70 tracking-widest">Roles</th>
+                        <th class="px-3 sm:px-4 py-4 text-[10px] font-bold text-[#150fbd]/70 tracking-widest">Fecha de registro</th>
+                        <th class="px-3 sm:px-4 py-4 text-[10px] font-bold text-[#150fbd]/70 tracking-widest text-right">Acciones</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-[#150fbd]/5">
@@ -93,11 +101,12 @@
                                     {{ user.fullName ? user.fullName.substring(0,1).toUpperCase() : 'U' }}
                                 </div>
                                 <div class="flex flex-col">
-                                    <div class="text-[12px] font-bold text-[#150fbd] uppercase tracking-normal mb-1">
-                                        {{ user.username }}
+                                    <div class="flex items-baseline gap-2 mb-1 min-w-0">
+                                        <span class="text-[12px] font-bold text-[#150fbd] tracking-normal truncate">{{ user.username }}</span>
+                                        <span class="text-[11px] font-medium text-slate-400 italic truncate">({{ user.fullName || 'Sin nombre' }})</span>
                                     </div>
                                     <div class="text-[12px] font-medium text-slate-500 italic">
-                                        {{ user.roles[0] || 'Sin Rol' }}
+                                        {{ user.roles[0] || 'Sin rol' }}
                                     </div>
                                 </div>
                             </div>
@@ -110,20 +119,20 @@
                                 type="button"
                                 (click)="onToggleStatus(user)"
                                 [ngClass]="user.isActive ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'"
-                                class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest cursor-pointer hover:scale-105 transition-transform focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-[#150fbd]/50">
-                                {{ user.isActive ? 'ACTIVO' : 'INACTIVO' }}
+                                class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold tracking-widest cursor-pointer hover:scale-105 transition-transform focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-[#150fbd]/50">
+                                {{ user.isActive ? 'Activo' : 'Inactivo' }}
                             </button>
                         </td>
                         <td class="px-3 sm:px-4 py-5">
                             <div class="flex flex-wrap gap-1.5">
                                 <span *ngFor="let role of user.roles"
-                                    class="px-3 py-1.5 rounded-lg bg-[#150fbd]/10 text-[#150fbd] text-[11px] font-bold uppercase tracking-wider flex items-center gap-2.5">
+                                    class="px-3 py-1.5 rounded-lg bg-[#150fbd]/10 text-[#150fbd] text-[11px] font-bold tracking-wider flex items-center gap-2.5">
                                     {{ role }}
                                     <button (click)="onRemoveRole(user.id, role)" class="remove-role-btn" title="Quitar rol">
                                         <i class="fas fa-xmark"></i>
                                     </button>
                                 </span>
-                                <span *ngIf="user.roles.length === 0" class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Sin roles</span>
+                                <span *ngIf="user.roles.length === 0" class="text-[10px] font-bold tracking-widest text-slate-400">Sin roles</span>
                             </div>
                         </td>
                         <td class="px-3 sm:px-4 py-5 text-xs font-semibold text-slate-500 whitespace-nowrap">
@@ -133,12 +142,17 @@
                             <div class="flex items-center justify-end gap-3">
                                 <select (change)="onAssignRole(user.id, $event)"
                                     [disabled]="!user.isActive"
-                                    class="text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:border-[#150fbd]/50 focus:ring-2 focus:ring-[#150fbd]/20 outline-none transition-all cursor-pointer text-slate-700 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                                    class="text-[10px] font-bold tracking-widest px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:border-[#150fbd]/50 focus:ring-2 focus:ring-[#150fbd]/20 outline-none transition-all cursor-pointer text-slate-700 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
                                     <option value="">+ Rol</option>
                                     <option *ngFor="let role of roles()" [value]="role.id">{{ role.name }}</option>
                                 </select>
 
-                                <button (click)="onDeleteUser(user.id)" class="btn-icon btn-icon-danger" title="Eliminar usuario">
+                                <button (click)="openEditModal(user)" class="btn-icon btn-icon-warning" title="Editar información del usuario">
+                                    <i class="fas fa-pen-to-square"></i>
+                                </button>
+                                <button (click)="onDeleteUser(user.id)" [disabled]="user.isActive" 
+                                    class="btn-icon btn-icon-danger disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-rose-50" 
+                                    [title]="user.isActive ? 'Inactiva al usuario para eliminarlo' : 'Eliminar usuario'">
                                     <i class="fas fa-trash-can"></i>
                                 </button>
                             </div>
@@ -151,5 +165,257 @@
         <div *ngIf="users().length === 0" class="p-12 text-center border-t border-[#150fbd]/5 bg-white/40">
             <p class="text-slate-400 font-medium text-sm">No se encontraron usuarios registrados.</p>
         </div>
+    </div>
+</div>
+
+<!-- ======================= MODAL: EDITAR USUARIO ======================= -->
+<div *ngIf="showEditModal()" class="modal-backdrop">
+    <div class="modal-card w-full max-w-lg animate-in zoom-in-95 duration-200">
+        <!-- Header -->
+        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 rounded-t-3xl">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shadow-sm">
+                    <i class="fas fa-user-pen text-lg"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-slate-900 leading-none mb-1">Editar usuario</h3>
+                    <p class="text-[10px] text-slate-500 font-bold tracking-widest">{{ selectedUser?.username }}</p>
+                </div>
+            </div>
+            <button (click)="closeEditModal()" 
+                class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-100 text-slate-400 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-100 transition-all shadow-sm">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- Body / Form -->
+        <form [formGroup]="editForm" (ngSubmit)="updateUserData()" class="p-8">
+            <div class="space-y-6">
+                <!-- Nombre Completo -->
+                <div class="flex flex-col gap-2">
+                    <label for="editFullName" class="text-xs font-bold text-slate-500 tracking-widest ml-1">Nombre completo <small class="text-rose-500">*</small></label>
+                    <div class="relative flex items-center group">
+                        <i class="fas fa-id-card absolute left-4 text-slate-400 group-focus-within:text-[#150fbd] transition-colors"></i>
+                        <input id="editFullName" type="text" formControlName="fullName"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 pl-12 pr-4 text-slate-900 placeholder:text-slate-400 focus:ring-4 focus:ring-[#150fbd]/5 focus:border-[#150fbd] transition-all outline-none"
+                            placeholder="E.g. Juan Pérez" />
+                    </div>
+                    <div *ngIf="editForm.get('fullName')?.invalid && editForm.get('fullName')?.touched" class="text-[10px] text-rose-500 font-bold ml-1 flex items-center gap-1">
+                        <i class="fas fa-circle-exclamation"></i> Nombre requerido (Mín. 3 caracteres).
+                    </div>
+                </div>
+
+                <!-- Correo Electrónico -->
+                <div class="flex flex-col gap-2">
+                    <label for="editEmail" class="text-xs font-bold text-slate-500 tracking-widest ml-1">Email corporativo <small class="text-rose-500">*</small></label>
+                    <div class="relative flex items-center group">
+                        <i class="fas fa-envelope absolute left-4 text-slate-400 group-focus-within:text-[#150fbd] transition-colors"></i>
+                        <input id="editEmail" type="email" formControlName="email"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 pl-12 pr-4 text-slate-900 placeholder:text-slate-400 focus:ring-4 focus:ring-[#150fbd]/5 focus:border-[#150fbd] transition-all outline-none"
+                            placeholder="usuario@dominio.com" />
+                    </div>
+                    <div *ngIf="editForm.get('email')?.invalid && editForm.get('email')?.touched" class="text-[10px] text-rose-500 font-bold ml-1 flex items-center gap-1">
+                        <i class="fas fa-circle-exclamation"></i> Ingrese un correo electrónico válido.
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Documento Identidad (Edición) -->
+                    <div class="flex flex-col gap-2">
+                        <label for="editDoc" class="text-xs font-bold text-slate-500 tracking-widest ml-1">Documento identidad <small class="text-rose-500">*</small></label>
+                        <div class="relative flex items-center group">
+                            <i class="fas fa-id-badge absolute left-4 text-slate-400 group-focus-within:text-[#150fbd] transition-colors"></i>
+                            <input id="editDoc" type="text" formControlName="documentoIdentidad"
+                                class="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 pl-12 pr-4 text-slate-900 placeholder:text-slate-400 focus:ring-4 focus:ring-[#150fbd]/5 focus:border-[#150fbd] transition-all outline-none"
+                                placeholder="E.g. 1234567-LP" />
+                        </div>
+                    </div>
+
+                    <!-- Fecha Nacimiento (Edición) -->
+                    <div class="flex flex-col gap-2">
+                        <label for="editBirth" class="text-xs font-bold text-slate-500 tracking-widest ml-1">Fecha de nacimiento <small class="text-rose-500">*</small></label>
+                        <div class="relative flex items-center group">
+                            <i class="fas fa-calendar-alt absolute left-4 text-slate-400 group-focus-within:text-[#150fbd] transition-colors"></i>
+                            <input id="editBirth" type="date" formControlName="fechaNacimiento"
+                                [min]="minDate" [max]="maxDate"
+                                class="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 pl-12 pr-4 text-slate-900 placeholder:text-slate-400 focus:ring-4 focus:ring-[#150fbd]/5 focus:border-[#150fbd] transition-all outline-none" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Teléfono (Edición) -->
+                <div class="flex flex-col gap-2">
+                    <label for="editPhone" class="text-xs font-bold text-slate-500 tracking-widest ml-1">Teléfono (Intl.)</label>
+                    <div class="relative flex items-center group">
+                        <i class="fas fa-phone absolute left-4 text-slate-400 group-focus-within:text-[#150fbd] transition-colors"></i>
+                        <input id="editPhone" type="text" formControlName="telefono"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 pl-12 pr-4 text-slate-900 placeholder:text-slate-400 focus:ring-4 focus:ring-[#150fbd]/5 focus:border-[#150fbd] transition-all outline-none"
+                            placeholder="+59170000000" />
+                    </div>
+                </div>
+
+                <!-- Estado del Usuario -->
+                <div class="pt-4 border-t border-slate-50">
+                    <div class="flex items-center justify-between p-4 bg-slate-50/50 rounded-2xl border border-slate-100">
+                        <div>
+                            <p class="text-sm font-bold text-slate-800 mb-0.5">Estado del acceso</p>
+                            <p class="text-[10px] text-slate-500 font-medium tracking-wider">Permitir inicio de sesión</p>
+                        </div>
+                        <label for="editStatus" class="toggle shrink-0">
+                            <span class="sr-only">Alternar estado del usuario</span>
+                            <input id="editStatus" type="checkbox" formControlName="isActive" aria-label="Activar o desactivar cuenta de usuario">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="mt-10 flex gap-3 justify-end items-center">
+                <button type="button" (click)="closeEditModal()" class="btn-secondary" [disabled]="isSubmitting()">
+                    <i class="fas fa-xmark"></i> Cancelar
+                </button>
+                <button type="submit" [disabled]="editForm.invalid || isSubmitting()" class="btn-primary min-w-[120px]">
+                    <div *ngIf="isSubmitting()" class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+                    <i *ngIf="!isSubmitting()" class="fas fa-save mr-2"></i>
+                    <span>{{ isSubmitting() ? 'Guardando...' : 'Guardar Cambios' }}</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ======================= MODAL: REGISTRAR USUARIO ======================= -->
+<div *ngIf="showCreateModal()" class="modal-backdrop">
+    <div class="modal-card w-full max-w-2xl animate-in zoom-in-95 duration-200">
+        <!-- Header -->
+        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 rounded-t-3xl">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-sm">
+                    <i class="fas fa-user-plus text-lg"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-slate-900 leading-none mb-1">Registrar nuevo usuario</h3>
+                    <p class="text-[10px] text-slate-500 font-bold tracking-widest">Complete los datos para el nuevo acceso</p>
+                </div>
+            </div>
+            <button (click)="closeCreateModal()" 
+                class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-100 text-slate-400 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-100 transition-all shadow-sm">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- Body / Form -->
+        <form [formGroup]="createForm" (ngSubmit)="onCreateUser()" class="p-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Username -->
+                <div class="flex flex-col gap-2">
+                    <label for="createUsername" class="text-xs font-bold text-slate-500 tracking-widest ml-1">Nombre de usuario <small class="text-rose-500">*</small></label>
+                    <div class="relative flex items-center group">
+                        <i class="fas fa-at absolute left-4 text-slate-400 group-focus-within:text-[#150fbd] transition-colors"></i>
+                        <input id="createUsername" type="text" formControlName="username"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 pl-12 pr-4 text-slate-900 placeholder:text-slate-400 focus:ring-4 focus:ring-[#150fbd]/5 focus:border-[#150fbd] transition-all outline-none"
+                            placeholder="E.g. jper01" />
+                    </div>
+                </div>
+
+                <!-- Contraseña -->
+                <div class="flex flex-col gap-2">
+                    <label for="createPassword" class="text-xs font-bold text-slate-500 tracking-widest ml-1">Contraseña <small class="text-rose-500">*</small></label>
+                    <div class="relative flex items-center group">
+                        <i class="fas fa-key absolute left-4 text-slate-400 group-focus-within:text-[#150fbd] transition-colors"></i>
+                        <input id="createPassword" type="password" formControlName="password"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 pl-12 pr-4 text-slate-900 placeholder:text-slate-400 focus:ring-4 focus:ring-[#150fbd]/5 focus:border-[#150fbd] transition-all outline-none"
+                            placeholder="••••••••" />
+                    </div>
+                </div>
+
+                <!-- Nombre Completo -->
+                <div class="flex flex-col gap-2">
+                    <label for="createFullName" class="text-xs font-bold text-slate-500 tracking-widest ml-1">Nombre completo <small class="text-rose-500">*</small></label>
+                    <div class="relative flex items-center group">
+                        <i class="fas fa-id-card absolute left-4 text-slate-400 group-focus-within:text-[#150fbd] transition-colors"></i>
+                        <input id="createFullName" type="text" formControlName="fullName"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 pl-12 pr-4 text-slate-900 placeholder:text-slate-400 focus:ring-4 focus:ring-[#150fbd]/5 focus:border-[#150fbd] transition-all outline-none"
+                            placeholder="E.g. Juan Pérez" />
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div class="flex flex-col gap-2">
+                    <label for="createEmail" class="text-xs font-bold text-slate-500 tracking-widest ml-1">Email corporativo <small class="text-rose-500">*</small></label>
+                    <div class="relative flex items-center group">
+                        <i class="fas fa-envelope absolute left-4 text-slate-400 group-focus-within:text-[#150fbd] transition-colors"></i>
+                        <input id="createEmail" type="email" formControlName="email"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 pl-12 pr-4 text-slate-900 placeholder:text-slate-400 focus:ring-4 focus:ring-[#150fbd]/5 focus:border-[#150fbd] transition-all outline-none"
+                            placeholder="usuario@dominio.com" />
+                    </div>
+                </div>
+
+                <!-- Documento Identidad -->
+                <div class="flex flex-col gap-2">
+                    <label for="createDoc" class="text-xs font-bold text-slate-500 tracking-widest ml-1">Documento identidad <small class="text-rose-500">*</small></label>
+                    <div class="relative flex items-center group">
+                        <i class="fas fa-id-badge absolute left-4 text-slate-400 group-focus-within:text-[#150fbd] transition-colors"></i>
+                        <input id="createDoc" type="text" formControlName="documentoIdentidad"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 pl-12 pr-4 text-slate-900 placeholder:text-slate-400 focus:ring-4 focus:ring-[#150fbd]/5 focus:border-[#150fbd] transition-all outline-none"
+                            placeholder="E.g. 1234567-LP" />
+                    </div>
+                </div>
+
+                <!-- Fecha Nacimiento -->
+                <div class="flex flex-col gap-2">
+                    <label for="createBirth" class="text-xs font-bold text-slate-500 tracking-widest ml-1">Fecha de nacimiento <small class="text-rose-500">*</small></label>
+                    <div class="relative flex items-center group">
+                        <i class="fas fa-calendar-alt absolute left-4 text-slate-400 group-focus-within:text-[#150fbd] transition-colors"></i>
+                        <input id="createBirth" type="date" formControlName="fechaNacimiento"
+                            [min]="minDate" [max]="maxDate"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 pl-12 pr-4 text-slate-900 placeholder:text-slate-400 focus:ring-4 focus:ring-[#150fbd]/5 focus:border-[#150fbd] transition-all outline-none" />
+                    </div>
+                </div>
+
+                <!-- Teléfono -->
+                <div class="flex flex-col gap-2">
+                    <label for="createPhone" class="text-xs font-bold text-slate-500 tracking-widest ml-1">Teléfono (Intl.)</label>
+                    <div class="relative flex items-center group">
+                        <i class="fas fa-phone absolute left-4 text-slate-400 group-focus-within:text-[#150fbd] transition-colors"></i>
+                        <input id="createPhone" type="text" formControlName="telefono"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 pl-12 pr-4 text-slate-900 placeholder:text-slate-400 focus:ring-4 focus:ring-[#150fbd]/5 focus:border-[#150fbd] transition-all outline-none"
+                            placeholder="+59170000000" />
+                    </div>
+                </div>
+
+                <!-- Rol Inicial -->
+                <div class="flex flex-col gap-2">
+                    <label for="createRole" class="text-xs font-bold text-slate-500 tracking-widest ml-1">Asignar rol inicial <small class="text-rose-500">*</small></label>
+                    <div class="relative flex items-center group">
+                        <i class="fas fa-user-shield absolute left-4 text-slate-400 group-focus-within:text-[#150fbd] transition-colors"></i>
+                        <select id="createRole" formControlName="roleId"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 pl-12 pr-4 text-slate-900 focus:ring-4 focus:ring-[#150fbd]/5 focus:border-[#150fbd] transition-all outline-none appearance-none cursor-pointer">
+                            <option value="">Seleccione un rol...</option>
+                            <option *ngFor="let role of roles()" [value]="role.id">{{ role.name }}</option>
+                        </select>
+                        <i class="fas fa-chevron-down absolute right-4 text-slate-400 pointer-events-none text-xs"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div *ngIf="createForm.invalid && createForm.touched" class="mt-6 p-4 bg-rose-50 border border-rose-100 rounded-2xl text-rose-600 text-xs font-bold flex items-center gap-3">
+                <i class="fas fa-triangle-exclamation text-lg"></i>
+                Por favor, complete todos los campos obligatorios correctamente.
+            </div>
+
+            <!-- Footer -->
+            <div class="mt-10 flex gap-3 justify-end items-center">
+                <button type="button" (click)="closeCreateModal()" class="btn-secondary" [disabled]="isSubmitting()">
+                    <i class="fas fa-xmark"></i> Cancelar
+                </button>
+                <button type="submit" [disabled]="createForm.invalid || isSubmitting()" class="btn-primary min-w-[140px]">
+                    <div *ngIf="isSubmitting()" class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+                    <i *ngIf="!isSubmitting()" class="fas fa-user-check mr-2"></i>
+                    <span>{{ isSubmitting() ? 'Registrando...' : 'Registrar usuario' }}</span>
+                </button>
+            </div>
+        </form>
     </div>
 </div>

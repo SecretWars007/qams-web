@@ -1,7 +1,6 @@
 // src/app/core/services/auth.service.ts
-// Servicio principal de autenticación: login, register, tokens, permisos.
-// Delega la gestión de sesión al AuthMockService para compatibilidad mock/real.
-import { Injectable, inject } from '@angular/core';
+// Servicio principal de autenticación: gestiona login, tokens y estado del usuario.
+import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, throwError } from 'rxjs';
@@ -17,7 +16,7 @@ import {
   ChangePasswordRequest,
 } from '../models/auth.model';
 import { environment } from '../../../environments/environment';
-import { AuthMockService } from './auth.mock.service';
+import { EncryptionService } from './encryption.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -29,18 +28,39 @@ export class AuthService {
 
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
-  private readonly authMockService = inject(AuthMockService);
+  private readonly encryptionService = inject(EncryptionService);
 
-  /** Señales reactivas delegadas al Mock Service */
-  readonly currentUser = this.authMockService.currentUser;
-  readonly permissions = this.authMockService.permissions;
-  readonly isAuthenticated = this.authMockService.isAuthenticated;
-  readonly fullName = this.authMockService.fullName;
+  // Señales reactivas para el estado de autenticación
+  private readonly currentUserSignal = signal<DecodedToken | null>(this.getStoredUser());
+  private readonly permissionsSignal = signal<string[]>(this.getStoredPermissions());
+
+  // Señales públicas de solo lectura
+  readonly currentUser = this.currentUserSignal.asReadonly();
+  readonly permissions = this.permissionsSignal.asReadonly();
+  readonly isAuthenticated = computed(() => this.currentUserSignal() !== null);
+  readonly fullName = computed(() => this.currentUserSignal()?.FullName ?? '');
+
+  constructor() {
+    this.checkInitialSession();
+  }
+
+  /**
+   * Verifica la sesión inicial y asegura la consistencia
+   */
+  private checkInitialSession(): void {
+    const user = this.getStoredUser();
+    const permissions = this.getStoredPermissions();
+
+    if (user && permissions.length === 0) {
+      console.warn(this.LOG_TAG, 'Sesión inconsistente detectada. Limpiando...');
+      this.logout();
+    } else if (user) {
+      console.log(this.LOG_TAG, 'Sesión cargada para:', user.unique_name);
+    }
+  }
 
   /**
    * Inicia sesión con credenciales de usuario.
-   * @param request - Credenciales (username, password)
-   * @returns Observable con la respuesta de login (tokens + claims)
    */
   login(request: LoginRequest): Observable<LoginResponse> {
     console.log(this.LOG_TAG, 'Login request →', `${this.apiUrl}/login`);
@@ -50,7 +70,7 @@ export class AuthService {
     }).pipe(
       tap((res) => {
         console.log(this.LOG_TAG, 'Login exitoso, estableciendo sesión');
-        this.authMockService.setSession(res);
+        this.setSession(res);
       }),
       catchError((error) => {
         console.error(this.LOG_TAG, 'Error en login:', error.status, error.message);
@@ -60,13 +80,44 @@ export class AuthService {
   }
 
   /**
-   * Registra un nuevo usuario en el sistema.
-   * @param request - Datos de registro (username, email, password, fullName)
-   * @returns Observable con la respuesta de login automática
+   * Establece la sesión del usuario (tokens, signals, localStorage)
+   */
+  setSession(response: LoginResponse): void {
+    try {
+      if (!response?.accessToken) {
+        console.error(this.LOG_TAG, 'Falta accessToken en la respuesta');
+        return;
+      }
+
+      const decodedRaw = jwtDecode<any>(response.accessToken);
+      const decoded = this.normalizeClaims(decodedRaw);
+      
+      const permissions = response.permissions || decoded.permission || [];
+      const permsArray = Array.isArray(permissions) ? permissions : [permissions];
+
+      // Actualizar señales
+      this.currentUserSignal.set(decoded);
+      this.permissionsSignal.set(permsArray);
+
+      // Guardar en localStorage (ENCRIPTADO)
+      localStorage.setItem('access_token', this.encryptionService.encrypt(response.accessToken));
+      localStorage.setItem('refresh_token', this.encryptionService.encrypt(response.refreshToken));
+      localStorage.setItem('permissions', this.encryptionService.encrypt(JSON.stringify(permsArray)));
+      
+      console.log(this.LOG_TAG, 'Sesión establecida correctamente (Datos cifrados)');
+    } catch (e) {
+      console.error(this.LOG_TAG, 'Error al establecer sesión:', e);
+      this.logout();
+    }
+  }
+
+  /**
+   * Registra un nuevo usuario.
    */
   register(request: RegisterRequest): Observable<LoginResponse> {
     console.log(this.LOG_TAG, 'Registro de usuario →', request.username);
     return this.http.post<LoginResponse>(`${this.apiUrl}/register`, request).pipe(
+      tap(res => this.setSession(res)),
       catchError((error) => {
         console.error(this.LOG_TAG, 'Error en registro:', error.status, error.message);
         return throwError(() => error);
@@ -75,32 +126,22 @@ export class AuthService {
   }
 
   /**
-   * Renueva el access token usando el refresh token almacenado.
-   * Si usa mock, delega al AuthMockService.
-   * @returns Observable con nuevos tokens
+   * Renueva los tokens.
    */
   refreshToken(): Observable<LoginResponse> {
-    if (environment.useMock) {
-      return this.authMockService.refreshToken().pipe(
-        tap(res => this.authMockService.setSession(res))
-      );
-    }
-
     const accessToken = this.getAccessToken();
     const refreshToken = this.getRefreshToken();
 
     if (!accessToken || !refreshToken) {
-      console.warn(this.LOG_TAG, 'No hay tokens disponibles para refresh, cerrando sesión');
       this.logout();
-      return throwError(() => new Error('No tokens available for refresh'));
+      return throwError(() => new Error('No hay tokens disponibles'));
     }
 
     return this.http.post<LoginResponse>(`${this.apiUrl}/refresh`, {
       accessToken,
       refreshToken
     }).pipe(
-      tap(() => console.log(this.LOG_TAG, 'Token refrescado exitosamente')),
-      tap(res => this.authMockService.setSession(res)),
+      tap(res => this.setSession(res)),
       catchError((error) => {
         console.error(this.LOG_TAG, 'Error al refrescar token:', error.status);
         this.logout();
@@ -110,124 +151,108 @@ export class AuthService {
   }
 
   /**
-   * Solicita el restablecimiento de contraseña por email.
-   * @param request - Email del usuario
+   * Cierra la sesión.
    */
-  forgotPassword(request: ForgotPasswordRequest): Observable<string> {
-    if (environment.useMock) {
-      return this.authMockService.forgotPassword(request);
-    }
-    return this.http.post(`${this.apiUrl}/forgot-password`, request, { responseType: 'text' }).pipe(
-      catchError((error) => {
-        console.error(this.LOG_TAG, 'Error en forgotPassword:', error.status);
-        return throwError(() => error);
-      })
-    );
-  }
-
-  /**
-   * Restablece la contraseña usando el token de recuperación.
-   * @param request - Token de reset + nueva contraseña
-   */
-  resetPassword(request: ResetPasswordRequest): Observable<void> {
-    if (environment.useMock) {
-      return this.authMockService.resetPassword(request);
-    }
-    return this.http.post<void>(`${this.apiUrl}/reset-password`, request).pipe(
-      catchError((error) => {
-        console.error(this.LOG_TAG, 'Error en resetPassword:', error.status);
-        return throwError(() => error);
-      })
-    );
-  }
-
-  /**
-   * Cambia la contraseña del usuario autenticado.
-   * @param userId - ID del usuario
-   * @param request - Contraseña actual y nueva
-   */
-  changePassword(userId: string, request: ChangePasswordRequest): Observable<void> {
-    if (environment.useMock) {
-      return this.authMockService.changePassword(request);
-    }
-    return this.http.post<void>(`${this.apiUrl}/change-password`, request).pipe(
-      catchError((error) => {
-        console.error(this.LOG_TAG, 'Error en changePassword:', error.status);
-        return throwError(() => error);
-      })
-    );
-  }
-
-  /** Cierra la sesión y redirige al login */
   logout(): void {
     console.log(this.LOG_TAG, 'Cerrando sesión');
-    this.authMockService.logout();
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('permissions');
+    this.currentUserSignal.set(null);
+    this.permissionsSignal.set([]);
     this.router.navigate(['/auth/login']);
   }
 
   /**
-   * Verifica si el usuario tiene un permiso específico.
-   * @param permissionCode - Código del permiso (e.g., 'DASHBOARD_VIEW')
+   * Normaliza los claims del token JWT.
    */
+  private normalizeClaims(decoded: any): DecodedToken {
+    const normalized: any = {};
+    const claimMap: { [key: string]: string } = {
+      'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameid': 'nameid',
+      'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name': 'unique_name',
+      'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress': 'email',
+      'http://schemas.microsoft.com/ws/2008/06/identity/claims/role': 'role',
+      'FullName': 'FullName',
+      'permission': 'permission',
+    };
+
+    Object.keys(decoded).forEach(key => {
+      const shortKey = claimMap[key] || key;
+      normalized[shortKey] = decoded[key];
+    });
+
+    return normalized as DecodedToken;
+  }
+
+  forgotPassword(request: ForgotPasswordRequest): Observable<string> {
+    return this.http.post(`${this.apiUrl}/forgot-password`, request, { responseType: 'text' }).pipe(
+      catchError(err => throwError(() => err))
+    );
+  }
+
+  resetPassword(request: ResetPasswordRequest): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/reset-password`, request).pipe(
+      catchError(err => throwError(() => err))
+    );
+  }
+
+  changePassword(userId: string, request: ChangePasswordRequest): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/change-password`, request).pipe(
+      catchError(err => throwError(() => err))
+    );
+  }
+
   hasPermission(permissionCode: string): boolean {
-    return this.authMockService.hasPermission(permissionCode);
+    return this.permissions().includes(permissionCode);
   }
 
-  /**
-   * Verifica si el usuario tiene al menos uno de los permisos dados.
-   * @param permissionCodes - Lista de códigos de permiso
-   */
-  hasAnyPermission(...permissionCodes: string[]): boolean {
-    const currentPermissions = this.authMockService.permissions();
-    return permissionCodes.some((code) => currentPermissions.includes(code));
-  }
-
-  /**
-   * Verifica si el usuario actual tiene el rol de Administrador.
-   */
   isAdmin(): boolean {
     const user = this.currentUser();
-    if (!user) {
-      console.warn(this.LOG_TAG, 'isAdmin: No current user found');
-      return false;
-    }
-
-    const roles = user.role;
-    if (!roles) {
-      console.warn(this.LOG_TAG, 'isAdmin: No roles found in user claims');
-      return false;
-    }
-
-    // Normalizar a array si viene como string
-    const roleList = Array.isArray(roles) ? roles : [roles];
-    
-    // Lista de nombres de rol permitidos para administración
-    const adminRoles = new Set(['admin', 'administrador', 'administrator', 'superadmin']);
-    
-    const isUserAdmin = roleList.some(r => 
-      typeof r === 'string' && adminRoles.has(r.toLowerCase().trim())
-    );
-
-
-
-    return isUserAdmin;
+    if (!user?.role) return false;
+    const roleList = Array.isArray(user.role) ? user.role : [user.role];
+    const adminRoles = new Set(['admin', 'administrador', 'superadmin']);
+    return roleList.some(r => adminRoles.has(r.toLowerCase().trim()));
   }
 
-  /** Obtiene el access token almacenado en localStorage */
+  /**
+   * Obtiene el ID del usuario actual desde los claims.
+   */
+  getUserId(): string | null {
+    const user = this.currentUser();
+    if (!user) return null;
+    return user.nameid as string || user.sub as string || (user.unique_name?.includes('-') ? user.unique_name : null) || null;
+  }
+
+  /**
+   * Actualiza localmente los claims del usuario (útil tras editar perfil).
+   */
+  updateUserClaims(fullName: string, email: string): void {
+    const current = this.currentUserSignal();
+    if (current) {
+      this.currentUserSignal.set({
+        ...current,
+        FullName: fullName,
+        email: email
+      } as DecodedToken);
+    }
+  }
+
   getAccessToken(): string | null {
-    return localStorage.getItem('access_token');
+    const encrypted = localStorage.getItem('access_token');
+    if (!encrypted) return null;
+    return this.encryptionService.decrypt(encrypted) || null;
   }
 
-  /** Obtiene el refresh token almacenado en localStorage */
   getRefreshToken(): string | null {
-    return localStorage.getItem('refresh_token');
+    const encrypted = localStorage.getItem('refresh_token');
+    if (!encrypted) return null;
+    return this.encryptionService.decrypt(encrypted) || null;
   }
 
-  /** Verifica si el token actual ha expirado */
   isTokenExpired(): boolean {
     const token = this.getAccessToken();
     if (!token) return true;
-
     try {
       const decoded = jwtDecode<DecodedToken>(token);
       return decoded.exp * 1000 < Date.now();
@@ -236,16 +261,24 @@ export class AuthService {
     }
   }
 
-  /**
-   * Obtiene el ID del usuario desde los claims del token decodificado.
-   * Busca en los claims: nameid, sub, o unique_name (si es GUID).
-   */
-  getUserId(): string | null {
-    const user = this.currentUser();
-    const id = user?.nameid || user?.sub || (user?.unique_name?.includes('-') ? user.unique_name : null);
-    if (!id) {
-      console.warn(this.LOG_TAG, 'No se encontró un ID de usuario válido en los claims');
+  private getStoredUser(): DecodedToken | null {
+    try {
+      const token = this.getAccessToken();
+      if (!token) return null;
+      return this.normalizeClaims(jwtDecode<any>(token));
+    } catch {
+      return null;
     }
-    return id ?? null;
+  }
+
+  private getStoredPermissions(): string[] {
+    try {
+      const encrypted = localStorage.getItem('permissions');
+      if (!encrypted) return [];
+      const decrypted = this.encryptionService.decrypt(encrypted);
+      return decrypted ? JSON.parse(decrypted) : [];
+    } catch {
+      return [];
+    }
   }
 }

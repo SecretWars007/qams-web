@@ -1,3 +1,4 @@
+import Swal from 'sweetalert2';
 import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule } from '@angular/forms';
@@ -10,7 +11,6 @@ import { User } from '../../core/models/user.model';
 import { Project } from '../../core/models/project.model';
 import { ProjectsService } from '../../core/services/projects.service';
 import { UsersService } from '../../core/services/users.service';
-import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-test-cases',
@@ -61,7 +61,6 @@ export class TestCasesComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private fb = inject(FormBuilder);
-  private toastr = inject(ToastService);
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
@@ -219,7 +218,12 @@ export class TestCasesComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error fetching test steps:', err);
-        this.toastr.error('Error al cargar los pasos del caso de prueba', 'Error');
+        Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Error al cargar los pasos del caso de prueba',
+      confirmButtonColor: '#150fbd'
+    });
       }
     });
   }
@@ -352,7 +356,12 @@ export class TestCasesComponent implements OnInit {
           error: (err) => {
             console.error('TestCasesComponent: Error updating test case:', err);
             this.isSubmitting.set(false);
-            this.toastr.error('Error al actualizar el caso de prueba. Verifica los datos.', 'Error');
+            Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Error al actualizar el caso de prueba. Verifica los datos.',
+      confirmButtonColor: '#150fbd'
+    });
           }
         });
       } else {
@@ -368,7 +377,12 @@ export class TestCasesComponent implements OnInit {
           error: (err) => {
             console.error('TestCasesComponent: Error creating test case:', err);
             this.isSubmitting.set(false);
-            this.toastr.error('Error al crear el caso de prueba. Verifica los datos.', 'Error');
+            Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Error al crear el caso de prueba. Verifica los datos.',
+      confirmButtonColor: '#150fbd'
+    });
           }
         });
       }

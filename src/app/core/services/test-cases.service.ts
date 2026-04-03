@@ -17,8 +17,8 @@ export class TestCasesService {
     /** URL base del endpoint de casos de prueba */
     private readonly apiUrl = `${environment.apiUrl}/TestCases`;
 
-    private http = inject(HttpClient);
-    private mockService = inject(TestCasesMockService);
+    private readonly http = inject(HttpClient);
+    private readonly mockService = inject(TestCasesMockService);
 
     /**
      * Obtiene la lista de casos de prueba, opcionalmente filtrados por proyecto.

@@ -11,7 +11,9 @@ export class UserMapper {
       dto.fullName,
       dto.isActive,
       new Date(dto.createdAt),
-      dto.roles || []
+      dto.roles || [],
+      dto.documentoIdentidad || '',
+      dto.fechaNacimiento || ''
     );
   }
 
@@ -23,7 +25,9 @@ export class UserMapper {
       fullName: user.fullName,
       isActive: user.isActive,
       createdAt: user.createdAt.toISOString(),
-      roles: user.roles
+      roles: user.roles,
+      documentoIdentidad: user.documentoIdentidad,
+      fechaNacimiento: user.fechaNacimiento
     };
   }
 }

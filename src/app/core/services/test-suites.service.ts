@@ -12,8 +12,8 @@ import { map } from 'rxjs/operators';
 @Injectable({ providedIn: 'root' })
 export class TestSuitesService {
     private readonly apiUrl = `${environment.apiUrl}/TestSuites`;
-    private http = inject(HttpClient);
-    private mockService = inject(TestSuitesMockService);
+    private readonly http = inject(HttpClient);
+    private readonly mockService = inject(TestSuitesMockService);
 
     getTestSuitesByProjectId(projectId: string): Observable<TestSuite[]> {
         if (environment.useMock) {

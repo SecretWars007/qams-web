@@ -7,7 +7,7 @@
       </div>
       <div class="header-text">
         <h2 class="text-xl font-black text-slate-800 tracking-tight">System Catalogs</h2>
-        <p class="text-xs font-semibold text-slate-400 uppercase tracking-widest mt-1">Configure Data Types</p>
+        <p class="text-xs font-semibold text-slate-400 tracking-widest mt-1">Configurar tipos de datos</p>
       </div>
     </div>
 
@@ -30,7 +30,7 @@
     <header class="main-header">
       <div class="title-section space-y-2">
         <div class="inline-block px-3 py-1 bg-indigo-50 border border-indigo-100 rounded-full">
-            <span class="text-[10px] font-black text-indigo-600 tracking-widest uppercase">Admin Console</span>
+            <span class="text-[10px] font-black text-indigo-600 tracking-widest">Consola de administración</span>
         </div>
         <h1 class="text-4xl font-black text-slate-900 tracking-tight leading-none">{{ selectedCatalog.displayName }}</h1>
         <p class="text-slate-500 font-medium">Gestiona los valores permitidos para el catálogo <code class="bg-slate-100 px-1.5 py-0.5 rounded text-indigo-600 text-sm font-bold">{{ selectedCatalog.name }}</code></p>
@@ -75,11 +75,12 @@
             </td>
             <td class="desc-col text-sm text-slate-500 font-medium">{{ item.description || 'Sin descripción detallada' }}</td>
             <td class="status-col">
-              <span [class]="item.isActive ? 'badge-success' : 'badge-danger'" 
-                    (click)="toggleActive(item)"
-                    class="badge clickable cursor-pointer hover:scale-105 transition-transform">
+              <button [class]="item.isActive ? 'badge-success' : 'badge-danger'" 
+                      (click)="toggleActive(item)"
+                      type="button"
+                      class="badge clickable cursor-pointer hover:scale-105 transition-transform border-none outline-none">
                 {{ item.isActive ? 'Activo' : 'Inactivo' }}
-              </span>
+              </button>
             </td>
             <td class="actions-col !pr-8">
               <div class="flex justify-end gap-2">
@@ -121,18 +122,18 @@
       <form [formGroup]="itemForm" (ngSubmit)="saveItem()" class="p-10 space-y-8 bg-white">
         <div class="grid grid-cols-2 gap-6">
           <div class="space-y-2">
-            <label class="form-label">Código Interno</label>
-            <input type="text" formControlName="code" placeholder="p.ej. ALTA" [readonly]="isEdit" class="form-input">
+            <label for="code" class="form-label">Código Interno</label>
+            <input id="code" type="text" formControlName="code" placeholder="p.ej. ALTA" [readonly]="isEdit" class="form-input">
           </div>
           <div class="space-y-2">
-            <label class="form-label">Nombre Visual</label>
-            <input type="text" formControlName="name" placeholder="p.ej. Prioridad Alta" class="form-input">
+            <label for="name" class="form-label">Nombre Visual</label>
+            <input id="name" type="text" formControlName="name" placeholder="p.ej. Prioridad Alta" class="form-input">
           </div>
         </div>
 
         <div class="space-y-2">
-          <label class="form-label">Descripción</label>
-          <textarea formControlName="description" rows="3" placeholder="Describe brevemente el propósito de este valor..." class="form-input resize-none"></textarea>
+          <label for="description" class="form-label">Descripción</label>
+          <textarea id="description" formControlName="description" rows="3" placeholder="Describe brevemente el propósito de este valor..." class="form-input resize-none"></textarea>
         </div>
 
         <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
@@ -145,8 +146,9 @@
                   <p class="text-xs text-slate-400 font-medium">Define si el valor está disponible actualmente</p>
               </div>
           </div>
-          <label class="toggle">
-            <input type="checkbox" formControlName="isActive">
+          <label for="catalogStatusToggle" class="toggle">
+            <span class="sr-only">Alternar estado del registro</span>
+            <input id="catalogStatusToggle" type="checkbox" formControlName="isActive">
             <span class="slider round"></span>
           </label>
         </div>

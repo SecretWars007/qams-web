@@ -9,14 +9,14 @@
             </div>
             <div>
                 <h1 class="text-3xl font-black text-white tracking-tight">Reportes</h1>
-                <p class="text-gray-500 text-[10px] font-black uppercase tracking-[0.2em] mt-1">Generación de evidencia
+                <p class="text-gray-500 text-[10px] font-black tracking-[0.2em] mt-1">Generación de evidencia
                     técnica</p>
             </div>
         </div>
 
         <button *ngIf="reportGenerated()" (click)="resetReport()" class="btn-secondary w-full sm:w-auto">
             <i class="fas fa-redo"></i>
-            Nuevo Reporte
+            Nuevo reporte
         </button>
     </div>
 
@@ -29,8 +29,10 @@
             <!-- Project selector -->
             <div class="bg-gray-900/40 rounded-[2rem] border border-white/5 p-8 backdrop-blur-md">
                 <h2
-                    class="text-[10px] font-black text-gray-600 uppercase tracking-[0.2em] mb-6 flex items-center gap-3">
-                    <i class="fas fa-folder-open text-indigo-500/50"></i> Especificación de Proyecto
+                    class="text-[10px] font-black text-gray-600 tracking-[0.2em] mb-6 flex items-center gap-3">
+                    <label for="reportProjectSelector" class="flex items-center gap-2 cursor-pointer">
+                        <i class="fas fa-folder-open text-indigo-500/50"></i> Especificación de proyecto
+                    </label>
                 </h2>
 
                 <div *ngIf="loading()" class="flex justify-center py-6">
@@ -40,7 +42,7 @@
 
                 <form *ngIf="!loading()" [formGroup]="filterForm">
                     <div class="relative group">
-                        <select formControlName="projectId"
+                        <select id="reportProjectSelector" formControlName="projectId"
                             class="w-full bg-gray-950 border border-white/5 rounded-2xl px-5 py-4 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all text-sm font-medium appearance-none cursor-pointer">
                             <option value="">Selecciona un proyecto principal...</option>
                             <option *ngFor="let p of projects()" [value]="p.id">{{ p.name }}</option>
@@ -54,21 +56,21 @@
             <!-- Date range -->
             <div class="hidden bg-gray-900/40 rounded-[2rem] border border-white/5 p-8 backdrop-blur-md">
                 <h2
-                    class="text-[10px] font-black text-gray-600 uppercase tracking-[0.2em] mb-6 flex items-center gap-3">
-                    <i class="fas fa-calendar-range text-purple-500/50"></i> Dimensión Temporal
+                    class="text-[10px] font-black text-gray-600 tracking-[0.2em] mb-6 flex items-center gap-3">
+                    <i class="fas fa-calendar-range text-purple-500/50"></i> Dimensión temporal
                 </h2>
                 <form [formGroup]="filterForm">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div class="space-y-2">
-                            <label class="px-1 text-[9px] font-black text-gray-700 uppercase tracking-widest">Inicio del
-                                Ciclo</label>
-                            <input type="date" formControlName="startDate"
+                            <label for="startDate" class="px-1 text-[9px] font-black text-gray-700 tracking-widest">Inicio del
+                                ciclo</label>
+                            <input id="startDate" type="date" formControlName="startDate"
                                 class="w-full bg-gray-950 border border-white/5 rounded-2xl px-4 py-3 text-white text-xs focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 transition-all font-mono">
                         </div>
                         <div class="space-y-2">
-                            <label class="px-1 text-[9px] font-black text-gray-700 uppercase tracking-widest">Cierre del
-                                Ciclo</label>
-                            <input type="date" formControlName="endDate"
+                            <label for="endDate" class="px-1 text-[9px] font-black text-gray-700 tracking-widest">Cierre del
+                                ciclo</label>
+                            <input id="endDate" type="date" formControlName="endDate"
                                 class="w-full bg-gray-950 border border-white/5 rounded-2xl px-4 py-3 text-white text-xs focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 transition-all font-mono">
                         </div>
                     </div>
@@ -78,17 +80,17 @@
             <!-- Execution Status filter -->
             <div class="hidden bg-gray-900/40 rounded-[2rem] border border-white/5 p-8 backdrop-blur-md">
                 <h2
-                    class="text-[10px] font-black text-gray-600 uppercase tracking-[0.2em] mb-6 flex items-center gap-3">
-                    <i class="fas fa-circle-check text-emerald-500/50"></i> Estatus de Calidad
+                    class="text-[10px] font-black text-gray-600 tracking-[0.2em] mb-6 flex items-center gap-3">
+                    <i class="fas fa-circle-check text-emerald-500/50"></i> Estatus de calidad
                     <span *ngIf="selectedExecStatuses().size > 0"
                         class="ml-auto px-2 py-0.5 bg-indigo-500/10 text-indigo-400 rounded-lg text-[8px] font-black border border-indigo-500/10">
-                        {{ selectedExecStatuses().size }} SELECCIONADOS
+                        {{ selectedExecStatuses().size }} seleccionados
                     </span>
                 </h2>
                 <div class="flex flex-wrap gap-2">
                     <button *ngFor="let s of executionStatuses" (click)="toggleExecStatus(s.id)"
                         [class]="isExecSelected(s.id) ? getStatusColorSelected(s.color) : getStatusColor(s.color)"
-                        class="px-3 py-2 rounded-xl text-[9px] font-black border uppercase tracking-widest transition-all flex items-center gap-2 cursor-pointer active:scale-95">
+                        class="px-3 py-2 rounded-xl text-[9px] font-black border tracking-widest transition-all flex items-center gap-2 cursor-pointer active:scale-95">
                         <span class="w-1.5 h-1.5 rounded-full bg-current shadow-[0_0_8px_currentColor]"></span>
                         {{ s.label }}
                     </button>
@@ -98,18 +100,18 @@
             <!-- Task Status filter -->
             <div class="hidden bg-gray-900/40 rounded-[2rem] border border-white/5 p-8 backdrop-blur-md">
                 <h2
-                    class="text-[10px] font-black text-gray-600 uppercase tracking-[0.2em] mb-6 flex items-center gap-3">
-                    <i class="fas fa-columns text-amber-500/50"></i> Segmentación Kanban
+                    class="text-[10px] font-black text-gray-600 tracking-[0.2em] mb-6 flex items-center gap-3">
+                    <i class="fas fa-columns text-amber-500/50"></i> Segmentación kanban
                     <span *ngIf="selectedTaskStatuses().size > 0"
                         class="ml-auto px-2 py-0.5 bg-amber-500/10 text-amber-400 rounded-lg text-[8px] font-black border border-amber-500/10">
-                        {{ selectedTaskStatuses().size }} SELECCIONADOS
+                        {{ selectedTaskStatuses().size }} seleccionados
                     </span>
                 </h2>
                 <div class="flex flex-wrap gap-2">
                     <button *ngFor="let t of taskStatuses" (click)="toggleTaskStatus(t.name)" [class]="isTaskSelected(t.name) ? 
                             'bg-amber-500 text-white border-amber-400 shadow-lg shadow-amber-900/20' : 
                             'bg-gray-950 text-gray-500 border-white/5 hover:border-amber-500/30'"
-                        class="px-4 py-2.5 rounded-xl text-[9px] font-black border uppercase tracking-widest transition-all cursor-pointer flex items-center gap-2 active:scale-95">
+                        class="px-4 py-2.5 rounded-xl text-[9px] font-black border tracking-widest transition-all cursor-pointer flex items-center gap-2 active:scale-95">
                         <i class="fas fa-grip-vertical text-[10px] opacity-30"></i>
                         {{ t.label }}
                     </button>
@@ -126,7 +128,7 @@
                             <i class="fas fa-file-invoice text-indigo-400 text-lg"></i>
                         </div>
                         <span
-                            class="text-[10px] font-black text-gray-400 group-hover:text-indigo-400 uppercase tracking-[0.2em] transition-colors">General</span>
+                            class="text-[10px] font-black text-gray-400 group-hover:text-indigo-400 tracking-[0.2em] transition-colors">General</span>
                     </button>
                     <button (click)="generateReport('observations')" [disabled]="!hasProject || generating()"
                         class="group relative py-6 bg-gray-900/60 hover:bg-rose-900/20 disabled:opacity-30 disabled:cursor-not-allowed border border-white/5 hover:border-rose-500/30 rounded-[1.5rem] transition-all flex flex-col items-center justify-center gap-2 backdrop-blur-md active:scale-[0.98]">
@@ -135,7 +137,7 @@
                             <i class="fas fa-comment-exclamation text-rose-400 text-lg"></i>
                         </div>
                         <span
-                            class="text-[10px] font-black text-gray-400 group-hover:text-rose-400 uppercase tracking-[0.2em] transition-colors">Devolución</span>
+                            class="text-[10px] font-black text-gray-400 group-hover:text-rose-400 tracking-[0.2em] transition-colors">Devolución</span>
                     </button>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
@@ -146,7 +148,7 @@
                             <i class="fas fa-certificate text-emerald-400 text-lg"></i>
                         </div>
                         <span
-                            class="text-[10px] font-black text-gray-400 group-hover:text-emerald-400 uppercase tracking-[0.2em] transition-colors">Evidencias</span>
+                            class="text-[10px] font-black text-gray-400 group-hover:text-emerald-400 tracking-[0.2em] transition-colors">Evidencias</span>
                     </button>
                     <button (click)="generateReport('burndown')" [disabled]="!hasProject || generating()"
                         class="group relative py-6 bg-gray-900/60 hover:bg-amber-900/20 disabled:opacity-30 disabled:cursor-not-allowed border border-white/5 hover:border-amber-500/30 rounded-[1.5rem] transition-all flex flex-col items-center justify-center gap-2 backdrop-blur-md active:scale-[0.98]">
@@ -155,14 +157,14 @@
                             <i class="fas fa-chart-line text-amber-400 text-lg"></i>
                         </div>
                         <span
-                            class="text-[10px] font-black text-gray-400 group-hover:text-amber-400 uppercase tracking-[0.2em] transition-colors">Seguimiento</span>
+                            class="text-[10px] font-black text-gray-400 group-hover:text-amber-400 tracking-[0.2em] transition-colors">Seguimiento</span>
                     </button>
                 </div>
             </div>
 
             <!-- Hint -->
             <div *ngIf="!hasProject" class="p-4 bg-indigo-500/5 rounded-2xl border border-indigo-500/10 text-center">
-                <p class="text-[9px] font-black text-indigo-500/70 uppercase tracking-widest leading-relaxed">
+                <p class="text-[9px] font-black text-indigo-500/70 tracking-widest leading-relaxed">
                     Selecciona un proyecto para parametrizar la salida del PDF
                 </p>
             </div>
@@ -179,7 +181,7 @@
                     class="w-24 h-24 bg-indigo-500/10 rounded-[2rem] flex items-center justify-center border border-indigo-500/10 mb-8 shadow-inner animate-pulse">
                     <i class="fas fa-file-pdf text-indigo-400 text-4xl"></i>
                 </div>
-                <h3 class="text-xl font-black text-white mb-3 tracking-tight">Reporte Pendiente de Generación</h3>
+                <h3 class="text-xl font-black text-white mb-3 tracking-tight">Reporte pendiente de generación</h3>
                 <p class="text-gray-500 text-sm max-w-sm leading-relaxed">
                     Ajusta los parámetros técnicos en el panel lateral y selecciona un tipo de reporte para iniciar la
                     síntesis documental.
@@ -187,8 +189,8 @@
 
                 <!-- Feature list -->
                 <div class="mt-12 space-y-4 text-left w-full max-w-xs">
-                    <p class="text-[9px] text-gray-700 uppercase tracking-[0.2em] font-black mb-6">Contenido del
-                        Entregable</p>
+                    <p class="text-[9px] text-gray-700 tracking-[0.2em] font-black mb-6">Contenido del
+                        entregable</p>
                     <div class="flex items-center gap-3 text-xs text-gray-500 font-medium">
                         <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]">
                         </div>
@@ -202,7 +204,7 @@
                     <div class="flex items-center gap-3 text-xs text-gray-500 font-medium">
                         <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]">
                         </div>
-                        Estado Actual del Flujo Kanban
+                        Estado actual del flujo kanban
                     </div>
                 </div>
             </div>
@@ -217,8 +219,8 @@
                         <i class="fas fa-cube text-indigo-400 text-2xl animate-bounce"></i>
                     </div>
                 </div>
-                <p class="text-white font-black text-xl tracking-tight">Sincronizando Datos...</p>
-                <p class="text-gray-500 text-[10px] font-black uppercase tracking-[0.2em] mt-3">Compilando Documentación
+                <p class="text-white font-black text-xl tracking-tight">Sincronizando datos...</p>
+                <p class="text-gray-500 text-[10px] font-black tracking-[0.2em] mt-3">Compilando documentación
                     PDF</p>
             </div>
 
@@ -229,10 +231,10 @@
                     class="w-20 h-20 bg-rose-500/10 rounded-[2rem] flex items-center justify-center border border-rose-500/10 mb-6">
                     <i class="fas fa-triangle-exclamation text-rose-400 text-3xl"></i>
                 </div>
-                <h3 class="text-xl font-black text-rose-400 mb-3 tracking-tight">Interrupción en el Proceso</h3>
+                <h3 class="text-xl font-black text-rose-400 mb-3 tracking-tight">Interrupción en el proceso</h3>
                 <p class="text-gray-500 text-sm max-w-sm leading-relaxed mb-10">{{ error() }}</p>
                 <button (click)="generateReport()" class="btn-primary">
-                    <i class="fas fa-rotate-right"></i> Reiniciar Proceso
+                    <i class="fas fa-rotate-right"></i> Reiniciar proceso
                 </button>
             </div>
 
@@ -249,21 +251,20 @@
                             <i class="fas fa-check text-emerald-400"></i>
                         </div>
                         <div>
-                            <p class="text-white text-sm font-black tracking-tight leading-none">Documento Listo</p>
-                            <p class="text-gray-500 text-[9px] font-black uppercase tracking-widest mt-1.5">{{ today |
+                            <p class="text-white text-sm font-black tracking-tight leading-none">Documento listo</p>
+                            <p class="text-gray-500 text-[9px] font-black tracking-widest mt-1.5">{{ today |
                                 date:'dd MMM yyyy • HH:mm' }}</p>
                         </div>
                     </div>
 
                     <button (click)="downloadReport()" class="btn-primary w-full sm:w-auto">
                         <i class="fas fa-download"></i>
-                        Descargar Evidencia
+                        Descargar evidencia
                     </button>
                 </div>
 
                 <!-- PDF Preview iframe -->
-                <div class="bg-gray-950 rounded-[2.5rem] border border-white/5 overflow-hidden shadow-2xl relative group"
-                    style="height: 75vh;">
+                <div class="bg-gray-950 rounded-[2.5rem] border border-white/5 overflow-hidden shadow-2xl relative group report-preview-container">
                     <div
                         class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 z-10">
                     </div>

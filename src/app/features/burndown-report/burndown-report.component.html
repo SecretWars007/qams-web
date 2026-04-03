@@ -9,14 +9,14 @@
                 </div>
                 <h1 class="text-2xl font-bold text-white">Reporte Burndown</h1>
             </div>
-            <p class="text-gray-400 text-sm ml-13">Visualiza el progreso del tablero en un gráfico de quemado (Burndown
-                Chart)</p>
+            <p class="text-gray-400 text-sm ml-13">Visualiza el progreso del tablero en un gráfico de quemado (burndown
+                chart)</p>
         </div>
 
         <button *ngIf="reportGenerated()" (click)="resetReport()"
             class="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-xl text-gray-300 text-sm font-medium transition-all border border-gray-700">
             <i class="fas fa-redo text-xs"></i>
-            Nuevo Reporte
+            Nuevo reporte
         </button>
     </div>
 
@@ -25,8 +25,10 @@
         <!-- Filters Panel -->
         <div class="xl:col-span-2 space-y-5">
             <div class="bg-gray-900 rounded-2xl border border-gray-800 p-6">
-                <h2 class="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                    <i class="fas fa-folder-open text-blue-400"></i> Proyecto
+                <h2 class="text-sm font-bold text-gray-400 tracking-widest mb-4 flex items-center gap-2">
+                    <label for="burndownProjectSelector" class="flex items-center gap-2 cursor-pointer">
+                        <i class="fas fa-folder-open text-blue-400"></i> Proyecto
+                    </label>
                 </h2>
 
                 <div *ngIf="loading()" class="flex justify-center py-4">
@@ -35,7 +37,7 @@
                 </div>
 
                 <form *ngIf="!loading()" [formGroup]="filterForm">
-                    <select formControlName="projectId"
+                    <select id="burndownProjectSelector" formControlName="projectId"
                         class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all text-sm">
                         <option value="">-- Selecciona un proyecto --</option>
                         <option *ngFor="let p of projects()" [value]="p.id">{{ p.name }}</option>
@@ -49,7 +51,7 @@
                 <span *ngIf="generating()"
                     class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
                 <i *ngIf="!generating()" class="fas fa-chart-line text-lg"></i>
-                {{ generating() ? 'Generando reporte...' : 'Generar Burndown PDF' }}
+                {{ generating() ? 'Generando reporte...' : 'Generar burndown PDF' }}
             </button>
         </div>
 
@@ -64,7 +66,7 @@
                 </div>
                 <h3 class="text-lg font-bold text-gray-300 mb-2">Reporte no generado</h3>
                 <p class="text-gray-500 text-sm max-w-xs">
-                    Selecciona un proyecto y presiona <strong class="text-gray-400">Generar Burndown PDF</strong> para
+                    Selecciona un proyecto y presiona <strong class="text-gray-400">Generar burndown PDF</strong> para
                     visualizar el documento aquí.
                 </p>
             </div>
@@ -115,9 +117,9 @@
                         <i class="fas fa-download"></i> Descargar PDF
                     </button>
                 </div>
-                <div class="bg-gray-900 rounded-2xl border border-gray-800 overflow-hidden" style="height: 70vh;">
+                <div class="bg-gray-900 rounded-2xl border border-gray-800 overflow-hidden burndown-preview-container">
                     <iframe [src]="pdfUrl() | safeUrl" class="w-full h-full border-none"
-                        title="Reporte Burndown PDF"></iframe>
+                        title="Reporte burndown PDF"></iframe>
                 </div>
             </div>
         </div>

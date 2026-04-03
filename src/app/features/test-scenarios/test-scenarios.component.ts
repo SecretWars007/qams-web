@@ -1,3 +1,4 @@
+import Swal from 'sweetalert2';
 // src/app/features/test-scenarios/test-scenarios.component.ts
 // Componente para visualizar y gestionar escenarios de prueba (Test Suites).
 // Permite listar escenarios por proyecto y crear nuevos.
@@ -5,7 +6,6 @@ import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ToastService } from '../../core/services/toast.service';
 import { TestSuitesService } from '../../core/services/test-suites.service';
 import { ProjectsService } from '../../core/services/projects.service';
 import { TestSuite } from '../../core/models/test-suite.model';
@@ -34,7 +34,6 @@ export class TestScenariosComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private fb = inject(FormBuilder);
-  private toastr = inject(ToastService);
 
   ngOnInit(): void {
     this.initForm();
@@ -128,12 +127,22 @@ export class TestScenariosComponent implements OnInit {
           this.loadTestSuites(this.selectedProjectId()!);
           this.closeModal();
           this.isSubmitting.set(false);
-          this.toastr.success('Escenario creado correctamente.', 'Éxito');
+          Swal.fire({
+      icon: 'success',
+      title: 'Éxito',
+      text: 'Escenario creado correctamente.',
+      confirmButtonColor: '#150fbd'
+    });
         },
         error: (err) => {
           console.error('[TestScenarios] Error creating test suite', err);
           this.isSubmitting.set(false);
-          this.toastr.error('Error al crear el escenario.', 'Error');
+          Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Error al crear el escenario.',
+      confirmButtonColor: '#150fbd'
+    });
         }
       });
     }

@@ -1,9 +1,10 @@
-import { Component, signal, inject, effect, ChangeDetectorRef } from '@angular/core';
+import { Component, signal, inject, ChangeDetectorRef, ViewChild } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../core/services/auth.service';
 import { HasPermissionDirective } from '../../shared/directives/has-permission.directive';
 import { filter } from 'rxjs/operators';
+import { ProfileModalComponent } from '../../features/profile/profile-modal.component';
 
 @Component({
   selector: 'app-main-layout',
@@ -14,6 +15,7 @@ import { filter } from 'rxjs/operators';
     RouterLink,
     RouterLinkActive,
     HasPermissionDirective,
+    ProfileModalComponent,
   ],
   template: `
     <div class="min-h-screen bg-[#F6F6F8] flex overflow-hidden font-display text-slate-800 relative">
@@ -38,12 +40,12 @@ import { filter } from 'rxjs/operators';
             </div>
             <span class="text-white font-bold text-xl tracking-tight">QAMS</span>
           </div>
-          <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-2 ml-1">Quality Assurance</span>
+          <span class="text-[10px] text-slate-400 font-bold tracking-widest mt-2 ml-1">Quality assurance</span>
         </div>
 
         <!-- Navegación -->
         <nav class="flex-1 px-4 space-y-2 overflow-y-auto custom-scrollbar pb-6">
-          <p class="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 mt-2">Menú Principal</p>
+          <p class="px-4 text-[10px] font-bold text-slate-500 tracking-widest mb-3 mt-2">Menú principal</p>
           
           <!-- Dashboard -->
           <a
@@ -67,6 +69,18 @@ import { filter } from 'rxjs/operators';
           >
             <i class="fas fa-project-diagram w-5 text-center group-hover:scale-110 transition-transform"></i>
             <span class="font-medium group-[.active]:font-semibold">Proyectos</span>
+          </a>
+
+          <!-- Requisitos -->
+          <a
+            *hasPermission="'PROJECTS_VIEW'"
+            routerLink="/requirements"
+            routerLinkActive="bg-[#150fbd]/20 text-white border-l-4 border-[#150fbd] shadow-[inset_0_0_20px_rgba(21,15,189,0.15)]"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
+                    text-slate-400 hover:text-white hover:bg-white/5 transition-all group"
+          >
+            <i class="fas fa-list-check w-5 text-center group-hover:scale-110 transition-transform"></i>
+            <span class="font-medium group-[.active]:font-semibold">Requisitos</span>
           </a>
 
           <!-- Escenarios -->
@@ -132,7 +146,7 @@ import { filter } from 'rxjs/operators';
           <!-- Separador Admin -->
           <ng-container *ngIf="authService.isAdmin()">
             <div class="pt-6 pb-2">
-              <p class="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+              <p class="px-4 text-[10px] font-bold text-slate-500 tracking-widest">
                 Configuración
               </p>
             </div>
@@ -246,6 +260,14 @@ import { filter } from 'rxjs/operators';
                     </div>
 
                     <button
+                      (click)="openProfile()"
+                      class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-indigo-600 transition-colors"
+                    >
+                      <i class="fas fa-user-circle w-4 text-center text-slate-400"></i>
+                      <span>Perfil</span>
+                    </button>
+
+                    <button
                       (click)="goToChangePassword()"
                       class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-indigo-600 transition-colors"
                     >
@@ -289,6 +311,8 @@ import { filter } from 'rxjs/operators';
                    hover:opacity-60 transition-all duration-500 filter blur-[0.5px]"></i>
         <div class="h-1 w-12 bg-gradient-to-r from-transparent via-[#f59e0b]/20 to-transparent blur-xl mt-1"></div>
       </div>
+      <!-- Perfil Modal -->
+      <app-profile-modal #profileModal />
     </div>
   `,
   styles: [`
@@ -299,14 +323,15 @@ import { filter } from 'rxjs/operators';
   `]
 })
 export class MainLayoutComponent {
+  @ViewChild('profileModal') profileModal!: ProfileModalComponent;
   // Estado para controlar el menú de usuario
   userMenuOpen: boolean = false;
 
   // Señal para controlar visibilidad del sidebar en móvil
   sidebarOpen = signal(false);
 
-  private router = inject(Router);
-  private cdr = inject(ChangeDetectorRef);
+  private readonly router = inject(Router);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   constructor(public authService: AuthService) {
     // Escuchar cambios de ruta para cerrar el sidebar y menús en móvil
@@ -334,6 +359,12 @@ export class MainLayoutComponent {
     this.cdr.detectChanges();
   }
 
+  /** Abrir Modal de Perfil */
+  openProfile(): void {
+    this.closeUserMenu();
+    this.profileModal.open();
+  }
+
   /** Navegar a Cambio de Contraseña */
   goToChangePassword(): void {
     this.closeUserMenu();
@@ -358,6 +389,6 @@ export class MainLayoutComponent {
     if (!name) return '?';
     const parts = name.trim().split(/\s+/);
     if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
-    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    return (parts[0][0] + parts.at(-1)![0]).toUpperCase();
   }
 }

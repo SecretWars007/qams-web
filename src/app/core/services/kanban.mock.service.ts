@@ -8,7 +8,7 @@ import { TestExecutionsMockService } from './test-executions.mock.service';
 @Injectable({ providedIn: 'root' })
 export class KanbanMockService {
 
-    private executionsService = inject(TestExecutionsMockService);
+    private readonly executionsService = inject(TestExecutionsMockService);
 
     getBoard(projectId?: string): Observable<KanbanBoard> {
         // Fetch executions and build Kanban board dynamically
@@ -64,7 +64,7 @@ export class KanbanMockService {
                     if (column) {
                         column.tasks.push(task);
                     } else {
-                        // Fallback to todo if column doesn't exist
+                        // Fallback to initial column if target column doesn't exist
                         columns[0].tasks.push(task);
                     }
                 });
@@ -94,7 +94,7 @@ export class KanbanMockService {
             case 'PASSED':
                 return 'col-done';
             case 'FAILED':
-                return 'col-todo'; // Re-test or keep in todo? Let's say review for now
+                return 'col-todo'; // For failed tests, keep them in the initial column for re-evaluation
             default:
                 return 'col-todo';
         }

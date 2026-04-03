@@ -19,7 +19,7 @@ export interface ProjectReportFilter {
 @Injectable({ providedIn: 'root' })
 export class ReportsService {
     private readonly apiUrl = `${environment.apiUrl}/Reports`;
-    private http = inject(HttpClient);
+    private readonly http = inject(HttpClient);
 
     /** Genera el reporte general del proyecto en formato PDF (Blob) */
     generateProjectReport(filter: ProjectReportFilter): Observable<Blob> {

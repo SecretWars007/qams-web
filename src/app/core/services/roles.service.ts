@@ -14,7 +14,7 @@ export class RolesService {
     /** URL base del endpoint de roles */
     private readonly apiUrl = `${environment.apiUrl}/Roles`;
 
-    private http = inject(HttpClient);
+    private readonly http = inject(HttpClient);
 
     /** Obtiene la lista completa de roles */
     getRoles(): Observable<Role[]> {

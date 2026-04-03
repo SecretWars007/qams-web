@@ -1,10 +1,10 @@
+import Swal from 'sweetalert2';
 // src/app/features/auth/login/login/login.mock.component.ts
 // Componente de login con opción de usuarios de prueba
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { ToastService } from '../../../../core/services/toast.service';
 import { AuthMockService } from '../../../../core/services/auth.mock.service';
 import { LoginRequest } from '../../../../core/models/auth.model';
 
@@ -197,7 +197,6 @@ export class LoginMockComponent {
   constructor(
     private authService: AuthMockService,
     private router: Router,
-    private toastr: ToastService,
   ) { }
 
   selectTestUser(user: TestUser): void {
@@ -207,7 +206,12 @@ export class LoginMockComponent {
 
   onSubmit(): void {
     if (!this.form.username || !this.form.password) {
-      this.toastr.warning('Complete todos los campos.', 'Atención');
+      Swal.fire({
+      icon: 'warning',
+      title: 'Atención',
+      text: 'Complete todos los campos.',
+      confirmButtonColor: '#150fbd'
+    });
       return;
     }
 
@@ -215,7 +219,12 @@ export class LoginMockComponent {
     if (
       !this.authService.validatePassword(this.form.username, this.form.password)
     ) {
-      this.toastr.error('Usuario o contraseña inválidos.', 'Error');
+      Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Usuario o contraseña inválidos.',
+      confirmButtonColor: '#150fbd'
+    });
       return;
     }
 
@@ -223,11 +232,21 @@ export class LoginMockComponent {
 
     this.authService.login(this.form).subscribe({
       next: () => {
-        this.toastr.success('¡Bienvenido!', '✓ Sesión iniciada');
+        Swal.fire({
+      icon: 'success',
+      title: '✓ Sesión iniciada',
+      text: '¡Bienvenido!',
+      confirmButtonColor: '#150fbd'
+    });
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {
-        this.toastr.error(err.message || 'Error al iniciar sesión', 'Error');
+        Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: err.message || 'Error al iniciar sesión',
+      confirmButtonColor: '#150fbd'
+    });
         this.loading.set(false);
       },
     });

@@ -13,8 +13,11 @@
     <div class="flex items-center gap-4">
       <!-- Selector de Proyecto Premium -->
       <div class="flex items-center gap-2 px-4 py-2 bg-white rounded-2xl border border-slate-200 shadow-sm">
-        <i class="ri-folder-open-line text-blue-600"></i>
-        <select 
+        <label for="dashboardProjectSelector" class="flex items-center gap-2 cursor-pointer">
+          <i class="ri-folder-open-line text-blue-600"></i>
+          <span class="sr-only">Seleccionar proyecto</span>
+        </label>
+        <select id="dashboardProjectSelector"
           [ngModel]="selectedProjectId()" 
           (ngModelChange)="onProjectChange($event)"
           class="bg-transparent border-none outline-none text-sm font-bold text-slate-700 pr-4 cursor-pointer">
@@ -23,7 +26,7 @@
       </div>
 
       <div class="flex items-center gap-3 bg-white/80 p-2 px-5 rounded-2xl border border-slate-200 backdrop-blur-md shadow-sm">
-        <span class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Hoy</span>
+        <span class="text-[10px] font-black text-slate-400 tracking-[0.2em]">Hoy</span>
         <div class="h-4 w-px bg-slate-200"></div>
         <span class="text-sm font-bold text-blue-700">{{ today | date:'dd MMM, yyyy' }}</span>
       </div>
@@ -40,10 +43,10 @@
         <div class="w-12 h-12 rounded-2xl bg-blue-100 flex items-center justify-center border border-blue-200">
           <i class="ri-folder-info-fill text-blue-600 text-xl"></i>
         </div>
-        <span class="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded-lg border border-blue-100">GENERAL</span>
+        <span class="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded-lg border border-blue-100">General</span>
       </div>
       <div class="relative z-10 mt-4">
-        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Proyectos Activos</p>
+        <p class="text-xs font-bold text-slate-400 tracking-widest">Proyectos activos</p>
         <p class="text-4xl font-black text-slate-900 mt-1">{{ summary()!.totalProjects }}</p>
       </div>
     </div>
@@ -55,10 +58,10 @@
         <div class="w-12 h-12 rounded-2xl bg-purple-100 flex items-center justify-center border border-purple-200">
           <i class="ri-test-tube-fill text-purple-600 text-xl"></i>
         </div>
-        <span class="text-[10px] font-black text-purple-600 bg-purple-50 px-2 py-0.5 rounded-lg border border-purple-100">TESTING</span>
+        <span class="text-[10px] font-black text-purple-600 bg-purple-50 px-2 py-0.5 rounded-lg border border-purple-100">Testing</span>
       </div>
       <div class="relative z-10 mt-4">
-        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Casos de Prueba</p>
+        <p class="text-xs font-bold text-slate-400 tracking-widest">Casos de prueba</p>
         <p class="text-4xl font-black text-slate-900 mt-1">{{ summary()!.totalTestCases }}</p>
       </div>
     </div>
@@ -72,11 +75,11 @@
         </div>
         <div class="flex items-center gap-1.5 px-2 py-0.5 bg-emerald-50 rounded-lg border border-emerald-100">
           <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-          <span class="text-[10px] font-black text-emerald-600">HEALTHY</span>
+          <span class="text-[10px] font-black text-emerald-600">Healthy</span>
         </div>
       </div>
       <div class="relative z-10 mt-4">
-        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Pass Rate</p>
+        <p class="text-xs font-bold text-slate-400 tracking-widest">Pass rate</p>
         <div class="flex items-baseline gap-1">
           <p class="text-4xl font-black text-slate-900 mt-1">{{ summary()!.passRate }}</p>
           <span class="text-xl font-bold text-slate-400">%</span>
@@ -91,29 +94,23 @@
         <div class="w-12 h-12 rounded-2xl bg-amber-100 flex items-center justify-center border border-amber-200">
           <i class="ri-time-fill text-amber-600 text-xl"></i>
         </div>
-        <span class="text-[10px] font-black text-amber-600 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-100">QUEUE</span>
+        <span class="text-[10px] font-black text-amber-600 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-100">Queue</span>
       </div>
       <div class="relative z-10 mt-4">
-        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Pendientes</p>
+        <p class="text-xs font-bold text-slate-400 tracking-widest">Pendientes</p>
         <p class="text-4xl font-black text-slate-900 mt-1">{{ summary()!.pendingTestCases }}</p>
       </div>
     </div>
   </div>
 
-  <!-- Contenedores de Gráficos Dual Section -->
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-    <!-- Chart Principal (Ejecuciones) - OCULTO POR SOLICITUD
-    <div class="lg:col-span-8 card !p-0 overflow-hidden">
-      ...
-    </div>
-    -->
 
     <!-- Chart Secundario (Distribución) -->
     <div class="lg:col-span-12 card !p-0 overflow-hidden">
       <div class="p-8 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
         <h3 class="text-xl font-bold text-slate-900 flex items-center gap-2">
           <i class="ri-pie-chart-2-line text-purple-600"></i>
-          Status Mix
+          Status mix
         </h3>
       </div>
       <div class="p-8 h-[400px] flex items-center justify-center">
@@ -123,17 +120,11 @@
     </div>
   </div>
 
-  <!-- Timeline y Burndown Grid -->
   <div class="grid grid-cols-1 gap-8">
-    <!-- Cronograma de Pruebas - OCULTO POR SOLICITUD
-    <div class="card">
-        ...
-    </div>
-    -->
     <div class="card">
         <div class="flex items-center justify-between mb-8">
-            <h3 class="text-xl font-bold text-slate-900">Estadística de Tareas</h3>
-            <span class="text-xs font-bold text-amber-600 bg-amber-50 px-3 py-1 rounded-full uppercase tracking-tighter">Kanban Progress</span>
+            <h3 class="text-xl font-bold text-slate-900">Estadística de tareas</h3>
+            <span class="text-xs font-bold text-amber-600 bg-amber-50 px-3 py-1 rounded-full tracking-tighter">Kanban progress</span>
         </div>
         <div class="h-80">
             <canvas baseChart [data]="barData" [options]="barOptions" type="bar"></canvas>
@@ -151,7 +142,7 @@
       </div>
     </div>
     <div class="text-center space-y-2">
-      <h2 class="text-2xl font-black text-slate-900 tracking-tight">Analizando Datos...</h2>
+      <h2 class="text-2xl font-black text-slate-900 tracking-tight">Analizando datos...</h2>
       <p class="text-slate-400 font-medium">Sincronizando el motor de calidad QAMS</p>
     </div>
   </div>

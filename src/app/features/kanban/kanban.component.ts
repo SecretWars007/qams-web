@@ -1,3 +1,4 @@
+import Swal from 'sweetalert2';
 // src/app/features/kanban/kanban.component.ts
 // Componente que renderiza el tablero Kanban interactivo para el seguimiento de ejecuciones.
 // Permite mover tareas (casos de prueba/ejecuciones) entre columnas asociadas a estados.
@@ -5,7 +6,6 @@ import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DragDropModule, CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { Router, ActivatedRoute } from '@angular/router';
-import { ToastService } from '../../core/services/toast.service';
 import { KanbanService } from '../../core/services/kanban.service';
 import { KanbanBoard, KanbanTask } from '../../core/models/kanban.model';
 import { ProjectsService } from '../../core/services/projects.service';
@@ -25,11 +25,10 @@ export class KanbanComponent implements OnInit {
   projectId = signal<string | null>(null);
   projects = signal<Project[]>([]);
 
-  private kanbanService = inject(KanbanService);
-  private projectsService = inject(ProjectsService);
-  private router = inject(Router);
-  private route = inject(ActivatedRoute);
-  private toastr = inject(ToastService);
+  private readonly kanbanService = inject(KanbanService);
+  private readonly projectsService = inject(ProjectsService);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   ngOnInit(): void {
     this.loadProjects();
@@ -81,7 +80,12 @@ export class KanbanComponent implements OnInit {
       error: (err) => {
         console.error('[KanbanComponent] Error cargando tablero:', err);
         this.loading.set(false);
-        this.toastr.error('Error al cargar el tablero Kanban.', 'Error');
+        Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Error al cargar el tablero kanban.',
+      confirmButtonColor: '#150fbd'
+    });
       }
     });
   }
@@ -115,7 +119,12 @@ export class KanbanComponent implements OnInit {
         next: () => console.log('[KanbanComponent] Movimiento persistido con éxito'),
         error: (err) => {
           console.error('[KanbanComponent] Error persistiendo movimiento:', err);
-          this.toastr.error('Ocurrió un error al mover la tarea.', 'Error de sincronización');
+          Swal.fire({
+      icon: 'error',
+      title: 'Error de sincronización',
+      text: 'Ocurrió un error al mover la tarea.',
+      confirmButtonColor: '#150fbd'
+    });
         }
       });
     }
@@ -134,7 +143,12 @@ export class KanbanComponent implements OnInit {
         }
       });
     } else {
-      this.toastr.warning('Esta tarea no está vinculada a una Ejecución.', 'Aviso');
+      Swal.fire({
+      icon: 'warning',
+      title: 'Aviso',
+      text: 'Esta tarea no está vinculada a una ejecución.',
+      confirmButtonColor: '#150fbd'
+    });
     }
   }
 }

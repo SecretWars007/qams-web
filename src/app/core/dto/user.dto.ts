@@ -8,4 +8,6 @@ export interface UserDto {
   isActive: boolean;
   createdAt: string;
   roles: string[];
+  documentoIdentidad?: string;
+  fechaNacimiento?: string;
 }

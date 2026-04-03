@@ -7,7 +7,7 @@ import { TestCasesMockService } from './test-cases.mock.service';
 
 @Injectable({ providedIn: 'root' })
 export class TestExecutionsMockService {
-    private testCasesService = inject(TestCasesMockService);
+    private readonly testCasesService = inject(TestCasesMockService);
 
     private executions: TestExecution[] = [
         new TestExecution(
@@ -214,8 +214,8 @@ export class TestExecutionsMockService {
                 (statusUpdate as any).status || existing.status,
                 existing.executionDate,
                 existing.executedBy,
-                execution.actualTimeHours !== undefined ? execution.actualTimeHours : existing.actualTimeHours,
-                execution.notes !== undefined ? execution.notes : existing.notes,
+                execution.actualTimeHours ?? existing.actualTimeHours,
+                execution.notes ?? existing.notes,
                 execution.stepResults || existing.stepResults,
                 existing.evidences
             );
@@ -270,7 +270,7 @@ export class TestExecutionsMockService {
     }
 
     addObservation(stepResultId: string, observation: string, file?: File): Observable<any> {
-        return of({ id: Math.random().toString(36).substr(2, 9), observation }).pipe(delay(400));
+        return of({ id: Math.random().toString(36).slice(2, 11), observation }).pipe(delay(400));
     }
 
     respondToObservation(observationId: string, response: string): Observable<any> {

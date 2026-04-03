@@ -1,25 +1,18 @@
-<div class="auth-layout-container">
-  <!-- Elementos decorativos animados en el fondo -->
-  <div class="glow-sphere sphere-1"></div>
-  <div class="glow-sphere sphere-2"></div>
-  <div class="glow-sphere sphere-3"></div>
+<!-- Layout de pantalla completa para login/register -->
+<div class="min-h-screen relative flex items-center justify-center p-4 bg-[#F6F6F8] overflow-y-auto overflow-x-hidden">
   
-  <div class="auth-content-wrapper">
-    <!-- Logo o Branding superior (opcional en el layout) -->
-    <div class="auth-branding">
-      <div class="logo-placeholder">
-        <i class="ri-shield-flash-line"></i>
-        <span>QAMS</span>
-      </div>
-    </div>
+  <!-- Background Pattern Layer (Forced Visibility - Synchronized) -->
+  <div 
+    class="absolute inset-0 opacity-[0.25] pointer-events-none transition-opacity duration-700 auth-bg-pattern"
+  ></div>
 
-    <!-- Contenido dinámico (Login, Registro, etc.) -->
-    <main class="auth-main-content">
-      <router-outlet></router-outlet>
-    </main>
+  <!-- Abstract Background Details -->
+  <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-600/5 rounded-full blur-[100px] -z-10 pointer-events-none"></div>
+  <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-indigo-900/10 rounded-full blur-[120px] -z-10 pointer-events-none"></div>
 
-    <footer class="auth-footer">
-      <p>&copy; 2025 QAMS - Quality Assurance Management System</p>
-    </footer>
+  <!-- Contenedor central (Los hijos controlarán su propio branding) -->
+  <div class="w-full max-w-5xl z-10 relative py-4 flex flex-col items-center">
+    <!-- Contenido dinámico (login o register ahora incluyen su logo) -->
+    <router-outlet></router-outlet>
   </div>
 </div>

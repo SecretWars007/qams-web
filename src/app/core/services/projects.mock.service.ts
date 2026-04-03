@@ -134,11 +134,11 @@ export class ProjectsMockService {
             const updated = new Project(
                 existing.id,
                 project.name || existing.name,
-                project.description !== undefined ? project.description : existing.description,
+                project.description ?? existing.description,
                 project.startDate ? new Date(project.startDate) : existing.startDate,
                 project.endDate ? new Date(project.endDate) : existing.endDate,
                 existing.testerNames,
-                project.isActive !== undefined ? project.isActive : existing.isActive,
+                project.isActive ?? existing.isActive,
                 existing.priority,
                 existing.status,
                 existing.createdAt,
@@ -163,7 +163,7 @@ export class ProjectsMockService {
             project.stats.devolutions = (project.stats.devolutions || 0) + 1;
             project.historicDevolutions = project.historicDevolutions || [];
             project.historicDevolutions.unshift({
-                id: Math.random().toString(36).substr(2, 9),
+                id: Math.random().toString(36).slice(2, 11),
                 projectId,
                 date: new Date(),
                 notes,

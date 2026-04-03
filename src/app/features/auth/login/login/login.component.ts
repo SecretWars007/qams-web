@@ -1,9 +1,8 @@
 // src/app/features/auth/login/login.component.ts
-import { Component, computed, signal } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { ToastService } from '../../../../core/services/toast.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import Swal from 'sweetalert2';
 
@@ -26,12 +25,11 @@ export class LoginComponent {
   loading = signal<boolean>(false);
 
   // Estado reactivo para el foco de los campos
-  private focusedFields = signal<Record<string, boolean>>({});
+  private readonly focusedFields = signal<Record<string, boolean>>({});
 
   constructor(
-    private authService: AuthService,
-    private router: Router,
-    private toastr: ToastService,
+    private readonly authService: AuthService,
+    private readonly router: Router,
   ) { }
 
   setFieldFocus(fieldName: string, isFocused: boolean) {
@@ -49,7 +47,12 @@ export class LoginComponent {
   onSubmit(): void {
     // Validar que los campos no estén vacíos
     if (!this.form.username || !this.form.password) {
-      this.toastr.warning('Todos los campos son obligatorios.', 'Atención');
+      Swal.fire({
+        icon: 'warning',
+        title: 'Atención',
+        text: 'Todos los campos son obligatorios.',
+        confirmButtonColor: '#150fbd'
+      });
       return;
     }
 
@@ -59,7 +62,17 @@ export class LoginComponent {
       next: () => {
         console.log('[LoginComponent] Login exitoso, procediendo a dashboard');
         this.loading.set(false);
-        this.toastr.success('Inicio de sesión exitoso.', '¡Bienvenido!');
+        
+        // Alerta de éxito optimizada (auto-dismiss)
+        Swal.fire({
+          icon: 'success',
+          title: '¡Bienvenido!',
+          text: 'Inicio de sesión exitoso.',
+          timer: 1500,
+          showConfirmButton: false
+        });
+        
+        // Navegación inmediata
         this.router.navigate(['/dashboard']).then(nav => {
           console.log('[LoginComponent] Navegación a dashboard completa:', nav);
         }).catch(err => {
@@ -68,7 +81,12 @@ export class LoginComponent {
       },
       error: (err) => {
         console.error('[LoginComponent] Error en login:', err);
-        this.toastr.error('Credenciales inválidas o error de conexión.', 'Error de Acceso');
+        Swal.fire({
+          icon: 'error',
+          title: 'Error de Acceso',
+          text: 'Credenciales inválidas o error de conexión.',
+          confirmButtonColor: '#150fbd'
+        });
         this.loading.set(false);
       },
     });

@@ -1,6 +1,7 @@
+import Swal from 'sweetalert2';
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators, FormsModule } from '@angular/forms';
 import { TestExecutionsService } from '../../core/services/test-executions.service';
 import { TestExecution } from '../../core/models/test-execution.model';
 
@@ -11,8 +12,6 @@ import { TestSuitesService } from '../../core/services/test-suites.service';
 import { Project } from '../../core/models/project.model';
 import { TestSuite } from '../../core/models/test-suite.model';
 import { TestCase } from '../../core/models/test-case.model';
-import { FormsModule } from '@angular/forms';
-import { ToastService } from '../../core/services/toast.service';
 
 /**
  * Componente para visualizar, crear, editar y subir evidencias a Ejecuciones de Prueba.
@@ -56,14 +55,13 @@ export class TestExecutionsComponent implements OnInit {
   uploadForm!: FormGroup;
   selectedFile: File | null = null;
 
-  private fb = inject(FormBuilder);
-  private executionsService = inject(TestExecutionsService);
-  private testCasesService = inject(TestCasesService);
-  private projectsService = inject(ProjectsService);
-  private scenariosService = inject(TestSuitesService);
-  private route = inject(ActivatedRoute);
-  private location = inject(Location);
-  private toastr = inject(ToastService);
+  private readonly fb = inject(FormBuilder);
+  private readonly executionsService = inject(TestExecutionsService);
+  private readonly testCasesService = inject(TestCasesService);
+  private readonly projectsService = inject(ProjectsService);
+  private readonly scenariosService = inject(TestSuitesService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly location = inject(Location);
 
   ngOnInit(): void {
     this.initForm();
@@ -234,13 +232,23 @@ export class TestExecutionsComponent implements OnInit {
       next: () => {
         this.isSubmitting.set(false);
         this.showModal.set(false);
-        this.toastr.success('Ejecución guardada exitosamente.', 'Éxito');
+        Swal.fire({
+      icon: 'success',
+      title: 'Éxito',
+      text: 'Ejecución guardada exitosamente.',
+      confirmButtonColor: '#150fbd'
+    });
         this.loadExecutions();
       },
       error: (err) => {
         this.isSubmitting.set(false);
         console.error('[TestExecutionsComponent] Error guardando ejecución:', err);
-        this.toastr.error('Error al guardar la ejecución.', 'Error');
+        Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Error al guardar la ejecución.',
+      confirmButtonColor: '#150fbd'
+    });
       }
     });
   }
@@ -349,9 +357,9 @@ export class TestExecutionsComponent implements OnInit {
     const items = event.clipboardData?.items;
     if (!items) return;
 
-    for (let i = 0; i < items.length; i++) {
-      if (items[i].type.indexOf('image') !== -1) {
-        const blob = items[i].getAsFile();
+    for (const item of Array.from(items)) {
+      if (item.type.includes('image')) {
+        const blob = item.getAsFile();
         if (blob) {
           this.selectedFile = blob;
           const reader = new FileReader();
@@ -435,15 +443,25 @@ export class TestExecutionsComponent implements OnInit {
       next: () => {
         this.isSubmitting.set(false);
         this.closeObservationModal();
-        this.toastr.success('Observación agregada.', 'Éxito');
+        Swal.fire({
+      icon: 'success',
+      title: 'Éxito',
+      text: 'Observación agregada exitosamente.',
+      confirmButtonColor: '#150fbd'
+    });
         if (this.selectedExecution()) {
           this.openDetailsModal(this.selectedExecution()!);
         }
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('[TestExecutionsComponent] Error adding observation:', err);
         this.isSubmitting.set(false);
-        this.toastr.error('Error al agregar observación.', 'Error');
+        Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Error al agregar la observación.',
+      confirmButtonColor: '#150fbd'
+    });
       }
     });
   }
@@ -452,14 +470,24 @@ export class TestExecutionsComponent implements OnInit {
     if (!response.trim()) return;
     this.executionsService.respondToObservation(observationId, response).subscribe({
       next: () => {
-        this.toastr.success('Respuesta guardada.', 'Éxito');
+        Swal.fire({
+      icon: 'success',
+      title: 'Éxito',
+      text: 'Respuesta guardada exitosamente.',
+      confirmButtonColor: '#150fbd'
+    });
         if (this.selectedExecution()) {
           this.openDetailsModal(this.selectedExecution()!);
         }
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('[TestExecutionsComponent] Error al responder observación:', err);
-        this.toastr.error('Error al guardar la respuesta.', 'Error');
+        Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Error al guardar la respuesta.',
+      confirmButtonColor: '#150fbd'
+    });
       }
     });
   }

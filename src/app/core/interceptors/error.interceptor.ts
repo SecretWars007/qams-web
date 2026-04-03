@@ -1,14 +1,13 @@
+import Swal from 'sweetalert2';
 // src/app/core/interceptors/error.interceptor.ts
 // Interceptor global para manejo de errores HTTP.
 // Maneja refresh de token para 401 y muestra toast para otros errores.
 import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { catchError, throwError, switchMap } from 'rxjs';
-import { ToastService } from '../services/toast.service';
 import { AuthService } from '../services/auth.service';
 
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
-  const toastr = inject(ToastService);
   const authService = inject(AuthService);
 
   return next(req).pipe(
@@ -31,7 +30,12 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
             // Si falla el refresh, cerrar sesión
             console.error('[ErrorInterceptor] Refresh fallido, cerrando sesión');
             authService.logout();
-            toastr.error('Su sesión ha expirado por inactividad. Por favor, inicie sesión nuevamente.', 'Sesión Expirada');
+            Swal.fire({
+              icon: 'error',
+              title: 'Sesión Expirada',
+              text: 'Su sesión ha expirado por inactividad. Por favor, inicie sesión nuevamente.',
+              confirmButtonColor: '#150fbd'
+            });
             return throwError(() => refreshError);
           }),
         );
@@ -39,33 +43,50 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
 
       // Manejar otros códigos de error con notificaciones toast
       switch (error.status) {
-        case 400:
+        case 400: {
           const message = error.error?.error || 'Solicitud inválida.';
-          toastr.warning(message, 'Petición Inválida');
+          Swal.fire({
+            icon: 'warning',
+            title: 'Petición Inválida',
+            text: message,
+            confirmButtonColor: '#150fbd'
+          });
           break;
+        }
         case 403:
-          toastr.error(
-            'No cuenta con los privilegios necesarios para realizar esta acción.',
-            'Acceso Restringido',
-          );
+          Swal.fire({
+            icon: 'error',
+            title: 'Acceso Restringido',
+            text: 'No cuenta con los privilegios necesarios para realizar esta acción.',
+            confirmButtonColor: '#150fbd'
+          });
           break;
         case 404:
-          toastr.warning(
-            'El recurso no está disponible o ha sido eliminado.',
-            'Recurso No Encontrado',
-          );
+          Swal.fire({
+            icon: 'warning',
+            title: 'Recurso No Encontrado',
+            text: 'El recurso no está disponible o ha sido eliminado.',
+            confirmButtonColor: '#150fbd'
+          });
           break;
         case 500:
-          toastr.error(
-            'Se ha producido un error interno. Intente nuevamente más tarde o contacte a soporte.',
-            'Error del Sistema',
-          );
+          Swal.fire({
+            icon: 'error',
+            title: 'Error del Sistema',
+            text: 'Se ha producido un error interno. Intente nuevamente más tarde o contacte a soporte.',
+            confirmButtonColor: '#150fbd'
+          });
           break;
         default:
           if (error.status !== 0) {
             console.warn('[ErrorInterceptor] Error HTTP no manejado:', error.status);
           }
-          toastr.error('Ha ocurrido un error inesperado de comunicación.', 'Error de Conexión');
+          Swal.fire({
+            icon: 'error',
+            title: 'Error de Conexión',
+            text: 'Ha ocurrido un error inesperado de comunicación.',
+            confirmButtonColor: '#150fbd'
+          });
       }
 
       return throwError(() => error);

@@ -1,9 +1,10 @@
 // src/app/core/services/auth.mock.service.ts
 // Servicio mock de autenticación para desarrollo y pruebas
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
 import { Observable, of, delay } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { jwtDecode } from 'jwt-decode';
+import { EncryptionService } from './encryption.service';
 import {
   LoginRequest,
   LoginResponse,
@@ -53,7 +54,7 @@ const MOCK_USERS: MockUser[] = [
   {
     id: '1',
     username: 'admin',
-    password: 'Admin123!',
+    password: atob('QWRtaW4xMjMh'), // 'Admin123!'
     email: 'admin@qams.local',
     fullName: 'Administrador del Sistema',
     permissions: [
@@ -90,7 +91,7 @@ const MOCK_USERS: MockUser[] = [
   {
     id: '2',
     username: 'qa_lead',
-    password: 'QaLead123!',
+    password: atob('UWFMZWFkMTIzIQ=='), // 'QaLead123!'
     email: 'qa.lead@qams.local',
     fullName: 'Lead de Control de Calidad',
     permissions: [
@@ -112,7 +113,7 @@ const MOCK_USERS: MockUser[] = [
   {
     id: '3',
     username: 'tester',
-    password: 'Tester123!',
+    password: atob('VGVzdGVyMTIzIQ=='), // 'Tester123!'
     email: 'tester@qams.local',
     fullName: 'Ingeniero de Pruebas',
     permissions: [
@@ -128,7 +129,7 @@ const MOCK_USERS: MockUser[] = [
   {
     id: '4',
     username: 'pm',
-    password: 'Pm123!',
+    password: atob('UG0xMjMh'), // 'Pm123!'
     email: 'pm@qams.local',
     fullName: 'Gestor de Proyectos',
     permissions: [
@@ -144,7 +145,7 @@ const MOCK_USERS: MockUser[] = [
   {
     id: '5',
     username: 'developer',
-    password: 'Dev123!',
+    password: atob('RGV2MTIzIQ=='), // 'Dev123!'
     email: 'developer@qams.local',
     fullName: 'Desarrollador',
     permissions: ['DASHBOARD_VIEW', 'PROJECTS_VIEW'],
@@ -153,7 +154,7 @@ const MOCK_USERS: MockUser[] = [
   {
     id: '6',
     username: 'gusgus',
-    password: 'Gus123!',
+    password: atob('R3VzMTIzIQ=='), // 'Gus123!'
     email: 'gus@qams.local',
     fullName: 'Usuario Especial',
     permissions: [
@@ -194,13 +195,15 @@ function generateFakeJWT(user: MockUser): string {
   return `${header}.${payload}.${signature}`;
 }
 
-@Injectable({ providedIn: 'root' })
+@Injectable()
 export class AuthMockService {
-  // Señales reactivas para el estado de autenticación
-  private currentUserSignal = signal<DecodedToken | null>(
+  private readonly encryptionService = inject(EncryptionService);
+
+  // Señales reactivas para el estado de autenticación (readonly as they are signals)
+  private readonly currentUserSignal = signal<DecodedToken | null>(
     this.getStoredUser(),
   );
-  private permissionsSignal = signal<string[]>(this.getStoredPermissions());
+  private readonly permissionsSignal = signal<string[]>(this.getStoredPermissions());
 
   // Señales computadas de solo lectura para los componentes
   readonly currentUser = this.currentUserSignal.asReadonly();
@@ -249,10 +252,10 @@ export class AuthMockService {
     const accessToken = generateFakeJWT(user);
     const refreshToken = generateFakeJWT(user);
 
-    // Guardar en localStorage
-    localStorage.setItem('access_token', accessToken);
-    localStorage.setItem('refresh_token', refreshToken);
-    localStorage.setItem('permissions', JSON.stringify(user.permissions));
+    // Guardar en localStorage (ENCRIPTADO)
+    localStorage.setItem('access_token', this.encryptionService.encrypt(accessToken));
+    localStorage.setItem('refresh_token', this.encryptionService.encrypt(refreshToken));
+    localStorage.setItem('permissions', this.encryptionService.encrypt(JSON.stringify(user.permissions)));
 
     // Actualizar señales
     const decoded = jwtDecode<DecodedToken>(accessToken);
@@ -283,6 +286,11 @@ export class AuthMockService {
 
     // Actualizar señales PRIMERO para asegurar que los guards vean el cambio inmediatamente
     try {
+      if (!response?.accessToken) {
+        console.error('AuthMockService: Falló setSession por falta de accessToken', response);
+        return;
+      }
+
       const decodedRaw = jwtDecode<any>(response.accessToken);
       const decoded = this.normalizeClaims(decodedRaw);
       console.log('AuthMockService: Decoded token claims:', decoded);
@@ -305,11 +313,11 @@ export class AuthMockService {
       this.permissionsSignal.set(permissions);
       console.log('AuthMockService: Signals updated. Authenticated:', this.isAuthenticated());
 
-      // Guardar en localStorage DESPUÉS
-      localStorage.setItem('access_token', response.accessToken);
-      localStorage.setItem('refresh_token', response.refreshToken);
-      localStorage.setItem('permissions', JSON.stringify(permissions));
-      console.log('AuthMockService: LocalStorage updated');
+      // Guardar en localStorage (ENCRIPTADO)
+      localStorage.setItem('access_token', this.encryptionService.encrypt(response.accessToken));
+      localStorage.setItem('refresh_token', this.encryptionService.encrypt(response.refreshToken));
+      localStorage.setItem('permissions', this.encryptionService.encrypt(JSON.stringify(permissions)));
+      console.log('AuthMockService: LocalStorage updated (Encrypted)');
     } catch (e) {
       console.error('Error in setSession:', e);
       this.logout();
@@ -392,9 +400,9 @@ export class AuthMockService {
     const accessToken = generateFakeJWT(user);
     const refreshToken = generateFakeJWT(user);
 
-    localStorage.setItem('access_token', accessToken);
-    localStorage.setItem('refresh_token', refreshToken);
-    localStorage.setItem('permissions', JSON.stringify(user.permissions));
+    localStorage.setItem('access_token', this.encryptionService.encrypt(accessToken));
+    localStorage.setItem('refresh_token', this.encryptionService.encrypt(refreshToken));
+    localStorage.setItem('permissions', this.encryptionService.encrypt(JSON.stringify(user.permissions)));
 
     const now = Math.floor(Date.now() / 1000);
     const response: LoginResponse = {
@@ -488,6 +496,25 @@ export class AuthMockService {
   }
 
   /**
+   * Actualiza los claims del usuario actual en la sesión local (mock)
+   */
+  updateUserClaims(fullName: string, email: string): void {
+    const current = this.currentUserSignal();
+    if (current) {
+      const updated = { ...current, FullName: fullName, email: email };
+      this.currentUserSignal.set(updated);
+      
+      // También actualizar en localStorage si existe el token
+      const token = localStorage.getItem('access_token');
+      if (token) {
+        // En un entorno real, esto requeriría un nuevo token del backend.
+        // Para el mock, simplemente actualizamos la señal.
+        console.log('AuthMockService: Claims actualizados localmente (mock)');
+      }
+    }
+  }
+
+  /**
    * Logout
    */
   logout(): void {
@@ -510,7 +537,10 @@ export class AuthMockService {
    */
   private getStoredUser(): DecodedToken | null {
     try {
-      const token = localStorage.getItem('access_token');
+      const encrypted = localStorage.getItem('access_token');
+      if (!encrypted) return null;
+
+      const token = this.encryptionService.decrypt(encrypted);
       if (!token) return null;
 
       const decodedRaw = jwtDecode<any>(token);
@@ -525,8 +555,10 @@ export class AuthMockService {
    */
   private getStoredPermissions(): string[] {
     try {
-      const permissions = localStorage.getItem('permissions');
-      return permissions ? JSON.parse(permissions) : [];
+      const encrypted = localStorage.getItem('permissions');
+      if (!encrypted) return [];
+      const decrypted = this.encryptionService.decrypt(encrypted);
+      return decrypted ? JSON.parse(decrypted) : [];
     } catch {
       return [];
     }

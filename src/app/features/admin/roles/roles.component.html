@@ -19,7 +19,7 @@
   @if (loading()) {
     <div class="flex flex-col items-center justify-center py-20">
       <div class="w-10 h-10 border-4 border-slate-200 border-t-indigo-600 rounded-full animate-spin"></div>
-      <p class="mt-4 text-sm tracking-widest text-slate-500 uppercase font-bold">Cargando Roles...</p>
+      <p class="mt-4 text-sm tracking-widest text-slate-500 font-bold">Cargando roles...</p>
     </div>
   }
 
@@ -44,7 +44,7 @@
     <div class="glass-card rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
       <div class="overflow-x-auto">
         <table class="premium-table w-full text-left text-sm whitespace-nowrap">
-          <thead class="bg-slate-50/80 text-slate-500 uppercase text-[10px] font-bold tracking-wider">
+          <thead class="bg-slate-50/80 text-slate-500 text-[10px] font-bold tracking-wider">
             <tr>
               <th scope="col" class="px-6 py-4 rounded-tl-xl w-1/4">Rol</th>
               <th scope="col" class="px-6 py-4">Descripción</th>
@@ -63,7 +63,7 @@
                     </div>
                     <div>
                       <p class="font-bold text-slate-900">{{ role.name }}</p>
-                      <span class="text-[10px] uppercase tracking-wider text-slate-400 font-bold bg-slate-100 px-2 py-0.5 rounded-md mt-1 inline-block">ID: {{role.id.substring(0,8)}}</span>
+                      <span class="text-[10px] tracking-wider text-slate-400 font-bold bg-slate-100 px-2 py-0.5 rounded-md mt-1 inline-block">ID: {{role.id.substring(0,8)}}</span>
                     </div>
                   </div>
                 </td>
@@ -83,8 +83,10 @@
                   </div>
                 </td>
                 <td class="px-6 py-4 text-center">
-                  <label class="toggle inline-flex items-center cursor-pointer justify-center">
+                  <label [for]="'roleStatus-' + role.id" class="toggle inline-flex items-center cursor-pointer justify-center">
+                    <span class="sr-only">Alternar estado del rol</span>
                     <input 
+                      [id]="'roleStatus-' + role.id"
                       type="checkbox" 
                       class="sr-only" 
                       [checked]="role.isActive"
@@ -146,10 +148,11 @@
         <div class="space-y-4">
           <!-- Nombre -->
           <div>
-            <label class="block text-sm font-semibold text-slate-700 mb-1">
+            <label for="roleName" class="block text-sm font-semibold text-slate-700 mb-1">
               Nombre del Rol <span class="text-rose-500">*</span>
             </label>
             <input 
+              id="roleName"
               type="text" 
               formControlName="name"
               class="w-full h-11 px-4 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none"
@@ -165,10 +168,11 @@
 
           <!-- Descripción -->
           <div>
-            <label class="block text-sm font-semibold text-slate-700 mb-1">
+            <label for="roleDescription" class="block text-sm font-semibold text-slate-700 mb-1">
               Descripción
             </label>
             <textarea 
+              id="roleDescription"
               formControlName="description"
               rows="3"
               class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none resize-none"
@@ -205,7 +209,7 @@
             <i class="fas fa-key text-indigo-500"></i> Permisos del Rol
           </h3>
           <p class="text-xs text-slate-500 font-medium tracking-wide">
-            ROL: <strong class="text-indigo-600 uppercase">{{ selectedRole()?.name }}</strong>
+            Rol: <strong class="text-indigo-600">{{ selectedRole()?.name }}</strong>
           </p>
         </div>
         <button 
@@ -221,7 +225,7 @@
         @if (allPermissions().length === 0) {
           <div class="text-center py-10">
             <div class="w-8 h-8 border-2 border-slate-200 border-t-indigo-600 rounded-full animate-spin mx-auto"></div>
-            <p class="mt-2 text-xs text-slate-500 font-bold tracking-widest uppercase">Cargando...</p>
+            <p class="mt-2 text-xs text-slate-500 font-bold tracking-widest">Cargando...</p>
           </div>
         }
 
@@ -238,7 +242,7 @@
             <!-- Items -->
             <div class="divide-y divide-slate-100">
               @for (perm of group.permissions; track perm.id) {
-                <label class="flex items-center justify-between p-4 hover:bg-slate-50/50 cursor-pointer transition-colors group/item">
+                <div class="flex items-center justify-between p-4 hover:bg-slate-50/50 transition-colors group/item relative">
                   <div class="flex-1 pr-4">
                     <p class="text-sm font-semibold text-slate-800">
                       {{ perm.code || perm.name || 'Permiso Genérico' }}
@@ -248,8 +252,10 @@
                     </p>
                   </div>
                   <!-- Inline Toggle -->
-                  <div class="toggle shrink-0">
+                  <label [for]="'perm-' + perm.id" class="toggle shrink-0">
+                    <span class="sr-only">Alternar permiso {{ perm.code }}</span>
                     <input 
+                      [id]="'perm-' + perm.id"
                       type="checkbox" 
                       class="sr-only" 
                       [checked]="hasPermission(perm)"
@@ -259,8 +265,8 @@
                     <div class="toggle-bg w-10 h-5 bg-slate-200 rounded-full border border-slate-300 transition-colors relative">
                       <div class="toggle-dot absolute left-[2px] top-[2px] bg-white w-4 h-4 rounded-full transition-transform shadow-sm"></div>
                     </div>
-                  </div>
-                </label>
+                  </label>
+                </div>
               }
             </div>
           </div>

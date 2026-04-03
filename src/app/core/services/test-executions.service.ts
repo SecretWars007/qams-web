@@ -4,7 +4,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { TestExecutionDto, CreateTestExecutionDto } from '../dto/test-execution.dto';
+import { TestExecutionDto } from '../dto/test-execution.dto';
 import { TestExecution } from '../models/test-execution.model';
 import { TestExecutionMapper } from '../mappers/test-execution.mapper';
 import { TestExecutionsMockService } from './test-executions.mock.service';
@@ -17,8 +17,8 @@ export class TestExecutionsService {
     /** URL base del endpoint de ejecuciones */
     private readonly apiUrl = `${environment.apiUrl}/TestExecutions`;
 
-    private http = inject(HttpClient);
-    private mockService = inject(TestExecutionsMockService);
+    private readonly http = inject(HttpClient);
+    private readonly mockService = inject(TestExecutionsMockService);
 
     /**
      * Obtiene ejecuciones, opcionalmente filtradas por caso, proyecto o suite.

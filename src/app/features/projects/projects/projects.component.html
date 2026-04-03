@@ -38,13 +38,13 @@
 
       <!-- Status Badge -->
       <div class="absolute top-0 right-0 z-10">
-        <span (click)="onToggleStatus(project, $event)" [ngClass]="{
+        <button type="button" (click)="onToggleStatus(project, $event)" [ngClass]="{
             'bg-emerald-500/10 text-emerald-400 border-emerald-500/10': project.isActive,
             'bg-rose-500/10 text-rose-400 border-rose-500/10': !project.isActive
           }"
-          class="px-4 py-1.5 rounded-bl-2xl border-b border-l text-[10px] font-black uppercase tracking-widest cursor-pointer hover:brightness-125 transition-all backdrop-blur-md">
+          class="px-4 py-1.5 rounded-bl-2xl border-b border-l text-[10px] font-black tracking-widest cursor-pointer hover:brightness-125 transition-all backdrop-blur-md outline-none">
           {{ project.isActive ? 'Activo' : 'Inactivo' }}
-        </span>
+        </button>
       </div>
 
       <!-- Content -->
@@ -60,8 +60,8 @@
               [title]="project.name">
               {{ project.name }}
             </h3>
-            <div class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-gray-500">
-              <span class="text-indigo-500/70">{{ project.status.name || 'PENDIENTE' }}</span>
+            <div class="flex items-center gap-2 text-[10px] font-bold tracking-wider text-gray-500">
+              <span class="text-indigo-500/70">{{ project.status.name || 'Pendiente' | titlecase }}</span>
               <span>•</span>
               <span>{{ project.createdAt | date:'MMM d, y' }}</span>
             </div>
@@ -77,14 +77,14 @@
       <!-- Metadata Grid -->
       <div class="grid grid-cols-2 gap-3 mb-6">
         <div class="bg-gray-950/50 rounded-2xl p-3 border border-white/5">
-          <p class="text-[9px] text-gray-600 uppercase tracking-widest font-black mb-1">Duración</p>
+          <p class="text-[9px] text-gray-600 tracking-widest font-black mb-1">Duración</p>
           <div class="flex items-center gap-2 text-[11px] text-gray-400 font-medium">
             <i class="far fa-calendar-alt text-indigo-500/50"></i>
             <span>{{ project.startDate | date:'dd/MM' }} - {{ project.endDate | date:'dd/MM' }}</span>
           </div>
         </div>
         <div class="bg-gray-950/50 rounded-2xl p-3 border border-white/5">
-          <p class="text-[9px] text-gray-600 uppercase tracking-widest font-black mb-1">Responsable</p>
+          <p class="text-[9px] text-gray-600 tracking-widest font-black mb-1">Responsable</p>
           <div class="flex items-center gap-2 text-[11px] text-gray-400 font-medium truncate">
             <i class="far fa-user text-purple-500/50"></i>
             <span class="truncate">{{ project.createdBy || 'Sistema' }}</span>
@@ -96,7 +96,7 @@
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <!-- Testers -->
         <div *ngIf="project.testerNames && project.testerNames.length">
-          <p class="text-[9px] text-gray-600 uppercase tracking-widest font-black mb-2">Equipo QA</p>
+          <p class="text-[9px] text-gray-600 tracking-widest font-black mb-2">Equipo QA</p>
           <div class="flex -space-x-2">
             <div *ngFor="let name of project.testerNames.slice(0, 4)"
               class="h-8 w-8 rounded-full border-2 border-gray-900 bg-gray-800 flex items-center justify-center text-[10px] font-black text-indigo-400"
@@ -122,11 +122,11 @@
             <span class="text-xs font-black text-white leading-none">{{ project.stats.kanbanTasks || 0 }}</span>
           </div>
           <div class="w-px h-4 bg-white/5"></div>
-          <div class="flex flex-col items-center px-1" title="Devoluciones"
+          <button type="button" class="flex flex-col items-center px-1 hover:bg-white/5 rounded-lg transition-colors outline-none" title="Devoluciones"
             (click)="openDevolutionModal(project, $event)">
             <span class="text-[10px] font-black text-rose-500/50 leading-none mb-1">D</span>
             <span class="text-xs font-black text-rose-500 leading-none">{{ project.stats.devolutions || 0 }}</span>
-          </div>
+          </button>
         </div>
       </div>
 
@@ -158,7 +158,7 @@
         <div class="flex justify-between items-center mb-10">
           <div>
             <h2 class="text-2xl font-black text-white tracking-tight">Nuevo Proyecto</h2>
-            <p class="text-gray-500 text-xs font-bold uppercase tracking-widest mt-1">Configuración inicial</p>
+            <p class="text-gray-500 text-xs font-bold tracking-widest mt-1">Configuración inicial</p>
           </div>
           <button (click)="closeModal()"
             class="w-10 h-10 rounded-2xl bg-white/5 text-gray-500 hover:text-white transition-all flex items-center justify-center">
@@ -168,57 +168,57 @@
 
         <form [formGroup]="projectForm" (ngSubmit)="onSubmit()" class="space-y-8">
           <div class="space-y-2">
-            <label class="text-[10px] font-black text-gray-600 uppercase tracking-widest px-1">Nombre Comercial</label>
-            <input type="text" formControlName="name" placeholder="Ej: QAMS E-commerce Integration"
+            <label for="projectName" class="text-[10px] font-black text-gray-600 tracking-widest px-1">Nombre comercial</label>
+            <input id="projectName" type="text" formControlName="name" placeholder="Ej: QAMS E-commerce Integration"
               class="w-full bg-gray-950 border border-white/5 rounded-2xl px-5 py-4 text-white placeholder-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-medium">
             <div *ngIf="projectForm.get('name')?.touched && projectForm.get('name')?.invalid"
-              class="text-rose-500 text-[10px] font-black uppercase tracking-widest mt-1 ml-1">
+              class="text-rose-500 text-[10px] font-black tracking-widest mt-1 ml-1">
               Nombre inválido (min. 3 caracteres)
             </div>
           </div>
 
           <div class="space-y-2">
-            <label class="text-[10px] font-black text-gray-600 uppercase tracking-widest px-1">Objetivos del
-              Proyecto</label>
-            <textarea formControlName="description" rows="4" placeholder="Define el alcance y metas principales..."
+            <label for="projectDescription" class="text-[10px] font-black text-gray-600 tracking-widest px-1">Objetivos del
+              proyecto</label>
+            <textarea id="projectDescription" formControlName="description" rows="4" placeholder="Define el alcance y metas principales..."
               class="w-full bg-gray-950 border border-white/5 rounded-2xl px-5 py-4 text-white placeholder-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all resize-none font-medium leading-relaxed"></textarea>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div class="space-y-2">
-              <label class="text-[10px] font-black text-gray-600 uppercase tracking-widest px-1">Fecha
-                Lanzamiento</label>
-              <input type="date" formControlName="startDate"
+              <label for="startDate" class="text-[10px] font-black text-gray-600 tracking-widest px-1">Fecha
+                lanzamiento</label>
+              <input id="startDate" type="date" formControlName="startDate"
                 class="w-full bg-gray-950 border border-white/5 rounded-2xl px-5 py-4 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-medium"
                 [class.border-rose-500]="projectForm.get('startDate')?.touched && projectForm.get('startDate')?.invalid">
               <div *ngIf="projectForm.get('startDate')?.touched && projectForm.get('startDate')?.invalid"
-                class="text-rose-500 text-[10px] font-black uppercase tracking-widest mt-1 ml-1">
+                class="text-rose-500 text-[10px] font-black tracking-widest mt-1 ml-1">
                 La fecha de inicio es requerida
               </div>
             </div>
             <div class="space-y-2">
-              <label class="text-[10px] font-black text-gray-600 uppercase tracking-widest px-1">Fecha Cierre</label>
-              <input type="date" formControlName="endDate"
+              <label for="endDate" class="text-[10px] font-black text-gray-600 tracking-widest px-1">Fecha cierre</label>
+              <input id="endDate" type="date" formControlName="endDate"
                 class="w-full bg-gray-950 border border-white/5 rounded-2xl px-5 py-4 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-medium"
                 [class.border-rose-500]="projectForm.get('endDate')?.touched && projectForm.get('endDate')?.invalid">
               <div *ngIf="projectForm.get('endDate')?.touched && projectForm.get('endDate')?.invalid"
-                class="text-rose-500 text-[10px] font-black uppercase tracking-widest mt-1 ml-1">
+                class="text-rose-500 text-[10px] font-black tracking-widest mt-1 ml-1">
                 La fecha de cierre es requerida
               </div>
             </div>
           </div>
 
           <div class="space-y-2">
-            <label class="text-[10px] font-black text-gray-600 uppercase tracking-widest px-1">Liderazgo QA
-              (Multiple)</label>
-            <select formControlName="testerIds" multiple
+            <label for="testerIds" class="text-[10px] font-black text-gray-600 tracking-widest px-1">Liderazgo QA
+              (Múltiple)</label>
+            <select id="testerIds" formControlName="testerIds" multiple
               class="w-full bg-gray-950 border border-white/5 rounded-2xl px-5 py-4 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all h-40 custom-scrollbar font-medium"
               [class.border-rose-500]="projectForm.get('testerIds')?.touched && projectForm.get('testerIds')?.invalid">
               <option *ngFor="let user of users()" [value]="user.id"
                 class="py-2 px-2 rounded-lg my-1 hover:bg-white/5 transition-all">{{ user.username }}</option>
             </select>
             <div *ngIf="projectForm.get('testerIds')?.touched && projectForm.get('testerIds')?.invalid"
-              class="text-rose-500 text-[10px] font-black uppercase tracking-widest mt-1 ml-1">
+              class="text-rose-500 text-[10px] font-black tracking-widest mt-1 ml-1">
               Seleccione al menos un especialista QA
             </div>
             <p class="text-[10px] text-gray-700 font-bold italic px-1">Tip: Usa CMD/Ctrl para selecciones múltiples.</p>
@@ -232,7 +232,7 @@
             <button type="submit" [disabled]="projectForm.invalid || isSubmitting()" class="btn-primary flex-1">
               <span *ngIf="isSubmitting()" class="w-5 h-5 border-3 border-white/20 border-t-white rounded-full animate-spin"></span>
               <i *ngIf="!isSubmitting()" class="fas fa-check-circle"></i>
-              {{ isSubmitting() ? 'Iniciando...' : 'Desplegar Proyecto' }}
+              {{ isSubmitting() ? 'Iniciando...' : 'Desplegar proyecto' }}
             </button>
           </div>
         </form>
@@ -251,7 +251,7 @@
             <h2 class="text-3xl font-black text-white tracking-tight">Devolución de Proyecto</h2>
             <div class="flex items-center gap-2 mt-2">
               <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
-              <p class="text-rose-500/80 text-[10px] font-black uppercase tracking-widest">Protocolo de Incumplimiento
+              <p class="text-rose-500/80 text-[10px] font-black tracking-widest">Protocolo de incumplimiento
               </p>
             </div>
             <p class="text-gray-500 font-bold text-xs mt-4">Sistema: <span class="text-white">{{
@@ -267,7 +267,7 @@
           <!-- Historic Devolutions -->
           <div *ngIf="selectedProjectForDevolution()?.historicDevolutions?.length" class="space-y-6">
             <div class="flex items-center gap-4">
-              <p class="text-[10px] font-black text-gray-600 uppercase tracking-widest">Historial de Auditoría</p>
+              <p class="text-[10px] font-black text-gray-600 tracking-widest">Historial de auditoría</p>
               <div class="flex-1 h-px bg-white/5"></div>
             </div>
             <div class="space-y-4">
@@ -275,9 +275,9 @@
                 class="bg-gray-900 border border-white/5 rounded-3xl p-6 relative overflow-hidden group/dev hover:border-rose-500/20 transition-all">
                 <div class="absolute top-0 right-0 p-4">
                   <span *ngIf="dev.responseDate"
-                    class="px-2 py-0.5 rounded-lg text-[8px] font-black bg-emerald-500/10 text-emerald-400 border border-emerald-500/10 uppercase">Resuelto</span>
+                    class="px-2 py-0.5 rounded-lg text-[8px] font-black bg-emerald-500/10 text-emerald-400 border border-emerald-500/10">Resuelto</span>
                   <span *ngIf="!dev.responseDate"
-                    class="px-2 py-0.5 rounded-lg text-[8px] font-black bg-rose-500/10 text-rose-500 border border-rose-500/10 uppercase">Pendiente</span>
+                    class="px-2 py-0.5 rounded-lg text-[8px] font-black bg-rose-500/10 text-rose-500 border border-rose-500/10">Pendiente</span>
                 </div>
 
                 <div class="flex items-start gap-4 mb-4">
@@ -287,7 +287,7 @@
                   </div>
                   <div>
                     <p class="text-xs font-black text-white tracking-tight leading-none mb-1">{{ dev.createdBy }}</p>
-                    <p class="text-[9px] text-gray-600 font-bold uppercase tracking-widest">{{ dev.date | date:'longDate' }}</p>
+                    <p class="text-[9px] text-gray-600 font-bold tracking-widest">{{ dev.date | date:'longDate' }}</p>
                   </div>
                 </div>
 
@@ -298,7 +298,7 @@
                   class="mt-6 ml-14 p-5 bg-emerald-500/5 rounded-2xl border border-emerald-500/10 animate-in slide-in-from-left-2">
                   <div class="flex items-center gap-2 mb-2">
                     <i class="fas fa-check-double text-[10px] text-emerald-500"></i>
-                    <p class="text-[9px] text-emerald-500 font-black uppercase tracking-widest">Resolución Aplicada • {{
+                    <p class="text-[9px] text-emerald-500 font-black tracking-widest">Resolución aplicada • {{
                       dev.responseDate | date:'dd/MM/yyyy' }}</p>
                   </div>
                   <p class="text-xs text-gray-300/80 leading-relaxed font-medium">{{ dev.responseNotes }}</p>
@@ -310,7 +310,7 @@
           <!-- New Devolution Input -->
           <div class="space-y-4">
             <div class="flex items-center gap-4">
-              <p class="text-[10px] font-black text-gray-600 uppercase tracking-widest">Nuevo Registro de Hallazgo</p>
+              <p class="text-[10px] font-black text-gray-600 tracking-widest">Nuevo registro de hallazgo</p>
               <div class="flex-1 h-px bg-white/5"></div>
             </div>
             <textarea [(ngModel)]="devolutionNotes" [ngModelOptions]="{standalone: true}" rows="5"
@@ -318,7 +318,7 @@
               class="w-full bg-gray-900 border border-white/5 rounded-3xl px-6 py-5 text-white placeholder-gray-700 focus:outline-none focus:ring-2 focus:ring-rose-500/50 focus:border-rose-500 transition-all resize-none text-sm leading-relaxed font-medium"></textarea>
             <div class="flex items-start gap-3 p-4 bg-rose-500/5 rounded-2xl border border-rose-500/10">
               <i class="fas fa-info-circle text-rose-500 mt-0.5"></i>
-              <p class="text-[10px] text-rose-500/70 font-bold uppercase tracking-widest leading-normal">
+              <p class="text-[10px] text-rose-500/70 font-bold tracking-widest leading-normal">
                 Nota: Esta acción bloqueará el estado del proyecto y requerirá una respuesta formal del líder técnico.
               </p>
             </div>
@@ -333,7 +333,7 @@
           <button type="button" (click)="onRegisterDevolution()" [disabled]="!devolutionNotes.trim() || isSubmitting()" class="btn-danger flex-1">
             <span *ngIf="isSubmitting()" class="w-5 h-5 border-3 border-white/20 border-t-white rounded-full animate-spin"></span>
             <i *ngIf="!isSubmitting()" class="fas fa-file-signature"></i>
-            {{ isSubmitting() ? 'Ejecutando...' : 'Formalizar Devolución' }}
+            {{ isSubmitting() ? 'Ejecutando...' : 'Formalizar devolución' }}
           </button>
         </div>
       </div>

@@ -1,42 +1,42 @@
 <div class="p-6">
   <div class="flex justify-between items-center mb-6">
     <div class="flex flex-col">
-      <h1 class="text-2xl font-bold text-slate-900">Casos de Prueba</h1>
+      <h1 class="text-2xl font-bold text-slate-900">Casos de prueba</h1>
       <div *ngIf="projectTitle()" class="flex items-center gap-2 mt-2">
         <i class="fas fa-folder-open text-[#150fbd]"></i>
         <span class="text-[#150fbd] text-sm font-medium">{{ projectTitle() }}</span>
         <span *ngIf="projectStatus()" [ngClass]="{
             'bg-emerald-100 text-emerald-700 border-emerald-200': projectStatus() === 'Activo',
             'bg-rose-100 text-rose-700 border-rose-200': projectStatus() === 'Inactivo'
-          }" class="px-2 py-0.5 rounded-full border text-[10px] font-bold uppercase tracking-wider">
+          }" class="px-2 py-0.5 rounded-full border text-[10px] font-bold tracking-wider">
           {{ projectStatus() }}
         </span>
       </div>
     </div>
     <button (click)="openModal()" [disabled]="!projectId()" class="btn-primary">
       <i class="fas fa-plus-circle"></i>
-      Nuevo Caso de Prueba
+      Nuevo caso de prueba
     </button>
   </div>
 
   <!-- Project & Suite Selection -->
   <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 bg-gray-900/40 p-6 rounded-3xl border border-white/5 backdrop-blur-md shadow-sm">
     <div>
-      <label
-        class="block text-sm font-medium text-gray-600 mb-2 font-black uppercase tracking-widest text-[9px]">Proyecto</label>
-      <select (change)="onProjectChange($event)" [value]="projectId() || ''"
-        class="w-full bg-gray-950 border border-white/5 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all shadow-sm font-bold text-xs appearance-none cursor-pointer">
-        <option value="">Todos los Proyectos</option>
+      <label for="projectSelect"
+        class="block text-sm font-medium text-gray-600 mb-2 font-medium text-[11px]">Proyecto</label>
+      <select id="projectSelect" (change)="onProjectChange($event)" [value]="projectId() || ''"
+        class="w-full bg-gray-950 border border-white/5 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all shadow-sm font-medium text-xs appearance-none cursor-pointer">
+        <option value="">Todos los proyectos</option>
         <option *ngFor="let project of projects()" [value]="project.id">{{ project.name }}</option>
       </select>
     </div>
     <div>
-      <label
-        class="block text-sm font-medium text-gray-600 mb-2 font-black uppercase tracking-widest text-[9px]">Escenario
-        (Suite)</label>
-      <select (change)="onSuiteChange($event)" [value]="testSuiteId() || ''" [disabled]="!projectId()"
-        class="w-full bg-gray-950 border border-white/5 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-sm font-bold text-xs appearance-none cursor-pointer">
-        <option value="">Todos los Escenarios</option>
+      <label for="suiteSelect"
+        class="block text-sm font-medium text-gray-600 mb-2 font-medium text-[11px]">Escenario
+        (suite)</label>
+      <select id="suiteSelect" (change)="onSuiteChange($event)" [value]="testSuiteId() || ''" [disabled]="!projectId()"
+        class="w-full bg-gray-950 border border-white/5 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-sm font-medium text-xs appearance-none cursor-pointer">
+        <option value="">Todos los escenarios</option>
         <option *ngFor="let suite of testSuites()" [value]="suite.id">{{ suite.name }}</option>
       </select>
     </div>
@@ -53,24 +53,23 @@
           <div class="w-8 h-8 rounded-lg bg-[#150fbd]/10 text-[#150fbd] flex items-center justify-center mr-3 shrink-0">
             <i class="fas fa-folder text-sm"></i>
           </div>
-          <h2 class="text-xs sm:text-[11px] font-black text-white uppercase tracking-[0.2em] truncate">
-            {{ group.projectName || 'Sin Proyecto' }} <span class="text-gray-700 mx-2">/</span> <span
-              class="text-indigo-400">{{ group.testSuiteName || 'Sin Escenario' }}</span>
+          <h2 class="text-xs sm:text-[11px] font-bold text-white tracking-wide truncate">
+            {{ group.projectName || 'Sin proyecto' }} <span class="text-gray-700 mx-2">/</span> <span
+              class="text-indigo-400">{{ group.testSuiteName || 'Sin escenario' }}</span>
           </h2>
         </div>
-        <span class="ml-2 px-3 py-1 rounded-lg bg-indigo-500/10 text-indigo-400 text-[9px] font-black uppercase tracking-widest whitespace-nowrap border border-indigo-500/10">{{ group.items.length }} casos</span>
+        <span class="ml-2 px-3 py-1 rounded-lg bg-indigo-500/10 text-indigo-400 text-[9px] font-bold tracking-wide whitespace-nowrap border border-indigo-500/10">{{ group.items.length }} casos</span>
       </div>
 
-      <!-- Mobile Cards View -->
       <div class="grid grid-cols-1 gap-4 p-4 sm:hidden bg-slate-50/30">
-        <div *ngFor="let testCase of group.items" (click)="viewExecutions(testCase.id, $event)"
-          class="bg-white border border-slate-200 rounded-2xl p-5 active:scale-[0.98] transition-all shadow-sm">
+        <button type="button" *ngFor="let testCase of group.items" (click)="viewExecutions(testCase.id, $event)"
+          class="bg-white border border-slate-200 rounded-2xl p-5 active:scale-[0.98] transition-all shadow-sm text-left w-full outline-none focus:ring-2 focus:ring-indigo-500/50">
           <div class="flex justify-between items-start mb-3">
             <span class="text-[10px] font-bold text-slate-400 font-mono">#{{ testCase.id }}</span>
             <span [ngClass]="{
               'bg-emerald-100 text-emerald-700': testCase.isActive,
               'bg-slate-100 text-slate-500': !testCase.isActive
-            }" class="px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest">
+            }" class="px-2 py-0.5 rounded-md text-[8px] font-bold tracking-wide">
               {{ testCase.isActive ? 'Activo' : 'Inactivo' }}
             </span>
           </div>
@@ -82,8 +81,8 @@
               'bg-rose-100 text-rose-800': testCase.priority.code === 'P0',
               'bg-orange-100 text-orange-800': testCase.priority.code === 'P1',
               'bg-amber-100 text-amber-800': testCase.priority.code === 'P2'
-            }" class="px-2 py-0.5 rounded-md text-[8px] font-bold uppercase tracking-widest">
-              {{ testCase.priority.name }}
+            }" class="px-2 py-0.5 rounded-md text-[8px] font-bold tracking-wide">
+              {{ testCase.priority.name | titlecase }}
             </span>
             <div class="flex gap-1">
               <button (click)="viewSteps(testCase.id, testCase.title, $event)" class="btn-icon btn-icon-primary">
@@ -94,7 +93,7 @@
               </button>
             </div>
           </div>
-        </div>
+        </button>
       </div>
 
       <!-- Desktop Table View (Premium Dark) -->
@@ -102,18 +101,18 @@
         <table class="w-full text-left border-collapse">
           <thead>
             <tr class="bg-white/[0.02]">
-              <th class="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-gray-500 w-20">ID</th>
-              <th class="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-gray-500">Título</th>
-              <th class="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-gray-500 text-center w-32">Prioridad</th>
-              <th class="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-gray-500 text-center w-32">Estado</th>
-              <th class="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-gray-500 w-32">Creación</th>
-              <th class="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-gray-500 text-right w-32">Acciones</th>
+              <th class="px-6 py-5 text-[10px] font-bold tracking-wide text-gray-500 w-20">ID</th>
+              <th class="px-6 py-5 text-[10px] font-bold tracking-wide text-gray-500">Título</th>
+              <th class="px-6 py-5 text-[10px] font-bold tracking-wide text-gray-500 text-center w-32">Prioridad</th>
+              <th class="px-6 py-5 text-[10px] font-bold tracking-wide text-gray-500 text-center w-32">Estado</th>
+              <th class="px-6 py-5 text-[10px] font-bold tracking-wide text-gray-500 w-32">Creación</th>
+              <th class="px-6 py-5 text-[10px] font-bold tracking-wide text-gray-500 text-right w-32">Acciones</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-white/5">
-            <tr *ngFor="let testCase of group.items" (click)="viewExecutions(testCase.id, $event)"
-              class="bg-transparent hover:bg-white/[0.02] transition-colors cursor-pointer group">
-              <td class="px-6 py-5 text-gray-600 font-mono text-[10px] font-black w-20">#{{ testCase.id }}</td>
+            <tr *ngFor="let testCase of group.items" (click)="viewExecutions(testCase.id, $event)" (keydown.enter)="viewExecutions(testCase.id, $event)" tabindex="0"
+              class="bg-transparent hover:bg-white/[0.02] transition-colors cursor-pointer group outline-none focus:bg-white/[0.05]">
+              <td class="px-6 py-5 text-gray-600 font-mono text-[10px] font-bold w-20">#{{ testCase.id }}</td>
               <td class="px-6 py-5 font-bold text-sm text-white group-hover:text-indigo-400 transition-colors tracking-tight">
                 {{ testCase.title }}
               </td>
@@ -122,21 +121,21 @@
                   'bg-rose-500/10 text-rose-400 border-rose-500/10': testCase.priority.code === 'P0',
                   'bg-orange-500/10 text-orange-400 border-orange-500/10': testCase.priority.code === 'P1',
                   'bg-amber-500/10 text-amber-500 border-amber-500/10': testCase.priority.code === 'P2'
-                }" class="inline-flex items-center px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-widest border transition-all">
-                  {{ testCase.priority.name }}
+                }" class="inline-flex items-center px-2 py-0.5 rounded-lg text-[9px] font-bold tracking-wide border transition-all">
+                  {{ testCase.priority.name | titlecase }}
                 </span>
               </td>
               <td class="px-6 py-5 text-center">
-                <span class="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest" [class]="testCase.isActive ? 'text-emerald-400' : 'text-gray-600'">
+                <span class="inline-flex items-center gap-2 text-[10px] font-bold tracking-wide" [class]="testCase.isActive ? 'text-emerald-400' : 'text-gray-600'">
                   <span class="w-1.5 h-1.5 rounded-full"
                     [class]="testCase.isActive ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-gray-800'"></span>
                   {{ testCase.isActive ? 'Activo' : 'Inactivo' }}
                 </span>
               </td>
-              <td class="px-6 py-5 text-gray-500 text-[10px] font-bold uppercase tracking-widest">{{ testCase.createdAt | date:'MMM d, YY' }}
+              <td class="px-6 py-5 text-gray-500 text-[10px] font-bold tracking-wide">{{ testCase.createdAt | date:'MMM d, YY' }}
               </td>
               <td class="px-6 py-5 text-right w-32">
-                <div class="flex items-center justify-end gap-2 text-[10px] font-black uppercase tracking-widest">
+                <div class="flex items-center justify-end gap-2 text-[10px] font-bold tracking-wide">
                   <button (click)="viewSteps(testCase.id, testCase.title, $event)" class="btn-icon btn-icon-primary" title="Ver pasos de ejecución">
                     <i class="fas fa-tasks"></i>
                   </button>
@@ -158,8 +157,7 @@
     <div class="bg-gray-900 backdrop-blur-xl border-0 sm:border border-white/10 rounded-none sm:rounded-[2rem] w-full max-w-3xl h-full sm:h-auto overflow-hidden shadow-2xl flex flex-col">
       <div class="p-6 sm:p-8 overflow-y-auto custom-scrollbar flex-1">
         <div class="flex justify-between items-center mb-8 pb-4 border-b border-white/5 shrink-0">
-          <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight">{{ editingTestCaseId() ? 'Editar Caso de Prueba' : 'Nuevo Caso de
-            Prueba' }}</h2>
+          <h2 class="text-xl sm:text-2xl font-bold text-white tracking-tight">{{ editingTestCaseId() ? 'Editar caso de prueba' : 'Nuevo caso de prueba' }}</h2>
           <button (click)="closeModal()" class="w-10 h-10 rounded-xl bg-white/5 text-gray-500 hover:text-white transition-all flex items-center justify-center">
             <i class="fas fa-times text-xl"></i>
           </button>
@@ -172,21 +170,21 @@
           <!-- Basic Info Grid -->
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <div>
-              <label class="block text-[10px] font-black tracking-widest uppercase text-gray-600 mb-2">Escenario (Test Suite) *</label>
-              <select formControlName="testSuiteId"
+              <label for="modalSuiteId" class="block text-[10px] font-bold tracking-wide text-gray-600 mb-2">Escenario (test suite) *</label>
+              <select id="modalSuiteId" formControlName="testSuiteId"
                 class="w-full bg-gray-950 border border-white/5 rounded-xl px-4 py-3 text-white font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all text-sm appearance-none"
                 [class.border-rose-500]="testCaseForm.get('testSuiteId')?.touched && testCaseForm.get('testSuiteId')?.invalid">
                 <option value="">Selecciona un escenario...</option>
                 <option *ngFor="let suite of testSuites()" [value]="suite.id">{{ suite.name }}</option>
               </select>
               <div *ngIf="testCaseForm.get('testSuiteId')?.touched && testCaseForm.get('testSuiteId')?.invalid"
-                class="text-rose-500 text-[10px] font-black uppercase tracking-widest mt-1 ml-1">
+                class="text-rose-500 text-[10px] font-bold tracking-wide mt-1 ml-1">
                 El escenario es obligatorio
               </div>
             </div>
             <div>
-              <label class="block text-[10px] font-black tracking-widest uppercase text-gray-600 mb-2">Prioridad *</label>
-              <select formControlName="priorityId"
+              <label for="modalPriorityId" class="block text-[10px] font-bold tracking-wide text-gray-600 mb-2">Prioridad *</label>
+              <select id="modalPriorityId" formControlName="priorityId"
                 class="w-full bg-gray-950 border border-white/5 rounded-xl px-4 py-3 text-white font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all text-sm appearance-none">
                 <option value="1">Baja</option>
                 <option value="2">Media</option>
@@ -198,8 +196,8 @@
 
           <!-- Title -->
           <div>
-            <label class="block text-[10px] font-black tracking-widest uppercase text-gray-600 mb-2">Título *</label>
-            <input type="text" formControlName="title" placeholder="Ej: Verificar login con credenciales válidas"
+            <label for="modalTitle" class="block text-[10px] font-bold tracking-wide text-gray-600 mb-2">Título *</label>
+            <input id="modalTitle" type="text" formControlName="title" placeholder="Ej: Verificar login con credenciales válidas"
               class="w-full bg-gray-950 border border-white/5 rounded-xl px-4 py-3 text-white font-medium placeholder-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all">
             <div *ngIf="testCaseForm.get('title')?.touched && testCaseForm.get('title')?.invalid"
               class="text-rose-500 text-xs mt-2 font-medium">
@@ -209,26 +207,26 @@
 
           <!-- Description -->
           <div>
-            <label class="block text-[10px] font-black tracking-widest uppercase text-gray-600 mb-2">Descripción</label>
-            <textarea formControlName="description" rows="3" placeholder="Describe el objetivo del caso de prueba..."
+            <label for="modalDescription" class="block text-[10px] font-bold tracking-wide text-gray-600 mb-2">Descripción</label>
+            <textarea id="modalDescription" formControlName="description" rows="3" placeholder="Describe el objetivo del caso de prueba..."
               class="w-full bg-gray-950 border border-white/5 rounded-xl px-4 py-3 text-white font-medium placeholder-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all resize-none"></textarea>
           </div>
 
           <!-- Preconditions -->
           <div>
-            <label class="block text-[10px] font-black tracking-widest uppercase text-gray-600 mb-2">Precondiciones</label>
-            <textarea formControlName="preconditions" rows="2" placeholder="Condiciones previas necesarias..."
+            <label for="modalPreconditions" class="block text-[10px] font-bold tracking-wide text-gray-600 mb-2">Precondiciones</label>
+            <textarea id="modalPreconditions" formControlName="preconditions" rows="2" placeholder="Condiciones previas necesarias..."
               class="w-full bg-gray-950 border border-white/5 rounded-xl px-4 py-3 text-white font-medium placeholder-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all resize-none"></textarea>
           </div>
 
           <!-- Expected Result -->
           <div>
-            <label class="block text-[10px] font-black tracking-widest uppercase text-gray-600 mb-2">Resultado Esperado *</label>
-            <textarea formControlName="expectedResult" rows="2" placeholder="Describe el resultado esperado..."
+            <label for="modalExpectedResult" class="block text-[10px] font-bold tracking-wide text-gray-600 mb-2">Resultado esperado *</label>
+            <textarea id="modalExpectedResult" formControlName="expectedResult" rows="2" placeholder="Describe el resultado esperado..."
               class="w-full bg-gray-950 border border-white/5 rounded-xl px-4 py-3 text-white font-medium placeholder-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all resize-none"
               [class.border-rose-500]="testCaseForm.get('expectedResult')?.touched && testCaseForm.get('expectedResult')?.invalid"></textarea>
             <div *ngIf="testCaseForm.get('expectedResult')?.touched && testCaseForm.get('expectedResult')?.invalid"
-              class="text-rose-500 text-[10px] font-black uppercase tracking-widest mt-1 ml-1">
+              class="text-rose-500 text-[10px] font-bold tracking-wide mt-1 ml-1">
               El resultado esperado es obligatorio
             </div>
           </div>
@@ -237,8 +235,8 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-950/20 p-6 rounded-2xl border border-white/5">
             <!-- Test Type -->
             <div>
-              <label class="block text-[10px] font-black tracking-widest uppercase text-gray-600 mb-2">Tipo de Prueba *</label>
-              <select formControlName="testTypeId"
+              <label for="modalTestTypeId" class="block text-[10px] font-black tracking-widest text-gray-600 mb-2">Tipo de prueba *</label>
+              <select id="modalTestTypeId" formControlName="testTypeId"
                 class="w-full bg-gray-950 border border-white/5 rounded-xl px-4 py-3 text-white font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all appearance-none">
                 <option value="1">Funcional Manual</option>
                 <option value="2">Funcional Automatizada</option>
@@ -250,34 +248,34 @@
 
             <!-- Estimated Time -->
             <div>
-              <label class="block text-[10px] font-black tracking-widest uppercase text-gray-600 mb-2">Tiempo Estimado (Hrs) *</label>
-              <input type="number" formControlName="estimatedTimeHours" min="0" placeholder="Ej: 2"
+              <label for="modalEstimatedTime" class="block text-[10px] font-black tracking-widest text-gray-600 mb-2">Tiempo estimado (hrs) *</label>
+              <input id="modalEstimatedTime" type="number" formControlName="estimatedTimeHours" min="0" placeholder="Ej: 2"
                 class="w-full bg-gray-900 border border-white/5 rounded-xl px-4 py-3 text-white font-medium placeholder-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all"
                 [class.border-rose-500]="testCaseForm.get('estimatedTimeHours')?.touched && testCaseForm.get('estimatedTimeHours')?.invalid">
               <div *ngIf="testCaseForm.get('estimatedTimeHours')?.touched && testCaseForm.get('estimatedTimeHours')?.invalid"
-                class="text-rose-500 text-[10px] font-black uppercase tracking-widest mt-1 ml-1">
+                class="text-rose-500 text-[10px] font-black tracking-widest mt-1 ml-1">
                 Tiempo inválido
               </div>
             </div>
 
             <!-- Start Date -->
             <div class="space-y-2">
-              <label class="block text-[10px] font-black tracking-widest uppercase text-gray-600 mb-2">Fecha Inicio *</label>
-              <input type="date" formControlName="startDate"
+              <label for="modalStartDate" class="block text-[10px] font-black tracking-widest text-gray-600 mb-2">Fecha inicio *</label>
+              <input id="modalStartDate" type="date" formControlName="startDate"
                 class="w-full bg-gray-950 border border-white/5 rounded-xl px-4 py-3 text-white font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all">
             </div>
 
             <!-- End Date -->
             <div class="space-y-2">
-              <label class="block text-[10px] font-black tracking-widest uppercase text-gray-600 mb-2">Fecha Fin *</label>
-              <input type="date" formControlName="endDate"
+              <label for="modalEndDate" class="block text-[10px] font-black tracking-widest text-gray-600 mb-2">Fecha fin *</label>
+              <input id="modalEndDate" type="date" formControlName="endDate"
                 class="w-full bg-gray-950 border border-white/5 rounded-xl px-4 py-3 text-white font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all">
             </div>
 
             <!-- Certifiers -->
             <div class="col-span-1 md:col-span-2 space-y-2">
-              <label class="block text-[10px] font-black tracking-widest uppercase text-gray-600 mb-2">Certificadores *</label>
-              <select formControlName="certifierUserIds" multiple
+              <label for="modalCertifierIds" class="block text-[10px] font-black tracking-widest text-gray-600 mb-2">Certificadores *</label>
+              <select id="modalCertifierIds" formControlName="certifierUserIds" multiple
                 class="w-full bg-gray-950 border border-white/5 rounded-xl px-4 py-3 text-white font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all h-32 custom-scrollbar">
                 <option *ngFor="let user of users()" [value]="user.id" class="p-2">{{ user.fullName }}</option>
               </select>
@@ -288,9 +286,9 @@
           <!-- Steps Section -->
           <div class="border-t border-white/5 pt-8">
             <div class="flex justify-between items-center mb-6">
-              <h3 class="text-lg font-black text-white">Pasos de Ejecución</h3>
+              <h3 class="text-lg font-black text-white">Pasos de ejecución</h3>
               <button type="button" (click)="addStep()"
-                class="px-4 py-2 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 rounded-xl text-xs font-black uppercase tracking-widest transition-all border border-indigo-500/10 flex items-center gap-2">
+                class="px-4 py-2 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 rounded-xl text-xs font-black tracking-widest transition-all border border-indigo-500/10 flex items-center gap-2">
                 <i class="fas fa-plus"></i>
                 Agregar
               </button>
@@ -301,25 +299,25 @@
                 class="bg-gray-950 rounded-2xl p-5 border border-white/5 relative group overflow-hidden">
                 <div class="absolute top-0 left-0 w-1 h-full bg-gray-900 group-hover:bg-indigo-500 transition-colors"></div>
                 <div class="flex justify-between items-center mb-4 pl-3">
-                  <span class="text-xs font-black text-gray-600 uppercase tracking-widest">Paso {{ i + 1 }}</span>
+                  <span class="text-xs font-black text-gray-600 tracking-widest">Paso {{ i + 1 }}</span>
                   <button type="button" (click)="removeStep(i)" *ngIf="steps.length > 1" class="btn-icon btn-icon-danger">
                     <i class="fas fa-trash-can"></i>
                   </button>
                 </div>
                 <div class="space-y-4 pl-3">
                   <div>
-                    <label class="block text-[10px] font-black tracking-widest uppercase text-gray-600 mb-1">Acción *</label>
-                    <input type="text" formControlName="action" placeholder="Ej: Ingresar usuario y contraseña"
+                    <label [for]="'stepAction' + i" class="block text-[10px] font-black tracking-widest text-gray-600 mb-1">Acción *</label>
+                    <input [id]="'stepAction' + i" type="text" formControlName="action" placeholder="Ej: Ingresar usuario y contraseña"
                       class="w-full bg-gray-900 border border-white/5 rounded-xl px-4 py-3 text-white font-medium placeholder-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all text-sm">
                   </div>
                   <div>
-                    <label class="block text-[10px] font-black tracking-widest uppercase text-gray-600 mb-1">Resultado Esperado *</label>
-                    <input type="text" formControlName="expectedResult"
+                    <label [for]="'stepExpected' + i" class="block text-[10px] font-black tracking-widest text-gray-600 mb-1">Resultado esperado *</label>
+                    <input [id]="'stepExpected' + i" type="text" formControlName="expectedResult"
                       placeholder="Ej: El sistema muestra el dashboard"
                       class="w-full bg-gray-900 border border-white/5 rounded-xl px-4 py-3 text-white font-medium placeholder-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all text-sm"
                       [class.border-rose-500]="step.get('expectedResult')?.touched && step.get('expectedResult')?.invalid">
                     <div *ngIf="step.get('expectedResult')?.touched && step.get('expectedResult')?.invalid"
-                      class="text-rose-500 text-[9px] font-black uppercase tracking-widest mt-1">
+                      class="text-rose-500 text-[9px] font-black tracking-widest mt-1">
                       Requerido
                     </div>
                   </div>
@@ -338,7 +336,7 @@
               <span *ngIf="isSubmitting()" class="w-5 h-5 border-3 border-white/20 border-t-white rounded-full animate-spin"></span>
               <i *ngIf="!isSubmitting()" class="fas fa-check-circle"></i>
               {{ isSubmitting() ? (editingTestCaseId() ? 'Actualizando...' : 'Creando...') : (editingTestCaseId() ?
-              'Actualizar' : 'Crear Caso') }}
+              'Actualizar' : 'Crear caso') }}
             </button>
           </div>
         </form>
@@ -353,8 +351,8 @@
       <div class="p-6 sm:p-8 overflow-y-auto custom-scrollbar flex-1">
         <div class="flex justify-between items-start mb-8 pb-4 border-b border-white/5 shrink-0">
           <div>
-            <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight">Pasos de Ejecución</h2>
-            <p class="text-[10px] font-black tracking-widest uppercase text-gray-500 mt-2 line-clamp-1">{{ selectedTestCaseTitle() }}</p>
+            <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight">Pasos de ejecución</h2>
+            <p class="text-[10px] font-black tracking-widest text-gray-500 mt-2 line-clamp-1">{{ selectedTestCaseTitle() }}</p>
           </div>
           <button (click)="closeStepsModal()" class="w-10 h-10 rounded-xl bg-white/5 text-gray-500 hover:text-white transition-all flex items-center justify-center shrink-0">
             <i class="fas fa-times text-xl"></i>
@@ -375,11 +373,11 @@
               <!-- Step Content -->
               <div class="flex-1 space-y-4 pt-1">
                 <div>
-                  <label class="block text-[10px] font-black text-gray-600 uppercase tracking-widest mb-1.5">A C C I Ó N</label>
+                  <span class="block text-[10px] font-black text-gray-600 tracking-widest mb-1.5">Acción</span>
                   <p class="text-white font-semibold text-sm leading-relaxed">{{ step.action }}</p>
                 </div>
                 <div>
-                  <label class="block text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-1.5">R E S U L T A D O   E S P E R A D O</label>
+                  <span class="block text-[10px] font-black text-indigo-400 tracking-widest mb-1.5">Resultado esperado</span>
                   <p class="text-gray-400 text-sm leading-relaxed font-medium">{{ step.expectedResult }}</p>
                 </div>
               </div>
@@ -397,7 +395,7 @@
         <div class="mt-8 pt-4">
           <button (click)="closeStepsModal()" class="btn-secondary w-full">
             <i class="fas fa-xmark"></i>
-            Cerrar Visualizador
+            Cerrar visualizador
           </button>
         </div>
       </div>

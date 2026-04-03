@@ -1,8 +1,8 @@
+import Swal from 'sweetalert2';
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
-import { ToastService } from '../../../../core/services/toast.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ResetPasswordRequest } from '../../../../core/models/auth.model';
 
@@ -26,7 +26,6 @@ export class ResetPasswordComponent implements OnInit {
     private authService: AuthService,
     private router: Router,
     private route: ActivatedRoute,
-    private toastr: ToastService,
   ) { }
 
   ngOnInit(): void {
@@ -43,17 +42,32 @@ export class ResetPasswordComponent implements OnInit {
 
   onSubmit(): void {
     if (!this.form.email || !this.form.resetToken || !this.form.newPassword) {
-      this.toastr.warning('Por favor complete todos los campos.', 'Atención');
+      Swal.fire({
+      icon: 'warning',
+      title: 'Atención',
+      text: 'Por favor complete todos los campos.',
+      confirmButtonColor: '#150fbd'
+    });
       return;
     }
 
     if (this.form.newPassword !== this.confirmPassword) {
-      this.toastr.warning('Las contraseñas no coinciden.', 'Atención');
+      Swal.fire({
+      icon: 'warning',
+      title: 'Atención',
+      text: 'Las contraseñas no coinciden.',
+      confirmButtonColor: '#150fbd'
+    });
       return;
     }
 
     if (this.form.newPassword.length < 6) {
-      this.toastr.warning('La contraseña debe tener al menos 6 caracteres.', 'Atención');
+      Swal.fire({
+      icon: 'warning',
+      title: 'Atención',
+      text: 'La contraseña debe tener al menos 6 caracteres.',
+      confirmButtonColor: '#150fbd'
+    });
       return;
     }
 
@@ -61,13 +75,23 @@ export class ResetPasswordComponent implements OnInit {
 
     this.authService.resetPassword(this.form).subscribe({
       next: () => {
-        this.toastr.success('Su contraseña ha sido restablecida exitosamente.', 'Éxito');
+        Swal.fire({
+      icon: 'success',
+      title: 'Éxito',
+      text: 'Su contraseña ha sido restablecida exitosamente.',
+      confirmButtonColor: '#150fbd'
+    });
         this.loading.set(false);
         this.router.navigate(['/auth/login']);
       },
       error: (err) => {
         console.error('ResetPassword error:', err);
-        this.toastr.error(err.error?.title || 'Error al restablecer la contraseña. El token puede ser inválido o haber expirado.', 'Error');
+        Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: err.error?.title || 'Error al restablecer la contraseña. El token puede ser inválido o haber expirado.',
+      confirmButtonColor: '#150fbd'
+    });
         this.loading.set(false);
       }
     });

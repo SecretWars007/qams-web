@@ -1,0 +1,94 @@
+<div *ngIf="show()" class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+  <!-- Backdrop Glassmorphism -->
+  <button type="button" class="absolute inset-0 w-full h-full bg-slate-900/40 backdrop-blur-sm transition-opacity border-none cursor-default" 
+    (click)="close()" (keydown.escape)="close()" aria-label="Cerrar perfil"></button>
+  
+  <!-- Modal Card Ultra Premium -->
+  <div class="relative w-full max-w-md bg-white/95 backdrop-blur-xl rounded-[2rem] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.2)] border border-white/60 animate-in zoom-in-95 duration-300 overflow-hidden">
+    
+    <!-- Elementos Decorativos -->
+    <div class="absolute top-0 right-0 -mr-16 -mt-16 w-32 h-32 rounded-full bg-gradient-to-br from-blue-400/20 to-indigo-500/20 blur-2xl"></div>
+    <div class="absolute bottom-0 left-0 -ml-16 -mb-16 w-32 h-32 rounded-full bg-gradient-to-tr from-emerald-400/20 to-teal-500/20 blur-2xl"></div>
+
+    <!-- Header Elegante -->
+    <div class="relative px-8 pt-8 pb-4 flex justify-between items-start">
+      <div class="flex items-center gap-4">
+        <div class="relative flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 shadow-sm">
+          <i class="ri-user-smile-line text-2xl text-blue-600"></i>
+        </div>
+        <div>
+          <h3 class="text-2xl font-black text-slate-800 tracking-tight leading-tight">Mi perfil</h3>
+          <p class="text-xs font-bold text-slate-400 tracking-widest mt-0.5">Gestión de cuenta</p>
+        </div>
+      </div>
+      <button type="button" (click)="close()" 
+        class="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:bg-rose-50 hover:text-rose-500 transition-colors shadow-sm cursor-pointer z-10">
+        <i class="ri-close-line text-xl"></i>
+      </button>
+    </div>
+
+    <!-- Formulario Premium -->
+    <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="relative px-8 pb-8">
+      <div class="space-y-6 mt-4">
+        
+        <!-- Input Nombre Completo -->
+        <div class="group">
+          <label for="profileFullName" class="block text-[11px] font-black text-slate-500 tracking-widest mb-2 pl-1 transition-colors group-focus-within:text-blue-600">
+            Nombre completo <span class="text-rose-500">*</span>
+          </label>
+          <div class="relative flex items-center">
+            <div class="absolute left-4 w-5 flex justify-center">
+              <i class="ri-user-3-line text-lg text-slate-400 group-focus-within:text-blue-600 transition-colors"></i>
+            </div>
+            <input id="profileFullName" type="text" formControlName="fullName"
+              autocomplete="name"
+              class="w-full pl-12 pr-4 py-3 bg-slate-50/50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all hover:border-slate-300"
+              placeholder="Ej. Juan Pérez" />
+          </div>
+          <p *ngIf="profileForm.get('fullName')?.invalid && profileForm.get('fullName')?.touched" 
+             class="text-[10px] text-rose-500 font-bold mt-1.5 ml-1 flex items-center gap-1">
+             <i class="ri-error-warning-fill"></i> Se requiere nombre (mín. 3 letras)
+          </p>
+        </div>
+
+        <!-- Input Correo Electrónico -->
+        <div class="group">
+          <label for="profileEmail" class="block text-[11px] font-black text-slate-500 tracking-widest mb-2 pl-1 transition-colors group-focus-within:text-blue-600">
+            Correo electrónico <span class="text-rose-500">*</span>
+          </label>
+          <div class="relative flex items-center">
+            <div class="absolute left-4 w-5 flex justify-center">
+              <i class="ri-mail-send-line text-lg text-slate-400 group-focus-within:text-blue-600 transition-colors"></i>
+            </div>
+            <input id="profileEmail" type="email" formControlName="email"
+              autocomplete="email"
+              class="w-full pl-12 pr-4 py-3 bg-slate-50/50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all hover:border-slate-300"
+              placeholder="juan@ejemplo.com" />
+          </div>
+          <p *ngIf="profileForm.get('email')?.invalid && profileForm.get('email')?.touched" 
+             class="text-[10px] text-rose-500 font-bold mt-1.5 ml-1 flex items-center gap-1">
+             <i class="ri-error-warning-fill"></i> Ingrese un correo electrónico válido
+          </p>
+        </div>
+
+      </div>
+
+      <!-- Actions (Footer suave) -->
+      <div class="mt-8 pt-6 border-t border-slate-100 flex items-center justify-end gap-3">
+        <button type="button" (click)="close()" 
+          [disabled]="loading()"
+          class="px-5 py-2.5 rounded-xl text-sm font-bold text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 hover:text-slate-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm">
+          Cancelar
+        </button>
+        <button type="submit" 
+          [disabled]="profileForm.invalid || loading()" 
+          class="relative px-6 py-2.5 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg shadow-blue-500/20 overflow-hidden flex items-center gap-2">
+          
+          <i *ngIf="loading()" class="ri-loader-4-line animate-spin font-normal"></i>
+          <i *ngIf="!loading()" class="ri-save-3-line font-normal"></i>
+          <span>{{ loading() ? 'Actualizando...' : 'Guardar cambios' }}</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
