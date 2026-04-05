@@ -144,7 +144,7 @@ import { ProfileModalComponent } from '../../features/profile/profile-modal.comp
           </a>
 
           <!-- Separador Admin -->
-          <ng-container *ngIf="authService.isAdmin()">
+          <ng-container *ngIf="authService.isAdmin() || authService.hasPermission('USERS_VIEW') || authService.hasPermission('ROLES_VIEW') || authService.hasPermission('CATALOGS_VIEW')">
             <div class="pt-6 pb-2">
               <p class="px-4 text-[10px] font-bold text-slate-500 tracking-widest">
                 Configuración
@@ -153,6 +153,7 @@ import { ProfileModalComponent } from '../../features/profile/profile-modal.comp
 
             <!-- Usuarios -->
             <a
+              *hasPermission="'USERS_VIEW'"
               routerLink="/admin/users"
               routerLinkActive="bg-[#150fbd]/20 text-white border-l-4 border-[#150fbd] shadow-[inset_0_0_20px_rgba(21,15,189,0.15)]"
               class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
@@ -164,6 +165,7 @@ import { ProfileModalComponent } from '../../features/profile/profile-modal.comp
 
             <!-- Roles -->
             <a
+              *hasPermission="'ROLES_VIEW'"
               routerLink="/admin/roles"
               routerLinkActive="bg-[#150fbd]/20 text-white border-l-4 border-[#150fbd] shadow-[inset_0_0_20px_rgba(21,15,189,0.15)]"
               class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
@@ -175,6 +177,7 @@ import { ProfileModalComponent } from '../../features/profile/profile-modal.comp
 
             <!-- Catálogos -->
             <a
+              *hasPermission="'CATALOGS_VIEW'"
               routerLink="/admin/catalogs"
               routerLinkActive="bg-[#150fbd]/20 text-white border-l-4 border-[#150fbd] shadow-[inset_0_0_20px_rgba(21,15,189,0.15)]"
               class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
@@ -184,8 +187,9 @@ import { ProfileModalComponent } from '../../features/profile/profile-modal.comp
               <span class="font-medium group-[.active]:font-semibold">Catálogos</span>
             </a>
 
-            <!-- Test Reset Password -->
+            <!-- Test Reset Password (Solo Admin) -->
             <a
+              *ngIf="authService.isAdmin()"
               routerLink="/auth/reset-password"
               routerLinkActive="bg-[#150fbd]/20 text-white border-l-4 border-[#150fbd] shadow-[inset_0_0_20px_rgba(21,15,189,0.15)]"
               class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm

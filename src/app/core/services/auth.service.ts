@@ -211,8 +211,11 @@ export class AuthService {
     const user = this.currentUser();
     if (!user?.role) return false;
     const roleList = Array.isArray(user.role) ? user.role : [user.role];
-    const adminRoles = new Set(['admin', 'administrador', 'superadmin']);
-    return roleList.some(r => adminRoles.has(r.toLowerCase().trim()));
+    const adminKeywords = ['admin', 'administrador', 'superadmin'];
+    return roleList.some(r => {
+      const roleLower = r.toLowerCase().trim();
+      return adminKeywords.some(keyword => roleLower.includes(keyword));
+    });
   }
 
   /**

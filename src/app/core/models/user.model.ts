@@ -8,7 +8,9 @@ export class User {
     public createdAt: Date,
     public roles: string[],
     public documentoIdentidad: string = '',
-    public fechaNacimiento: string = ''
+    public fechaNacimiento: string = '',
+    public isDeleted?: boolean,
+    public is_deleted?: boolean
   ) {}
 }
 

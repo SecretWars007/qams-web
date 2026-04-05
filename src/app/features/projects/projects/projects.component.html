@@ -149,193 +149,305 @@
     </div>
   </div>
 
-  <!-- Registration Modal - Full Screen Mobile -->
+  <!-- Registration Modal - Responsive Wizard Layout -->
   <div *ngIf="showModal()"
-    class="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-xl animate-in fade-in duration-300">
-    <div
-      class="bg-gray-900 border-0 sm:border border-white/10 rounded-none sm:rounded-[2rem] w-full max-w-lg h-full sm:h-auto overflow-y-auto shadow-2xl flex flex-col">
-      <div class="p-8 sm:p-10 flex-1">
-        <div class="flex justify-between items-center mb-10">
+    class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300 overflow-hidden">
+    <div class="bg-white border border-slate-200 rounded-2xl w-full max-w-3xl max-h-[88vh] shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+      
+      <!-- Wizard Header (compact) -->
+      <div class="px-5 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100 text-sm">
+            <i class="fas" [ngClass]="{'fa-folder-plus': activeStep() === 1, 'fa-list-check': activeStep() === 2}"></i>
+          </div>
           <div>
-            <h2 class="text-2xl font-black text-white tracking-tight">Nuevo Proyecto</h2>
-            <p class="text-gray-500 text-xs font-bold tracking-widest mt-1">Configuración inicial</p>
+            <h2 class="text-base font-bold text-slate-900 tracking-tight">
+              {{ activeStep() === 1 ? 'Paso 1: Datos del Proyecto' : 'Paso 2: Requisitos' }}
+            </h2>
+            <div class="flex gap-1 mt-0.5">
+              <div class="h-1 w-5 rounded-full transition-all" [ngClass]="activeStep() === 1 ? 'bg-indigo-600' : 'bg-slate-200'"></div>
+              <div class="h-1 w-5 rounded-full transition-all" [ngClass]="activeStep() === 2 ? 'bg-indigo-600' : 'bg-slate-200'"></div>
+            </div>
           </div>
-          <button (click)="closeModal()"
-            class="w-10 h-10 rounded-2xl bg-white/5 text-gray-500 hover:text-white transition-all flex items-center justify-center">
-            <i class="fas fa-times text-xl"></i>
-          </button>
         </div>
+        <button (click)="closeModal()"
+          class="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all flex items-center justify-center text-xs">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
 
-        <form [formGroup]="projectForm" (ngSubmit)="onSubmit()" class="space-y-8">
-          <div class="space-y-2">
-            <label for="projectName" class="text-[10px] font-black text-gray-600 tracking-widest px-1">Nombre comercial</label>
-            <input id="projectName" type="text" formControlName="name" placeholder="Ej: QAMS E-commerce Integration"
-              class="w-full bg-gray-950 border border-white/5 rounded-2xl px-5 py-4 text-white placeholder-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-medium">
-            <div *ngIf="projectForm.get('name')?.touched && projectForm.get('name')?.invalid"
-              class="text-rose-500 text-[10px] font-black tracking-widest mt-1 ml-1">
-              Nombre inválido (min. 3 caracteres)
-            </div>
-          </div>
-
-          <div class="space-y-2">
-            <label for="projectDescription" class="text-[10px] font-black text-gray-600 tracking-widest px-1">Objetivos del
-              proyecto</label>
-            <textarea id="projectDescription" formControlName="description" rows="4" placeholder="Define el alcance y metas principales..."
-              class="w-full bg-gray-950 border border-white/5 rounded-2xl px-5 py-4 text-white placeholder-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all resize-none font-medium leading-relaxed"></textarea>
-          </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div class="space-y-2">
-              <label for="startDate" class="text-[10px] font-black text-gray-600 tracking-widest px-1">Fecha
-                lanzamiento</label>
-              <input id="startDate" type="date" formControlName="startDate"
-                class="w-full bg-gray-950 border border-white/5 rounded-2xl px-5 py-4 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-medium"
-                [class.border-rose-500]="projectForm.get('startDate')?.touched && projectForm.get('startDate')?.invalid">
-              <div *ngIf="projectForm.get('startDate')?.touched && projectForm.get('startDate')?.invalid"
-                class="text-rose-500 text-[10px] font-black tracking-widest mt-1 ml-1">
-                La fecha de inicio es requerida
+      <!-- Form Body (compact) -->
+      <div class="flex-1 overflow-y-auto custom-scrollbar px-5 py-4 bg-white">
+        
+        <!-- STEP 1: PROJECT DATA -->
+        <form *ngIf="activeStep() === 1" [formGroup]="projectForm" id="projectForm">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-3">
+            <!-- Nombre -->
+            <div class="md:col-span-2">
+              <label for="projectName" class="text-[10px] font-bold text-slate-500 tracking-widest uppercase ml-1">Nombre del proyecto <small class="text-rose-500">*</small></label>
+              <div class="relative flex items-center group mt-1">
+                <i class="fas fa-cube absolute left-3 text-slate-400 group-focus-within:text-indigo-600 transition-colors text-xs"></i>
+                <input id="projectName" type="text" formControlName="name" placeholder="Ej: QAMS E-commerce Integration"
+                  class="w-full bg-slate-50 border border-slate-200 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-medium">
               </div>
             </div>
-            <div class="space-y-2">
-              <label for="endDate" class="text-[10px] font-black text-gray-600 tracking-widest px-1">Fecha cierre</label>
-              <input id="endDate" type="date" formControlName="endDate"
-                class="w-full bg-gray-950 border border-white/5 rounded-2xl px-5 py-4 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-medium"
-                [class.border-rose-500]="projectForm.get('endDate')?.touched && projectForm.get('endDate')?.invalid">
-              <div *ngIf="projectForm.get('endDate')?.touched && projectForm.get('endDate')?.invalid"
-                class="text-rose-500 text-[10px] font-black tracking-widest mt-1 ml-1">
-                La fecha de cierre es requerida
+
+            <!-- Descripción -->
+            <div class="md:col-span-2">
+              <label for="projectDescription" class="text-[10px] font-bold text-slate-500 tracking-widest uppercase ml-1">Objetivos del proyecto</label>
+              <div class="relative flex items-start group mt-1">
+                <i class="fas fa-align-left absolute left-3 top-2.5 text-slate-400 group-focus-within:text-indigo-600 transition-colors text-xs"></i>
+                <textarea id="projectDescription" formControlName="description" rows="1" placeholder="Define el alcance y metas principales..."
+                  class="w-full bg-slate-50 border border-slate-200 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all resize-none font-medium"></textarea>
               </div>
             </div>
-          </div>
 
-          <div class="space-y-2">
-            <label for="testerIds" class="text-[10px] font-black text-gray-600 tracking-widest px-1">Liderazgo QA
-              (Múltiple)</label>
-            <select id="testerIds" formControlName="testerIds" multiple
-              class="w-full bg-gray-950 border border-white/5 rounded-2xl px-5 py-4 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all h-40 custom-scrollbar font-medium"
-              [class.border-rose-500]="projectForm.get('testerIds')?.touched && projectForm.get('testerIds')?.invalid">
-              <option *ngFor="let user of users()" [value]="user.id"
-                class="py-2 px-2 rounded-lg my-1 hover:bg-white/5 transition-all">{{ user.username }}</option>
-            </select>
-            <div *ngIf="projectForm.get('testerIds')?.touched && projectForm.get('testerIds')?.invalid"
-              class="text-rose-500 text-[10px] font-black tracking-widest mt-1 ml-1">
-              Seleccione al menos un especialista QA
+            <!-- Fechas -->
+            <div>
+              <label for="startDate" class="text-[10px] font-bold text-slate-500 tracking-widest uppercase ml-1">Lanzamiento <small class="text-rose-500">*</small></label>
+              <div class="relative flex items-center group mt-1">
+                <i class="fas fa-calendar-day absolute left-3 text-slate-400 group-focus-within:text-indigo-600 transition-colors text-xs"></i>
+                <input id="startDate" type="date" formControlName="startDate"
+                  class="w-full bg-slate-50 border border-slate-200 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all font-medium"
+                  [class.border-rose-500]="projectForm.get('startDate')?.touched && projectForm.get('startDate')?.invalid">
+              </div>
             </div>
-            <p class="text-[10px] text-gray-700 font-bold italic px-1">Tip: Usa CMD/Ctrl para selecciones múltiples.</p>
-          </div>
 
-          <div class="flex flex-col sm:flex-row gap-4 pt-6 border-t border-white/5">
-            <button type="button" (click)="closeModal()" class="btn-secondary flex-1">
-              <i class="fas fa-xmark"></i>
-              Cancelar
-            </button>
-            <button type="submit" [disabled]="projectForm.invalid || isSubmitting()" class="btn-primary flex-1">
-              <span *ngIf="isSubmitting()" class="w-5 h-5 border-3 border-white/20 border-t-white rounded-full animate-spin"></span>
-              <i *ngIf="!isSubmitting()" class="fas fa-check-circle"></i>
-              {{ isSubmitting() ? 'Iniciando...' : 'Desplegar proyecto' }}
-            </button>
+            <div>
+              <label for="endDate" class="text-[10px] font-bold text-slate-500 tracking-widest uppercase ml-1">Fecha cierre <small class="text-rose-500">*</small></label>
+              <div class="relative flex items-center group mt-1">
+                <i class="fas fa-calendar-check absolute left-3 text-slate-400 group-focus-within:text-indigo-600 transition-colors text-xs"></i>
+                <input id="endDate" type="date" formControlName="endDate"
+                  class="w-full bg-slate-50 border border-slate-200 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all font-medium"
+                  [class.border-rose-500]="projectForm.get('endDate')?.touched && projectForm.get('endDate')?.invalid">
+              </div>
+            </div>
+
+            <!-- QA -->
+            <div class="md:col-span-2">
+              <label for="testerIds" class="text-[10px] font-bold text-slate-500 tracking-widest uppercase ml-1">Liderazgo QA (Múltiple) <small class="text-rose-500">*</small></label>
+              <div class="relative flex items-start group mt-1">
+                <i class="fas fa-users-gear absolute left-3 top-2.5 text-slate-400 group-focus-within:text-indigo-600 transition-colors text-xs"></i>
+                <select id="testerIds" formControlName="testerIds" multiple
+                  class="w-full bg-slate-50 border border-slate-200 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all h-16 custom-scrollbar font-medium"
+                  [class.border-rose-500]="projectForm.get('testerIds')?.touched && projectForm.get('testerIds')?.invalid">
+                  <option *ngFor="let user of users()" [value]="user.id"
+                    class="py-0.5 px-1 text-xs">{{ user.username }} ({{ user.fullName }})</option>
+                </select>
+              </div>
+            </div>
           </div>
         </form>
+
+        <!-- STEP 2: REQUIREMENTS -->
+        <div *ngIf="activeStep() === 2" class="space-y-6">
+          <form [formGroup]="requirementForm" (ngSubmit)="addPendingRequirement()" class="bg-indigo-50/50 border border-indigo-100 rounded-2xl p-5 relative">
+            <h4 class="text-xs font-black tracking-widest text-indigo-700 uppercase mb-4">Agregar Requisito Rápido</h4>
+            <!-- Compact 3-Column Grid for 9 fields -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-3">
+              <!-- Grid Row 1 -->
+              <div>
+                <label for="reqCode" class="text-[10px] font-bold text-slate-500 uppercase ml-1">Código *</label>
+                <input id="reqCode" type="text" formControlName="code" placeholder="REQ-001" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-medium focus:ring-1 focus:ring-indigo-500 outline-none">
+              </div>
+              <div class="md:col-span-2">
+                <label for="reqTitle" class="text-[10px] font-bold text-slate-500 uppercase ml-1">Título *</label>
+                <input id="reqTitle" type="text" formControlName="title" placeholder="Ej: Autenticación OAuth" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-medium focus:ring-1 focus:ring-indigo-500 outline-none">
+              </div>
+
+              <!-- Grid Row 2 -->
+              <div>
+                <label for="reqType" class="text-[10px] font-bold text-slate-500 uppercase ml-1">Tipo *</label>
+                <select id="reqType" formControlName="requirementTypeId" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-medium focus:ring-1 focus:ring-indigo-500 outline-none">
+                  <option *ngFor="let type of requirementTypes()" [value]="type.id">{{ type.name }}</option>
+                </select>
+              </div>
+              <div>
+                <label for="reqPriority" class="text-[10px] font-bold text-slate-500 uppercase ml-1">Prioridad *</label>
+                <select id="reqPriority" formControlName="requirementPriorityId" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-medium focus:ring-1 focus:ring-indigo-500 outline-none">
+                  <option *ngFor="let p of priorities()" [value]="p.id">{{ p.name }}</option>
+                </select>
+              </div>
+              <div>
+                <label for="reqComplexity" class="text-[10px] font-bold text-slate-500 uppercase ml-1">Complejidad *</label>
+                <select id="reqComplexity" formControlName="requirementComplexityId" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-medium focus:ring-1 focus:ring-indigo-500 outline-none">
+                  <option *ngFor="let c of complexities()" [value]="c.id">{{ c.name }}</option>
+                </select>
+              </div>
+
+              <!-- Grid Row 3 -->
+              <div>
+                <label for="reqStatus" class="text-[10px] font-bold text-slate-500 uppercase ml-1">Estado</label>
+                <select id="reqStatus" formControlName="requirementStatusId" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-medium focus:ring-1 focus:ring-indigo-500 outline-none">
+                  <option *ngFor="let s of statuses()" [value]="s.id">{{ s.name }}</option>
+                </select>
+              </div>
+              <div>
+                <label for="reqSource" class="text-[10px] font-bold text-slate-500 uppercase ml-1">Fuente</label>
+                <input id="reqSource" type="text" formControlName="source" placeholder="Business, Cliente..." class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-medium focus:ring-1 focus:ring-indigo-500 outline-none">
+              </div>
+              <div class="flex items-end justify-end">
+                <button type="submit" [disabled]="requirementForm.invalid" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2 rounded-lg transition-all w-full md:w-auto h-9 flex items-center justify-center gap-1 disabled:opacity-50">
+                  <i class="fas fa-plus"></i> Cola
+                </button>
+              </div>
+              
+              <!-- Grid Row 4: Desc & Criteria -->
+              <div class="md:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label for="reqDesc" class="sr-only">Descripción</label>
+                  <textarea id="reqDesc" formControlName="description" rows="1" placeholder="Descripción breve..." class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-medium focus:ring-1 focus:ring-indigo-500 outline-none resize-none"></textarea>
+                </div>
+                <div>
+                  <label for="reqCriteria" class="sr-only">Criterios de Aceptación</label>
+                  <textarea id="reqCriteria" formControlName="acceptanceCriteria" rows="1" placeholder="Criterios de aceptación..." class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-medium focus:ring-1 focus:ring-indigo-500 outline-none resize-none"></textarea>
+                </div>
+              </div>
+            </div>
+          </form>
+
+          <!-- List of Added Requirements -->
+          <div *ngIf="pendingRequirements().length > 0" class="border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+            <div class="bg-slate-50 px-4 py-2 border-b border-slate-200 flex justify-between items-center">
+              <span class="text-xs font-bold text-slate-600 tracking-wider uppercase">Requisitos en cola ({{pendingRequirements().length}})</span>
+            </div>
+            <div class="max-h-40 overflow-y-auto custom-scrollbar bg-white p-2 flex flex-col gap-2">
+              <div *ngFor="let req of pendingRequirements(); let i = index" class="flex items-center justify-between bg-slate-50 border border-slate-100 rounded-xl px-4 py-2 group hover:border-slate-300 transition-all">
+                <div class="flex flex-col">
+                  <span class="text-xs font-black text-slate-800">{{ req.code }} - {{ req.title }}</span>
+                  <span class="text-[10px] font-medium text-slate-500 truncate max-w-sm">{{ req.description || 'Sin descripción' }}</span>
+                </div>
+                <button (click)="removePendingRequirement(i)" class="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-all opacity-0 group-hover:opacity-100">
+                  <i class="fas fa-trash-can text-sm"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="pendingRequirements().length === 0" class="py-3 flex flex-col items-center justify-center text-center border-2 border-dashed border-slate-200 rounded-xl">
+            <i class="fas fa-list-ul text-slate-300 text-lg mb-1"></i>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sin requisitos preparados</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fixed Footer Wizard Nav (compact) -->
+      <div class="px-5 py-3 shrink-0 border-t border-slate-100 bg-slate-50/80 flex gap-3 w-full">
+        <ng-container *ngIf="activeStep() === 1">
+          <button type="button" (click)="closeModal()" class="flex-1 h-10 flex items-center justify-center gap-2 rounded-xl bg-white border border-slate-200 text-slate-600 text-sm font-bold hover:bg-slate-100 transition-all">
+            <i class="fas fa-xmark text-xs"></i> Cancelar
+          </button>
+          <button type="button" (click)="nextStep()" [disabled]="projectForm.invalid" class="flex-[2] h-10 flex items-center justify-center gap-2 rounded-xl bg-indigo-600 text-white text-sm font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+            Siguiente Paso <i class="fas fa-arrow-right text-xs"></i>
+          </button>
+        </ng-container>
+
+        <ng-container *ngIf="activeStep() === 2">
+          <button type="button" (click)="prevStep()" class="flex-1 h-10 flex items-center justify-center gap-2 rounded-xl bg-white border border-slate-200 text-slate-600 text-sm font-bold hover:bg-slate-100 transition-all">
+            <i class="fas fa-arrow-left text-xs"></i> Volver
+          </button>
+          <button type="button" (click)="onSubmit()" [disabled]="isSubmitting()" class="flex-[2] h-10 flex items-center justify-center gap-2 rounded-xl bg-indigo-600 text-white text-sm font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-500/20 transition-all disabled:opacity-50 disabled:grayscale">
+            <div *ngIf="isSubmitting()" class="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+            <i *ngIf="!isSubmitting()" class="fas fa-rocket text-xs"></i>
+            {{ isSubmitting() ? 'Procesando...' : 'Desplegar Proyecto' }}
+          </button>
+        </ng-container>
       </div>
     </div>
   </div>
 
-  <!-- Devolution Modal - Full Screen Mobile -->
+  <!-- Devolution Modal - Responsive Fixed Layout -->
   <div *ngIf="showDevolutionModal()"
-    class="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 bg-black/90 backdrop-blur-xl animate-in zoom-in duration-300">
+    class="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 bg-black/90 backdrop-blur-2xl animate-in zoom-in duration-300">
     <div
-      class="bg-gray-950 border-0 sm:border border-white/10 rounded-none sm:rounded-[2.5rem] w-full max-w-3xl h-full sm:h-auto max-h-[95vh] overflow-hidden shadow-2xl flex flex-col">
-      <div class="p-8 sm:p-12 flex flex-col h-full overflow-hidden">
-        <div class="flex justify-between items-start mb-10 shrink-0">
-          <div>
-            <h2 class="text-3xl font-black text-white tracking-tight">Devolución de Proyecto</h2>
-            <div class="flex items-center gap-2 mt-2">
-              <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
-              <p class="text-rose-500/80 text-[10px] font-black tracking-widest">Protocolo de incumplimiento
-              </p>
-            </div>
-            <p class="text-gray-500 font-bold text-xs mt-4">Sistema: <span class="text-white">{{
-                selectedProjectForDevolution()?.name }}</span></p>
+      class="bg-gray-950 border-0 sm:border border-white/10 rounded-none sm:rounded-[2.5rem] w-full max-w-3xl h-full sm:h-auto sm:max-h-[95vh] shadow-2xl flex flex-col overflow-hidden">
+      <!-- Fixed Header -->
+      <div class="p-8 sm:p-10 shrink-0 border-b border-white/5 flex justify-between items-start bg-gray-950/80 backdrop-blur-md z-10">
+        <div>
+          <h2 class="text-3xl font-black text-white tracking-tight">Devolución de Proyecto</h2>
+          <div class="flex items-center gap-2 mt-2">
+            <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+            <p class="text-rose-500/80 text-[10px] font-black tracking-widest uppercase">Protocolo de incumplimiento</p>
           </div>
-          <button (click)="closeDevolutionModal()"
-            class="w-12 h-12 rounded-2xl bg-white/5 text-gray-600 hover:text-white transition-all flex items-center justify-center border border-white/5">
-            <i class="fas fa-times text-xl"></i>
-          </button>
+          <p class="text-gray-500 font-bold text-xs mt-3">Proyecto: <span class="text-white">{{ selectedProjectForDevolution()?.name }}</span></p>
         </div>
+        <button (click)="closeDevolutionModal()"
+          class="w-12 h-12 rounded-2xl bg-white/5 text-gray-600 hover:text-white transition-all flex items-center justify-center border border-white/5">
+          <i class="fas fa-times text-xl"></i>
+        </button>
+      </div>
 
-        <div class="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-10 group/modal">
-          <!-- Historic Devolutions -->
-          <div *ngIf="selectedProjectForDevolution()?.historicDevolutions?.length" class="space-y-6">
-            <div class="flex items-center gap-4">
-              <p class="text-[10px] font-black text-gray-600 tracking-widest">Historial de auditoría</p>
-              <div class="flex-1 h-px bg-white/5"></div>
-            </div>
-            <div class="space-y-4">
-              <div *ngFor="let dev of selectedProjectForDevolution()?.historicDevolutions"
-                class="bg-gray-900 border border-white/5 rounded-3xl p-6 relative overflow-hidden group/dev hover:border-rose-500/20 transition-all">
-                <div class="absolute top-0 right-0 p-4">
-                  <span *ngIf="dev.responseDate"
-                    class="px-2 py-0.5 rounded-lg text-[8px] font-black bg-emerald-500/10 text-emerald-400 border border-emerald-500/10">Resuelto</span>
-                  <span *ngIf="!dev.responseDate"
-                    class="px-2 py-0.5 rounded-lg text-[8px] font-black bg-rose-500/10 text-rose-500 border border-rose-500/10">Pendiente</span>
+      <!-- Scrollable Content Body -->
+      <div class="flex-1 overflow-y-auto custom-scrollbar p-8 sm:p-10 space-y-10">
+        <!-- Historic Devolutions -->
+        <div *ngIf="selectedProjectForDevolution()?.historicDevolutions?.length" class="space-y-6">
+          <div class="flex items-center gap-4">
+            <p class="text-[10px] font-black text-gray-600 tracking-widest uppercase">Historial de auditoría</p>
+            <div class="flex-1 h-px bg-white/5"></div>
+          </div>
+          <div class="space-y-4">
+            <div *ngFor="let dev of selectedProjectForDevolution()?.historicDevolutions"
+              class="bg-gray-900 border border-white/5 rounded-3xl p-6 relative overflow-hidden group/dev hover:border-rose-500/20 transition-all">
+              <div class="absolute top-0 right-0 p-4">
+                <span *ngIf="dev.responseDate"
+                  class="px-2 py-0.5 rounded-lg text-[8px] font-black bg-emerald-500/10 text-emerald-400 border border-emerald-500/10 uppercase">Resuelto</span>
+                <span *ngIf="!dev.responseDate"
+                  class="px-2 py-0.5 rounded-lg text-[8px] font-black bg-rose-500/10 text-rose-500 border border-rose-500/10 uppercase">Pendiente</span>
+              </div>
+
+              <div class="flex items-start gap-4 mb-4">
+                <div class="w-10 h-10 shrink-0 bg-rose-500/10 rounded-xl flex items-center justify-center text-rose-500">
+                  <i class="fas fa-undo text-sm"></i>
                 </div>
-
-                <div class="flex items-start gap-4 mb-4">
-                  <div
-                    class="w-10 h-10 shrink-0 bg-rose-500/10 rounded-xl flex items-center justify-center text-rose-500">
-                    <i class="fas fa-undo text-sm"></i>
-                  </div>
-                  <div>
-                    <p class="text-xs font-black text-white tracking-tight leading-none mb-1">{{ dev.createdBy }}</p>
-                    <p class="text-[9px] text-gray-600 font-bold tracking-widest">{{ dev.date | date:'longDate' }}</p>
-                  </div>
+                <div>
+                  <p class="text-xs font-black text-white tracking-tight leading-none mb-1">{{ dev.createdBy }}</p>
+                  <p class="text-[9px] text-gray-600 font-bold tracking-widest">{{ dev.date | date:'longDate' }}</p>
                 </div>
+              </div>
 
-                <p class="text-sm text-gray-400 leading-relaxed pl-14">{{ dev.notes }}</p>
+              <p class="text-sm text-gray-400 leading-relaxed pl-14">{{ dev.notes }}</p>
 
-                <!-- Response Component -->
-                <div *ngIf="dev.responseNotes"
-                  class="mt-6 ml-14 p-5 bg-emerald-500/5 rounded-2xl border border-emerald-500/10 animate-in slide-in-from-left-2">
-                  <div class="flex items-center gap-2 mb-2">
-                    <i class="fas fa-check-double text-[10px] text-emerald-500"></i>
-                    <p class="text-[9px] text-emerald-500 font-black tracking-widest">Resolución aplicada • {{
-                      dev.responseDate | date:'dd/MM/yyyy' }}</p>
-                  </div>
-                  <p class="text-xs text-gray-300/80 leading-relaxed font-medium">{{ dev.responseNotes }}</p>
+              <!-- Response Component -->
+              <div *ngIf="dev.responseNotes"
+                class="mt-6 ml-14 p-5 bg-emerald-500/5 rounded-2xl border border-emerald-500/10 animate-in slide-in-from-left-2">
+                <div class="flex items-center gap-2 mb-2">
+                  <i class="fas fa-check-double text-[10px] text-emerald-500"></i>
+                  <p class="text-[9px] text-emerald-500 font-black tracking-widest uppercase">Resolución aplicada • {{ dev.responseDate | date:'dd/MM/yyyy' }}</p>
                 </div>
+                <p class="text-xs text-gray-300/80 leading-relaxed font-medium">{{ dev.responseNotes }}</p>
               </div>
             </div>
           </div>
+        </div>
 
-          <!-- New Devolution Input -->
-          <div class="space-y-4">
-            <div class="flex items-center gap-4">
-              <p class="text-[10px] font-black text-gray-600 tracking-widest">Nuevo registro de hallazgo</p>
-              <div class="flex-1 h-px bg-white/5"></div>
-            </div>
-            <textarea [(ngModel)]="devolutionNotes" [ngModelOptions]="{standalone: true}" rows="5"
-              placeholder="Describe los motivos técnicos para la devolución. Se notificará inmediatamente al equipo responsable..."
-              class="w-full bg-gray-900 border border-white/5 rounded-3xl px-6 py-5 text-white placeholder-gray-700 focus:outline-none focus:ring-2 focus:ring-rose-500/50 focus:border-rose-500 transition-all resize-none text-sm leading-relaxed font-medium"></textarea>
-            <div class="flex items-start gap-3 p-4 bg-rose-500/5 rounded-2xl border border-rose-500/10">
-              <i class="fas fa-info-circle text-rose-500 mt-0.5"></i>
-              <p class="text-[10px] text-rose-500/70 font-bold tracking-widest leading-normal">
-                Nota: Esta acción bloqueará el estado del proyecto y requerirá una respuesta formal del líder técnico.
-              </p>
-            </div>
+        <!-- New Devolution Input -->
+        <div class="space-y-4">
+          <div class="flex items-center gap-4">
+            <p class="text-[10px] font-black text-gray-600 tracking-widest uppercase">Nuevo registro de hallazgo</p>
+            <div class="flex-1 h-px bg-white/5"></div>
+          </div>
+          <textarea [(ngModel)]="devolutionNotes" [ngModelOptions]="{standalone: true}" rows="5"
+            placeholder="Describe los motivos técnicos para la devolución. Se notificará inmediatamente al equipo responsable..."
+            class="w-full bg-gray-900 border border-white/5 rounded-3xl px-6 py-5 text-white placeholder-gray-700 focus:outline-none focus:ring-2 focus:ring-rose-500/50 focus:border-rose-500 transition-all resize-none text-sm leading-relaxed font-medium"></textarea>
+          <div class="flex items-start gap-3 p-4 bg-rose-500/5 rounded-2xl border border-rose-500/10">
+            <i class="fas fa-info-circle text-rose-500 mt-0.5"></i>
+            <p class="text-[10px] text-rose-500/70 font-bold tracking-widest leading-normal uppercase">
+              Nota: Esta acción bloqueará el estado del proyecto y requerirá una respuesta formal del líder técnico.
+            </p>
           </div>
         </div>
+      </div>
 
-        <div class="pt-10 flex flex-col sm:flex-row gap-4 shrink-0">
-          <button type="button" (click)="closeDevolutionModal()" class="btn-secondary flex-1">
-            <i class="fas fa-xmark"></i>
-            Cerrar Panel
-          </button>
-          <button type="button" (click)="onRegisterDevolution()" [disabled]="!devolutionNotes.trim() || isSubmitting()" class="btn-danger flex-1">
-            <span *ngIf="isSubmitting()" class="w-5 h-5 border-3 border-white/20 border-t-white rounded-full animate-spin"></span>
-            <i *ngIf="!isSubmitting()" class="fas fa-file-signature"></i>
-            {{ isSubmitting() ? 'Ejecutando...' : 'Formalizar devolución' }}
-          </button>
-        </div>
+      <!-- Fixed Footer -->
+      <div class="p-8 sm:p-10 shrink-0 border-t border-white/5 bg-gray-950/90 backdrop-blur-md z-10 flex flex-col sm:flex-row gap-4">
+        <button type="button" (click)="closeDevolutionModal()" class="btn-secondary flex-1">
+          <i class="fas fa-xmark"></i>
+          Cerrar Panel
+        </button>
+        <button type="button" (click)="onRegisterDevolution()" [disabled]="!devolutionNotes.trim() || isSubmitting()" class="btn-danger flex-1">
+          <span *ngIf="isSubmitting()" class="w-5 h-5 border-3 border-white/20 border-t-white rounded-full animate-spin"></span>
+          <i *ngIf="!isSubmitting()" class="fas fa-file-signature"></i>
+          {{ isSubmitting() ? 'Ejecutando...' : 'Formalizar devolución' }}
+        </button>
       </div>
     </div>
   </div>

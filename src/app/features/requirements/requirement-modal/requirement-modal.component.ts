@@ -3,6 +3,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { RequirementsService } from '../../../core/services/requirements.service';
 import { CatalogsService } from '../../../core/services/catalogs.service';
 import { Requirement, CreateRequirement, UpdateRequirement } from '../../../core/models/requirement.model';
+import { catchError, of } from 'rxjs';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -30,6 +31,20 @@ export class RequirementModalComponent implements OnInit {
   priorities = signal<any[]>([]);
   complexities = signal<any[]>([]);
   statuses = signal<any[]>([]);
+
+  // Fallback data when backend catalogs are unavailable
+  private readonly fallbackTypes = [
+    { id: 1, name: 'Funcional' }, { id: 2, name: 'No Funcional' }, { id: 3, name: 'Técnico' }
+  ];
+  private readonly fallbackPriorities = [
+    { id: 1, name: 'Baja' }, { id: 2, name: 'Media' }, { id: 3, name: 'Alta' }, { id: 4, name: 'Crítica' }
+  ];
+  private readonly fallbackComplexities = [
+    { id: 1, name: 'Baja' }, { id: 2, name: 'Media' }, { id: 3, name: 'Alta' }
+  ];
+  private readonly fallbackStatuses = [
+    { id: 1, name: 'Pendiente' }, { id: 2, name: 'En Progreso' }, { id: 3, name: 'Completado' }
+  ];
 
   private readonly fb = inject(FormBuilder);
   private readonly requirementsService = inject(RequirementsService);
@@ -61,10 +76,21 @@ export class RequirementModalComponent implements OnInit {
   }
 
   private loadCatalogs() {
-    this.catalogsService.getActive('RequirementType').subscribe(data => this.requirementTypes.set(data));
-    this.catalogsService.getActive('RequirementPriority').subscribe(data => this.priorities.set(data));
-    this.catalogsService.getActive('RequirementComplexity').subscribe(data => this.complexities.set(data));
-    this.catalogsService.getActive('RequirementStatus').subscribe(data => this.statuses.set(data));
+    this.catalogsService.getActive('RequirementType').pipe(
+      catchError(() => of(this.fallbackTypes))
+    ).subscribe(data => this.requirementTypes.set(data.length ? data : this.fallbackTypes));
+
+    this.catalogsService.getActive('RequirementPriority').pipe(
+      catchError(() => of(this.fallbackPriorities))
+    ).subscribe(data => this.priorities.set(data.length ? data : this.fallbackPriorities));
+
+    this.catalogsService.getActive('RequirementComplexity').pipe(
+      catchError(() => of(this.fallbackComplexities))
+    ).subscribe(data => this.complexities.set(data.length ? data : this.fallbackComplexities));
+
+    this.catalogsService.getActive('RequirementStatus').pipe(
+      catchError(() => of(this.fallbackStatuses))
+    ).subscribe(data => this.statuses.set(data.length ? data : this.fallbackStatuses));
   }
 
   onSubmit() {

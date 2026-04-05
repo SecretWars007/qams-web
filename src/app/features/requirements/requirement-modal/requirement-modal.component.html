@@ -1,138 +1,150 @@
 <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
-  <div class="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden animate-in zoom-in-95 duration-300">
+  <div class="bg-white w-full max-w-xl rounded-3xl shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95 duration-300">
     
     <!-- Modal Header -->
-    <div class="px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
+    <div class="px-5 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
       <div>
-        <h2 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+        <h2 class="text-sm font-black text-slate-900 tracking-tight">
           {{ requirement ? 'Editar Requisito' : 'Nuevo Requisito' }}
         </h2>
-        <p class="text-slate-500 dark:text-slate-400 text-sm mt-0.5">Complete los detalles técnicos del requisito.</p>
+        <p class="text-slate-500 text-[10px] font-bold tracking-widest mt-0.5">Complete los detalles técnicos del requisito.</p>
       </div>
-      <button (click)="close()" class="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-colors">
-        <i class="fas fa-times text-slate-400"></i>
+      <button (click)="close()" class="w-7 h-7 flex items-center justify-center hover:bg-slate-200 rounded-lg transition-colors">
+        <i class="fas fa-times text-slate-400 text-xs"></i>
       </button>
     </div>
 
     <!-- Modal Form -->
-    <form [formGroup]="requirementForm" (ngSubmit)="onSubmit()" class="p-8">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <form [formGroup]="requirementForm" (ngSubmit)="onSubmit()" class="px-5 py-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-3">
         
-        <!-- Código (Solo lectura si es edición?) -->
-        <div class="flex flex-col gap-1.5 md:col-span-1">
-          <label for="reqCode" class="text-xs font-black text-slate-400 tracking-widest ml-1">Código</label>
+        <!-- Código -->
+        <div class="flex flex-col gap-1">
+          <label for="reqCode" class="text-[10px] font-black text-slate-400 tracking-widest ml-0.5">Código</label>
           <input 
             id="reqCode"
             type="text" 
             formControlName="code"
-            class="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-mono"
+            class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-mono"
             placeholder="REQ-001"
           />
         </div>
 
         <!-- Título -->
-        <div class="flex flex-col gap-1.5 md:col-span-1">
-          <label for="reqTitle" class="text-xs font-black text-slate-400 tracking-widest ml-1">Título</label>
+        <div class="flex flex-col gap-1">
+          <label for="reqTitle" class="text-[10px] font-black text-slate-400 tracking-widest ml-0.5">Título</label>
           <input 
             id="reqTitle"
             type="text" 
             formControlName="title"
-            class="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+            class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
             placeholder="Nombre del requisito"
           />
           @if (requirementForm.get('title')?.touched && requirementForm.get('title')?.invalid) {
-            <span class="text-[10px] text-rose-500 font-bold ml-1">El título es obligatorio (mín. 5 carac.)</span>
+            <span class="text-[9px] text-rose-500 font-bold ml-0.5">El título es obligatorio (mín. 5 carac.)</span>
           }
         </div>
 
         <!-- Descripción -->
-        <div class="flex flex-col gap-1.5 md:col-span-2">
-          <label for="reqDesc" class="text-xs font-black text-slate-400 tracking-widest ml-1">Descripción</label>
+        <div class="flex flex-col gap-1 md:col-span-2">
+          <label for="reqDesc" class="text-[10px] font-black text-slate-400 tracking-widest ml-0.5">Descripción</label>
           <textarea 
             id="reqDesc"
             formControlName="description"
-            rows="3"
-            class="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all resize-none"
+            rows="2"
+            class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all resize-none"
             placeholder="Detalle el comportamiento esperado..."
           ></textarea>
         </div>
 
         <!-- Tipo -->
-        <div class="flex flex-col gap-1.5">
-          <label for="reqType" class="text-xs font-black text-slate-400 tracking-widest ml-1">Tipo</label>
-          <select 
-            id="reqType"
-            formControlName="requirementTypeId"
-            class="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all appearance-none cursor-pointer"
-          >
-            @for (type of requirementTypes(); track type.id) {
-              <option [value]="type.id">{{ type.name }}</option>
-            }
-          </select>
+        <div class="flex flex-col gap-1">
+          <label for="reqType" class="text-[10px] font-black text-slate-400 tracking-widest ml-0.5">Tipo</label>
+          <div class="relative">
+            <select 
+              id="reqType"
+              formControlName="requirementTypeId"
+              class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all appearance-none cursor-pointer pr-8"
+            >
+              @for (type of requirementTypes(); track type.id) {
+                <option [value]="type.id">{{ type.name }}</option>
+              }
+            </select>
+            <i class="fas fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[10px]"></i>
+          </div>
         </div>
 
         <!-- Prioridad -->
-        <div class="flex flex-col gap-1.5">
-          <label for="reqPriority" class="text-xs font-black text-slate-400 tracking-widest ml-1">Prioridad</label>
-          <select 
-            id="reqPriority"
-            formControlName="requirementPriorityId"
-            class="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all appearance-none cursor-pointer"
-          >
-            @for (p of priorities(); track p.id) {
-              <option [value]="p.id">{{ p.name }}</option>
-            }
-          </select>
+        <div class="flex flex-col gap-1">
+          <label for="reqPriority" class="text-[10px] font-black text-slate-400 tracking-widest ml-0.5">Prioridad</label>
+          <div class="relative">
+            <select 
+              id="reqPriority"
+              formControlName="requirementPriorityId"
+              class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all appearance-none cursor-pointer pr-8"
+            >
+              @for (p of priorities(); track p.id) {
+                <option [value]="p.id">{{ p.name }}</option>
+              }
+            </select>
+            <i class="fas fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[10px]"></i>
+          </div>
         </div>
 
         <!-- Complejidad -->
-        <div class="flex flex-col gap-1.5">
-          <label for="reqComplexity" class="text-xs font-black text-slate-400 tracking-widest ml-1">Complejidad</label>
-          <select 
-            id="reqComplexity"
-            formControlName="requirementComplexityId"
-            class="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all appearance-none cursor-pointer"
-          >
-            @for (c of complexities(); track c.id) {
-              <option [value]="c.id">{{ c.name }}</option>
-            }
-          </select>
+        <div class="flex flex-col gap-1">
+          <label for="reqComplexity" class="text-[10px] font-black text-slate-400 tracking-widest ml-0.5">Complejidad</label>
+          <div class="relative">
+            <select 
+              id="reqComplexity"
+              formControlName="requirementComplexityId"
+              class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all appearance-none cursor-pointer pr-8"
+            >
+              @for (c of complexities(); track c.id) {
+                <option [value]="c.id">{{ c.name }}</option>
+              }
+            </select>
+            <i class="fas fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[10px]"></i>
+          </div>
         </div>
 
         <!-- Estado -->
-        <div class="flex flex-col gap-1.5">
-          <label for="reqStatus" class="text-xs font-black text-slate-400 tracking-widest ml-1">Estado</label>
-          <select 
-            id="reqStatus"
-            formControlName="requirementStatusId"
-            class="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all appearance-none cursor-pointer"
-          >
-            @for (s of statuses(); track s.id) {
-              <option [value]="s.id">{{ s.name }}</option>
-            }
-          </select>
+        <div class="flex flex-col gap-1">
+          <label for="reqStatus" class="text-[10px] font-black text-slate-400 tracking-widest ml-0.5">Estado</label>
+          <div class="relative">
+            <select 
+              id="reqStatus"
+              formControlName="requirementStatusId"
+              class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all appearance-none cursor-pointer pr-8"
+            >
+              @for (s of statuses(); track s.id) {
+                <option [value]="s.id">{{ s.name }}</option>
+              }
+            </select>
+            <i class="fas fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-[10px]"></i>
+          </div>
         </div>
       </div>
 
       <!-- Actions -->
-      <div class="mt-10 flex gap-3">
+      <div class="mt-5 pt-4 border-t border-slate-100 flex gap-2.5 justify-end">
         <button 
           type="button" 
           (click)="close()"
-          class="flex-1 px-6 py-4 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-all font-bold tracking-widest text-xs"
+          class="btn-secondary !py-2 !px-4 !text-xs"
         >
           Cancelar
         </button>
         <button 
           type="submit" 
           [disabled]="requirementForm.invalid || isSubmitting()"
-          class="flex-[2] bg-indigo-600 text-white px-6 py-4 rounded-2xl font-black hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 dark:shadow-none disabled:opacity-50 disabled:cursor-not-allowed tracking-widest text-xs flex items-center justify-center gap-2"
+          class="btn-primary !py-2 !px-4 !text-xs min-w-[140px]"
         >
           @if (isSubmitting()) {
-            <i class="fas fa-spinner fa-spin"></i>
+            <i class="fas fa-spinner fa-spin mr-1.5"></i>
             Guardando...
           } @else {
-            <i class="fas fa-save"></i>
+            <i class="fas fa-save mr-1.5"></i>
             {{ requirement ? 'Actualizar requisito' : 'Guardar requisito' }}
           }
         </button>

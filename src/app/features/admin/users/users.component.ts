@@ -6,6 +6,7 @@ import { RolesService } from '../../../core/services/roles.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { User, UpdateUser } from '../../../core/models/user.model';
 import { Role } from '../../../core/models/role.model';
+import { firstValueFrom } from 'rxjs';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -73,10 +74,11 @@ export class UsersComponent implements OnInit {
 
   loadData(): void {
     this.isLoading.set(true);
-    // Cargar usuarios
     this.usersService.getUsers().subscribe({
       next: (data) => {
-        this.users.set(data);
+        // Filtrar usuarios eliminados lógicamente (tanto is_deleted como isDeleted por formato JSON)
+        const activeUsers = data.filter(u => u.is_deleted !== true && u.isDeleted !== true);
+        this.users.set(activeUsers);
         this.isLoading.set(false);
       },
       error: () => this.isLoading.set(false)
@@ -96,8 +98,10 @@ export class UsersComponent implements OnInit {
 
     const user = this.users().find(u => u.id === userId);
     const roleObj = this.roles().find(r => r.id === roleId);
+    
+    if (!roleObj) return;
 
-    if (user && roleObj && user.roles.includes(roleObj.name)) {
+    if (user?.roles.includes(roleObj.name)) {
       Swal.fire({
         title: 'Rol ya asignado',
         text: `El usuario ya cuenta con el rol "${roleObj.name}".`,
@@ -110,26 +114,43 @@ export class UsersComponent implements OnInit {
       return;
     }
 
-    this.usersService.assignRole(userId, roleId).subscribe({
-      next: () => {
-        this.loadData();
-        select.value = '';
-        Swal.fire({
-          title: 'Asignado',
-          text: 'El rol ha sido asignado correctamente.',
-          icon: 'success',
-          timer: 2000,
-          showConfirmButton: false
-        });
-      }
-    });
+    this.processAssignRole(userId, roleId, roleObj, select);
   }
 
-  onRemoveRole(userId: string, roleName: string): void {
+  private async processAssignRole(userId: string, roleId: string, roleObj: Role, select: HTMLSelectElement): Promise<void> {
+    try {
+      await firstValueFrom(this.usersService.assignRole(userId, roleId));
+
+      // Optimistic Update
+      this.users.update(users => users.map(u => {
+        if (u.id === userId && !u.roles.includes(roleObj.name)) {
+          return { ...u, roles: [...u.roles, roleObj.name] };
+        }
+        return u;
+      }));
+
+      // Refresh to sync with server
+      this.loadData();
+      
+      select.value = '';
+      Swal.fire({
+        title: 'Asignado',
+        text: 'El rol ha sido asignado correctamente.',
+        icon: 'success',
+        timer: 1500,
+        showConfirmButton: false
+      });
+    } catch (error) {
+      console.error('Error assigning role:', error);
+      Swal.fire('Error', 'No se pudo asignar el rol.', 'error');
+    }
+  }
+
+  async onRemoveRole(userId: string, roleName: string): Promise<void> {
     const roleObj = this.roles().find(r => r.name === roleName);
     if (!roleObj) return;
 
-    Swal.fire({
+    const result = await Swal.fire({
       title: '¿Quitar rol?',
       text: `¿Desea remover el rol "${roleName}" de este usuario?`,
       icon: 'question',
@@ -139,23 +160,36 @@ export class UsersComponent implements OnInit {
       confirmButtonText: 'Sí, quitar',
       cancelButtonText: 'Mantener',
       background: '#ffffff'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        this.usersService.removeRole(userId, roleObj.id).subscribe({
-          next: () => {
-            this.loadData();
-            Swal.fire({
-              title: '¡Rol removido!',
-              text: 'El rol ha sido quitado satisfactoriamente.',
-              icon: 'success',
-              confirmButtonColor: '#150fbd',
-              timer: 1500,
-              showConfirmButton: false
-            });
-          }
-        });
-      }
     });
+
+    if (result.isConfirmed) {
+      try {
+        await firstValueFrom(this.usersService.removeRole(userId, roleObj.id));
+
+        // Optimistic Update
+        this.users.update(users => users.map(u => {
+          if (u.id === userId) {
+            return { ...u, roles: u.roles.filter(r => r !== roleName) };
+          }
+          return u;
+        }));
+
+        // Refresh to sync with server
+        this.loadData();
+
+        Swal.fire({
+          title: '¡Rol removido!',
+          text: 'El rol ha sido quitado satisfactoriamente.',
+          icon: 'success',
+          confirmButtonColor: '#150fbd',
+          timer: 1500,
+          showConfirmButton: false
+        });
+      } catch (error) {
+        console.error('Error removing role:', error);
+        Swal.fire('Error', 'No se pudo remover el rol.', 'error');
+      }
+    }
   }
 
   onDeleteUser(userId: string): void {
@@ -184,15 +218,30 @@ export class UsersComponent implements OnInit {
       background: '#ffffff'
     }).then((result) => {
       if (result.isConfirmed) {
+        // Optimistic: remove from local list immediately
+        const previousUsers = this.users();
+        this.users.set(previousUsers.filter(u => u.id !== userId));
+
         this.usersService.deleteUser(userId).subscribe({
           next: () => {
-            this.loadData();
             Swal.fire({
               title: '¡Eliminado!',
               text: 'El usuario ha sido eliminado correctamente.',
               icon: 'success',
               confirmButtonColor: '#150fbd',
+              timer: 2000,
               showConfirmButton: false
+            });
+          },
+          error: (err) => {
+            console.error('[UsersComponent] Error al eliminar usuario:', err);
+            // Revert optimistic update
+            this.users.set(previousUsers);
+            Swal.fire({
+              title: 'Error',
+              text: 'No se pudo eliminar el usuario. Verifique sus permisos.',
+              icon: 'error',
+              confirmButtonColor: '#150fbd'
             });
           }
         });

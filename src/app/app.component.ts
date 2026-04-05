@@ -1,16 +1,12 @@
 // src/app/app.component.ts
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { LoadingOverlayComponent } from './features/shared/loading-overlay/loading-overlay.component';
+import { RouterOutlet } from "@angular/router";
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, LoadingOverlayComponent],
-  template: `
-    <app-loading-overlay />
-    <router-outlet />
-  `,
+  imports: [RouterOutlet],
+  templateUrl: 'app.component.html',
 })
 export class AppComponent {
   constructor() {

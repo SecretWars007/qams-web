@@ -5,8 +5,11 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { ProjectsService } from '../../../core/services/projects.service';
 import { UsersService } from '../../../core/services/users.service';
-import { Project } from '../../../core/models/project.model';
+import { RequirementsService } from '../../../core/services/requirements.service';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { User } from '../../../core/models/user.model';
+import { Project } from '../../../core/models/project.model';
 
 @Component({
   selector: 'app-projects',
@@ -24,17 +27,47 @@ export class ProjectsComponent implements OnInit {
   showDevolutionModal = signal<boolean>(false);
   selectedProjectForDevolution = signal<Project | null>(null);
   devolutionNotes: string = '';
+  
   projectForm!: FormGroup;
+  requirementForm!: FormGroup;
+  
+  activeStep = signal<number>(1);
+  pendingRequirements = signal<any[]>([]);
+  
+  requirementTypes = signal<any[]>([]);
+  priorities = signal<any[]>([]);
+  complexities = signal<any[]>([]);
+  statuses = signal<any[]>([]);
 
-  private projectsService = inject(ProjectsService);
-  private usersService = inject(UsersService);
-  private router = inject(Router);
-  private fb = inject(FormBuilder);
+  private readonly projectsService = inject(ProjectsService);
+  private readonly usersService = inject(UsersService);
+  private readonly requirementsService = inject(RequirementsService);
+
+
+  private readonly router = inject(Router);
+  private readonly fb = inject(FormBuilder);
 
   ngOnInit(): void {
     this.initForm();
     this.loadProjects();
     this.loadUsers();
+    this.loadCatalogs();
+  }
+
+  private loadCatalogs() {
+    // Datos locales — el backend aún no expone estos catálogos de requisitos
+    this.requirementTypes.set([
+      { id: 1, name: 'Funcional' }, { id: 2, name: 'No Funcional' }, { id: 3, name: 'Técnico' }
+    ]);
+    this.priorities.set([
+      { id: 1, name: 'Baja' }, { id: 2, name: 'Media' }, { id: 3, name: 'Alta' }, { id: 4, name: 'Crítica' }
+    ]);
+    this.complexities.set([
+      { id: 1, name: 'Baja' }, { id: 2, name: 'Media' }, { id: 3, name: 'Alta' }
+    ]);
+    this.statuses.set([
+      { id: 1, name: 'Pendiente' }, { id: 2, name: 'En Progreso' }, { id: 3, name: 'Completado' }
+    ]);
   }
 
   private initForm() {
@@ -45,13 +78,26 @@ export class ProjectsComponent implements OnInit {
       endDate: ['', Validators.required],
       testerIds: [[], Validators.required]
     });
+
+    this.requirementForm = this.fb.group({
+      title: ['', [Validators.required, Validators.minLength(5)]],
+      description: [''],
+      code: ['', [Validators.required]],
+      acceptanceCriteria: [''],
+      requirementTypeId: [1, Validators.required],
+      requirementPriorityId: [1, Validators.required],
+      requirementComplexityId: [1, Validators.required],
+      requirementStatusId: [1],
+      source: ['']
+    });
   }
 
   loadUsers() {
+
     this.usersService.getUsers().subscribe({
       next: (data) => {
         // Filtrar solo usuarios con rol 'Tester'
-        const testers = data.filter(u => u.roles && u.roles.includes('Tester'));
+        const testers = data.filter(u => u.roles?.includes('Tester'));
         console.log('ProjectsComponent: Usuarios cargados (filtrados por Tester):', testers);
         this.users.set(testers);
       },
@@ -94,6 +140,14 @@ export class ProjectsComponent implements OnInit {
       startDate: new Date().toISOString().split('T')[0],
       testerIds: []
     });
+    this.requirementForm.reset({
+      requirementTypeId: 1,
+      requirementPriorityId: 1,
+      requirementComplexityId: 1,
+      requirementStatusId: 1
+    });
+    this.activeStep.set(1);
+    this.pendingRequirements.set([]);
     this.showModal.set(true);
   }
 
@@ -101,39 +155,95 @@ export class ProjectsComponent implements OnInit {
     this.showModal.set(false);
   }
 
-  onSubmit() {
+  nextStep() {
     if (this.projectForm.valid) {
-      this.isSubmitting.set(true);
-      const formValue = this.projectForm.value;
-
-      // Asegurar formato de fecha ISO 8601 completo para el backend
-      const payload = {
-        ...formValue,
-        startDate: new Date(formValue.startDate).toISOString(),
-        endDate: new Date(formValue.endDate).toISOString()
-      };
-
-      console.log('ProjectsComponent: Creando proyecto con payload:', payload);
-
-      this.projectsService.createProject(payload as any).subscribe({
-        next: (newProj) => {
-          console.log('ProjectsComponent: Proyecto creado correctamente:', newProj);
-          this.loadProjects();
-          this.closeModal();
-          this.isSubmitting.set(false);
-        },
-        error: (err) => {
-          console.error('ProjectsComponent: Error al crear proyecto:', err);
-          this.isSubmitting.set(false);
-          Swal.fire({
-            icon: 'error',
-            title: 'Error de creación',
-            text: 'No se pudo crear el proyecto. Verifique sus datos e intente nuevamente.',
-            confirmButtonColor: '#150fbd'
-          });
-        }
-      });
+      this.activeStep.set(2);
     }
+  }
+
+  prevStep() {
+    this.activeStep.set(1);
+  }
+
+  addPendingRequirement() {
+    if (this.requirementForm.invalid) return;
+    
+    // Add to local array
+    const req = this.requirementForm.value;
+    const currentList = this.pendingRequirements();
+    this.pendingRequirements.set([...currentList, req]);
+    
+    // Reset form for next item
+    this.requirementForm.reset({
+      requirementTypeId: 1,
+      requirementPriorityId: 1,
+      requirementComplexityId: 1,
+      requirementStatusId: 1
+    });
+  }
+
+  removePendingRequirement(index: number) {
+    const list = [...this.pendingRequirements()];
+    list.splice(index, 1);
+    this.pendingRequirements.set(list);
+  }
+
+  onSubmit() {
+    if (this.projectForm.invalid) return;
+    
+    this.isSubmitting.set(true);
+    const formValue = this.projectForm.value;
+
+    const payload = {
+      ...formValue,
+      startDate: new Date(formValue.startDate).toISOString(),
+      endDate: new Date(formValue.endDate).toISOString()
+    };
+
+    this.projectsService.createProject(payload).subscribe({
+      next: (newProj) => {
+        const requirements = this.pendingRequirements();
+        if (requirements.length > 0) {
+          const reqRequests = requirements.map(req => 
+            this.requirementsService.createRequirement(newProj.id, req).pipe(
+              catchError(err => of(null)) // Ignore individual failures to avoid breaking the UI success flow
+            )
+          );
+
+          forkJoin(reqRequests).subscribe({
+            next: () => this.completeCreation()
+          });
+        } else {
+          this.completeCreation();
+        }
+      },
+      error: (err) => {
+        this.isSubmitting.set(false);
+        this.showErrorMessage('No se pudo crear el proyecto.');
+      }
+    });
+  }
+
+  private completeCreation() {
+    this.loadProjects();
+    this.closeModal();
+    this.isSubmitting.set(false);
+    Swal.fire({
+      icon: 'success',
+      title: '¡Proyecto Desplegado!',
+      text: 'El proyecto ha sido registrado con éxito.',
+      timer: 2000,
+      showConfirmButton: false
+    });
+  }
+
+  private showErrorMessage(message: string) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error de operación',
+      text: message,
+      confirmButtonColor: '#150fbd'
+    });
   }
 
   onDeleteProject(projectId: string, event: Event) {

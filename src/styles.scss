@@ -272,6 +272,7 @@
   }
 
   .fade-in { animation-name: fadeIn; }
+  .slide-in-from-top-1 { animation-name: slideInTop1; }
   .slide-in-from-bottom-6 { animation-name: slideInBottom6; }
   .slide-in-from-right-6 { animation-name: slideInRight6; }
   .zoom-in-95 { animation-name: zoomIn95; }
@@ -279,6 +280,11 @@
   @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
+  }
+
+  @keyframes slideInTop1 {
+    from { transform: translateY(-0.25rem); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
   }
 
   @keyframes slideInBottom6 {

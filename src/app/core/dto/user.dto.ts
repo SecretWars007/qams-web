@@ -10,4 +10,6 @@ export interface UserDto {
   roles: string[];
   documentoIdentidad?: string;
   fechaNacimiento?: string;
+  isDeleted?: boolean;
+  is_deleted?: boolean;
 }

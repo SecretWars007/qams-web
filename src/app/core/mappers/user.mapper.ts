@@ -13,7 +13,9 @@ export class UserMapper {
       new Date(dto.createdAt),
       dto.roles || [],
       dto.documentoIdentidad || '',
-      dto.fechaNacimiento || ''
+      dto.fechaNacimiento || '',
+      dto.isDeleted,
+      dto.is_deleted
     );
   }
 
@@ -27,7 +29,9 @@ export class UserMapper {
       createdAt: user.createdAt.toISOString(),
       roles: user.roles,
       documentoIdentidad: user.documentoIdentidad,
-      fechaNacimiento: user.fechaNacimiento
+      fechaNacimiento: user.fechaNacimiento,
+      isDeleted: user.isDeleted,
+      is_deleted: user.is_deleted
     };
   }
 }

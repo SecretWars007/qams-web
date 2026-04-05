@@ -1,7 +1,7 @@
 // src/app/features/auth/register/register.component.ts
-import { Component, signal } from '@angular/core';
+import { Component, signal, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../../core/services/auth.service';
 import { RegisterRequest } from '../../../../core/models/auth.model';
@@ -19,6 +19,8 @@ import Swal from 'sweetalert2';
   styleUrls: ['./register.component.scss']
 })
 export class RegisterComponent {
+  @ViewChild('regForm') regForm!: NgForm;
+
   form: RegisterRequest = {
     username: '',
     email: '',
@@ -30,6 +32,7 @@ export class RegisterComponent {
   };
 
   loading = signal(false);
+  submitted = signal(false);
   minDate: string;
   maxDate: string;
 
@@ -51,18 +54,17 @@ export class RegisterComponent {
    * Envía los datos del formulario al servicio de autenticación.
    */
   onSubmit(): void {
-    if (
-      !this.form.username ||
-      !this.form.email ||
-      !this.form.password ||
-      !this.form.fullName ||
-      !this.form.documentoIdentidad ||
-      !this.form.fechaNacimiento
-    ) {
+    this.submitted.set(true);
+
+    if (this.regForm) {
+      this.regForm.form.markAllAsTouched();
+    }
+
+    if (this.regForm && this.regForm.invalid) {
       Swal.fire({
         icon: 'warning',
         title: 'Atención',
-        text: 'Por favor, complete todos los campos obligatorios.',
+        text: 'Por favor, revise los campos marcados en rojo y asegúrese de cumplir con los formatos requeridos.',
         confirmButtonColor: '#150fbd'
       });
       return;
@@ -93,6 +95,7 @@ export class RegisterComponent {
     this.authService.register(this.form).subscribe({
       next: () => {
         console.log('[RegisterComponent] Registro exitoso para:', this.form.username);
+        this.loading.set(false);
         Swal.fire({
           icon: 'success',
           title: '¡Bienvenido!',

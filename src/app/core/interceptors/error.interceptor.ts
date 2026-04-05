@@ -70,12 +70,15 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
           });
           break;
         case 500:
-          Swal.fire({
-            icon: 'error',
-            title: 'Error del Sistema',
-            text: 'Se ha producido un error interno. Intente nuevamente más tarde o contacte a soporte.',
-            confirmButtonColor: '#150fbd'
-          });
+          // No mostrar alerta global para errores de catálogos (se manejan con fallback en el componente)
+          if (!req.url.includes('/Catalogs/')) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error del Sistema',
+              text: 'Se ha producido un error interno. Intente nuevamente más tarde o contacte a soporte.',
+              confirmButtonColor: '#150fbd'
+            });
+          }
           break;
         default:
           if (error.status !== 0) {
