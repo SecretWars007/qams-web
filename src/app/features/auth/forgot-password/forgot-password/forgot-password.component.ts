@@ -35,13 +35,13 @@ export class ForgotPasswordComponent {
     this.loading.set(true);
 
     this.authService.forgotPassword({ email: this.email }).subscribe({
-      next: (message) => {
+      next: () => {
         Swal.fire({
-      icon: 'success',
-      title: 'Éxito',
-      text: message || 'Instrucciones enviadas a su correo.',
-      confirmButtonColor: '#150fbd'
-    });
+          icon: 'success',
+          title: 'Solicitud Enviada',
+          text: 'Si el correo ingresado es correcto, recibirá un mensaje con las instrucciones para restablecer su contraseña en unos instantes.',
+          confirmButtonColor: '#150fbd'
+        });
         this.loading.set(false);
         this.router.navigate(['/auth/login']);
       },
