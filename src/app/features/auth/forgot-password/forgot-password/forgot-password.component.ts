@@ -17,8 +17,8 @@ export class ForgotPasswordComponent {
   loading = signal(false);
 
   constructor(
-    private authService: AuthService,
-    private router: Router,
+    private readonly authService: AuthService,
+    private readonly router: Router,
   ) { }
 
   onSubmit(): void {

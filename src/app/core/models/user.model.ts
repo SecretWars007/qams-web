@@ -32,5 +32,5 @@ export interface UpdateUser {
   documentoIdentidad?: string;
   fechaNacimiento?: string;
   telefono?: string;
-  roleIds: string[];
+  roleIds?: string[];
 }

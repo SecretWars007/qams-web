@@ -2,16 +2,22 @@
   <!-- Header -->
   <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
     <div>
-      <div class="flex items-center gap-2 text-slate-500 mb-1">
-        <button (click)="goBack()" class="hover:text-indigo-600 transition-colors">
-          <i class="fas fa-arrow-left"></i>
-          <span class="ml-2 text-xs font-bold tracking-widest">Proyectos</span>
-        </button>
-      </div>
+      @if (projectId()) {
+        <div class="flex items-center gap-2 text-slate-500 mb-1">
+          <button (click)="goBack()" class="hover:text-indigo-600 transition-colors">
+            <i class="fas fa-arrow-left"></i>
+            <span class="ml-2 text-xs font-bold tracking-widest">Proyectos</span>
+          </button>
+        </div>
+      }
       <h1 class="text-3xl font-black text-slate-900 tracking-tight">Requisitos</h1>
       @if (project()) {
         <p class="text-slate-500 text-sm mt-1">
           Gestionando el alcance para <span class="text-indigo-600 font-bold">{{ project()?.name }}</span>.
+        </p>
+      } @else {
+        <p class="text-slate-500 text-sm mt-1">
+          Gestiona los requisitos funcionales y técnicos de tus proyectos.
         </p>
       }
     </div>
@@ -52,9 +58,16 @@
             
             <!-- Top Badges -->
             <div class="flex justify-between items-start mb-4">
-              <span class="px-3 py-1 bg-slate-100 text-slate-600 text-[10px] font-black tracking-widest rounded-lg border border-slate-200">
-                {{ req.code }}
-              </span>
+              <div class="flex items-center gap-2">
+                <span class="px-3 py-1 bg-slate-100 text-slate-600 text-[10px] font-black tracking-widest rounded-lg border border-slate-200">
+                  {{ req.code }}
+                </span>
+                @if (!projectId() && req.projectId) {
+                  <span class="px-3 py-1 bg-indigo-50 text-indigo-600 text-[10px] font-bold tracking-wide rounded-lg border border-indigo-200">
+                    <i class="fas fa-project-diagram mr-1"></i>{{ getProjectName(req.projectId) }}
+                  </span>
+                }
+              </div>
               <div class="flex gap-2">
                 <span [ngClass]="{
                   'bg-emerald-100 text-emerald-600 border-emerald-200': req.requirementStatusId === 3,
@@ -118,7 +131,8 @@
 <!-- Modal -->
 @if (showModal()) {
   <app-requirement-modal 
-    [projectId]="projectId()!" 
+    [projectId]="projectId()" 
+    [projects]="projects()"
     [requirement]="selectedRequirement()" 
     (closed)="closeModal()" 
     (saved)="onSaved()" />

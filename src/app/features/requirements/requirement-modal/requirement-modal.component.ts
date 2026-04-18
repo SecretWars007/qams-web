@@ -3,6 +3,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { RequirementsService } from '../../../core/services/requirements.service';
 import { CatalogsService } from '../../../core/services/catalogs.service';
 import { Requirement, CreateRequirement, UpdateRequirement } from '../../../core/models/requirement.model';
+import { Project } from '../../../core/models/project.model';
 import { catchError, of } from 'rxjs';
 import Swal from 'sweetalert2';
 
@@ -18,7 +19,8 @@ import Swal from 'sweetalert2';
   `]
 })
 export class RequirementModalComponent implements OnInit {
-  @Input({ required: true }) projectId!: string;
+  @Input() projectId: string | null = null;
+  @Input() projects: Project[] = [];
   @Input() requirement: Requirement | null = null;
   @Output() closed = new EventEmitter<void>();
   @Output() saved = new EventEmitter<void>();
@@ -50,6 +52,10 @@ export class RequirementModalComponent implements OnInit {
   private readonly requirementsService = inject(RequirementsService);
   private readonly catalogsService = inject(CatalogsService);
 
+  get showProjectSelector(): boolean {
+    return !this.projectId && this.projects.length > 0;
+  }
+
   ngOnInit(): void {
     this.initForm();
     this.loadCatalogs();
@@ -62,7 +68,7 @@ export class RequirementModalComponent implements OnInit {
   }
 
   private initForm() {
-    this.requirementForm = this.fb.group({
+    const formConfig: any = {
       title: ['', [Validators.required, Validators.minLength(5)]],
       description: [''],
       code: ['', [Validators.required]],
@@ -72,7 +78,14 @@ export class RequirementModalComponent implements OnInit {
       requirementComplexityId: [1, Validators.required],
       requirementStatusId: [1],
       source: ['']
-    });
+    };
+
+    // Agregar selector de proyecto solo cuando no hay projectId pre-asignado
+    if (!this.projectId) {
+      formConfig['selectedProjectId'] = ['', Validators.required];
+    }
+
+    this.requirementForm = this.fb.group(formConfig);
   }
 
   private loadCatalogs() {
@@ -99,9 +112,21 @@ export class RequirementModalComponent implements OnInit {
     this.isSubmitting.set(true);
     const formValue = this.requirementForm.value;
 
+    // Determinar el projectId: del input directo o del selector del formulario
+    const targetProjectId = this.projectId || formValue.selectedProjectId;
+
+    if (!targetProjectId) {
+      Swal.fire('Error', 'Debe seleccionar un proyecto.', 'error');
+      this.isSubmitting.set(false);
+      return;
+    }
+
+    // Remover selectedProjectId del payload antes de enviarlo al backend
+    const { selectedProjectId, ...payload } = formValue;
+
     if (this.requirement) {
       // Update
-      const updateDto: UpdateRequirement = { ...formValue };
+      const updateDto: UpdateRequirement = { ...payload };
       this.requirementsService.updateRequirement(this.requirement.id, updateDto).subscribe({
         next: () => {
           Swal.fire('Éxito', 'Requisito actualizado correctamente.', 'success');
@@ -115,8 +140,8 @@ export class RequirementModalComponent implements OnInit {
       });
     } else {
       // Create
-      const createDto: CreateRequirement = { ...formValue };
-      this.requirementsService.createRequirement(this.projectId, createDto).subscribe({
+      const createDto: CreateRequirement = { ...payload };
+      this.requirementsService.createRequirement(targetProjectId, createDto).subscribe({
         next: () => {
           Swal.fire('Éxito', 'Requisito creado correctamente.', 'success');
           this.saved.emit();

@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, inject, output } from '@angular/core';
+import { Component, signal, inject, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
@@ -15,7 +15,7 @@ import Swal from 'sweetalert2';
   templateUrl: './profile-modal.component.html',
   styleUrl: './profile-modal.component.scss'
 })
-export class ProfileModalComponent implements OnInit {
+export class ProfileModalComponent {
   show = signal(false);
   loading = signal(false);
   profileUpdated = output<void>();
@@ -36,13 +36,19 @@ export class ProfileModalComponent implements OnInit {
     });
   }
 
-  ngOnInit() {
-    this.rolesService.getRoles().subscribe(roles => this.allRoles.set(roles));
-  }
+  // El ngOnInit fue removido para evitar métodos de ciclo de vida vacíos (Lint).
 
   open() {
     const userId = this.authService.getUserId();
     if (!userId) return;
+
+    // Solo intentar cargar roles si el usuario es Admin y aún no los tenemos
+    if (this.authService.isAdmin() && this.allRoles().length === 0) {
+      this.rolesService.getRoles().subscribe({
+        next: (roles) => this.allRoles.set(roles),
+        error: () => console.warn('No se pudieron cargar los roles para el perfil.')
+      });
+    }
 
     this.loading.set(true);
     this.usersService.getUserById(userId).subscribe({
@@ -77,9 +83,13 @@ export class ProfileModalComponent implements OnInit {
     const updateDto: UpdateUser = {
       fullName: formValue.fullName,
       email: formValue.email,
-      isActive: this.currentUserData.isActive,
-      roleIds: roleIds
+      isActive: this.currentUserData.isActive
     };
+
+    // Solo incluir roleIds si logramos mapearlos (normalmente solo para admins)
+    if (roleIds.length > 0) {
+      updateDto.roleIds = roleIds;
+    }
 
     this.usersService.updateUser(this.currentUserData.id, updateDto).subscribe({
       next: () => {

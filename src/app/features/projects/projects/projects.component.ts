@@ -50,7 +50,7 @@ export class ProjectsComponent implements OnInit {
   ngOnInit(): void {
     this.initForm();
     this.loadProjects();
-    this.loadUsers();
+    // Se elimina loadUsers de aquí para evitar 403 en roles no administradores al abrir el módulo.
     this.loadCatalogs();
   }
 
@@ -93,7 +93,6 @@ export class ProjectsComponent implements OnInit {
   }
 
   loadUsers() {
-
     this.usersService.getUsers().subscribe({
       next: (data) => {
         // Filtrar solo usuarios con rol 'Tester'
@@ -101,7 +100,10 @@ export class ProjectsComponent implements OnInit {
         console.log('ProjectsComponent: Usuarios cargados (filtrados por Tester):', testers);
         this.users.set(testers);
       },
-      error: (err) => console.error('Error loading users', err)
+      error: (err) => {
+        console.warn('ProjectsComponent: No se pudieron cargar los usuarios (403 o red). El modal de creación podría estar incompleto.', err);
+        // No relanzamos el error para evitar que el interceptor global bloquee la UI
+      }
     });
   }
 
@@ -148,6 +150,12 @@ export class ProjectsComponent implements OnInit {
     });
     this.activeStep.set(1);
     this.pendingRequirements.set([]);
+
+    // Cargar usuarios bajo demanda solo al abrir el modal (optimización y prevención de 403)
+    if (this.users().length === 0) {
+      this.loadUsers();
+    }
+    
     this.showModal.set(true);
   }
 

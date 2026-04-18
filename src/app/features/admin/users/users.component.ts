@@ -324,6 +324,24 @@ export class UsersComponent implements OnInit {
     this.editForm.reset();
   }
 
+  toggleRole(roleId: string): void {
+    if (!this.selectedUser) return;
+    const roleObj = this.roles().find(r => r.id === roleId);
+    if (!roleObj) return;
+
+    if (this.selectedUser.roles.includes(roleObj.name)) {
+      this.selectedUser.roles = this.selectedUser.roles.filter(name => name !== roleObj.name);
+    } else {
+      this.selectedUser.roles = [...this.selectedUser.roles, roleObj.name];
+    }
+  }
+
+  isRoleSelected(roleId: string): boolean {
+    if (!this.selectedUser) return false;
+    const roleObj = this.roles().find(r => r.id === roleId);
+    return roleObj ? this.selectedUser.roles.includes(roleObj.name) : false;
+  }
+
   updateUserData(): void {
     if (this.editForm.invalid || !this.selectedUser) return;
 
@@ -373,9 +391,10 @@ export class UsersComponent implements OnInit {
       error: (err) => {
         console.error('[UsersComponent] Error updating user:', err);
         this.isSubmitting.set(false);
+        const errorMsg = err.error?.message || 'No se pudo actualizar la información del usuario.';
         Swal.fire({
-          title: 'Acceso denegado',
-          text: 'No se puede asignar roles a un usuario inactivo.',
+          title: 'Error de actualización',
+          text: errorMsg,
           icon: 'error',
           confirmButtonColor: '#150fbd'
         });

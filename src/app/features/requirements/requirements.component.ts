@@ -24,6 +24,7 @@ import Swal from 'sweetalert2';
 })
 export class RequirementsComponent implements OnInit {
   requirements = signal<Requirement[]>([]);
+  projects = signal<Project[]>([]);
   project = signal<Project | null>(null);
   loading = signal<boolean>(true);
   projectId = signal<string | null>(null);
@@ -36,6 +37,9 @@ export class RequirementsComponent implements OnInit {
   private readonly router = inject(Router);
 
   ngOnInit(): void {
+    // Siempre cargar la lista de proyectos (para el selector del modal)
+    this.loadProjects();
+
     this.route.queryParams.subscribe(params => {
       const pid = params['projectId'];
       if (pid) {
@@ -43,8 +47,16 @@ export class RequirementsComponent implements OnInit {
         this.loadProject(pid);
         this.loadRequirements(pid);
       } else {
-        this.loading.set(false);
+        // Sin proyecto específico: cargar requisitos de todos los proyectos
+        this.loadAllRequirements();
       }
+    });
+  }
+
+  loadProjects() {
+    this.projectsService.getProjects().subscribe({
+      next: (data) => this.projects.set(data),
+      error: (err) => console.warn('No se pudieron cargar los proyectos', err)
     });
   }
 
@@ -69,6 +81,41 @@ export class RequirementsComponent implements OnInit {
     });
   }
 
+  loadAllRequirements() {
+    this.loading.set(true);
+    // Cargar requisitos de todos los proyectos disponibles
+    this.projectsService.getProjects().subscribe({
+      next: (projects) => {
+        if (projects.length === 0) {
+          this.loading.set(false);
+          return;
+        }
+        let allReqs: Requirement[] = [];
+        let loaded = 0;
+        for (const proj of projects) {
+          this.requirementsService.getRequirementsByProject(proj.id).subscribe({
+            next: (reqs) => {
+              allReqs = [...allReqs, ...reqs];
+              loaded++;
+              if (loaded === projects.length) {
+                this.requirements.set(allReqs);
+                this.loading.set(false);
+              }
+            },
+            error: () => {
+              loaded++;
+              if (loaded === projects.length) {
+                this.requirements.set(allReqs);
+                this.loading.set(false);
+              }
+            }
+          });
+        }
+      },
+      error: () => this.loading.set(false)
+    });
+  }
+
   openModal(requirement: Requirement | null = null) {
     this.selectedRequirement.set(requirement);
     this.showModal.set(true);
@@ -83,6 +130,8 @@ export class RequirementsComponent implements OnInit {
     const pid = this.projectId();
     if (pid) {
       this.loadRequirements(pid);
+    } else {
+      this.loadAllRequirements();
     }
     this.closeModal();
   }
@@ -103,7 +152,11 @@ export class RequirementsComponent implements OnInit {
           next: () => {
             Swal.fire('Eliminado', 'El requisito ha sido eliminado.', 'success');
             const pid = this.projectId();
-            if (pid) this.loadRequirements(pid);
+            if (pid) {
+              this.loadRequirements(pid);
+            } else {
+              this.loadAllRequirements();
+            }
           },
           error: (err) => {
             console.error('Error deleting requirement', err);
@@ -112,6 +165,11 @@ export class RequirementsComponent implements OnInit {
         });
       }
     });
+  }
+
+  getProjectName(projectId: string): string {
+    const p = this.projects().find(proj => proj.id === projectId);
+    return p ? p.name : 'Sin proyecto';
   }
 
   goBack() {
