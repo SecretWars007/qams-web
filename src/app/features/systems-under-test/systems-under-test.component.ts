@@ -34,18 +34,16 @@ export class SystemsUnderTestComponent implements OnInit {
     return this.projectContextService.activeProjectId();
   } 
 
-  canManageSut(): boolean {
-    return this.authService.isAdmin() || this.authService.hasPermission('SUT_CREATE'); // Note: QA Lead should have SUT_CREATE, but since we cloned it to everyone earlier, let's explicitly check the role.
+  canCreateSut(): boolean {
+    return this.authService.isAdmin() || this.authService.hasPermission('SUT_CREATE');
   }
-  
-  hasRequiredRole(): boolean {
-      const user = this.authService.currentUser();
-      if (!user?.role) return false;
-      const roleList = Array.isArray(user.role) ? user.role : [user.role];
-      return roleList.some(r => {
-          const roleLower = r.toLowerCase().trim();
-          return roleLower.includes('admin') || roleLower.includes('qa lead');
-      });
+
+  canEditSut(): boolean {
+    return this.authService.isAdmin() || this.authService.hasPermission('SUT_UPDATE');
+  }
+
+  canDeleteSut(): boolean {
+    return this.authService.isAdmin() || this.authService.hasPermission('SUT_DELETE');
   }
 
   ngOnInit(): void {
@@ -121,14 +119,11 @@ export class SystemsUnderTestComponent implements OnInit {
         this.loadSuts();
       },
       error: (err) => {
-        // 409 Conflict = nombre duplicado detectado por el backend
-        const mensaje = err.status === 409 && err.error?.error
-          ? err.error.error
-          : 'Error al guardar el SUT. Verifique los datos e intente nuevamente.';
+        const mensaje = err.error?.message || err.error?.error || (typeof err.error === 'string' ? err.error : 'Error al guardar el SUT. Verifique los datos e intente nuevamente.');
 
         Swal.fire({
           icon: err.status === 409 ? 'warning' : 'error',
-          title: err.status === 409 ? 'Nombre duplicado' : 'Error',
+          title: err.status === 409 ? 'Nombre duplicado' : (err.status === 403 ? 'Acceso denegado' : 'Error'),
           text: mensaje,
           confirmButtonColor: '#150fbd'
         });
