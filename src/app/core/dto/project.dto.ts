@@ -22,6 +22,8 @@ export interface ProjectDto {
   priority: number;
   projectStatusId: number;
   projectStatusName: string;
+  systemUnderTestId?: string | null;
+  systemUnderTestName?: string | null;
   createdAt: string;
   createdByUserName: string;
   testSuiteCount: number;
@@ -37,6 +39,7 @@ export interface CreateProjectDto {
   endDate: string | null;
   priority: number;
   projectStatusId: number;
+  systemUnderTestId?: string | null;
   testerIds: string[];
 }
 
@@ -47,6 +50,7 @@ export interface UpdateProjectDto {
   endDate?: string | null;
   priority?: number;
   projectStatusId?: number;
+  systemUnderTestId?: string | null;
   testerIds?: string[];
   isActive?: boolean;
 }

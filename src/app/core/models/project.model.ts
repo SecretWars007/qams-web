@@ -26,7 +26,9 @@ export class Project {
       kanbanTasks: number;
       devolutions: number;
     },
-    public historicDevolutions: ProjectDevolution[] = []
+    public historicDevolutions: ProjectDevolution[] = [],
+    public systemUnderTestId: string | null = null,
+    public systemUnderTestName: string | null = null
   ) {}
 
   /**
@@ -57,6 +59,7 @@ export interface CreateProject {
   description: string;
   startDate: string;
   endDate: string;
+  systemUnderTestId?: string | null;
   testerIds: string[];
 }
 

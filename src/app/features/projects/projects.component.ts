@@ -1,16 +1,18 @@
 import Swal from 'sweetalert2';
-import { Component, OnInit, signal, inject, DestroyRef } from '@angular/core';
+import { Component, OnInit, signal, computed, inject, DestroyRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { ProjectsService } from '../../core/services/projects.service';
 import { UsersService } from '../../core/services/users.service';
 import { RequirementsService } from '../../core/services/requirements.service';
+import { SystemsUnderTestService } from '../../core/services/systems-under-test.service';
 import { AuthService } from '../../core/services/auth.service';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { User } from '../../core/models/user.model';
 import { Project } from '../../core/models/project.model';
+import { SystemUnderTest } from '../../core/models/system-under-test.model';
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 
 @Component({
@@ -21,9 +23,10 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
   styleUrls: ['./projects.component.scss']
 })
 export class ProjectsComponent implements OnInit {
-    private destroyRef = inject(DestroyRef);
+  private destroyRef = inject(DestroyRef);
   projects = signal<Project[]>([]);
   users = signal<User[]>([]);
+  suts = signal<SystemUnderTest[]>([]);
   loading = signal<boolean>(true);
   showModal = signal<boolean>(false);
   isSubmitting = signal<boolean>(false);
@@ -31,6 +34,44 @@ export class ProjectsComponent implements OnInit {
   selectedProjectForDevolution = signal<Project | null>(null);
   devolutionNotes: string = '';
   
+  // Filter signals
+  selectedSutId = signal<string>('ALL');
+  searchQuery = signal<string>('');
+  statusFilter = signal<string>('ALL'); // 'ALL', 'ACTIVE', 'INACTIVE'
+
+  filteredProjects = computed(() => {
+    const list = this.projects();
+    const sutFilter = this.selectedSutId();
+    const query = this.searchQuery().trim().toLowerCase();
+    const status = this.statusFilter();
+
+    return list.filter(p => {
+      // SUT filter
+      if (sutFilter !== 'ALL') {
+        if (sutFilter === 'NONE') {
+          if (p.systemUnderTestId) return false;
+        } else if (p.systemUnderTestId !== sutFilter) {
+          return false;
+        }
+      }
+
+      // Status filter
+      if (status === 'ACTIVE' && !p.isActive) return false;
+      if (status === 'INACTIVE' && p.isActive) return false;
+
+      // Search query filter
+      if (query) {
+        const matchesName = p.name.toLowerCase().includes(query);
+        const matchesDesc = p.description?.toLowerCase().includes(query) ?? false;
+        const matchesSut = p.systemUnderTestName?.toLowerCase().includes(query) ?? false;
+        const matchesLeader = p.createdBy?.toLowerCase().includes(query) ?? false;
+        if (!matchesName && !matchesDesc && !matchesSut && !matchesLeader) return false;
+      }
+
+      return true;
+    });
+  });
+
   projectForm!: FormGroup;
   requirementForm!: FormGroup;
   
@@ -48,6 +89,7 @@ export class ProjectsComponent implements OnInit {
   private readonly projectsService = inject(ProjectsService);
   private readonly usersService = inject(UsersService);
   private readonly requirementsService = inject(RequirementsService);
+  private readonly sutService = inject(SystemsUnderTestService);
   private readonly authService = inject(AuthService);
 
   private readonly router = inject(Router);
@@ -94,6 +136,7 @@ export class ProjectsComponent implements OnInit {
   ngOnInit(): void {
     this.initForm();
     this.loadProjects();
+    this.loadSuts();
     this.loadCatalogs();
   }
 
@@ -113,10 +156,41 @@ export class ProjectsComponent implements OnInit {
     ]);
   }
 
+  loadSuts() {
+    this.sutService.getAll().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (sutsList) => {
+        console.log('ProjectsComponent: SUTs cargados:', sutsList);
+        this.suts.set(sutsList);
+      },
+      error: (err) => {
+        console.warn('ProjectsComponent: Error al cargar SUTs:', err);
+      }
+    });
+  }
+
+  onSutFilterChange(sutId: string) {
+    this.selectedSutId.set(sutId);
+  }
+
+  onSearchChange(query: string) {
+    this.searchQuery.set(query);
+  }
+
+  onStatusFilterChange(status: string) {
+    this.statusFilter.set(status);
+  }
+
+  clearFilters() {
+    this.selectedSutId.set('ALL');
+    this.searchQuery.set('');
+    this.statusFilter.set('ALL');
+  }
+
   private initForm() {
     this.projectForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3)]],
       description: [''],
+      systemUnderTestId: [null],
       startDate: [new Date().toISOString().split('T')[0], Validators.required],
       endDate: ['', Validators.required],
       testerIds: [[], Validators.required]
@@ -145,7 +219,6 @@ export class ProjectsComponent implements OnInit {
       },
       error: (err) => {
         console.warn('ProjectsComponent: No se pudieron cargar los usuarios (403 o red). El modal de creación podría estar incompleto.', err);
-        // No relanzamos el error para evitar que el interceptor global bloquee la UI
       }
     });
   }
@@ -184,6 +257,7 @@ export class ProjectsComponent implements OnInit {
     this.isEditing.set(false);
     this.editingProject.set(null);
     this.projectForm.reset({
+      systemUnderTestId: null,
       startDate: new Date().toISOString().split('T')[0],
       testerIds: []
     });
@@ -196,7 +270,10 @@ export class ProjectsComponent implements OnInit {
     this.activeStep.set(1);
     this.pendingRequirements.set([]);
 
-    // Cargar usuarios bajo demanda solo al abrir el modal (optimización y prevención de 403)
+    if (this.suts().length === 0) {
+      this.loadSuts();
+    }
+
     if (this.users().length === 0) {
       this.loadUsers();
     }
@@ -226,6 +303,7 @@ export class ProjectsComponent implements OnInit {
     this.projectForm.patchValue({
       name: project.name,
       description: project.description || '',
+      systemUnderTestId: project.systemUnderTestId || null,
       startDate: startDateStr,
       endDate: endDateStr,
       testerIds: selectedTesterIds
@@ -233,6 +311,10 @@ export class ProjectsComponent implements OnInit {
 
     this.activeStep.set(1);
     this.pendingRequirements.set([]);
+
+    if (this.suts().length === 0) {
+      this.loadSuts();
+    }
 
     if (this.users().length === 0) {
       this.usersService.getUsers().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
@@ -303,6 +385,7 @@ export class ProjectsComponent implements OnInit {
     const payload: any = {
       name: formValue.name,
       description: formValue.description,
+      systemUnderTestId: formValue.systemUnderTestId || null,
       startDate: formValue.startDate ? new Date(formValue.startDate).toISOString() : null,
       endDate: formValue.endDate ? new Date(formValue.endDate).toISOString() : null,
       testerIds: formValue.testerIds || [],

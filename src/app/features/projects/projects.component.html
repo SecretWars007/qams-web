@@ -1,9 +1,9 @@
 <div class="p-4 sm:p-6 max-w-7xl mx-auto animate-in fade-in duration-500">
   <!-- Header -->
-  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
     <div>
       <h1 class="text-3xl font-black text-slate-900 tracking-tight">Proyectos</h1>
-      <p class="text-slate-500 text-sm mt-1">Gestiona tus espacios de trabajo y casos de prueba.</p>
+      <p class="text-slate-500 text-sm mt-1">Gestiona tus espacios de trabajo, sistemas bajo prueba (SUT) y casos de prueba.</p>
     </div>
     <button *ngIf="canCreateProject()" (click)="openModal()" class="btn-primary w-full sm:w-auto">
       <i class="fas fa-plus-circle"></i>
@@ -11,12 +11,92 @@
     </button>
   </div>
 
+  <!-- Filters & SUT Toolbar -->
+  <div class="bg-white border border-slate-200/80 rounded-2xl p-4 mb-8 shadow-sm">
+    <div class="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center justify-between">
+      
+      <!-- SUT Dropdown Filter -->
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1">
+        <div class="relative min-w-[240px] flex-1 sm:flex-initial">
+          <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">Filtrar por SUT</label>
+          <div class="relative flex items-center">
+            <i class="fas fa-microchip absolute left-3 text-indigo-500 text-xs"></i>
+            <select [ngModel]="selectedSutId()" (ngModelChange)="onSutFilterChange($event)"
+              class="w-full bg-slate-50 hover:bg-slate-100/80 border border-slate-200 rounded-xl pl-9 pr-8 py-2 text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all appearance-none cursor-pointer">
+              <option value="ALL">🏢 Todos los SUTs ({{ projects().length }})</option>
+              <option value="NONE">⚡ Sin SUT asignado</option>
+              <option *ngFor="let sut of suts()" [value]="sut.id">
+                {{ sut.name }} ({{ sut.platformTypeName || sut.platformTypeCode || 'SUT' }})
+              </option>
+            </select>
+            <i class="fas fa-chevron-down absolute right-3 text-slate-400 pointer-events-none text-xs"></i>
+          </div>
+        </div>
+
+        <!-- Search Input -->
+        <div class="relative flex-1">
+          <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">Buscar proyecto</label>
+          <div class="relative flex items-center">
+            <i class="fas fa-search absolute left-3 text-slate-400 text-xs"></i>
+            <input type="text" [ngModel]="searchQuery()" (ngModelChange)="onSearchChange($event)"
+              placeholder="Buscar por nombre, SUT o responsable..."
+              class="w-full bg-slate-50 hover:bg-slate-100/80 border border-slate-200 rounded-xl pl-9 pr-8 py-2 text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all">
+            <button *ngIf="searchQuery()" (click)="onSearchChange('')" 
+              class="absolute right-3 text-slate-400 hover:text-slate-600 text-xs">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Status Chips & Clear Button -->
+      <div class="flex flex-wrap items-end gap-2 pt-1">
+        <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
+          <button (click)="onStatusFilterChange('ALL')"
+            [ngClass]="statusFilter() === 'ALL' ? 'bg-white text-indigo-600 shadow-sm font-black' : 'text-slate-500 hover:text-slate-800 font-medium'"
+            class="px-3 py-1.5 rounded-lg text-xs transition-all">
+            Todos
+          </button>
+          <button (click)="onStatusFilterChange('ACTIVE')"
+            [ngClass]="statusFilter() === 'ACTIVE' ? 'bg-white text-emerald-600 shadow-sm font-black' : 'text-slate-500 hover:text-slate-800 font-medium'"
+            class="px-3 py-1.5 rounded-lg text-xs transition-all">
+            Activos
+          </button>
+          <button (click)="onStatusFilterChange('INACTIVE')"
+            [ngClass]="statusFilter() === 'INACTIVE' ? 'bg-white text-rose-600 shadow-sm font-black' : 'text-slate-500 hover:text-slate-800 font-medium'"
+            class="px-3 py-1.5 rounded-lg text-xs transition-all">
+            Inactivos
+          </button>
+        </div>
+
+        <button *ngIf="selectedSutId() !== 'ALL' || searchQuery() || statusFilter() !== 'ALL'"
+          (click)="clearFilters()"
+          class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5"
+          title="Restablecer filtros">
+          <i class="fas fa-filter-circle-xmark text-slate-500"></i>
+          <span>Limpiar</span>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Active Filter Indicator Counter -->
+    <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+      <div>
+        <span>Mostrando <strong class="text-slate-800 font-black">{{ filteredProjects().length }}</strong> de <strong class="text-slate-800 font-black">{{ projects().length }}</strong> proyectos</span>
+        <span *ngIf="selectedSutId() !== 'ALL'" class="ml-2 px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-600 font-bold text-[10px] border border-indigo-100">
+          <i class="fas fa-microchip text-[9px] mr-1"></i>Filtrado por SUT
+        </span>
+      </div>
+    </div>
+  </div>
+
   <!-- Loading State -->
   <div *ngIf="loading()" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
     <div *ngFor="let i of [1,2,3]" class="h-64 bg-gray-900/50 rounded-3xl border border-white/5"></div>
   </div>
 
-  <!-- Empty State -->
+  <!-- Empty State (No Projects in System) -->
   <div *ngIf="!loading() && projects().length === 0"
     class="flex flex-col items-center justify-center py-20 bg-slate-100 rounded-3xl border-2 border-dashed border-slate-200">
     <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-6 border border-slate-100 shadow-sm">
@@ -31,9 +111,23 @@
     </button>
   </div>
 
+  <!-- Filtered Empty State (No matches for SUT / Search) -->
+  <div *ngIf="!loading() && projects().length > 0 && filteredProjects().length === 0"
+    class="flex flex-col items-center justify-center py-16 bg-slate-50 rounded-3xl border border-dashed border-slate-200">
+    <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mb-4 border border-slate-200 shadow-sm text-indigo-500">
+      <i class="fas fa-filter text-2xl text-slate-400"></i>
+    </div>
+    <h3 class="text-base font-bold text-slate-800 mb-1">Sin resultados con los filtros actuales</h3>
+    <p class="text-slate-500 text-xs mb-5 max-w-sm text-center">No encontramos proyectos asociados al SUT o término de búsqueda seleccionado.</p>
+    <button (click)="clearFilters()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-2">
+      <i class="fas fa-rotate-left"></i>
+      Restablecer todos los filtros
+    </button>
+  </div>
+
   <!-- Projects Grid -->
-  <div *ngIf="!loading()" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-    <div *ngFor="let project of projects()" (dblclick)="openProject(project.id)"
+  <div *ngIf="!loading() && filteredProjects().length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div *ngFor="let project of filteredProjects()" (dblclick)="openProject(project.id)"
       class="bg-gray-900 border border-white/5 rounded-3xl p-6 hover:border-indigo-500/30 transition-all hover:shadow-2xl hover:shadow-black/40 group cursor-pointer relative overflow-hidden flex flex-col h-full">
 
       <!-- Status Badge & Top Quick Actions -->
@@ -58,7 +152,7 @@
       </div>
 
       <!-- Content -->
-      <div class="mb-5 pr-28"> <!-- Space for badges & buttons -->
+      <div class="mb-3 pr-28"> <!-- Space for badges & buttons -->
         <div class="flex items-start gap-4">
           <div
             class="w-12 h-12 shrink-0 rounded-2xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 shadow-lg shadow-indigo-500/5 group-hover:scale-110 transition-transform duration-500">
@@ -76,6 +170,21 @@
               <span>{{ project.createdAt | date:'MMM d, y' }}</span>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- SUT Badge (Prominent) -->
+      <div class="mb-4">
+        <div *ngIf="project.systemUnderTestName"
+          class="inline-flex items-center gap-2 px-3 py-1 rounded-xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-xs font-bold tracking-wide"
+          [title]="'SUT: ' + project.systemUnderTestName">
+          <i class="fas fa-microchip text-[11px] text-indigo-400"></i>
+          <span class="truncate max-w-[200px]">{{ project.systemUnderTestName }}</span>
+        </div>
+        <div *ngIf="!project.systemUnderTestName"
+          class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-gray-800/60 border border-white/5 text-gray-500 text-xs font-semibold">
+          <i class="fas fa-link-slash text-[10px]"></i>
+          <span>Sin SUT asignado</span>
         </div>
       </div>
 
@@ -210,6 +319,23 @@
                 <i class="fas fa-cube absolute left-3 text-slate-400 group-focus-within:text-indigo-600 transition-colors text-xs"></i>
                 <input id="projectName" type="text" formControlName="name" placeholder="Ej: QAMS E-commerce Integration"
                   class="w-full bg-slate-50 border border-slate-200 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-medium">
+              </div>
+            </div>
+
+            <!-- Sistema Bajo Prueba (SUT) -->
+            <div class="md:col-span-2">
+              <label for="systemUnderTestId" class="text-[10px] font-bold text-slate-500 tracking-widest uppercase ml-1">
+                Sistema Bajo Prueba (SUT)
+              </label>
+              <div class="relative flex items-center group mt-1">
+                <i class="fas fa-microchip absolute left-3 text-slate-400 group-focus-within:text-indigo-600 transition-colors text-xs"></i>
+                <select id="systemUnderTestId" formControlName="systemUnderTestId"
+                  class="w-full bg-slate-50 border border-slate-200 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all font-medium">
+                  <option [ngValue]="null">-- Sin vincular a un SUT --</option>
+                  <option *ngFor="let sut of suts()" [value]="sut.id">
+                    {{ sut.name }} ({{ sut.platformTypeName || sut.platformTypeCode || 'SUT' }})
+                  </option>
+                </select>
               </div>
             </div>
 

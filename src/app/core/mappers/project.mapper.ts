@@ -24,7 +24,9 @@ export class ProjectMapper {
         kanbanTasks: dto.kanbanBoardCount,
         devolutions: dto.devolucionesCounter
       },
-      dto.historicDevolutions?.map(this.fromDevolutionDto) || []
+      dto.historicDevolutions?.map(this.fromDevolutionDto) || [],
+      dto.systemUnderTestId || null,
+      dto.systemUnderTestName || null
     );
   }
 

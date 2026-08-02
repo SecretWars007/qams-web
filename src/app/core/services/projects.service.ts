@@ -21,9 +21,13 @@ export class ProjectsService {
     private readonly http = inject(HttpClient);
     private readonly testCasesService = inject(TestCasesService);
 
-    /** Obtiene la lista completa de proyectos */
-    getProjects(): Observable<Project[]> {
-        return this.http.get<ProjectDto[]>(this.apiUrl).pipe(
+    /** Obtiene la lista completa de proyectos (opcionalmente filtrada por SUT) */
+    getProjects(sutId?: string): Observable<Project[]> {
+        const params: any = {};
+        if (sutId && sutId !== 'ALL') {
+            params.sutId = sutId;
+        }
+        return this.http.get<ProjectDto[]>(this.apiUrl, { params }).pipe(
             map(dtos => dtos.map(dto => ProjectMapper.fromDto(dto)))
         );
     }
