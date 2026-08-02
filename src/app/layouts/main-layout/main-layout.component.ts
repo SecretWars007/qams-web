@@ -71,7 +71,7 @@ import { Project } from '../../core/models/project.model';
 
           <!-- Sistemas Bajo Prueba -->
           <a
-            *hasPermission="'PROJECTS_VIEW'"
+            *hasPermission="'SUT_VIEW'"
             routerLink="/systems-under-test"
             routerLinkActive="bg-[#150fbd]/20 text-white border-l-4 border-[#150fbd] shadow-[inset_0_0_20px_rgba(21,15,189,0.15)]"
             class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
@@ -83,7 +83,7 @@ import { Project } from '../../core/models/project.model';
 
           <!-- Entornos de Prueba (ISTQB Cap 5.4) -->
           <a
-            *hasPermission="'PROJECTS_VIEW'"
+            *hasPermission="'ENVIRONMENTS_VIEW'"
             routerLink="/test-environments"
             routerLinkActive="bg-[#150fbd]/20 text-white border-l-4 border-[#150fbd] shadow-[inset_0_0_20px_rgba(21,15,189,0.15)]"
             class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
@@ -107,7 +107,7 @@ import { Project } from '../../core/models/project.model';
 
           <!-- Requisitos -->
           <a
-            *hasPermission="'PROJECTS_VIEW'"
+            *hasPermission="'REQUIREMENTS_VIEW'"
             routerLink="/requirements"
             routerLinkActive="bg-[#150fbd]/20 text-white border-l-4 border-[#150fbd] shadow-[inset_0_0_20px_rgba(21,15,189,0.15)]"
             class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
@@ -119,7 +119,7 @@ import { Project } from '../../core/models/project.model';
 
           <!-- Pruebas Estáticas (Walkthroughs & Inspecciones ISTQB) -->
           <a
-            *hasPermission="'PROJECTS_VIEW'"
+            *hasPermission="'REVIEWS_VIEW'"
             routerLink="/reviews"
             routerLinkActive="bg-[#150fbd]/20 text-white border-l-4 border-[#150fbd] shadow-[inset_0_0_20px_rgba(21,15,189,0.15)]"
             class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
@@ -179,7 +179,7 @@ import { Project } from '../../core/models/project.model';
 
           <!-- Pruebas Exploratorias (ISTQB Cap 4.4) -->
           <a
-            *hasPermission="'PROJECTS_VIEW'"
+            *hasPermission="'EXPLORATORY_VIEW'"
             routerLink="/exploratory"
             routerLinkActive="bg-[#150fbd]/20 text-white border-l-4 border-[#150fbd] shadow-[inset_0_0_20px_rgba(21,15,189,0.15)]"
             class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
@@ -191,7 +191,7 @@ import { Project } from '../../core/models/project.model';
 
           <!-- Defectos -->
           <a
-            *hasPermission="'PROJECTS_VIEW'"
+            *hasPermission="'DEFECTS_VIEW'"
             routerLink="/defects"
             routerLinkActive="bg-[#150fbd]/20 text-white border-l-4 border-[#150fbd] shadow-[inset_0_0_20px_rgba(21,15,189,0.15)]"
             class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm

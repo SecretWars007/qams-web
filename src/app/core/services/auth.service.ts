@@ -204,6 +204,7 @@ export class AuthService {
   }
 
   hasPermission(permissionCode: string): boolean {
+    if (this.isAdmin()) return true;
     return this.permissions().includes(permissionCode);
   }
 
