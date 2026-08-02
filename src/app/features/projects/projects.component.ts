@@ -42,23 +42,58 @@ export class ProjectsComponent implements OnInit {
   complexities = signal<any[]>([]);
   statuses = signal<any[]>([]);
 
+  isEditing = signal<boolean>(false);
+  editingProject = signal<Project | null>(null);
+
   private readonly projectsService = inject(ProjectsService);
   private readonly usersService = inject(UsersService);
   private readonly requirementsService = inject(RequirementsService);
   private readonly authService = inject(AuthService);
 
-
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
 
+  canCreateProject(): boolean {
+    return this.authService.isAdmin() || 
+           this.authService.hasPermission('PROJECTS_CREATE') || 
+           this.authService.hasRole('qa lead') || 
+           this.authService.hasRole('líder de pruebas (lead)') || 
+           this.authService.hasRole('lead') || 
+           this.authService.hasRole('tester') || 
+           this.authService.hasRole('qa tester') ||
+           this.authService.hasRole('administrador') ||
+           this.authService.hasRole('admin');
+  }
+
+  canEditProject(): boolean {
+    return this.authService.isAdmin() || 
+           this.authService.hasPermission('PROJECTS_UPDATE') || 
+           this.authService.hasRole('qa lead') || 
+           this.authService.hasRole('líder de pruebas (lead)') || 
+           this.authService.hasRole('lead') || 
+           this.authService.hasRole('tester') || 
+           this.authService.hasRole('qa tester') ||
+           this.authService.hasRole('administrador') ||
+           this.authService.hasRole('admin');
+  }
+
+  canDeleteProject(): boolean {
+    return this.authService.isAdmin() || 
+           this.authService.hasPermission('PROJECTS_DELETE') || 
+           this.authService.hasRole('qa lead') || 
+           this.authService.hasRole('líder de pruebas (lead)') || 
+           this.authService.hasRole('lead') || 
+           this.authService.hasRole('administrador') ||
+           this.authService.hasRole('admin');
+  }
+
   hasRequiredRole(): boolean {
-    return this.authService.hasRole('QA Lead') || this.authService.hasRole('Administrator');
+    return this.canCreateProject();
   }
 
   ngOnInit(): void {
     this.initForm();
     this.loadProjects();
-    // Se elimina loadUsers de aquí para evitar 403 en roles no administradores al abrir el módulo.
     this.loadCatalogs();
   }
 
@@ -146,6 +181,8 @@ export class ProjectsComponent implements OnInit {
   }
 
   openModal() {
+    this.isEditing.set(false);
+    this.editingProject.set(null);
     this.projectForm.reset({
       startDate: new Date().toISOString().split('T')[0],
       testerIds: []
@@ -167,8 +204,61 @@ export class ProjectsComponent implements OnInit {
     this.showModal.set(true);
   }
 
+  openEditModal(project: Project, event?: Event) {
+    if (event) event.stopPropagation();
+    this.isEditing.set(true);
+    this.editingProject.set(project);
+
+    const startDateStr = project.startDate 
+      ? new Date(project.startDate).toISOString().split('T')[0] 
+      : new Date().toISOString().split('T')[0];
+    const endDateStr = project.endDate 
+      ? new Date(project.endDate).toISOString().split('T')[0] 
+      : '';
+
+    let selectedTesterIds: string[] = [];
+    if (this.users().length > 0 && project.testerNames?.length) {
+      selectedTesterIds = this.users()
+        .filter(u => project.testerNames.includes(u.fullName) || project.testerNames.includes(u.username))
+        .map(u => u.id);
+    }
+
+    this.projectForm.patchValue({
+      name: project.name,
+      description: project.description || '',
+      startDate: startDateStr,
+      endDate: endDateStr,
+      testerIds: selectedTesterIds
+    });
+
+    this.activeStep.set(1);
+    this.pendingRequirements.set([]);
+
+    if (this.users().length === 0) {
+      this.usersService.getUsers().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+        next: (data) => {
+          const testers = data.filter(u => u.roles?.includes('Tester'));
+          this.users.set(testers);
+          if (project.testerNames?.length) {
+            const matchedIds = testers
+              .filter(u => project.testerNames.includes(u.fullName) || project.testerNames.includes(u.username))
+              .map(u => u.id);
+            this.projectForm.patchValue({ testerIds: matchedIds });
+          }
+        },
+        error: (err) => {
+          console.warn('ProjectsComponent: No se pudieron cargar usuarios para edición', err);
+        }
+      });
+    }
+
+    this.showModal.set(true);
+  }
+
   closeModal() {
     this.showModal.set(false);
+    this.isEditing.set(false);
+    this.editingProject.set(null);
   }
 
   nextStep() {
@@ -210,11 +300,39 @@ export class ProjectsComponent implements OnInit {
     this.isSubmitting.set(true);
     const formValue = this.projectForm.value;
 
-    const payload = {
-      ...formValue,
-      startDate: new Date(formValue.startDate).toISOString(),
-      endDate: new Date(formValue.endDate).toISOString()
+    const payload: any = {
+      name: formValue.name,
+      description: formValue.description,
+      startDate: formValue.startDate ? new Date(formValue.startDate).toISOString() : null,
+      endDate: formValue.endDate ? new Date(formValue.endDate).toISOString() : null,
+      testerIds: formValue.testerIds || [],
+      projectPriorityId: 2,
+      projectStatusId: this.isEditing() ? (this.editingProject()?.status?.id || 1) : 1
     };
+
+    if (this.isEditing()) {
+      const projectId = this.editingProject()!.id;
+      this.projectsService.updateProject(projectId, payload).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+        next: () => {
+          this.loadProjects();
+          this.closeModal();
+          this.isSubmitting.set(false);
+          Swal.fire({
+            icon: 'success',
+            title: '¡Proyecto Actualizado!',
+            text: 'Los cambios se guardaron con éxito.',
+            timer: 2000,
+            showConfirmButton: false
+          });
+        },
+        error: (err) => {
+          console.error('ProjectsComponent: Error al actualizar proyecto:', err);
+          this.isSubmitting.set(false);
+          this.showErrorMessage('No se pudo actualizar el proyecto. Verifique sus permisos.');
+        }
+      });
+      return;
+    }
 
     this.projectsService.createProject(payload).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (newProj) => {
