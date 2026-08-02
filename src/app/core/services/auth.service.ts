@@ -207,6 +207,16 @@ export class AuthService {
     return this.permissions().includes(permissionCode);
   }
 
+  /**
+   * Verifica si el usuario actual tiene un rol específico.
+   */
+  hasRole(role: string): boolean {
+    const user = this.currentUser();
+    if (!user?.role) return false;
+    const roleList = Array.isArray(user.role) ? user.role : [user.role];
+    return roleList.some(r => r.trim().toLowerCase() === role.trim().toLowerCase());
+  }
+
   isAdmin(): boolean {
     const user = this.currentUser();
     if (!user?.role) return false;

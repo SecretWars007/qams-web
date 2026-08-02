@@ -1,0 +1,51 @@
+// src/app/features/projects/projects/projects.component.scss
+// TailwindCSS-only component styles via @apply
+
+:host { @apply block; }
+
+.custom-scrollbar {
+  &::-webkit-scrollbar {
+    @apply w-1.5;
+  }
+  &::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    @apply rounded-[10px];
+    background: rgba(0, 0, 0, 0.05);
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.1);
+  }
+}
+
+:host ::ng-deep {
+  .btn-primary, .btn-secondary, .btn-danger, .btn-info, .btn-warning {
+    @apply flex items-center justify-center gap-2 px-6 py-4 rounded-2xl font-bold transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-primary {
+    @apply bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-600/20 active:translate-y-0.5;
+  }
+
+  .btn-secondary {
+    @apply bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200 active:translate-y-0.5;
+  }
+
+  .btn-danger {
+    @apply bg-rose-500 text-white hover:bg-rose-600 shadow-lg shadow-rose-500/20;
+  }
+
+  .btn-info {
+    @apply bg-sky-500 text-white hover:bg-sky-600 shadow-lg shadow-sky-500/20;
+  }
+
+  .btn-warning {
+    @apply bg-amber-500 text-white hover:bg-amber-600 shadow-lg shadow-amber-500/20;
+  }
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  @apply cursor-pointer opacity-60;
+  &:hover { @apply opacity-100; }
+}

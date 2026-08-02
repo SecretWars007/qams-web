@@ -1,0 +1,25 @@
+// src/app/layouts/main-layout/main-layout.component.scss
+// TailwindCSS-only component styles via @apply
+
+.custom-scrollbar {
+  &::-webkit-scrollbar {
+    @apply w-1;
+  }
+  &::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    @apply rounded-[10px];
+    background: rgba(255, 255, 255, 0.1);
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+}
+
+.main-bg-pattern {
+  @apply bg-repeat;
+  background-image: url('/images/bg-qa.png?v=4');
+  background-size: 800px;
+  z-index: 1;
+}

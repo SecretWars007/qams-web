@@ -1,5 +1,4 @@
 name: qams-frontend
-version: '3.8'
 
 services:
   # Aplicación Web Frontend
@@ -15,12 +14,75 @@ services:
     networks:
       - qams-network
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:80 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  # Backend Web API y Motor de Reportes PDF
+  backend:
+    image: qams-backend:latest
+    container_name: qams-backend
+    build:
+      context: ../QAMS
+      dockerfile: Dockerfile
+    ports:
+      - "5000:8080"
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ConnectionStrings__DefaultConnection=Host=qams-postgres;Port=5432;Database=qams_db;Username=postgres;Password=postgres123
+      - JwtSettings__Secret=TuClaveSecretaSuperSeguraDe64CaracteresMinimoPorFavor!!2025QAMS
+      - JwtSettings__Issuer=QAMS.Api
+      - JwtSettings__Audience=QAMS.Client
+      - EncryptionSettings__Key=12345678901234567890123456789012
+      - EncryptionSettings__IV=1234567890123456
+      - Redis__Configuration=qams-redis:6379
+      - FRONTEND_URL=http://localhost:4200
+      - SmtpSettings__Username=enriquezariasedwingustavo@gmail.com
+      - SmtpSettings__Password=tliheqrfqlzbdhuh
+      - SmtpSettings__FromEmail=enriquezariasedwingustavo@gmail.com
+      - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
+      - DISABLE_RATE_LIMIT=true
+    networks:
+      - qams-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # Runner de Pruebas E2E Playwright + Cucumber BDD
+  # Uso: docker compose --profile test up --exit-code-from e2e-tests e2e-tests
+  e2e-tests:
+    build:
+      context: .
+      dockerfile: Dockerfile.ci
+    container_name: qams-e2e-tests
+    depends_on:
+      frontend:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
+    environment:
+      - CI=true
+      - BASE_URL=http://qams-frontend:80
+      - E2E_USERNAME=admin
+      - E2E_PASSWORD=Admin123!
+      - PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium-browser
+    volumes:
+      - ./playwright-report:/app/playwright-report
+      - ./test-results:/app/test-results
+    networks:
+      - qams-network
+    profiles:
+      - test
 
 networks:
   qams-network:
     external: true
     name: qams-network
+

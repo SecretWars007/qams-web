@@ -13,10 +13,16 @@
         </span>
       </div>
     </div>
-    <button (click)="openModal()" [disabled]="!projectId()" class="btn-primary">
-      <i class="fas fa-plus-circle"></i>
-      Nuevo caso de prueba
-    </button>
+    <div class="flex items-center gap-3">
+      <button (click)="exportCsv()" [disabled]="!projectId()" class="btn-secondary" title="Exportar casos a archivo CSV">
+        <i class="fas fa-file-csv text-emerald-500"></i>
+        Exportar CSV
+      </button>
+      <button (click)="openModal()" [disabled]="!projectId()" class="btn-primary">
+        <i class="fas fa-plus-circle"></i>
+        Nuevo caso de prueba
+      </button>
+    </div>
   </div>
 
   <!-- Project & Suite Selection -->
@@ -104,6 +110,7 @@
               <th class="px-6 py-5 text-[10px] font-bold tracking-wide text-gray-500 w-20">ID</th>
               <th class="px-6 py-5 text-[10px] font-bold tracking-wide text-gray-500">Título</th>
               <th class="px-6 py-5 text-[10px] font-bold tracking-wide text-gray-500 text-center w-32">Prioridad</th>
+              <th class="px-6 py-5 text-[10px] font-bold tracking-wide text-gray-500 text-center w-36">Riesgo (RBT)</th>
               <th class="px-6 py-5 text-[10px] font-bold tracking-wide text-gray-500 text-center w-32">Estado</th>
               <th class="px-6 py-5 text-[10px] font-bold tracking-wide text-gray-500 w-32">Creación</th>
               <th class="px-6 py-5 text-[10px] font-bold tracking-wide text-gray-500 text-right w-32">Acciones</th>
@@ -123,6 +130,11 @@
                   'bg-amber-500/10 text-amber-500 border-amber-500/10': testCase.priority.code === 'P2'
                 }" class="inline-flex items-center px-2 py-0.5 rounded-lg text-[9px] font-bold tracking-wide border transition-all">
                   {{ testCase.priority.name | titlecase }}
+                </span>
+              </td>
+              <td class="px-6 py-5 text-center">
+                <span [ngClass]="getRiskBadgeClass(testCase)" class="inline-flex items-center px-2.5 py-1 rounded-lg text-[9px] font-bold tracking-wide border transition-all">
+                  <i class="fas fa-shield-halved mr-1"></i> {{ getRiskLevelName(testCase) }}
                 </span>
               </td>
               <td class="px-6 py-5 text-center">
@@ -190,6 +202,32 @@
                 <option value="2">Media</option>
                 <option value="3">Alta</option>
                 <option value="4">Crítica</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- RBT Risk Assessment (ISTQB) -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-indigo-950/20 p-4 rounded-2xl border border-indigo-500/10">
+            <div>
+              <label for="modalImpact" class="block text-[10px] font-bold tracking-wide text-indigo-400 mb-1">Impacto del Fallo (RBT 1-5) *</label>
+              <select id="modalImpact" formControlName="impactLevel"
+                class="w-full bg-gray-950 border border-white/5 rounded-xl px-3 py-2 text-white text-xs font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/50">
+                <option value="1">1 - Insignificante</option>
+                <option value="2">2 - Menor</option>
+                <option value="3">3 - Moderado</option>
+                <option value="4">4 - Mayor</option>
+                <option value="5">5 - Catastrófico</option>
+              </select>
+            </div>
+            <div>
+              <label for="modalLikelihood" class="block text-[10px] font-bold tracking-wide text-indigo-400 mb-1">Probabilidad de Ocurrencia (RBT 1-5) *</label>
+              <select id="modalLikelihood" formControlName="likelihoodLevel"
+                class="w-full bg-gray-950 border border-white/5 rounded-xl px-3 py-2 text-white text-xs font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/50">
+                <option value="1">1 - Muy Rara</option>
+                <option value="2">2 - Poco Probable</option>
+                <option value="3">3 - Probable</option>
+                <option value="4">4 - Muy Probable</option>
+                <option value="5">5 - Inminente</option>
               </select>
             </div>
           </div>

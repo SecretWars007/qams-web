@@ -1,383 +1,459 @@
-<div class="p-4 sm:p-6 animate-in fade-in duration-500">
+<div class="space-y-6">
   <!-- Header -->
-  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-    <div class="flex items-center w-full sm:w-auto">
-      <button (click)="goBack()"
-        class="w-10 h-10 shrink-0 flex items-center justify-center bg-gray-900 hover:bg-gray-800 text-gray-500 hover:text-white rounded-2xl transition-all mr-4 border border-white/5">
-        <i class="fas fa-arrow-left"></i>
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/50 p-6 rounded-2xl border border-white/20 backdrop-blur-md shadow-sm">
+    <div class="flex items-center gap-4">
+      <button (click)="goBack()" class="w-10 h-10 shrink-0 flex items-center justify-center bg-white hover:bg-gray-50 text-gray-500 rounded-2xl transition-all border shadow-sm">
+        <i class="ri-arrow-left-line"></i>
       </button>
-      <div class="min-w-0">
-        <h1 class="text-2xl font-black text-slate-900 tracking-tight flex items-center truncate">
-          <i class="fas fa-play-circle mr-3 text-indigo-500 shrink-0"></i>
-          Ejecuciones
-        </h1>
-        <div *ngIf="testCaseTitle()"
-          class="flex items-center mt-1 text-[10px] font-bold tracking-widest text-gray-500 truncate">
-          <span class="text-indigo-500/70 mr-2">Caso:</span>
-          <span class="truncate">{{ testCaseTitle() }}</span>
-        </div>
+      <div>
+        <h1 class="text-2xl font-bold text-gray-800 tracking-tight">Ejecuciones de Prueba</h1>
+        <p class="text-gray-500 text-sm mt-1" *ngIf="!testCaseTitle()">Gestiona las ejecuciones de los casos de prueba.</p>
+        <p class="text-indigo-600 text-sm font-semibold mt-1" *ngIf="testCaseTitle()">
+          Caso: {{ testCaseTitle() }}
+        </p>
       </div>
     </div>
-    <button (click)="openModal()" class="btn-primary w-full sm:w-auto">
-      <i class="fas fa-plus-circle"></i>
-      <span>Nueva ejecución</span>
+    <button (click)="openModal()" class="btn-primary flex items-center gap-2">
+      <i class="ri-play-circle-line"></i>
+      Nueva Ejecución
     </button>
   </div>
 
   <!-- Filters Section -->
-  <div
-    class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8 p-6 bg-gray-900/40 rounded-[2rem] border border-white/5 backdrop-blur-md">
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
     <!-- Project Filter -->
-    <div class="space-y-3">
-      <label for="projectSelector" class="px-1 text-[9px] font-black text-gray-600 tracking-widest flex items-center gap-2">
-        <i class="fas fa-folder text-indigo-500/50"></i> 
-        Proyecto principal
-      </label>
+    <div class="relative">
+      <label for="projectSelector" class="block text-xs font-bold text-gray-400 tracking-widest mb-1 ml-1">PROYECTO</label>
       <div class="relative group">
         <select id="projectSelector" [value]="selectedProjectId()" (change)="onProjectChange($event)"
-          class="w-full bg-gray-950 border border-white/5 text-white text-xs rounded-2xl focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 px-5 py-4 outline-none transition-all appearance-none cursor-pointer font-bold tracking-wide hover:bg-gray-900/80">
+          class="w-full bg-white border border-gray-200 text-gray-700 text-sm rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 px-4 py-3 outline-none transition-all appearance-none cursor-pointer hover:border-gray-300">
           <option value="">Todos los proyectos</option>
           <option *ngFor="let project of projects()" [value]="project.id">{{ project.name }}</option>
         </select>
-        <svg
-          class="absolute right-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-600 group-hover:text-indigo-400 transition-colors pointer-events-none"
-          fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path>
-        </svg>
+        <i class="ri-arrow-down-s-line absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
       </div>
     </div>
 
     <!-- Scenario Filter -->
-    <div class="space-y-3">
-      <label for="scenarioSelector" class="px-1 text-[9px] font-black text-gray-600 tracking-widest flex items-center gap-2">
-        <svg class="w-3.5 h-3.5 text-purple-500/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-        </svg>
-        Escenario / módulo</label>
+    <div class="relative">
+      <label for="scenarioSelector" class="block text-xs font-bold text-gray-400 tracking-widest mb-1 ml-1">ESCENARIO</label>
       <div class="relative group">
         <select id="scenarioSelector" [value]="selectedScenarioId()" (change)="onScenarioChange($event)" [disabled]="!selectedProjectId()"
-          class="w-full bg-gray-950 border border-white/5 text-white text-xs rounded-2xl focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 px-5 py-4 outline-none transition-all appearance-none cursor-pointer font-bold tracking-wide disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-900/80">
+          class="w-full bg-white border border-gray-200 text-gray-700 text-sm rounded-xl focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 px-4 py-3 outline-none transition-all appearance-none cursor-pointer disabled:opacity-50 disabled:bg-gray-50 hover:border-gray-300">
           <option value="">Todos los escenarios</option>
           <option *ngFor="let scenario of scenarios()" [value]="scenario.id">{{ scenario.name }}</option>
         </select>
-        <svg
-          class="absolute right-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-600 group-hover:text-purple-400 transition-colors pointer-events-none"
-          fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path>
-        </svg>
+        <i class="ri-arrow-down-s-line absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
       </div>
     </div>
 
     <!-- Test Case Filter -->
-    <div class="space-y-3">
-      <label for="tcSelector" class="px-1 text-[9px] font-black text-gray-600 tracking-widest flex items-center gap-2">
-        <svg class="w-3.5 h-3.5 text-emerald-500/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01">
-          </path>
-        </svg>
-        Caso específico</label>
+    <div class="relative">
+      <label for="tcSelector" class="block text-xs font-bold text-gray-400 tracking-widest mb-1 ml-1">CASO DE PRUEBA</label>
       <div class="relative group">
         <select id="tcSelector" [value]="selectedTestCaseId()" (change)="onTestCaseChange($event)" [disabled]="!selectedScenarioId()"
-          class="w-full bg-gray-950 border border-white/5 text-white text-xs rounded-2xl focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 px-5 py-4 outline-none transition-all appearance-none cursor-pointer font-bold tracking-wide disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-900/80">
+          class="w-full bg-white border border-gray-200 text-gray-700 text-sm rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 px-4 py-3 outline-none transition-all appearance-none cursor-pointer disabled:opacity-50 disabled:bg-gray-50 hover:border-gray-300">
           <option value="">Todos los casos</option>
           <option *ngFor="let tc of testCases()" [value]="tc.id">{{ tc.title }}</option>
         </select>
-        <svg
-          class="absolute right-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-600 group-hover:text-emerald-400 transition-colors pointer-events-none"
-          fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path>
-        </svg>
+        <i class="ri-arrow-down-s-line absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
       </div>
     </div>
   </div>
 
   <!-- Loading State -->
-  <div *ngIf="loading()" class="space-y-4 animate-pulse">
-    <div *ngFor="let i of [1,2,3]" class="h-16 bg-gray-800 rounded-lg"></div>
+  <div *ngIf="loading()" class="bg-white/80 rounded-2xl border border-white/20 shadow-sm overflow-hidden backdrop-blur-md">
+    <app-skeleton-loader [rows]="5" [columns]="5"></app-skeleton-loader>
   </div>
 
   <!-- Empty State -->
-  <div *ngIf="!loading() && executions().length === 0"
-    class="text-center py-12 bg-gray-900 rounded-xl border border-gray-800 border-dashed">
-    <div class="text-gray-500 text-lg mb-2">No hay ejecuciones registradas</div>
-    <p class="text-gray-600 text-sm">Este caso de prueba aun no ha sido ejecutado.</p>
+  <div *ngIf="!loading() && executions().length === 0" class="text-center py-16 px-4 bg-white/80 rounded-2xl border border-white/20 shadow-sm backdrop-blur-md">
+    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-indigo-50 text-indigo-500 mb-4 border border-indigo-100">
+      <i class="ri-play-circle-line text-2xl"></i>
+    </div>
+    <h3 class="text-lg font-medium text-gray-900 mb-1">¡No hay ejecuciones!</h3>
+    <p class="text-gray-500 text-sm">Aún no se ha registrado ninguna ejecución para este caso o proyecto.</p>
   </div>
 
-  <!-- Executions List (Responsive Table/Cards) -->
-  <div *ngIf="!loading() && executions().length > 0">
-    <!-- Mobile Cards View -->
-    <div class="grid grid-cols-1 gap-4 sm:hidden">
-      <div *ngFor="let execution of executions()" (dblclick)="editExecution(execution)"
-        class="bg-gray-900 border border-white/5 rounded-3xl p-5 hover:border-indigo-500/30 transition-all active:scale-[0.98]">
-        <div class="flex justify-between items-start mb-4">
-          <span class="text-[10px] font-black text-gray-600 font-mono tracking-tighter">#{{ execution.id }}</span>
-          <span [ngClass]="{
-              'bg-emerald-500/10 text-emerald-400 border-emerald-500/10': execution.status.code === 'PASSED',
-              'bg-rose-500/10 text-rose-400 border-rose-500/10': execution.status.code === 'FAILED',
-              'bg-amber-500/10 text-amber-500 border-amber-500/10': execution.status.code === 'BLOCKED',
-              'bg-indigo-500/10 text-indigo-400 border-indigo-500/10': execution.status.code === 'IN_PROGRESS',
-              'bg-gray-800 text-gray-400 border-white/5': execution.status.code === 'PENDING'
-            }" class="px-2 py-0.5 rounded-lg text-[8px] font-black border tracking-widest">
-            {{ execution.status.code | titlecase }}
-          </span>
-        </div>
-        <h3 class="text-white font-bold text-sm mb-4 line-clamp-2 leading-tight">{{ execution.testCase.title }}</h3>
-
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <div
-              class="w-6 h-6 rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-[10px] font-black text-indigo-400">
-              {{ (execution.executedBy || 'U').slice(0,1) }}
-            </div>
-            <span class="text-xs text-gray-500 font-medium">{{ execution.executedBy }}</span>
-          </div>
-          <span class="text-[10px] text-gray-600 font-bold">{{ execution.executionDate | date:'MMM d, HH:mm'
-            }}</span>
-        </div>
-
-        <div class="flex gap-2 mt-5">
-          <button (click)="editExecution(execution, $event)" class="btn-secondary py-2 flex-1 text-xs">
-            <i class="fas fa-pen-to-square"></i>
-            <span>Editar</span>
-          </button>
-          <button (click)="openDetailsModal(execution)" class="btn-secondary py-2 flex-1 text-xs">
-            <i class="fas fa-eye"></i>
-            <span>Detalles</span>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Desktop Table View (Stitch Premium Dark Design) -->
-    <div class="hidden sm:block bg-gray-900 border border-white/5 rounded-3xl overflow-hidden shadow-2xl mb-10">
-      <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
-          <thead>
-            <tr class="bg-white/5">
-              <th class="px-6 py-5 text-[10px] font-black tracking-widest text-gray-500">Identificador</th>
-              <th class="px-6 py-5 text-[10px] font-black tracking-widest text-gray-500">Caso de prueba</th>
-              <th class="px-6 py-5 text-[10px] font-black tracking-widest text-gray-500 text-center">Estatus</th>
-              <th class="px-6 py-5 text-[10px] font-black tracking-widest text-gray-500">Especialista QA</th>
-              <th class="px-6 py-5 text-[10px] font-black tracking-widest text-gray-500">Fecha reporte</th>
-              <th class="px-6 py-5 text-[10px] font-black tracking-widest text-gray-500 text-right">Gestión</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-white/5">
-            <tr *ngFor="let execution of executions()" (dblclick)="editExecution(execution)"
-              class="bg-transparent hover:bg-white/[0.02] transition-colors cursor-pointer group">
-              <td class="px-6 py-5">
-                <span class="text-gray-600 font-mono text-[10px] font-black">#{{ execution.id }}</span>
-              </td>
-              <td class="px-6 py-5">
-                <div class="flex flex-col">
-                  <span class="text-white font-bold text-sm tracking-tight group-hover:text-indigo-400 transition-colors">{{ execution.testCase.title }}</span>
-                  <span class="text-[9px] text-gray-600 font-black tracking-widest mt-1">Validación de funcionalidad</span>
-                </div>
-              </td>
-              <td class="px-6 py-5 text-center">
-                <span [ngClass]="{
-                    'bg-emerald-500/10 text-emerald-400 border-emerald-500/10': execution.status.code === 'PASSED',
-                    'bg-rose-500/10 text-rose-400 border-rose-500/10': execution.status.code === 'FAILED',
-                    'bg-amber-500/10 text-amber-500 border-amber-500/10': execution.status.code === 'BLOCKED',
-                    'bg-indigo-500/10 text-indigo-400 border-indigo-500/10': execution.status.code === 'IN_PROGRESS',
-                    'bg-gray-800 text-gray-500 border-white/5': execution.status.code === 'PENDING'
-                  }" class="inline-flex items-center px-2.5 py-1 rounded-lg text-[9px] font-black border tracking-widest">
-                  {{ execution.status.code | titlecase }}
-                </span>
-              </td>
-              <td class="px-6 py-5">
-                <div class="flex items-center gap-3">
-                  <div class="w-8 h-8 rounded-xl bg-indigo-500/10 border border-indigo-500/10 flex items-center justify-center text-[10px] font-black text-indigo-400">
-                    {{ (execution.executedBy || 'U').slice(0,1) }}
+  <!-- Executions List -->
+  <div *ngIf="!loading() && executions().length > 0" class="bg-white/80 rounded-2xl border border-white/20 shadow-sm overflow-hidden backdrop-blur-md">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-gray-50/50 border-b border-gray-100 text-xs text-gray-500 uppercase tracking-wider">
+            <th class="py-4 px-6 font-medium">Ejecución</th>
+            <th class="py-4 px-6 font-medium">Caso de Prueba</th>
+            <th class="py-4 px-6 font-medium text-center">Estado</th>
+            <th class="py-4 px-6 font-medium text-center">Progreso</th>
+            <th class="py-4 px-6 font-medium">Tester / Fecha</th>
+            <th class="py-4 px-6 font-medium text-right">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <tr *ngFor="let execution of executions()" (dblclick)="editExecution(execution)" class="hover:bg-gray-50/50 transition-colors group cursor-pointer">
+            <td class="py-4 px-6">
+              <span class="text-gray-800 font-mono text-xs font-medium">#{{ execution.id.substring(0,8) }}</span>
+            </td>
+            <td class="py-4 px-6">
+              <span class="text-sm font-semibold text-gray-800 group-hover:text-indigo-600 transition-colors">{{ execution.testCase.title }}</span>
+            </td>
+            <td class="py-4 px-6 text-center">
+              <span [ngClass]="{
+                  'bg-emerald-50 text-emerald-700 border-emerald-200': execution.status.code === 'PASSED',
+                  'bg-rose-50 text-rose-700 border-rose-200': execution.status.code === 'FAILED',
+                  'bg-amber-50 text-amber-700 border-amber-200': execution.status.code === 'BLOCKED',
+                  'bg-indigo-50 text-indigo-700 border-indigo-200': execution.status.code === 'IN_PROGRESS',
+                  'bg-gray-100 text-gray-600 border-gray-200': execution.status.code === 'PENDING',
+                  'bg-gray-100 text-gray-500 border-gray-200': execution.status.code === 'SKIPPED'
+                }" class="px-2.5 py-1 rounded-full text-[10px] font-bold border tracking-widest uppercase">
+                {{ execution.status.code }}
+              </span>
+            </td>
+            <td class="py-4 px-6 text-center">
+              <div class="flex items-center justify-center gap-2">
+                <div class="w-16 h-2 bg-gray-100 rounded-full overflow-hidden">
+                  <div class="h-full rounded-full transition-all duration-500"
+                    [style.width]="calculateProgress(execution) + '%'"
+                    [class.bg-emerald-500]="calculateProgress(execution) === 100"
+                    [class.bg-indigo-500]="calculateProgress(execution) < 100">
                   </div>
-                  <span class="text-xs text-gray-400 font-bold">{{ execution.executedBy || 'No Asignado' }}</span>
                 </div>
-              </td>
-              <td class="px-6 py-5">
-                <span class="text-[10px] text-gray-500 font-bold">{{ execution.executionDate | date:'MMM d, HH:mm' }}</span>
-              </td>
-              <td class="px-6 py-5 text-right">
-                <div class="flex justify-end gap-2 text-[10px] font-black tracking-widest">
-                  <button (click)="editExecution(execution, $event)" class="btn-icon btn-icon-warning" title="Editar">
-                    <i class="fas fa-pen-to-square"></i>
-                  </button>
-                  <button (click)="openDetailsModal(execution)" class="btn-icon btn-icon-primary" title="Detalles">
-                    <i class="fas fa-eye"></i>
-                  </button>
+                <span class="text-[10px] font-bold text-gray-500">{{ calculateProgress(execution) }}%</span>
+              </div>
+            </td>
+            <td class="py-4 px-6">
+              <div class="flex items-center gap-2">
+                <div class="w-6 h-6 rounded-full bg-indigo-100 border border-indigo-200 flex items-center justify-center text-xs font-bold text-indigo-600">
+                  {{ (execution.executedBy || 'U').slice(0,1) }}
                 </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+                <div>
+                  <div class="text-xs font-medium text-gray-700">{{ execution.executedBy || 'No Asignado' }}</div>
+                  <div class="text-[10px] text-gray-500">{{ execution.executionDate | date:'MMM d, HH:mm' }}</div>
+                </div>
+              </div>
+            </td>
+            <td class="py-4 px-6 text-right">
+              <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button (click)="editExecution(execution, $event)" class="p-1.5 text-gray-400 hover:text-blue-600 rounded hover:bg-blue-50 transition-colors" title="Editar">
+                  <i class="ri-pencil-line"></i>
+                </button>
+                <button (click)="openDetailsModal(execution); $event.stopPropagation()" class="p-1.5 text-gray-400 hover:text-indigo-600 rounded hover:bg-indigo-50 transition-colors" title="Detalles">
+                  <i class="ri-eye-line"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 
-  <!-- Registration Modal - Full Screen Mobile -->
-  <div *ngIf="showModal()"
-    class="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-xl animate-in fade-in duration-300">
-    <div
-      class="bg-gray-900 border-0 sm:border border-white/10 rounded-none sm:rounded-[2rem] w-full max-w-4xl h-full sm:h-auto overflow-hidden shadow-2xl flex flex-col">
-      <div class="p-8 sm:p-10 flex-1 overflow-y-auto custom-scrollbar">
-        <div class="flex justify-between items-start mb-8">
-          <div>
-            <h2 class="text-2xl font-black text-white tracking-tight">{{ isEditing() ? 'Actualizar ejecución #' +
-              editingExecutionId() : 'Nueva ejecución' }}</h2>
-            <p class="text-gray-500 text-[10px] font-black tracking-[0.2em] mt-2" *ngIf="testCaseTitle()">
-              Caso: {{ testCaseTitle() }}</p>
-          </div>
-          <button (click)="closeModal()"
-            class="w-10 h-10 rounded-2xl bg-white/5 text-gray-500 hover:text-white transition-all flex items-center justify-center">
-            <i class="fas fa-times text-xl"></i>
-          </button>
+  <!-- Registration Modal -->
+  <div *ngIf="showModal()" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm animate-in fade-in duration-300">
+    <div class="bg-white rounded-2xl w-full max-w-4xl h-full sm:h-auto max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
+      <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+        <div>
+          <h2 class="text-xl font-bold text-gray-800 tracking-tight">
+            {{ isEditing() ? 'Actualizar ejecución #' + editingExecutionId()?.substring(0,8) : 'Nueva ejecución' }}
+          </h2>
+          <p class="text-gray-500 text-xs font-medium mt-1" *ngIf="testCaseTitle()">Caso: {{ testCaseTitle() }}</p>
         </div>
+        <button (click)="closeModal()" class="text-gray-400 hover:text-gray-600 transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100">
+          <i class="ri-close-line text-xl"></i>
+        </button>
+      </div>
 
-        <form [formGroup]="executionForm" (ngSubmit)="onSubmit()" class="space-y-8">
+      <div class="p-6 flex-1 overflow-y-auto">
+        <form [formGroup]="executionForm" (ngSubmit)="onSubmit()" class="space-y-6">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- Test Case Selection -->
-            <div class="space-y-3">
-              <label for="modalTestCaseId" class="px-1 text-[9px] font-black text-gray-600 tracking-widest">Caso de prueba</label>
-              <div class="relative group">
-                <select id="modalTestCaseId" formControlName="testCaseId"
-                  class="w-full bg-gray-950 border border-white/5 rounded-2xl px-5 py-4 text-xs font-bold text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all appearance-none cursor-pointer hover:bg-gray-900/80"
-                  [class.border-rose-500]="executionForm.get('testCaseId')?.touched && executionForm.get('testCaseId')?.invalid">
-                  <option value="">Seleccionar caso...</option>
-                  <option *ngFor="let tc of testCases()" [value]="tc.id">{{ tc.title }}</option>
-                </select>
-                <div *ngIf="executionForm.get('testCaseId')?.touched && executionForm.get('testCaseId')?.invalid"
-                  class="text-rose-500 text-[10px] font-black tracking-widest mt-1 ml-1">
-                  El caso de prueba es obligatorio
-                </div>
-                <svg
-                  class="absolute right-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-600 group-hover:text-indigo-400 transition-colors pointer-events-none"
-                  fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path>
-                </svg>
-              </div>
+            <!-- Test Case -->
+            <div>
+              <label class="block text-xs font-bold text-gray-500 mb-1 ml-1">Caso de prueba</label>
+              <select formControlName="testCaseId" class="form-control" [class.border-red-500]="executionForm.get('testCaseId')?.invalid && executionForm.get('testCaseId')?.touched">
+                <option value="">Seleccionar caso...</option>
+                <option *ngFor="let tc of testCases()" [value]="tc.id">{{ tc.title }}</option>
+              </select>
             </div>
-
-            <!-- Execution Status -->
-            <div class="space-y-3">
-              <label for="modalStatusId" class="px-1 text-[9px] font-black text-gray-600 tracking-widest">Estatus global</label>
-              <div class="relative group">
-                <select id="modalStatusId" formControlName="statusId"
-                  class="w-full bg-gray-950 border border-white/5 rounded-2xl px-5 py-4 text-xs font-bold text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all appearance-none cursor-pointer hover:bg-gray-900/80 tracking-wider">
-                  <option [value]="1">Passed</option>
-                  <option [value]="2">Failed</option>
-                  <option [value]="3">Blocked</option>
-                  <option [value]="6">Skipped</option>
-                </select>
-                <svg
-                  class="absolute right-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-600 group-hover:text-indigo-400 transition-colors pointer-events-none"
-                  fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path>
-                </svg>
-              </div>
+            <!-- Status -->
+            <div>
+              <label class="block text-xs font-bold text-gray-500 mb-1 ml-1">Estado</label>
+              <select formControlName="statusId" class="form-control">
+                <option [value]="1">Passed</option>
+                <option [value]="2">Failed</option>
+                <option [value]="3">Blocked</option>
+                <option [value]="6">Skipped</option>
+              </select>
             </div>
-
-            <!-- Actual Time Hours -->
-            <div class="space-y-3">
-              <label for="modalEffort" class="px-1 text-[9px] font-black text-gray-600 tracking-widest">Esfuerzo
-                (horas)</label>
-              <input id="modalEffort" type="number" formControlName="actualTimeHours" step="0.5" min="0"
-                class="w-full bg-gray-950 border border-white/5 rounded-2xl px-5 py-4 text-xs font-bold text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all hover:bg-gray-900/80 tracking-wider placeholder-gray-700"
-                placeholder="Ej. 1.5"
-                [class.border-rose-500]="executionForm.get('actualTimeHours')?.touched && executionForm.get('actualTimeHours')?.invalid">
-              <div *ngIf="executionForm.get('actualTimeHours')?.touched && executionForm.get('actualTimeHours')?.invalid"
-                class="text-rose-500 text-[10px] font-black tracking-widest mt-1 ml-1">
-                Esfuerzo inválido
-              </div>
+            <!-- Effort -->
+            <div>
+              <label class="block text-xs font-bold text-gray-500 mb-1 ml-1">Esfuerzo (horas)</label>
+              <input type="number" formControlName="actualTimeHours" step="0.5" min="0" class="form-control" placeholder="Ej. 1.5">
             </div>
           </div>
 
           <!-- Notes -->
-          <div class="space-y-3">
-            <label for="modalNotes" class="px-1 text-[9px] font-black text-gray-600 tracking-widest">Observaciones
-              generales</label>
-            <textarea id="modalNotes" formControlName="notes" rows="3"
-              class="w-full bg-gray-950 border border-white/5 rounded-2xl px-5 py-4 flex-1 text-sm text-white placeholder-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all hover:bg-gray-900/80 resize-none font-medium leading-relaxed"
-              placeholder="Describe el resultado global de la sesión de pruebas..."></textarea>
+          <div>
+            <label class="block text-xs font-bold text-gray-500 mb-1 ml-1">Observaciones generales</label>
+            <textarea formControlName="notes" rows="2" class="form-control resize-none" placeholder="Añade observaciones sobre la ejecución global..."></textarea>
           </div>
 
-          <!-- Step Results -->
-          <div class="space-y-6" *ngIf="stepResults.length > 0">
-            <div class="flex items-center gap-4">
-              <button type="button" (click)="toggleSteps()"
-                class="flex items-center gap-2 text-lg font-black text-white hover:text-indigo-400 transition-colors">
-                <span>Cronología de pasos</span>
-                <i class="fas text-sm" [ngClass]="showSteps() ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
-              </button>
-              <div class="flex-1 h-px bg-white/5"></div>
-            </div>
-
-            <div *ngIf="showSteps()" formArrayName="stepResults"
-              class="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
-              <div *ngFor="let step of stepResults.controls; let i = index" [formGroupName]="i"
-                class="p-6 bg-gray-950 border border-white/5 rounded-[2rem] hover:border-indigo-500/20 transition-all group/step relative overflow-hidden shadow-inner">
-
-                <div class="flex flex-col sm:flex-row justify-between items-start gap-4 mb-6 relative z-10">
-                  <div class="flex items-start gap-4">
-                    <div
-                      class="w-8 h-8 shrink-0 rounded-2xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/10 flex items-center justify-center text-xs font-black">
-                      {{ i + 1 }}
-                    </div>
-                    <div>
-                      <p class="text-white font-bold tracking-tight text-sm">{{ step.get('action')?.value }}</p>
-                      <p class="text-[9px] text-gray-600 font-black tracking-widest mt-1">Acción requerida</p>
-                    </div>
+          <!-- Steps Accordion -->
+          <div class="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+            <button type="button" (click)="toggleSteps()" class="w-full px-5 py-4 flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition-colors border-b border-gray-200">
+              <div class="flex items-center gap-3">
+                <i class="ri-list-check-2 text-indigo-600 text-lg"></i>
+                <span class="font-bold text-gray-800">Pasos de Prueba ({{ stepResults.length }})</span>
+              </div>
+              <i class="ri-arrow-down-s-line text-gray-500 transition-transform" [class.rotate-180]="showSteps()"></i>
+            </button>
+            <div *ngIf="showSteps()" class="p-5 bg-white space-y-4" formArrayName="stepResults">
+              <div *ngIf="stepResults.length === 0" class="text-center py-6 text-sm text-gray-500">
+                Este caso de prueba no tiene pasos definidos o no se ha seleccionado ninguno.
+              </div>
+              <div *ngFor="let step of stepResults.controls; let i=index" [formGroupName]="i" class="p-4 rounded-xl border border-gray-100 bg-gray-50/50 flex flex-col gap-3 group transition-colors hover:border-indigo-100 hover:bg-indigo-50/10">
+                <div class="flex items-start justify-between gap-4">
+                  <div class="flex-1 flex gap-3">
+                    <span class="w-6 h-6 shrink-0 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-xs font-bold">{{ step.get('stepOrder')?.value }}</span>
+                    <p class="text-sm text-gray-700 mt-0.5">{{ step.get('action')?.value }}</p>
                   </div>
-                  <div class="w-full sm:w-auto relative group">
-                    <select formControlName="statusId"
-                      class="w-full sm:w-40 bg-gray-900 border border-white/5 text-[10px] font-black text-gray-300 rounded-xl pl-4 pr-8 py-3 outline-none focus:ring-1 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all appearance-none cursor-pointer hover:bg-gray-800 tracking-widest shadow-inner">
+                  <div class="w-40 shrink-0">
+                    <select formControlName="statusId" class="form-control form-control-sm text-xs font-semibold py-1.5"
+                      [ngClass]="{
+                        'bg-emerald-50 text-emerald-700 border-emerald-200': step.get('statusId')?.value == 1,
+                        'bg-rose-50 text-rose-700 border-rose-200': step.get('statusId')?.value == 2,
+                        'bg-amber-50 text-amber-700 border-amber-200': step.get('statusId')?.value == 3,
+                        'bg-gray-50 text-gray-600 border-gray-200': step.get('statusId')?.value == 6
+                      }">
                       <option [value]="1">Passed</option>
                       <option [value]="2">Failed</option>
                       <option [value]="3">Blocked</option>
+                      <option [value]="6">Skipped</option>
                     </select>
-                    <svg
-                      class="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-600 group-hover:text-indigo-400 transition-colors pointer-events-none"
-                      fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path>
-                    </svg>
                   </div>
                 </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 relative z-10">
-                  <div class="space-y-2">
-                    <label [for]="'stepActualResult' + i" class="px-2 text-[8px] font-black text-gray-600 tracking-widest">Resultado
-                      obtenido</label>
-                    <input type="text" [id]="'stepActualResult' + i" formControlName="actualResult"
-                      class="w-full bg-gray-900 border border-white/5 rounded-2xl px-5 py-3.5 text-xs text-gray-200 outline-none focus:ring-1 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-medium placeholder-gray-700 hover:bg-gray-800 shadow-inner"
-                      placeholder="¿Qué observaste?"
-                      [class.border-rose-500]="step.get('actualResult')?.touched && step.get('actualResult')?.invalid">
-                    <div *ngIf="step.get('actualResult')?.touched && step.get('actualResult')?.invalid"
-                      class="text-rose-500 text-[9px] font-black tracking-widest mt-1 ml-1">
-                      Resultado requerido
-                    </div>
-                  </div>
-                  <div class="space-y-2">
-                    <label [for]="'stepTechNote' + i" class="px-2 text-[8px] font-black text-gray-600 tracking-widest">Anotación
-                      técnica</label>
-                    <input type="text" [id]="'stepTechNote' + i" formControlName="notes"
-                      class="w-full bg-gray-900 border border-white/5 rounded-2xl px-5 py-3.5 text-xs text-gray-200 outline-none focus:ring-1 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-medium placeholder-gray-700 hover:bg-gray-800 shadow-inner"
-                      placeholder="Detalles adicionales...">
-                  </div>
+                <div class="pl-9 space-y-3">
+                  <input type="text" formControlName="actualResult" class="form-control form-control-sm text-sm" placeholder="Resultado actual observado..."
+                    [class.border-red-500]="step.get('actualResult')?.invalid && step.get('actualResult')?.touched">
+                  <input type="text" formControlName="notes" class="form-control form-control-sm text-sm" placeholder="Notas adicionales del paso (opcional)...">
                 </div>
               </div>
             </div>
           </div>
+        </form>
+      </div>
 
-          <!-- Submit Buttons -->
-          <div class="flex flex-col sm:flex-row justify-end gap-4 pt-10 border-t border-white/5">
-            <button type="button" (click)="closeModal()" class="btn-secondary flex-1">
-              <i class="fas fa-xmark"></i>
-              Descartar
+      <!-- Footer Modal -->
+      <div class="p-6 border-t border-gray-100 bg-gray-50 flex justify-end gap-3 rounded-b-2xl">
+        <button type="button" (click)="closeModal()" class="btn-secondary" [disabled]="isSubmitting()">Cancelar</button>
+        <button type="button" (click)="onSubmit()" class="btn-primary min-w-[120px]" [disabled]="executionForm.invalid || isSubmitting()">
+          <i class="ri-loader-4-line animate-spin" *ngIf="isSubmitting()"></i>
+          <span *ngIf="!isSubmitting()">Guardar Ejecución</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detalles de Ejecución y Evidencias (Modal) -->
+  <div *ngIf="showDetailsModal() && selectedExecution()" class="fixed inset-0 z-50 flex justify-end bg-gray-900/40 backdrop-blur-sm animate-in fade-in duration-300">
+    <div class="bg-white w-full max-w-2xl h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
+      <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+        <div>
+          <h2 class="text-xl font-bold text-gray-800">Detalle de Ejecución</h2>
+          <p class="text-gray-500 text-xs mt-1">ID: #{{ selectedExecution()?.id }}</p>
+        </div>
+        <button (click)="closeDetailsModal()" class="text-gray-400 hover:text-gray-600 transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100">
+          <i class="ri-close-line text-xl"></i>
+        </button>
+      </div>
+
+      <div class="p-6 flex-1 overflow-y-auto space-y-8">
+        <!-- Overview -->
+        <div class="bg-gray-50 rounded-xl p-5 border border-gray-100">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-gray-800 text-lg">{{ selectedExecution()?.testCase?.title }}</h3>
+            <span class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider"
+              [ngClass]="{
+                'bg-emerald-100 text-emerald-700': selectedExecution()?.status?.code === 'PASSED',
+                'bg-rose-100 text-rose-700': selectedExecution()?.status?.code === 'FAILED',
+                'bg-amber-100 text-amber-700': selectedExecution()?.status?.code === 'BLOCKED',
+                'bg-indigo-100 text-indigo-700': selectedExecution()?.status?.code === 'IN_PROGRESS'
+              }">
+              {{ selectedExecution()?.status?.code }}
+            </span>
+          </div>
+          <p class="text-sm text-gray-600 mb-4" *ngIf="selectedExecution()?.notes">{{ selectedExecution()?.notes }}</p>
+          <div class="flex items-center gap-6 text-sm">
+            <div class="flex items-center gap-2 text-gray-500">
+              <i class="ri-user-line"></i>
+              <span class="font-medium">{{ selectedExecution()?.executedBy || 'No asignado' }}</span>
+            </div>
+            <div class="flex items-center gap-2 text-gray-500">
+              <i class="ri-time-line"></i>
+              <span class="font-medium">{{ selectedExecution()?.executionDate | date:'medium' }}</span>
+            </div>
+            <div class="flex items-center gap-2 text-gray-500" *ngIf="selectedExecution()?.actualTimeHours">
+              <i class="ri-timer-line"></i>
+              <span class="font-medium">{{ selectedExecution()?.actualTimeHours }}h</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Evidencias Globales -->
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <h4 class="font-bold text-gray-800 flex items-center gap-2">
+              <i class="ri-image-line text-indigo-500"></i>
+              Evidencias Generales
+            </h4>
+            <button (click)="openUploadModal(selectedExecution()!)" class="btn-secondary py-1.5 px-3 text-xs">
+              <i class="ri-upload-cloud-line mr-1"></i> Subir
             </button>
-            <button type="submit" [disabled]="executionForm.invalid || isSubmitting()" class="btn-primary flex-1">
-              <span *ngIf="isSubmitting()" class="w-5 h-5 border-3 border-white/20 border-t-white rounded-full animate-spin"></span>
-              <i *ngIf="!isSubmitting()" class="fas fa-check-circle"></i>
-              {{ isSubmitting() ? 'Sincronizando...' : (isEditing() ? 'Actualizar reporte' : 'Finalizar ejecución') }}
+          </div>
+          
+          <div *ngIf="!selectedExecution()?.evidences?.length" class="bg-gray-50 border border-gray-100 border-dashed rounded-xl p-6 text-center">
+            <i class="ri-image-add-line text-3xl text-gray-300 mb-2"></i>
+            <p class="text-sm text-gray-500">No hay evidencias generales registradas.</p>
+          </div>
+
+          <div *ngIf="selectedExecution()?.evidences?.length" class="grid grid-cols-2 gap-4">
+            <div *ngFor="let ev of selectedExecution()?.evidences" class="relative group rounded-xl overflow-hidden border border-gray-200 bg-gray-50">
+              <a [href]="ev.fileUrl" target="_blank" class="block">
+                <img *ngIf="ev.fileTypeName.includes('image')" [src]="ev.fileUrl" class="w-full h-32 object-cover" [alt]="ev.fileName">
+                <div *ngIf="!ev.fileTypeName.includes('image')" class="w-full h-32 flex flex-col items-center justify-center text-gray-400">
+                  <i class="ri-file-text-line text-3xl mb-2"></i>
+                  <span class="text-xs max-w-full truncate px-4">{{ ev.fileName }}</span>
+                </div>
+                <div class="absolute inset-0 bg-gray-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white p-4 text-center">
+                  <i class="ri-external-link-line text-xl mb-1"></i>
+                  <span class="text-xs font-medium line-clamp-2">{{ ev.description || ev.fileName }}</span>
+                </div>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detalle de Pasos -->
+        <div>
+          <h4 class="font-bold text-gray-800 flex items-center gap-2 mb-4">
+            <i class="ri-list-check-2 text-indigo-500"></i>
+            Ejecución por Pasos
+          </h4>
+          
+          <div class="space-y-4">
+            <div *ngFor="let step of selectedExecution()?.stepResults" class="border border-gray-100 rounded-xl p-4 bg-white shadow-sm">
+              <div class="flex items-start gap-3">
+                <div class="w-6 h-6 shrink-0 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center text-xs font-bold">{{ step.stepOrder }}</div>
+                <div class="flex-1">
+                  <p class="text-sm font-medium text-gray-800 mb-1">{{ step.action }}</p>
+                  <p class="text-sm text-gray-600 mb-2"><span class="font-bold">Resultado Actual:</span> {{ step.actualResult }}</p>
+                  <p class="text-xs text-gray-500 mb-3" *ngIf="step.notes"><i class="ri-sticky-note-line mr-1"></i> {{ step.notes }}</p>
+                  
+                  <!-- Evidencias del Paso -->
+                  <div class="mt-4 pt-4 border-t border-gray-50">
+                    <div class="flex items-center justify-between mb-2">
+                      <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Evidencias del Paso</span>
+                      <button (click)="openUploadModal(selectedExecution()!, $event, step.id)" class="text-indigo-600 hover:text-indigo-800 text-xs font-semibold flex items-center gap-1 transition-colors">
+                        <i class="ri-add-line"></i> Agregar
+                      </button>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                      <a *ngFor="let ev of step.evidences" [href]="ev.fileUrl" target="_blank" 
+                        class="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs hover:bg-gray-100 transition-colors group">
+                        <i class="ri-image-line text-gray-400 group-hover:text-indigo-500 transition-colors"></i>
+                        <span class="font-medium text-gray-700 max-w-[150px] truncate" [title]="ev.description || ev.fileName">{{ ev.description || ev.fileName }}</span>
+                      </a>
+                      <span *ngIf="!step.evidences.length" class="text-xs text-gray-400 italic">No hay evidencias.</span>
+                    </div>
+                  </div>
+
+                  <!-- Observaciones (Review) -->
+                  <div class="mt-4 pt-4 border-t border-gray-50">
+                    <div class="flex items-center justify-between mb-2">
+                      <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Observaciones (QA Review)</span>
+                      <button (click)="openObservationModal(step.id, $event)" class="text-indigo-600 hover:text-indigo-800 text-xs font-semibold flex items-center gap-1 transition-colors">
+                        <i class="ri-chat-1-line"></i> Comentar
+                      </button>
+                    </div>
+                    <div class="space-y-3">
+                      <div *ngFor="let obs of step.observations" class="bg-amber-50/50 border border-amber-100 rounded-lg p-3">
+                        <div class="flex justify-between items-start mb-1">
+                          <span class="text-xs font-bold text-amber-800">{{ obs.createdBy }}</span>
+                          <span class="text-[10px] text-amber-600">{{ obs.createdAt | date:'short' }}</span>
+                        </div>
+                        <p class="text-sm text-gray-700 mb-2">{{ obs.observation }}</p>
+                        
+                        <!-- Response Form -->
+                        <div *ngIf="!obs.response" class="flex gap-2 mt-2 pt-2 border-t border-amber-100/50">
+                          <input type="text" #responseInput class="form-control form-control-sm text-xs bg-white" placeholder="Responder observación...">
+                          <button (click)="onRespondObservation(obs.id, responseInput.value)" class="btn-primary py-1 px-3 text-xs">Enviar</button>
+                        </div>
+                        <div *ngIf="obs.response" class="mt-2 pt-2 border-t border-amber-100/50 pl-3 border-l-2 border-l-emerald-400">
+                          <p class="text-xs font-bold text-emerald-700 mb-0.5">Respuesta:</p>
+                          <p class="text-xs text-gray-600">{{ obs.response }}</p>
+                        </div>
+                      </div>
+                      <span *ngIf="!step.observations.length" class="text-xs text-gray-400 italic">No hay observaciones.</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="shrink-0 pt-1">
+                  <i class="ri-checkbox-circle-fill text-xl text-emerald-500" *ngIf="step.status.code === 'PASSED'"></i>
+                  <i class="ri-close-circle-fill text-xl text-rose-500" *ngIf="step.status.code === 'FAILED'"></i>
+                  <i class="ri-error-warning-fill text-xl text-amber-500" *ngIf="step.status.code === 'BLOCKED'"></i>
+                  <i class="ri-skip-forward-fill text-xl text-gray-400" *ngIf="step.status.code === 'SKIPPED'"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Upload Modal -->
+  <div *ngIf="showUploadModal()" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm animate-in fade-in duration-300">
+    <div class="bg-white rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl">
+      <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+        <h2 class="text-lg font-bold text-gray-800">Subir Evidencia</h2>
+        <button (click)="closeUploadModal()" class="text-gray-400 hover:text-gray-600">
+          <i class="ri-close-line text-xl"></i>
+        </button>
+      </div>
+      <div class="p-6">
+        <form [formGroup]="uploadForm" (ngSubmit)="onUploadSubmit()">
+          <div class="mb-4">
+            <label class="block text-xs font-bold text-gray-500 mb-2">Seleccionar archivo o Pegar imagen (Ctrl+V)</label>
+            
+            <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:bg-gray-50 hover:border-indigo-400 transition-colors relative"
+                 (paste)="onPaste($event)">
+              <input type="file" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" (change)="onFileSelected($event)">
+              
+              <div *ngIf="!screenshotPreview()">
+                <i class="ri-upload-cloud-2-line text-4xl text-gray-400 mb-2"></i>
+                <p class="text-sm font-medium text-gray-600">Haz clic o arrastra un archivo aquí</p>
+                <p class="text-xs text-gray-400 mt-1">Soporta PNG, JPG, PDF (Max 10MB)</p>
+              </div>
+
+              <div *ngIf="screenshotPreview()" class="relative">
+                <img [src]="screenshotPreview()" class="max-h-48 mx-auto rounded shadow-sm">
+                <button type="button" (click)="clearScreenshot(); $event.stopPropagation(); $event.preventDefault()" 
+                  class="absolute -top-3 -right-3 w-8 h-8 bg-white text-rose-500 rounded-full shadow-md border border-gray-100 flex items-center justify-center hover:bg-rose-50 transition-colors z-10">
+                  <i class="ri-delete-bin-line"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <div class="mb-6">
+            <label class="block text-xs font-bold text-gray-500 mb-1">Descripción corta (opcional)</label>
+            <input type="text" formControlName="description" class="form-control" placeholder="¿Qué muestra esta evidencia?">
+          </div>
+          
+          <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
+            <button type="button" (click)="closeUploadModal()" class="btn-secondary" [disabled]="isUploading()">Cancelar</button>
+            <button type="submit" class="btn-primary min-w-[120px]" [disabled]="!selectedFile || isUploading()">
+              <i class="ri-loader-4-line animate-spin" *ngIf="isUploading()"></i>
+              <span *ngIf="!isUploading()">Subir Evidencia</span>
             </button>
           </div>
         </form>
@@ -385,314 +461,28 @@
     </div>
   </div>
 
-  <!-- Details Modal - Full Screen Mobile -->
-  <div *ngIf="showDetailsModal() && selectedExecution()"
-    class="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 bg-black/90 backdrop-blur-xl animate-in zoom-in duration-500">
-    <div
-      class="bg-gray-950 border-0 sm:border border-white/10 rounded-none sm:rounded-[2.5rem] w-full max-w-6xl h-full sm:h-auto max-h-full sm:max-h-[95vh] overflow-hidden shadow-2xl flex flex-col">
-      <div class="p-8 sm:p-12 flex flex-col h-full overflow-hidden">
-
-        <!-- Modal Header -->
-        <div class="flex justify-between items-start mb-10 shrink-0">
-          <div class="min-w-0 pr-10">
-            <div class="flex items-center gap-3 mb-2">
-              <span
-                class="px-3 py-1 bg-indigo-500/10 text-indigo-400 border border-indigo-500/10 rounded-lg text-[10px] font-black tracking-widest">Auditoría
-                #{{ selectedExecution()?.id }}</span>
-              <span [ngClass]="{
-                    'bg-emerald-500/10 text-emerald-400 border-emerald-500/10': selectedExecution()?.status?.code === 'PASSED',
-                    'bg-rose-500/10 text-rose-400 border-rose-500/10': selectedExecution()?.status?.code === 'FAILED',
-                    'bg-amber-500/10 text-amber-500 border-amber-500/10': selectedExecution()?.status?.code === 'BLOCKED'
-                  }" class="px-3 py-1 rounded-lg text-[10px] font-black border tracking-widest">
-                {{ selectedExecution()?.status?.code | titlecase }}
-              </span>
-            </div>
-            <h2 class="text-3xl font-black text-white tracking-tight truncate">{{ selectedExecution()?.testCase?.title }}
-            </h2>
-            <div class="flex items-center gap-4 mt-4 text-[10px] font-bold text-gray-600 tracking-widest">
-              <div class="flex items-center gap-1.5"><i class="far fa-user text-indigo-500/50"></i> {{
-                selectedExecution()?.executedBy }}</div>
-              <div class="flex items-center gap-1.5"><i class="far fa-clock text-indigo-500/50"></i> {{
-                selectedExecution()?.executionDate | date:'longDate' }}</div>
-            </div>
-          </div>
-          <button (click)="closeDetailsModal()"
-            class="w-12 h-12 shrink-0 rounded-2xl bg-white/5 text-gray-500 hover:text-white transition-all flex items-center justify-center border border-white/5 shadow-xl">
-            <i class="fas fa-times text-xl"></i>
-          </button>
-        </div>
-
-        <div class="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-12">
-          <!-- Step Results Section -->
-          <div class="space-y-6">
-            <div class="flex items-center gap-4">
-              <p class="text-[10px] font-black text-gray-600 tracking-widest">Protocolo de ejecución por pasos
-              </p>
-              <div class="flex-1 h-px bg-white/5"></div>
-            </div>
-
-            <div class="grid grid-cols-1 gap-4">
-              <div *ngFor="let step of selectedExecution()?.stepResults"
-                class="bg-gray-900/40 border border-white/5 rounded-[2rem] p-6 hover:border-white/10 transition-all group/steprow relative overflow-hidden">
-
-                <div class="flex flex-col md:flex-row justify-between gap-6 relative z-10">
-                  <div class="flex-1 min-w-0">
-                    <div class="flex items-center gap-3 mb-3">
-                      <span
-                        class="w-6 h-6 shrink-0 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/10 flex items-center justify-center text-[10px] font-black">{{
-                        step.stepOrder }}</span>
-                      <h4 class="text-gray-200 font-bold tracking-tight text-sm">{{ step.action }}</h4>
-                    </div>
-                    <div class="pl-9 space-y-3">
-                      <div class="flex items-start gap-3">
-                        <i class="fas fa-arrow-right text-[10px] text-indigo-500 mt-1"></i>
-                        <p class="text-gray-400 text-xs leading-relaxed font-medium">{{ step.actualResult || 'Sin
-                          resultado específico registrado.' }}</p>
-                      </div>
-
-                      <!-- Step Evidences (New Grid) -->
-                      <div *ngIf="step.evidences && step.evidences.length > 0" class="flex flex-wrap gap-2 pt-2">
-                        <div *ngFor="let ev of step.evidences" class="relative group/ev">
-                          <a [href]="ev.fileUrl" target="_blank"
-                            class="block w-12 h-12 bg-gray-950 rounded-xl border border-white/5 flex items-center justify-center text-indigo-400 hover:border-indigo-500/50 hover:bg-gray-900 transition-all">
-                            <i class="fas fa-image text-sm"></i>
-                          </a>
-                        </div>
-                      </div>
-
-                      <!-- Step Observations (Threaded View) -->
-                      <div *ngIf="step.observations && step.observations.length > 0" class="pt-4 space-y-3">
-                        <div *ngFor="let obs of step.observations"
-                          class="bg-rose-500/[0.03] border border-rose-500/10 rounded-2xl p-4 animate-in slide-in-from-left-2 transition-all hover:bg-rose-500/5">
-                          <div class="flex justify-between items-start gap-4">
-                            <div class="min-w-0 flex-1">
-                              <p class="text-[11px] text-gray-300 font-medium leading-relaxed">{{ obs.observation }}</p>
-                              <div
-                                class="flex items-center gap-2 mt-2 text-[9px] text-gray-600 font-black tracking-widest">
-                                <span>{{ obs.createdBy }}</span>
-                                <span>•</span>
-                                <span>{{ obs.createdAt | date:'shortTime' }}</span>
-                              </div>
-                            </div>
-                            <span *ngIf="obs.response"
-                              class="shrink-0 w-6 h-6 bg-emerald-500/10 text-emerald-400 rounded-full flex items-center justify-center text-[8px] border border-emerald-500/10">
-                              <i class="fas fa-check"></i>
-                            </span>
-                          </div>
-
-                          <!-- Threaded Response -->
-                          <div *ngIf="obs.response" class="mt-4 pl-4 border-l-2 border-emerald-500/30">
-                            <p class="text-[9px] text-emerald-500 font-black tracking-widest mb-1">Resolución
-                            </p>
-                            <p class="text-xs text-gray-400 leading-relaxed font-medium">{{ obs.response }}</p>
-                          </div>
-                          <div *ngIf="!obs.response" class="mt-4 flex gap-2">
-                            <input #respInput type="text" placeholder="Añadir respuesta técnica..."
-                              class="flex-1 bg-gray-950 border border-white/5 rounded-xl px-4 py-2 text-[11px] text-white focus:outline-none focus:ring-1 focus:ring-indigo-500/30">
-                            <button (click)="onRespondObservation(obs.id, respInput.value)"
-                              class="w-10 h-10 shrink-0 bg-emerald-600/10 hover:bg-emerald-600 text-emerald-500 hover:text-white rounded-xl transition-all border border-emerald-500/10 flex items-center justify-center">
-                              <i class="fas fa-reply text-xs"></i>
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div
-                    class="md:w-32 shrink-0 flex flex-col md:items-end gap-3 justify-center border-t md:border-t-0 md:border-l border-white/5 pt-4 md:pt-0 md:pl-6">
-                    <span [ngClass]="{
-                          'text-emerald-400': step.status.id === 1,
-                          'text-rose-400': step.status.id === 2,
-                          'text-amber-500': step.status.id === 3
-                        }" class="text-[9px] font-black tracking-[0.2em]">
-                      {{ step.status.id === 1 ? 'Passed' : step.status.id === 2 ? 'Failed' : 'Blocked' }}
-                    </span>
-                    <div class="flex gap-2">
-                      <button (click)="openUploadModal(selectedExecution()!, undefined, step.id)"
-                        class="w-9 h-9 flex items-center justify-center bg-gray-950 hover:bg-gray-800 text-indigo-400 rounded-xl border border-white/5 hover:border-indigo-500/30 transition-all"
-                        title="Anexar Archivo">
-                        <i class="fas fa-plus text-xs"></i>
-                      </button>
-                      <button (click)="openObservationModal(step.id, $event)"
-                        class="w-9 h-9 flex items-center justify-center bg-gray-950 hover:bg-rose-950 text-rose-500 rounded-xl border border-white/5 hover:border-rose-500/30 transition-all"
-                        title="Abrir Observación">
-                        <i class="fas fa-comment-dots text-xs"></i>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- General Evidence Section -->
-          <div class="space-y-6">
-            <div class="flex items-center gap-4">
-              <p class="text-[10px] font-black text-gray-600 tracking-widest">Repositorio de capturas globales
-              </p>
-              <div class="flex-1 h-px bg-white/5"></div>
-            </div>
-
-            <div *ngIf="selectedExecution()?.evidences?.length === 0"
-              class="p-12 text-center bg-gray-950/30 rounded-[2.5rem] border border-white/5 border-dashed">
-              <i class="fas fa-cloud-sun text-4xl text-gray-800 mb-4 block"></i>
-              <p class="text-gray-600 font-bold text-sm">El repositorio de evidencias está vacío.</p>
-              <p class="text-[9px] text-gray-700 tracking-widest mt-2">No se han registrado capturas de nivel
-                global todavía</p>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div *ngFor="let evidence of selectedExecution()?.evidences"
-                class="p-5 bg-gray-900/50 border border-white/5 rounded-[2rem] flex items-center gap-4 group hover:border-indigo-500/30 transition-all relative overflow-hidden">
-                <div
-                  class="w-12 h-12 bg-indigo-500/5 rounded-2xl flex items-center justify-center text-indigo-500 border border-indigo-500/10">
-                  <i class="fas fa-file-image text-xl"></i>
-                </div>
-                <div class="flex-1 min-w-0 pr-6">
-                  <p class="text-xs font-bold text-gray-200 truncate" [title]="evidence.fileName">{{ evidence.fileName
-                    }}</p>
-                  <p class="text-[9px] text-gray-600 font-black mt-1">{{ evidence.uploadedAt |
-                    date:'shortTime' }} • {{ evidence.uploadedAt | date:'dd MMM' }}</p>
-                </div>
-                <button
-                  class="absolute top-1/2 -right-10 group-hover:right-4 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-indigo-600 text-white rounded-xl transition-all shadow-xl shadow-indigo-950">
-                  <i class="fas fa-external-link-alt text-[10px]"></i>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Footer -->
-        <div class="pt-10 shrink-0">
-          <button (click)="closeDetailsModal()" class="btn-secondary">
-            <i class="fas fa-arrow-left"></i>
-            Volver al listado
-          </button>
-        </div>
+  <!-- Observation Modal -->
+  <div *ngIf="showObservationModal()" class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm animate-in fade-in duration-300">
+    <div class="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
+      <div class="p-5 border-b border-gray-100 bg-amber-50 flex justify-between items-center">
+        <h2 class="text-lg font-bold text-amber-900 flex items-center gap-2">
+          <i class="ri-chat-1-line text-amber-600"></i>
+          Añadir Observación QA
+        </h2>
+        <button (click)="closeObservationModal()" class="text-amber-600 hover:bg-amber-100 w-8 h-8 rounded-full transition-colors flex items-center justify-center">
+          <i class="ri-close-line text-xl"></i>
+        </button>
       </div>
-    </div>
-  </div>
-
-  <!-- Upload Modal - Compact & Tactile -->
-  <div *ngIf="showUploadModal()" (window:paste)="onPaste($event)"
-    class="fixed inset-0 z-[60] flex items-center justify-center p-0 sm:p-4 bg-black/90 backdrop-blur-xl animate-in fade-in duration-300">
-    <div
-      class="bg-gray-950 border-0 sm:border border-white/10 rounded-none sm:rounded-[2.5rem] w-full max-w-lg h-full sm:h-auto shadow-2xl overflow-hidden flex flex-col">
-      <div class="p-8 sm:p-12 text-center flex-1 overflow-y-auto">
-        <div
-          class="w-20 h-20 bg-indigo-500/10 rounded-[2rem] flex items-center justify-center mx-auto mb-8 text-indigo-500 border border-indigo-500/10 shadow-inner">
-          <i class="fas fa-cloud-upload-alt text-3xl"></i>
-        </div>
-        <h2 class="text-2xl font-black text-white tracking-tight mb-2">Subir evidencia</h2>
-        <p class="text-gray-600 text-[10px] font-black tracking-[0.2em] mb-10">Auditoría #{{
-          selectedExecution()?.id }}</p>
-
-        <form [formGroup]="uploadForm" (ngSubmit)="onUploadSubmit()" class="space-y-8 text-left">
-          <div class="space-y-3">
-            <label for="fileEvidenceUpload" class="px-1 text-[10px] font-black text-gray-600 tracking-widest">Contenido multimedia</label>
-
-            <!-- ÁREA DE CARGA -->
-            <div class="relative group/zone">
-              <input id="fileEvidenceUpload" type="file" (change)="onFileSelected($event)" accept="image/*"
-                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
-
-              <div *ngIf="!screenshotPreview()"
-                class="bg-gray-900 border-2 border-white/5 border-dashed rounded-[2rem] p-10 flex flex-col items-center justify-center gap-4 group-hover/zone:border-indigo-500/40 group-hover/zone:bg-indigo-500/[0.02] transition-all">
-                <div class="w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center text-gray-600 mb-2">
-                  <i class="fas fa-camera text-2xl"></i>
-                </div>
-                <div class="text-center">
-                  <p class="text-sm text-gray-300 font-bold">Selecciona o pega una captura</p>
-                  <p class="text-[9px] text-gray-600 mt-2 tracking-widest font-black italic">CTRL + V
-                    habilitado</p>
-                </div>
-              </div>
-
-              <!-- PREVISUALIZACIÓN -->
-              <div *ngIf="screenshotPreview()"
-                class="relative rounded-[2.5rem] overflow-hidden border border-white/10 bg-black/60 aspect-video flex items-center justify-center shadow-2xl animate-in zoom-in-95">
-                <img [src]="screenshotPreview()" alt="Vista previa de captura" class="max-h-full max-w-full object-contain">
-                <button type="button" (click)="clearScreenshot()"
-                  class="absolute top-4 right-4 w-10 h-10 flex items-center justify-center bg-rose-600 text-white rounded-2xl hover:bg-rose-700 transition-all shadow-xl z-20 border border-rose-500/20">
-                  <i class="fas fa-times"></i>
-                </button>
-                <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 to-transparent">
-                  <p class="text-[9px] text-indigo-400 font-black tracking-widest px-2">{{ selectedFile?.name
-                    || 'CAPTURADO_DESDE_SISTEMA.PNG' }}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="space-y-3">
-            <label for="evidenceDesc" class="px-1 text-[10px] font-black text-gray-600 tracking-widest">Contexto de la
-              evidencia</label>
-            <textarea id="evidenceDesc" formControlName="description" rows="3"
-              class="w-full bg-gray-900 border border-white/5 rounded-2xl px-6 py-4 text-white placeholder-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all resize-none font-medium leading-relaxed text-sm"
-              placeholder="Indica qué se está validando en esta imagen..."></textarea>
-          </div>
-
-          <div class="flex flex-col sm:flex-row gap-4 pt-4">
-            <button type="button" (click)="closeUploadModal()" class="btn-secondary flex-1">
-              <i class="fas fa-xmark"></i>
-              Cancelar
-            </button>
-            <button type="submit" [disabled]="!selectedFile || isUploading()" class="btn-primary flex-1">
-              <span *ngIf="isUploading()" class="w-5 h-5 border-3 border-white/20 border-t-white rounded-full animate-spin"></span>
-              <i *ngIf="!isUploading()" class="fas fa-cloud-arrow-up"></i>
-              {{ isUploading() ? 'Subiendo...' : 'Publicar' }}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  <!-- Observation Modal - Compact -->
-  <div *ngIf="showObservationModal()"
-    class="fixed inset-0 z-[70] flex items-center justify-center p-0 sm:p-4 bg-black/90 backdrop-blur-xl animate-in zoom-in-95 duration-300">
-    <div
-      class="bg-gray-950 border-0 sm:border border-white/10 rounded-none sm:rounded-[2.5rem] w-full max-w-lg h-full sm:h-auto shadow-2xl overflow-hidden flex flex-col">
-      <div class="p-8 sm:p-12 flex-1">
-        <div class="flex justify-between items-center mb-10">
-          <div>
-            <h2 class="text-2xl font-black text-white tracking-tight">Reportar hallazgo</h2>
-            <p class="text-gray-600 text-[10px] font-black tracking-widest mt-2">Nueva observación técnica</p>
-          </div>
-          <button (click)="closeObservationModal()"
-            class="w-10 h-10 rounded-2xl bg-white/5 text-gray-600 hover:text-white transition-all flex items-center justify-center">
-            <i class="fas fa-times text-xl"></i>
+      <div class="p-6">
+        <label class="block text-xs font-bold text-gray-600 mb-2">Comentario de Revisión</label>
+        <textarea [(ngModel)]="observationText" rows="4" class="form-control resize-none mb-6" placeholder="Escribe tu observación técnica aquí..."></textarea>
+        
+        <div class="flex justify-end gap-3">
+          <button type="button" (click)="closeObservationModal()" class="btn-secondary" [disabled]="isSubmitting()">Cancelar</button>
+          <button type="button" (click)="onAddObservation()" class="btn-primary bg-amber-500 hover:bg-amber-600 border-none shadow-amber-500/30" [disabled]="!observationText.trim() || isSubmitting()">
+             <i class="ri-loader-4-line animate-spin" *ngIf="isSubmitting()"></i>
+            <span *ngIf="!isSubmitting()">Añadir Observación</span>
           </button>
-        </div>
-
-        <div class="space-y-8">
-          <div class="space-y-3">
-            <label [for]="'observationText'" class="px-1 text-[10px] font-black text-gray-600 tracking-widest">Descripción del
-              defecto</label>
-            <textarea id="observationText" [(ngModel)]="observationText" name="observationText" rows="5"
-              placeholder="Describe detalladamente el comportamiento inesperado o discrepancia observada..."
-              class="w-full bg-gray-900 border border-white/5 rounded-[2rem] px-6 py-5 text-white placeholder-gray-700 focus:outline-none focus:ring-2 focus:ring-rose-500/50 focus:border-rose-500 transition-all resize-none text-sm leading-relaxed font-medium"></textarea>
-            <div class="flex items-start gap-4 p-5 bg-rose-500/5 rounded-2xl border border-rose-500/10">
-              <i class="fas fa-exclamation-triangle text-rose-500 mt-0.5"></i>
-              <p class="text-[10px] text-rose-500/70 font-bold tracking-widest leading-normal">
-                Nota: Este registro será visible para el equipo de desarrollo para su pronta resolución.
-              </p>
-            </div>
-          </div>
-
-          <div class="flex flex-col sm:flex-row gap-4 pt-6 border-t border-white/5">
-            <button type="button" (click)="closeObservationModal()" class="btn-secondary flex-1">
-              <i class="fas fa-xmark"></i>
-              Cancelar
-            </button>
-            <button type="button" (click)="onAddObservation()" [disabled]="!observationText.trim() || isSubmitting()" class="btn-danger flex-1">
-              <span *ngIf="isSubmitting()" class="w-5 h-5 border-3 border-white/20 border-t-white rounded-full animate-spin"></span>
-              <i *ngIf="!isSubmitting()" class="fas fa-comment-medical"></i>
-              {{ isSubmitting() ? 'Registrando...' : 'Publicar hallazgo' }}
-            </button>
-          </div>
         </div>
       </div>
     </div>

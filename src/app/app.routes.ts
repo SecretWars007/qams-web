@@ -17,28 +17,28 @@ export const routes: Routes = [
       {
         path: 'login',
         loadComponent: () =>
-          import('./features/auth/login/login/login.component').then(
+          import('./features/auth/login/login.component').then(
             (m) => m.LoginComponent,
           ),
       },
       {
         path: 'register',
         loadComponent: () =>
-          import('./features/auth/register/register/register.component').then(
+          import('./features/auth/register/register.component').then(
             (m) => m.RegisterComponent,
           ),
       },
       {
         path: 'forgot-password',
         loadComponent: () =>
-          import('./features/auth/forgot-password/forgot-password/forgot-password.component').then(
+          import('./features/auth/forgot-password/forgot-password.component').then(
             (m) => m.ForgotPasswordComponent,
           ),
       },
       {
         path: 'reset-password',
         loadComponent: () =>
-          import('./features/auth/reset-password/reset-password/reset-password.component').then(
+          import('./features/auth/reset-password/reset-password.component').then(
             (m) => m.ResetPasswordComponent,
           ),
       },
@@ -61,7 +61,7 @@ export const routes: Routes = [
       {
         path: 'dashboard',
         loadComponent: () =>
-          import('./features/dashboard/dashboard/dashboard.component').then(
+          import('./features/dashboard/dashboard.component').then(
             (m) => m.DashboardComponent,
           ),
         data: { permission: 'DASHBOARD_VIEW' },
@@ -72,7 +72,7 @@ export const routes: Routes = [
       {
         path: 'change-password',
         loadComponent: () =>
-          import('./features/auth/change-password/change-password/change-password.component').then(
+          import('./features/auth/change-password/change-password.component').then(
             (m) => m.ChangePasswordComponent,
           ),
       },
@@ -81,7 +81,7 @@ export const routes: Routes = [
       {
         path: 'projects',
         loadComponent: () =>
-          import('./features/projects/projects/projects.component').then(
+          import('./features/projects/projects.component').then(
             (m) => m.ProjectsComponent,
           ),
         data: { permission: 'PROJECTS_VIEW' },
@@ -106,7 +106,7 @@ export const routes: Routes = [
           import('./features/test-scenarios/test-scenarios.component').then(
             (m) => m.TestScenariosComponent,
           ),
-        data: { permission: 'TEST_CASES_VIEW' }, // Use same permission for now
+        data: { permission: 'TEST_CASES_VIEW' },
         canActivate: [permissionGuard],
       },
 
@@ -132,7 +132,7 @@ export const routes: Routes = [
         canActivate: [permissionGuard],
       },
 
-      // Reportes
+      // Reportes Unificados (Quality Gate, RTM Matrix, RBT Risk Heatmap, PDF)
       {
         path: 'reports',
         loadComponent: () =>
@@ -143,15 +143,29 @@ export const routes: Routes = [
         canActivate: [permissionGuard],
       },
 
-      // Reporte Burndown
+      // Revisiones Estáticas (Walkthroughs & Inspecciones ISTQB)
       {
-        path: 'burndown-report',
+        path: 'reviews',
         loadComponent: () =>
-          import('./features/burndown-report/burndown-report.component').then(
-            (m) => m.BurndownReportComponent,
+          import('./features/reviews/reviews.component').then(
+            (m) => m.ReviewsComponent,
           ),
-        data: { permission: 'DASHBOARD_VIEW' },
+        data: { permission: 'REVIEWS_VIEW' },
         canActivate: [permissionGuard],
+      },
+
+      // Matriz RTM (Redirigida a Reportes)
+      {
+        path: 'rtm-matrix',
+        redirectTo: 'reports',
+        pathMatch: 'full'
+      },
+
+      // Gestión de Riesgos RBT (Redirigida a Reportes)
+      {
+        path: 'risk-management',
+        redirectTo: 'reports',
+        pathMatch: 'full'
       },
 
       // Tablero Kanban
@@ -172,7 +186,62 @@ export const routes: Routes = [
           import('./features/requirements/requirements.component').then(
             (m) => m.RequirementsComponent,
           ),
-        data: { permission: 'PROJECTS_VIEW' },
+        data: { permission: 'REQUIREMENTS_VIEW' },
+        canActivate: [permissionGuard],
+      },
+
+      // Planes de Prueba
+      {
+        path: 'test-plans',
+        loadComponent: () =>
+          import('./features/test-plans/test-plans.component').then(
+            (m) => m.TestPlansComponent,
+          ),
+        data: { permission: 'TEST_CASES_VIEW' },
+        canActivate: [permissionGuard],
+      },
+
+      // Defectos
+      {
+        path: 'defects',
+        loadComponent: () =>
+          import('./features/defects/defects.component').then(
+            (m) => m.DefectsComponent,
+          ),
+        data: { permission: 'DEFECTS_VIEW' },
+        canActivate: [permissionGuard],
+      },
+
+      // Sistemas Bajo Prueba (SUT)
+      {
+        path: 'systems-under-test',
+        loadComponent: () =>
+          import('./features/systems-under-test/systems-under-test.component').then(
+            (m) => m.SystemsUnderTestComponent,
+          ),
+        data: { permission: 'SUT_VIEW' },
+        canActivate: [permissionGuard],
+      },
+
+      // Entornos de Prueba (ISTQB Cap 5.4)
+      {
+        path: 'test-environments',
+        loadComponent: () =>
+          import('./features/test-environments/test-environments.component').then(
+            (m) => m.TestEnvironmentsComponent,
+          ),
+        data: { permission: 'ENVIRONMENTS_VIEW' },
+        canActivate: [permissionGuard],
+      },
+
+      // Pruebas Exploratorias (ISTQB Cap 4.4)
+      {
+        path: 'exploratory',
+        loadComponent: () =>
+          import('./features/exploratory/exploratory.component').then(
+            (m) => m.ExploratoryComponent,
+          ),
+        data: { permission: 'EXPLORATORY_VIEW' },
         canActivate: [permissionGuard],
       },
 
@@ -209,6 +278,17 @@ export const routes: Routes = [
         canActivate: [permissionGuard],
       },
 
+      // Admin: API Keys
+      {
+        path: 'admin/api-keys',
+        loadComponent: () =>
+          import('./features/admin/api-keys/api-keys.component').then(
+            (m) => m.ApiKeysComponent,
+          ),
+        data: { permission: 'CATALOGS_VIEW' },
+        canActivate: [permissionGuard],
+      },
+
       // Redireccion por defecto
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
     ],
@@ -217,3 +297,4 @@ export const routes: Routes = [
   // Ruta catch-all: redirigir a auth/login
   { path: '**', redirectTo: 'auth/login' },
 ];
+

@@ -26,6 +26,18 @@ export interface KanbanTask {
   priorityCode: string;
   dueDate: string | null;
   orderIndex: number;
+
+  // ── Contexto de Certificación ISTQB ──
+  testCaseTitle: string | null;
+  totalSteps: number;
+  completedSteps: number;
+  passedSteps: number;
+  openDefectsCount: number;
+  lastExecutionStatusCode: string | null;
+  lastExecutionStatusName: string | null;
+  sutName: string | null;
+  isOverdue: boolean;
+  stepProgressPercent: number;
 }
 
 export interface CreateKanbanTask {

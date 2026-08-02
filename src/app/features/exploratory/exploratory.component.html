@@ -1,0 +1,468 @@
+<!-- src/app/features/exploratory/exploratory.component.html -->
+<div class="min-h-screen p-6 md:p-8 space-y-6 text-slate-100 bg-[#0B0F19]">
+
+  <!-- Header & Context -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800/80 pb-6">
+    <div class="space-y-1">
+      <div class="flex items-center gap-2">
+        <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+          ISTQB Cap. 4.4 — Pruebas Basadas en Experiencia
+        </span>
+        <span class="text-xs text-slate-400 font-mono">Session-Based Testing</span>
+      </div>
+      <h1 class="text-2xl md:text-3xl font-bold tracking-tight text-white flex items-center gap-3">
+        <i class="fas fa-compass text-indigo-500"></i>
+        Sesiones de Prueba Exploratoria
+      </h1>
+      <p class="text-sm text-slate-400">
+        Gestión de pruebas con Charters estructurados, time-boxing de sesión y registro sistemático de hallazgos.
+      </p>
+    </div>
+
+    <!-- Actions & Project Selector -->
+    <div class="flex flex-wrap items-center gap-3">
+      <div class="relative min-w-[220px]">
+        <select
+          [ngModel]="selectedProjectId()"
+          (ngModelChange)="onProjectChange($event)"
+          class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all cursor-pointer shadow-inner"
+        >
+          <option value="" disabled>Seleccione un proyecto</option>
+          @for (project of projects(); track project.id) {
+            <option [value]="project.id">{{ project.name }}</option>
+          }
+        </select>
+      </div>
+
+      <button
+        (click)="openCreateModal()"
+        [disabled]="!selectedProjectId()"
+        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold shadow-lg shadow-indigo-500/20 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none"
+      >
+        <i class="fas fa-plus text-xs"></i>
+        Nueva Sesión
+      </button>
+    </div>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+    <div class="bg-slate-900/50 backdrop-blur border border-slate-800/80 rounded-2xl p-4 shadow-sm">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Sesiones</span>
+        <i class="fas fa-layer-group text-slate-500"></i>
+      </div>
+      <div class="mt-2 text-2xl font-bold text-white">{{ metrics().total }}</div>
+    </div>
+
+    <div class="bg-slate-900/50 backdrop-blur border border-slate-800/80 rounded-2xl p-4 shadow-sm">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-semibold text-amber-400 uppercase tracking-wider">Planificadas</span>
+        <i class="fas fa-calendar-alt text-amber-400"></i>
+      </div>
+      <div class="mt-2 text-2xl font-bold text-amber-400">{{ metrics().planned }}</div>
+    </div>
+
+    <div class="bg-slate-900/50 backdrop-blur border border-slate-800/80 rounded-2xl p-4 shadow-sm">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-semibold text-blue-400 uppercase tracking-wider">En Progreso</span>
+        <i class="fas fa-stopwatch text-blue-400"></i>
+      </div>
+      <div class="mt-2 text-2xl font-bold text-blue-400">{{ metrics().inProgress }}</div>
+    </div>
+
+    <div class="bg-slate-900/50 backdrop-blur border border-slate-800/80 rounded-2xl p-4 shadow-sm">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-semibold text-emerald-400 uppercase tracking-wider">Completadas</span>
+        <i class="fas fa-check-circle text-emerald-400"></i>
+      </div>
+      <div class="mt-2 text-2xl font-bold text-emerald-400">{{ metrics().completed }}</div>
+    </div>
+
+    <div class="bg-slate-900/50 backdrop-blur border border-slate-800/80 rounded-2xl p-4 shadow-sm">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-semibold text-rose-400 uppercase tracking-wider">Hallazgos</span>
+        <i class="fas fa-bug text-rose-400"></i>
+      </div>
+      <div class="mt-2 text-2xl font-bold text-rose-400">{{ metrics().totalFindings }}</div>
+    </div>
+  </div>
+
+  <!-- Main Content Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- Sessions List (2 columns on lg) -->
+    <div class="lg:col-span-2 space-y-4">
+      <div class="bg-slate-900/60 backdrop-blur border border-slate-800/80 rounded-2xl p-5 shadow-xl">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold text-white flex items-center gap-2">
+            <i class="fas fa-list-ul text-indigo-400"></i>
+            Sesiones de Prueba
+          </h2>
+          <span class="text-xs text-slate-400 font-mono">{{ sessions().length }} registros</span>
+        </div>
+
+        @if (loading()) {
+          <div class="flex flex-col items-center justify-center py-12 text-slate-400">
+            <i class="fas fa-circle-notch fa-spin text-3xl text-indigo-500 mb-3"></i>
+            <p class="text-sm font-medium">Cargando sesiones exploratorias...</p>
+          </div>
+        } @else if (sessions().length === 0) {
+          <div class="flex flex-col items-center justify-center py-16 px-4 text-center border-2 border-dashed border-slate-800 rounded-xl">
+            <div class="w-16 h-16 rounded-full bg-slate-800/50 flex items-center justify-center text-slate-500 mb-4">
+              <i class="fas fa-compass text-2xl"></i>
+            </div>
+            <h3 class="text-base font-semibold text-slate-200 mb-1">Sin sesiones exploratorias</h3>
+            <p class="text-sm text-slate-400 max-w-sm mb-4">
+              Crea una sesión con un Charter estructurado para iniciar pruebas exploratorias según ISTQB.
+            </p>
+            <button
+              (click)="openCreateModal()"
+              class="px-4 py-2 rounded-xl bg-indigo-600/80 hover:bg-indigo-600 text-white text-xs font-semibold transition-all"
+            >
+              <i class="fas fa-plus mr-1"></i> Crear primera sesión
+            </button>
+          </div>
+        } @else {
+          <div class="space-y-3">
+            @for (session of sessions(); track session.id) {
+              <div
+                (click)="viewSessionDetail(session)"
+                [class.ring-2]="selectedSession()?.id === session.id"
+                [class.ring-indigo-500]="selectedSession()?.id === session.id"
+                class="group p-4 rounded-xl bg-slate-800/40 hover:bg-slate-800/80 border border-slate-800 transition-all cursor-pointer shadow-sm hover:shadow-md"
+              >
+                <div class="flex items-start justify-between gap-3">
+                  <div class="space-y-1 flex-1">
+                    <div class="flex items-center gap-2">
+                      <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold" [ngClass]="getStatusBadgeClass(session.statusId)">
+                        {{ session.statusName }}
+                      </span>
+                      <span class="text-xs text-slate-400">
+                        <i class="far fa-user mr-1"></i> {{ session.testerName || 'Tester' }}
+                      </span>
+                      @if (session.durationMinutes) {
+                        <span class="text-xs text-slate-400">
+                          <i class="far fa-clock mr-1"></i> {{ session.durationMinutes }} min
+                        </span>
+                      }
+                    </div>
+                    <h4 class="text-sm font-semibold text-white group-hover:text-indigo-300 transition-colors">
+                      {{ session.charter }}
+                    </h4>
+                    @if (session.notes) {
+                      <p class="text-xs text-slate-400 line-clamp-1">
+                        {{ session.notes }}
+                      </p>
+                    }
+                  </div>
+
+                  <!-- Quick Action Buttons -->
+                  <div class="flex items-center gap-1.5" (click)="$event.stopPropagation()">
+                    @if (session.statusId === 1) {
+                      <button
+                        (click)="startSession(session)"
+                        title="Iniciar Sesión"
+                        class="p-2 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 transition-colors"
+                      >
+                        <i class="fas fa-play text-xs"></i>
+                      </button>
+                    }
+                    @if (session.statusId === 2) {
+                      <button
+                        (click)="openCompleteModal(session)"
+                        title="Completar Sesión"
+                        class="p-2 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 transition-colors"
+                      >
+                        <i class="fas fa-check text-xs"></i>
+                      </button>
+                      <button
+                        (click)="openFindingModal(session)"
+                        title="Agregar Hallazgo"
+                        class="p-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 transition-colors"
+                      >
+                        <i class="fas fa-bug text-xs"></i>
+                      </button>
+                    }
+                    <button
+                      (click)="deleteSession(session)"
+                      title="Eliminar Sesión"
+                      class="p-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-colors"
+                    >
+                      <i class="fas fa-trash-alt text-xs"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Detail Panel / Findings (1 column on lg) -->
+    <div class="space-y-4">
+      @if (selectedSession()) {
+        <div class="bg-slate-900/60 backdrop-blur border border-slate-800/80 rounded-2xl p-5 shadow-xl space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <h3 class="text-base font-bold text-white flex items-center gap-2">
+              <i class="fas fa-clipboard-check text-indigo-400"></i>
+              Detalle del Charter
+            </h3>
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold" [ngClass]="getStatusBadgeClass(selectedSession()!.statusId)">
+              {{ selectedSession()!.statusName }}
+            </span>
+          </div>
+
+          <div class="space-y-3 text-xs">
+            <div>
+              <span class="text-slate-400 block font-medium mb-1">Misión / Objetivo (Charter):</span>
+              <p class="text-slate-200 bg-slate-800/50 p-2.5 rounded-lg border border-slate-800 leading-relaxed">
+                {{ selectedSession()!.charter }}
+              </p>
+            </div>
+
+            @if (selectedSession()!.notes) {
+              <div>
+                <span class="text-slate-400 block font-medium mb-1">Notas de la sesión:</span>
+                <p class="text-slate-300 bg-slate-800/30 p-2.5 rounded-lg border border-slate-800">
+                  {{ selectedSession()!.notes }}
+                </p>
+              </div>
+            }
+
+            <div class="grid grid-cols-2 gap-2 text-slate-400 pt-2 border-t border-slate-800">
+              <div>
+                <span class="block text-[10px] uppercase font-bold text-slate-500">Tester</span>
+                <span class="text-slate-300">{{ selectedSession()!.testerName || 'N/A' }}</span>
+              </div>
+              <div>
+                <span class="block text-[10px] uppercase font-bold text-slate-500">Duración</span>
+                <span class="text-slate-300">{{ selectedSession()!.durationMinutes ? selectedSession()!.durationMinutes + ' min' : 'No especificada' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Findings List -->
+          <div class="pt-4 border-t border-slate-800 space-y-3">
+            <div class="flex items-center justify-between">
+              <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                <i class="fas fa-search-plus text-rose-400"></i>
+                Hallazgos Registrados ({{ selectedSession()!.findings.length || 0 }})
+              </h4>
+              @if (selectedSession()!.statusId !== 3) {
+                <button
+                  (click)="openFindingModal(selectedSession()!)"
+                  class="px-2.5 py-1 rounded-lg bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 text-xs font-semibold transition-colors"
+                >
+                  <i class="fas fa-plus text-[10px] mr-1"></i> Hallazgo
+                </button>
+              }
+            </div>
+
+            @if (!selectedSession()!.findings || selectedSession()!.findings.length === 0) {
+              <div class="text-center py-6 text-slate-500 text-xs bg-slate-800/20 rounded-xl border border-slate-800">
+                Sin hallazgos reportados en esta sesión.
+              </div>
+            } @else {
+              <div class="space-y-2 max-h-[300px] overflow-y-auto pr-1">
+                @for (finding of selectedSession()!.findings; track finding.id) {
+                  <div class="p-3 rounded-lg bg-slate-800/50 border border-slate-800 text-xs space-y-1.5">
+                    <div class="flex items-center justify-between">
+                      <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase" [ngClass]="getFindingTypeBadgeClass(finding.typeId)">
+                        {{ finding.typeName }}
+                      </span>
+                      <button
+                        (click)="deleteFinding(finding.id)"
+                        class="text-slate-500 hover:text-red-400 transition-colors"
+                      >
+                        <i class="fas fa-times"></i>
+                      </button>
+                    </div>
+                    <p class="text-slate-200">{{ finding.description }}</p>
+                    <div class="text-[10px] text-slate-500 text-right">
+                      {{ finding.createdAt | date:'short' }}
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      } @else {
+        <div class="bg-slate-900/40 border border-slate-800/60 rounded-2xl p-8 text-center text-slate-500">
+          <i class="fas fa-hand-pointer text-3xl mb-3 text-slate-600"></i>
+          <p class="text-sm">Selecciona una sesión de la lista para ver su detalle y hallazgos.</p>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Modal: Crear Sesión -->
+  @if (showCreateModal()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg shadow-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <h3 class="text-lg font-bold text-white flex items-center gap-2">
+            <i class="fas fa-compass text-indigo-400"></i>
+            Nueva Sesión Exploratoria
+          </h3>
+          <button (click)="showCreateModal.set(false)" class="text-slate-400 hover:text-white">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div class="space-y-4 text-sm">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">
+              Charter / Misión de Prueba (ISTQB) <span class="text-rose-400">*</span>
+            </label>
+            <textarea
+              [(ngModel)]="newSession.charter"
+              rows="3"
+              placeholder="Ej: Explorar el flujo de checkout con cupones inválidos y validar manejo de excepciones..."
+              class="w-full bg-slate-800/80 border border-slate-700 rounded-xl p-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+            ></textarea>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Notas previas o alcance</label>
+            <textarea
+              [(ngModel)]="newSession.notes"
+              rows="2"
+              placeholder="Notas de configuración o contexto..."
+              class="w-full bg-slate-800/80 border border-slate-700 rounded-xl p-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+          <button
+            (click)="showCreateModal.set(false)"
+            class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-semibold transition-colors"
+          >
+            Cancelar
+          </button>
+          <button
+            (click)="createSession()"
+            class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold shadow-md transition-all"
+          >
+            Crear Sesión
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Modal: Agregar Hallazgo -->
+  @if (showFindingModal()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md shadow-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <h3 class="text-base font-bold text-white flex items-center gap-2">
+            <i class="fas fa-bug text-rose-400"></i>
+            Registrar Hallazgo
+          </h3>
+          <button (click)="showFindingModal.set(false)" class="text-slate-400 hover:text-white">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div class="space-y-4 text-sm">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Tipo de Hallazgo</label>
+            <select
+              [(ngModel)]="newFinding.typeId"
+              class="w-full bg-slate-800/80 border border-slate-700 rounded-xl p-3 text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+            >
+              <option [ngValue]="1">Bug (Defecto encontrado)</option>
+              <option [ngValue]="2">Nota (Observación de UX / Mejora)</option>
+              <option [ngValue]="3">Pregunta (Duda de negocio / Requisito)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Descripción del hallazgo <span class="text-rose-400">*</span></label>
+            <textarea
+              [(ngModel)]="newFinding.description"
+              rows="3"
+              placeholder="Describe lo observado durante la exploración..."
+              class="w-full bg-slate-800/80 border border-slate-700 rounded-xl p-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+          <button
+            (click)="showFindingModal.set(false)"
+            class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-semibold transition-colors"
+          >
+            Cancelar
+          </button>
+          <button
+            (click)="addFinding()"
+            class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-sm font-semibold shadow-md transition-all"
+          >
+            Guardar Hallazgo
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Modal: Completar Sesión -->
+  @if (showCompleteModal()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md shadow-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <h3 class="text-base font-bold text-white flex items-center gap-2">
+            <i class="fas fa-check-circle text-emerald-400"></i>
+            Completar Sesión
+          </h3>
+          <button (click)="showCompleteModal.set(false)" class="text-slate-400 hover:text-white">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div class="space-y-4 text-sm">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Duración (minutos)</label>
+            <input
+              type="number"
+              [(ngModel)]="completeData.durationMinutes"
+              min="5"
+              max="480"
+              class="w-full bg-slate-800/80 border border-slate-700 rounded-xl p-3 text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+            />
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Notas de cierre y conclusiones</label>
+            <textarea
+              [(ngModel)]="completeData.notes"
+              rows="3"
+              placeholder="Conclusiones de la exploración, áreas cubiertas..."
+              class="w-full bg-slate-800/80 border border-slate-700 rounded-xl p-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+          <button
+            (click)="showCompleteModal.set(false)"
+            class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-semibold transition-colors"
+          >
+            Cancelar
+          </button>
+          <button
+            (click)="completeSession()"
+            class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold shadow-md transition-all"
+          >
+            Cerrar Sesión
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+</div>

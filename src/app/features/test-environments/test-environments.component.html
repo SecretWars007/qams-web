@@ -1,0 +1,435 @@
+<!-- src/app/features/test-environments/test-environments.component.html -->
+<div class="min-h-screen p-6 md:p-8 space-y-6 text-slate-100 bg-[#0B0F19]">
+
+  <!-- Header & Context -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800/80 pb-6">
+    <div class="space-y-1">
+      <div class="flex items-center gap-2">
+        <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+          ISTQB Cap. 5.4 — Gestión de Entornos de Prueba
+        </span>
+        <span class="text-xs text-slate-400 font-mono">Test Environment Management</span>
+      </div>
+      <h1 class="text-2xl md:text-3xl font-bold tracking-tight text-white flex items-center gap-3">
+        <i class="fas fa-network-wired text-emerald-500"></i>
+        Entornos de Prueba
+      </h1>
+      <p class="text-sm text-slate-400">
+        Gestión formal de ambientes de ejecución, configuraciones de S.O., navegadores, versiones desplegadas y endpoints.
+      </p>
+    </div>
+
+    <!-- Actions & Project Selector -->
+    <div class="flex flex-wrap items-center gap-3">
+      <div class="relative min-w-[220px]">
+        <select
+          [ngModel]="selectedProjectId()"
+          (ngModelChange)="onProjectChange($event)"
+          class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all cursor-pointer shadow-inner"
+        >
+          <option value="" disabled>Seleccione un proyecto</option>
+          @for (project of projects(); track project.id) {
+            <option [value]="project.id">{{ project.name }}</option>
+          }
+        </select>
+      </div>
+
+      <button
+        (click)="openCreateModal()"
+        [disabled]="!selectedProjectId()"
+        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold shadow-lg shadow-emerald-500/20 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none"
+      >
+        <i class="fas fa-plus text-xs"></i>
+        Nuevo Entorno
+      </button>
+    </div>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div class="bg-slate-900/50 backdrop-blur border border-slate-800/80 rounded-2xl p-5 shadow-sm">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Entornos</span>
+        <i class="fas fa-server text-slate-500"></i>
+      </div>
+      <div class="mt-2 text-2xl font-bold text-white">{{ metrics().total }}</div>
+    </div>
+
+    <div class="bg-slate-900/50 backdrop-blur border border-slate-800/80 rounded-2xl p-5 shadow-sm">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-semibold text-emerald-400 uppercase tracking-wider">Entornos Activos</span>
+        <i class="fas fa-check-circle text-emerald-400"></i>
+      </div>
+      <div class="mt-2 text-2xl font-bold text-emerald-400">{{ metrics().active }}</div>
+    </div>
+
+    <div class="bg-slate-900/50 backdrop-blur border border-slate-800/80 rounded-2xl p-5 shadow-sm">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-semibold text-indigo-400 uppercase tracking-wider">Tipos de Ambiente</span>
+        <i class="fas fa-cubes text-indigo-400"></i>
+      </div>
+      <div class="mt-2 text-2xl font-bold text-indigo-400">{{ metrics().types }}</div>
+    </div>
+  </div>
+
+  <!-- Environment Cards Grid -->
+  <div class="bg-slate-900/60 backdrop-blur border border-slate-800/80 rounded-2xl p-6 shadow-xl space-y-4">
+    <div class="flex items-center justify-between">
+      <h2 class="text-lg font-bold text-white flex items-center gap-2">
+        <i class="fas fa-layer-group text-emerald-400"></i>
+        Configuraciones de Ambiente
+      </h2>
+      <span class="text-xs text-slate-400 font-mono">{{ environments().length }} entornos registrados</span>
+    </div>
+
+    @if (loading()) {
+      <div class="flex flex-col items-center justify-center py-16 text-slate-400">
+        <i class="fas fa-circle-notch fa-spin text-3xl text-emerald-500 mb-3"></i>
+        <p class="text-sm font-medium">Cargando entornos de prueba...</p>
+      </div>
+    } @else if (environments().length === 0) {
+      <div class="flex flex-col items-center justify-center py-16 px-4 text-center border-2 border-dashed border-slate-800 rounded-xl">
+        <div class="w-16 h-16 rounded-full bg-slate-800/50 flex items-center justify-center text-slate-500 mb-4">
+          <i class="fas fa-server text-2xl"></i>
+        </div>
+        <h3 class="text-base font-semibold text-slate-200 mb-1">Sin entornos configurados</h3>
+        <p class="text-sm text-slate-400 max-w-sm mb-4">
+          Registra los entornos (QA, Staging, UAT, etc.) para vincularlos a tus planes de prueba y garantizar reproducibilidad.
+        </p>
+        <button
+          (click)="openCreateModal()"
+          class="px-4 py-2 rounded-xl bg-emerald-600/80 hover:bg-emerald-600 text-white text-xs font-semibold transition-all"
+        >
+          <i class="fas fa-plus mr-1"></i> Configurar primer entorno
+        </button>
+      </div>
+    } @else {
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+        @for (env of environments(); track env.id) {
+          <div class="p-5 rounded-xl bg-slate-800/40 border border-slate-800/80 hover:border-slate-700 transition-all flex flex-col justify-between space-y-4 shadow-sm hover:shadow-md">
+            <div class="space-y-3">
+              <div class="flex items-start justify-between gap-2">
+                <div class="space-y-1">
+                  <div class="flex items-center gap-2">
+                    <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase" [ngClass]="getEnvTypeBadgeClass(env.environmentType)">
+                      {{ env.environmentType }}
+                    </span>
+                    @if (!env.isActive) {
+                      <span class="px-2 py-0.5 rounded text-[10px] bg-slate-800 text-slate-400 border border-slate-700">
+                        Inactivo
+                      </span>
+                    }
+                  </div>
+                  <h3 class="text-base font-bold text-white">{{ env.name }}</h3>
+                </div>
+
+                <div class="flex items-center gap-1">
+                  <button
+                    (click)="openEditModal(env)"
+                    title="Editar Entorno"
+                    class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/50 transition-colors"
+                  >
+                    <i class="fas fa-edit text-xs"></i>
+                  </button>
+                  <button
+                    (click)="deleteEnvironment(env)"
+                    title="Eliminar Entorno"
+                    class="p-1.5 rounded-lg text-slate-400 hover:text-red-400 hover:bg-slate-700/50 transition-colors"
+                  >
+                    <i class="fas fa-trash-alt text-xs"></i>
+                  </button>
+                </div>
+              </div>
+
+              @if (env.description) {
+                <p class="text-xs text-slate-400 leading-relaxed">{{ env.description }}</p>
+              }
+
+              <div class="space-y-2 text-xs text-slate-300 pt-2 border-t border-slate-800">
+                @if (env.baseUrl) {
+                  <div class="flex items-center gap-2 text-indigo-400">
+                    <i class="fas fa-link w-4 text-center"></i>
+                    <a [href]="env.baseUrl" target="_blank" class="hover:underline truncate font-mono text-[11px]">{{ env.baseUrl }}</a>
+                  </div>
+                }
+                @if (env.operatingSystem) {
+                  <div class="flex items-center gap-2">
+                    <i class="fas fa-desktop w-4 text-center text-slate-500"></i>
+                    <span>{{ env.operatingSystem }}</span>
+                  </div>
+                }
+                @if (env.browser) {
+                  <div class="flex items-center gap-2">
+                    <i class="fas fa-globe w-4 text-center text-slate-500"></i>
+                    <span>{{ env.browser }}</span>
+                  </div>
+                }
+                @if (env.softwareVersion) {
+                  <div class="flex items-center gap-2">
+                    <i class="fas fa-code-branch w-4 text-center text-slate-500"></i>
+                    <span class="font-mono text-[11px] bg-slate-900/60 px-1.5 py-0.5 rounded text-emerald-400">{{ env.softwareVersion }}</span>
+                  </div>
+                }
+                @if (env.additionalConfig) {
+                  <div class="pt-2">
+                    <span class="text-[10px] text-slate-500 uppercase font-bold block mb-0.5">Configuraciones:</span>
+                    <pre class="text-[11px] text-slate-400 bg-slate-900/80 p-2 rounded border border-slate-800 overflow-x-auto font-mono whitespace-pre-wrap">{{ env.additionalConfig }}</pre>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <div class="text-[10px] text-slate-500 pt-3 border-t border-slate-800/80 flex items-center justify-between">
+              <span>Creado: {{ env.createdAt | date:'shortDate' }}</span>
+              <span class="font-mono">ISTQB § 5.4</span>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Modal: Crear Entorno -->
+  @if (showCreateModal()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <h3 class="text-lg font-bold text-white flex items-center gap-2">
+            <i class="fas fa-network-wired text-emerald-400"></i>
+            Nuevo Entorno de Prueba
+          </h3>
+          <button (click)="showCreateModal.set(false)" class="text-slate-400 hover:text-white">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div class="space-y-3.5 text-sm">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Nombre del Entorno <span class="text-rose-400">*</span></label>
+            <input
+              type="text"
+              [(ngModel)]="newEnv.name"
+              placeholder="Ej: QA Staging Cloud, Lab Regression On-Premise"
+              class="w-full bg-slate-800/80 border border-slate-700 rounded-xl p-2.5 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+            />
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Tipo de Ambiente</label>
+              <select
+                [(ngModel)]="newEnv.environmentType"
+                class="w-full bg-slate-800/80 border border-slate-700 rounded-xl p-2.5 text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+              >
+                <option value="QA">QA / Testing</option>
+                <option value="Staging">Staging / Pre-Prod</option>
+                <option value="UAT">UAT / Aceptación</option>
+                <option value="Development">Development</option>
+                <option value="Production">Production (Sanity)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Versión de Software</label>
+              <input
+                type="text"
+                [(ngModel)]="newEnv.softwareVersion"
+                placeholder="v1.2.0-rc1"
+                class="w-full bg-slate-800/80 border border-slate-700 rounded-xl p-2.5 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">URL Base</label>
+            <input
+              type="text"
+              [(ngModel)]="newEnv.baseUrl"
+              placeholder="https://qa.app.midominio.com"
+              class="w-full bg-slate-800/80 border border-slate-700 rounded-xl p-2.5 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+            />
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Sistema Operativo</label>
+              <input
+                type="text"
+                [(ngModel)]="newEnv.operatingSystem"
+                placeholder="Ubuntu 22.04 / Win 11"
+                class="w-full bg-slate-800/80 border border-slate-700 rounded-xl p-2.5 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+              />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Navegadores / Runtime</label>
+              <input
+                type="text"
+                [(ngModel)]="newEnv.browser"
+                placeholder="Chrome 120+, Node 20"
+                class="w-full bg-slate-800/80 border border-slate-700 rounded-xl p-2.5 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Descripción</label>
+            <textarea
+              [(ngModel)]="newEnv.description"
+              rows="2"
+              placeholder="Propósito y alcance de este ambiente..."
+              class="w-full bg-slate-800/80 border border-slate-700 rounded-xl p-2.5 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+            ></textarea>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Configuración Adicional (Parámetros / Flags)</label>
+            <textarea
+              [(ngModel)]="newEnv.additionalConfig"
+              rows="2"
+              placeholder="DB: Postgres 16, FeatureFlags: { newCheckout: true }"
+              class="w-full bg-slate-800/80 border border-slate-700 rounded-xl p-2.5 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 font-mono text-xs"
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+          <button
+            (click)="showCreateModal.set(false)"
+            class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-semibold transition-colors"
+          >
+            Cancelar
+          </button>
+          <button
+            (click)="createEnvironment()"
+            class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold shadow-md transition-all"
+          >
+            Guardar Entorno
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Modal: Editar Entorno -->
+  @if (showEditModal()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <h3 class="text-lg font-bold text-white flex items-center gap-2">
+            <i class="fas fa-edit text-emerald-400"></i>
+            Editar Entorno de Prueba
+          </h3>
+          <button (click)="showEditModal.set(false)" class="text-slate-400 hover:text-white">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div class="space-y-3.5 text-sm">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Nombre del Entorno <span class="text-rose-400">*</span></label>
+            <input
+              type="text"
+              [(ngModel)]="editForm.name"
+              class="w-full bg-slate-800/80 border border-slate-700 rounded-xl p-2.5 text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+            />
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Tipo de Ambiente</label>
+              <select
+                [(ngModel)]="editForm.environmentType"
+                class="w-full bg-slate-800/80 border border-slate-700 rounded-xl p-2.5 text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+              >
+                <option value="QA">QA / Testing</option>
+                <option value="Staging">Staging / Pre-Prod</option>
+                <option value="UAT">UAT / Aceptación</option>
+                <option value="Development">Development</option>
+                <option value="Production">Production (Sanity)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Versión de Software</label>
+              <input
+                type="text"
+                [(ngModel)]="editForm.softwareVersion"
+                class="w-full bg-slate-800/80 border border-slate-700 rounded-xl p-2.5 text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">URL Base</label>
+            <input
+              type="text"
+              [(ngModel)]="editForm.baseUrl"
+              class="w-full bg-slate-800/80 border border-slate-700 rounded-xl p-2.5 text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+            />
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Sistema Operativo</label>
+              <input
+                type="text"
+                [(ngModel)]="editForm.operatingSystem"
+                class="w-full bg-slate-800/80 border border-slate-700 rounded-xl p-2.5 text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+              />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Navegadores / Runtime</label>
+              <input
+                type="text"
+                [(ngModel)]="editForm.browser"
+                class="w-full bg-slate-800/80 border border-slate-700 rounded-xl p-2.5 text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Descripción</label>
+            <textarea
+              [(ngModel)]="editForm.description"
+              rows="2"
+              class="w-full bg-slate-800/80 border border-slate-700 rounded-xl p-2.5 text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+            ></textarea>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Configuración Adicional</label>
+            <textarea
+              [(ngModel)]="editForm.additionalConfig"
+              rows="2"
+              class="w-full bg-slate-800/80 border border-slate-700 rounded-xl p-2.5 text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 font-mono text-xs"
+            ></textarea>
+          </div>
+
+          <div class="flex items-center gap-2 pt-1">
+            <input
+              type="checkbox"
+              id="isActiveEnv"
+              [(ngModel)]="editForm.isActive"
+              class="w-4 h-4 rounded text-emerald-600 bg-slate-800 border-slate-700 focus:ring-emerald-500"
+            />
+            <label for="isActiveEnv" class="text-xs font-medium text-slate-300 cursor-pointer">Entorno activo disponible para pruebas</label>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+          <button
+            (click)="showEditModal.set(false)"
+            class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-semibold transition-colors"
+          >
+            Cancelar
+          </button>
+          <button
+            (click)="updateEnvironment()"
+            class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold shadow-md transition-all"
+          >
+            Guardar Cambios
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+</div>

@@ -1,16 +1,21 @@
-import { Component, signal, inject, ChangeDetectorRef, ViewChild } from '@angular/core';
+import { Component, signal, inject, ChangeDetectorRef, ViewChild, OnInit } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
 import { HasPermissionDirective } from '../../shared/directives/has-permission.directive';
 import { filter } from 'rxjs/operators';
 import { ProfileModalComponent } from '../../features/profile/profile-modal.component';
+import { ProjectsService } from '../../core/services/projects.service';
+import { ProjectContextService } from '../../core/services/project-context.service';
+import { Project } from '../../core/models/project.model';
 
 @Component({
   selector: 'app-main-layout',
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     RouterOutlet,
     RouterLink,
     RouterLinkActive,
@@ -21,8 +26,7 @@ import { ProfileModalComponent } from '../../features/profile/profile-modal.comp
     <div class="min-h-screen bg-[#F6F6F8] flex overflow-hidden font-display text-slate-800 relative">
       <!-- Background Pattern Layer (Forced Visibility) -->
       <div 
-        class="fixed inset-0 opacity-[0.25] pointer-events-none transition-opacity duration-700"
-        style="background-image: url('/images/bg-qa.png?v=4'); background-repeat: repeat; background-size: 800px; z-index: 1;"
+        class="fixed inset-0 opacity-[0.25] pointer-events-none transition-opacity duration-700 main-bg-pattern"
       ></div>
 
       <!-- ============ SIDEBAR ============ -->
@@ -40,12 +44,12 @@ import { ProfileModalComponent } from '../../features/profile/profile-modal.comp
             </div>
             <span class="text-white font-bold text-xl tracking-tight">QAMS</span>
           </div>
-          <span class="text-[10px] text-slate-400 font-bold tracking-widest mt-2 ml-1">Quality assurance</span>
+          <span class="text-[10px] text-slate-400 font-bold tracking-widest mt-2 ml-1">Gestión de Calidad de Software</span>
         </div>
 
         <!-- Navegación -->
         <nav class="flex-1 px-4 space-y-2 overflow-y-auto custom-scrollbar pb-6">
-          <p class="px-4 text-[10px] font-bold text-slate-500 tracking-widest mb-3 mt-2">Menú principal</p>
+          <p class="px-4 text-[10px] font-bold text-slate-500 tracking-widest mb-3 mt-2">GENERAL</p>
           
           <!-- Dashboard -->
           <a
@@ -57,6 +61,36 @@ import { ProfileModalComponent } from '../../features/profile/profile-modal.comp
           >
             <i class="fas fa-th-large w-5 text-center group-hover:scale-110 transition-transform"></i>
             <span class="font-semibold">Dashboard</span>
+          </a>
+
+          <div class="pt-4 pb-2">
+            <p class="px-4 text-[10px] font-bold text-slate-500 tracking-widest">
+              CICLO QA (ISTQB)
+            </p>
+          </div>
+
+          <!-- Sistemas Bajo Prueba -->
+          <a
+            *hasPermission="'PROJECTS_VIEW'"
+            routerLink="/systems-under-test"
+            routerLinkActive="bg-[#150fbd]/20 text-white border-l-4 border-[#150fbd] shadow-[inset_0_0_20px_rgba(21,15,189,0.15)]"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
+                    text-slate-400 hover:text-white hover:bg-white/5 transition-all group"
+          >
+            <i class="fas fa-server w-5 text-center group-hover:scale-110 transition-transform"></i>
+            <span class="font-medium group-[.active]:font-semibold">Sistemas Bajo Prueba</span>
+          </a>
+
+          <!-- Entornos de Prueba (ISTQB Cap 5.4) -->
+          <a
+            *hasPermission="'PROJECTS_VIEW'"
+            routerLink="/test-environments"
+            routerLinkActive="bg-[#150fbd]/20 text-white border-l-4 border-[#150fbd] shadow-[inset_0_0_20px_rgba(21,15,189,0.15)]"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
+                    text-slate-400 hover:text-white hover:bg-white/5 transition-all group"
+          >
+            <i class="fas fa-network-wired w-5 text-center group-hover:scale-110 transition-transform text-emerald-400"></i>
+            <span class="font-medium group-[.active]:font-semibold">Entornos de Prueba</span>
           </a>
 
           <!-- Proyectos -->
@@ -81,6 +115,30 @@ import { ProfileModalComponent } from '../../features/profile/profile-modal.comp
           >
             <i class="fas fa-list-check w-5 text-center group-hover:scale-110 transition-transform"></i>
             <span class="font-medium group-[.active]:font-semibold">Requisitos</span>
+          </a>
+
+          <!-- Pruebas Estáticas (Walkthroughs & Inspecciones ISTQB) -->
+          <a
+            *hasPermission="'PROJECTS_VIEW'"
+            routerLink="/reviews"
+            routerLinkActive="bg-[#150fbd]/20 text-white border-l-4 border-[#150fbd] shadow-[inset_0_0_20px_rgba(21,15,189,0.15)]"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
+                    text-slate-400 hover:text-white hover:bg-white/5 transition-all group"
+          >
+            <i class="fas fa-microscope w-5 text-center group-hover:scale-110 transition-transform text-amber-400"></i>
+            <span class="font-medium group-[.active]:font-semibold">Pruebas Estáticas</span>
+          </a>
+
+          <!-- Planes de Prueba -->
+          <a
+            *hasPermission="'TEST_CASES_VIEW'"
+            routerLink="/test-plans"
+            routerLinkActive="bg-[#150fbd]/20 text-white border-l-4 border-[#150fbd] shadow-[inset_0_0_20px_rgba(21,15,189,0.15)]"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
+                    text-slate-400 hover:text-white hover:bg-white/5 transition-all group"
+          >
+            <i class="fas fa-clipboard-list w-5 text-center group-hover:scale-110 transition-transform"></i>
+            <span class="font-medium group-[.active]:font-semibold">Planes de Prueba</span>
           </a>
 
           <!-- Escenarios -->
@@ -119,6 +177,36 @@ import { ProfileModalComponent } from '../../features/profile/profile-modal.comp
             <span class="font-medium group-[.active]:font-semibold">Ejecuciones</span>
           </a>
 
+          <!-- Pruebas Exploratorias (ISTQB Cap 4.4) -->
+          <a
+            *hasPermission="'PROJECTS_VIEW'"
+            routerLink="/exploratory"
+            routerLinkActive="bg-[#150fbd]/20 text-white border-l-4 border-[#150fbd] shadow-[inset_0_0_20px_rgba(21,15,189,0.15)]"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
+                    text-slate-400 hover:text-white hover:bg-white/5 transition-all group"
+          >
+            <i class="fas fa-compass w-5 text-center group-hover:scale-110 transition-transform text-sky-400"></i>
+            <span class="font-medium group-[.active]:font-semibold">Exploratorias</span>
+          </a>
+
+          <!-- Defectos -->
+          <a
+            *hasPermission="'PROJECTS_VIEW'"
+            routerLink="/defects"
+            routerLinkActive="bg-[#150fbd]/20 text-white border-l-4 border-[#150fbd] shadow-[inset_0_0_20px_rgba(21,15,189,0.15)]"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
+                    text-slate-400 hover:text-white hover:bg-white/5 transition-all group"
+          >
+            <i class="fas fa-bug w-5 text-center group-hover:scale-110 transition-transform text-rose-400"></i>
+            <span class="font-medium group-[.active]:font-semibold">Defectos</span>
+          </a>
+
+          <div class="pt-4 pb-2">
+            <p class="px-4 text-[10px] font-bold text-slate-500 tracking-widest">
+              GESTIÓN ÁGIL
+            </p>
+          </div>
+
           <!-- Kanban -->
           <a
             *hasPermission="'KANBAN_VIEW'"
@@ -131,6 +219,12 @@ import { ProfileModalComponent } from '../../features/profile/profile-modal.comp
             <span class="font-medium group-[.active]:font-semibold">Tablero Kanban</span>
           </a>
 
+          <div class="pt-4 pb-2">
+            <p class="px-4 text-[10px] font-bold text-slate-500 tracking-widest">
+              ANÁLISIS
+            </p>
+          </div>
+
           <!-- Reportes -->
           <a
             *hasPermission="'DASHBOARD_VIEW'"
@@ -139,7 +233,7 @@ import { ProfileModalComponent } from '../../features/profile/profile-modal.comp
             class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
                     text-slate-400 hover:text-white hover:bg-white/5 transition-all group"
           >
-            <i class="fas fa-file-signature w-5 text-center group-hover:scale-110 transition-transform"></i>
+            <i class="fas fa-chart-bar w-5 text-center group-hover:scale-110 transition-transform"></i>
             <span class="font-medium group-[.active]:font-semibold">Reportes</span>
           </a>
 
@@ -147,7 +241,7 @@ import { ProfileModalComponent } from '../../features/profile/profile-modal.comp
           <ng-container *ngIf="authService.isAdmin() || authService.hasPermission('USERS_VIEW') || authService.hasPermission('ROLES_VIEW') || authService.hasPermission('CATALOGS_VIEW')">
             <div class="pt-6 pb-2">
               <p class="px-4 text-[10px] font-bold text-slate-500 tracking-widest">
-                Configuración
+                CONFIGURACIÓN
               </p>
             </div>
 
@@ -187,16 +281,16 @@ import { ProfileModalComponent } from '../../features/profile/profile-modal.comp
               <span class="font-medium group-[.active]:font-semibold">Catálogos</span>
             </a>
 
-            <!-- Test Reset Password (Solo Admin) -->
+            <!-- API Keys -->
             <a
-              *ngIf="authService.isAdmin()"
-              routerLink="/auth/reset-password"
+              *hasPermission="'CATALOGS_VIEW'"
+              routerLink="/admin/api-keys"
               routerLinkActive="bg-[#150fbd]/20 text-white border-l-4 border-[#150fbd] shadow-[inset_0_0_20px_rgba(21,15,189,0.15)]"
               class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
-                      text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-all group mt-6 border border-rose-500/10"
+                      text-slate-400 hover:text-white hover:bg-white/5 transition-all group"
             >
               <i class="fas fa-key w-5 text-center group-hover:scale-110 transition-transform"></i>
-              <span class="font-medium group-[.active]:font-semibold">Test Reset Password</span>
+              <span class="font-medium group-[.active]:font-semibold">API Keys</span>
             </a>
           </ng-container>
         </nav>
@@ -225,9 +319,30 @@ import { ProfileModalComponent } from '../../features/profile/profile-modal.comp
               </nav>
               <!-- We can add a dynamic title later or leave it to standard views -->
             </div>
+
+            <!-- Project Selection Dropdown in Navbar -->
+            <div class="relative group ml-4">
+              <select 
+                [ngModel]="activeProjectId()" 
+                (ngModelChange)="onProjectChange($event)"
+                class="bg-slate-100 hover:bg-slate-200/80 border border-slate-200 text-slate-700 text-xs font-bold rounded-xl px-4 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all appearance-none cursor-pointer shadow-sm"
+              >
+                <option value="" disabled>Seleccionar Proyecto...</option>
+                <option *ngFor="let p of projects()" [value]="p.id">{{ p.name }}</option>
+              </select>
+              <i class="fas fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-[10px] pointer-events-none group-hover:text-slate-600 transition-colors"></i>
+            </div>
           </div>
 
           <div class="flex items-center gap-5">
+            <!-- Global Search Bar -->
+            <div class="hidden md:flex items-center relative mr-2">
+              <i class="ri-search-line absolute left-3 text-slate-400"></i>
+              <input type="text" placeholder="Buscar casos, defectos, proyectos..." 
+                     class="bg-white border border-slate-200 text-sm rounded-full pl-9 pr-4 py-2 w-72 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-slate-700 placeholder-slate-400 shadow-sm">
+              <div class="absolute right-2 px-2 py-0.5 bg-slate-100 rounded text-[10px] font-bold text-slate-400 border border-slate-200 pointer-events-none">Ctrl K</div>
+            </div>
+
             <button class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-500 relative hover:text-slate-800 transition-colors shadow-sm">
               <i class="fas fa-bell"></i>
               <span class="absolute top-2.5 right-2.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-white"></span>
@@ -319,32 +434,67 @@ import { ProfileModalComponent } from '../../features/profile/profile-modal.comp
       <app-profile-modal #profileModal />
     </div>
   `,
-  styles: [`
-    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
-  `]
+  styleUrl: './main-layout.component.scss'
 })
-export class MainLayoutComponent {
+export class MainLayoutComponent implements OnInit {
   @ViewChild('profileModal') profileModal!: ProfileModalComponent;
-  // Estado para controlar el menú de usuario
   userMenuOpen: boolean = false;
-
-  // Señal para controlar visibilidad del sidebar en móvil
   sidebarOpen = signal(false);
+
+  projects = signal<Project[]>([]);
+  private readonly projectsService = inject(ProjectsService);
+  private readonly projectContext = inject(ProjectContextService);
+  readonly activeProjectId = this.projectContext.activeProjectId;
 
   private readonly router = inject(Router);
   private readonly cdr = inject(ChangeDetectorRef);
 
+  // ===== Flujo QA ISTQB Stepper =====
+  qaFlowSteps = [
+    { label: 'SUT (Sistema)', route: '/systems-under-test', active: false },
+    { label: 'Proyecto', route: '/projects', active: false },
+    { label: 'Requisitos', route: '/requirements', active: false },
+    { label: 'Plan de Pruebas', route: '/test-plans', active: false },
+    { label: 'Escenarios', route: '/test-scenarios', active: false },
+    { label: 'Casos de Prueba', route: '/test-cases', active: false },
+    { label: 'Ejecuciones', route: '/test-executions', active: false },
+    { label: 'Defectos', route: '/defects', active: false },
+    { label: 'Reportes', route: '/reports', active: false },
+  ];
+
   constructor(public authService: AuthService) {
-    // Escuchar cambios de ruta para cerrar el sidebar y menús en móvil
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
-    ).subscribe(() => {
+    ).subscribe((event: any) => {
       this.sidebarOpen.set(false);
       this.closeUserMenu();
+      // Actualizar el paso activo del stepper
+      this.qaFlowSteps = this.qaFlowSteps.map(step => ({
+        ...step,
+        active: event.urlAfterRedirects?.startsWith(step.route) ?? false
+      }));
     });
+  }
+
+  ngOnInit(): void {
+    this.loadProjects();
+  }
+
+  loadProjects(): void {
+    this.projectsService.getProjects().subscribe({
+      next: (projs) => {
+        this.projects.set(projs);
+        if (projs.length > 0 && !this.activeProjectId()) {
+          const initialId = projs[0].id;
+          this.projectContext.setActiveProject(initialId);
+        }
+      },
+      error: (err) => console.error('[MainLayout] Error loading projects:', err)
+    });
+  }
+
+  onProjectChange(projectId: string): void {
+    this.projectContext.setActiveProject(projectId);
   }
 
   /** Alterna visibilidad del menú de usuario */

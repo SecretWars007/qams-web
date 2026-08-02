@@ -7,7 +7,10 @@
     "build": "ng build",
     "build:prod": "sed -i \"s|apiUrl: '/api'|apiUrl: '$API_URL'|g\" src/environments/environment.prod.ts && ng build --configuration production",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "bddgen": "npx bddgen",
+    "e2e": "npm run bddgen && npx playwright test",
+    "generate:manual": "npm run bddgen && npx playwright test --grep \"@manual\" && node scripts/build-manual.js"
   },
   "private": true,
   "dependencies": {
@@ -34,16 +37,21 @@
     "@angular-devkit/build-angular": "^19.1.0",
     "@angular/cli": "^19.1.0",
     "@angular/compiler-cli": "^19.1.0",
+    "@cucumber/cucumber": "^13.2.0",
+    "@playwright/test": "^1.61.1",
     "@types/bonjour": "^3.5.13",
     "@types/crypto-js": "^4.2.2",
     "@types/jasmine": "~5.1.0",
     "autoprefixer": "^10.4.24",
+    "html-to-docx": "^1.8.0",
     "jasmine-core": "~5.5.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
+    "marked": "^18.0.7",
+    "playwright-bdd": "^9.2.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.19",
     "typescript": "~5.7.2"

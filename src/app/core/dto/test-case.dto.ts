@@ -17,6 +17,9 @@ export interface TestCaseDto {
   createdAt: string;
   createdByUserName: string;
   steps: TestCaseStepDto[];
+  impactLevel?: number;
+  likelihoodLevel?: number;
+  riskScore?: number;
 }
 
 export interface TestCaseStepDto {
@@ -34,4 +37,6 @@ export interface CreateTestCaseDto {
   preconditions: string;
   expectedResult: string;
   priorityId: number;
+  impactLevel?: number;
+  likelihoodLevel?: number;
 }

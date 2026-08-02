@@ -1,0 +1,51 @@
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-8">
+  <!-- 5x5 Risk Heatmap -->
+  <div class="bg-gray-900/40 rounded-2xl border border-white/5 p-6 backdrop-blur-md">
+    <h2 class="text-xs font-black text-gray-400 uppercase tracking-widest mb-4">Matriz de Calor de Riesgos 5x5</h2>
+    <div class="grid grid-cols-5 gap-2 text-center text-[10px] font-bold">
+      <div *ngFor="let cell of [
+        {p:5,i:1,c:'bg-yellow-900/30 text-yellow-400'}, {p:5,i:2,c:'bg-amber-900/40 text-amber-400'}, {p:5,i:3,c:'bg-rose-900/50 text-rose-300'}, {p:5,i:4,c:'bg-rose-900/70 text-rose-200'}, {p:5,i:5,c:'bg-rose-600 text-white font-black'},
+        {p:4,i:1,c:'bg-emerald-900/30 text-emerald-400'}, {p:4,i:2,c:'bg-yellow-900/30 text-yellow-400'}, {p:4,i:3,c:'bg-amber-900/40 text-amber-400'}, {p:4,i:4,c:'bg-rose-900/50 text-rose-300'}, {p:4,i:5,c:'bg-rose-900/70 text-rose-200'},
+        {p:3,i:1,c:'bg-emerald-900/30 text-emerald-400'}, {p:3,i:2,c:'bg-emerald-900/30 text-emerald-400'}, {p:3,i:3,c:'bg-yellow-900/30 text-yellow-400'}, {p:3,i:4,c:'bg-amber-900/40 text-amber-400'}, {p:3,i:5,c:'bg-rose-900/50 text-rose-300'},
+        {p:2,i:1,c:'bg-emerald-900/30 text-emerald-400'}, {p:2,i:2,c:'bg-emerald-900/30 text-emerald-400'}, {p:2,i:3,c:'bg-emerald-900/30 text-emerald-400'}, {p:2,i:4,c:'bg-yellow-900/30 text-yellow-400'}, {p:2,i:5,c:'bg-amber-900/40 text-amber-400'},
+        {p:1,i:1,c:'bg-emerald-900/30 text-emerald-400'}, {p:1,i:2,c:'bg-emerald-900/30 text-emerald-400'}, {p:1,i:3,c:'bg-emerald-900/30 text-emerald-400'}, {p:1,i:4,c:'bg-emerald-900/30 text-emerald-400'}, {p:1,i:5,c:'bg-yellow-900/30 text-yellow-400'}
+      ]" [class]="cell.c + ' p-3 rounded-lg border border-white/5 flex flex-col items-center justify-center h-12'">
+        <span>P{{cell.p}}-I{{cell.i}}</span>
+        <span class="text-[9px] opacity-75 font-mono">{{ getHeatmapCount(cell.p, cell.i) }}</span>
+      </div>
+    </div>
+    <p class="text-[9px] text-gray-500 mt-4 text-center">P: Probabilidad (1-5) • I: Impacto (1-5)</p>
+  </div>
+
+  <!-- Risks Table -->
+  <div class="xl:col-span-2 bg-gray-900/40 rounded-2xl border border-white/5 p-6 backdrop-blur-md overflow-x-auto">
+    <h2 class="text-xs font-black text-gray-400 uppercase tracking-widest mb-4">Evaluación de Riesgos del Producto</h2>
+    <table class="w-full text-left text-xs border-collapse">
+      <thead>
+        <tr class="bg-gray-900 text-gray-400 border-b border-white/5 uppercase text-[9px] font-black tracking-widest">
+          <th class="p-3">Requisito</th>
+          <th class="p-3">Categoría</th>
+          <th class="p-3">P x I</th>
+          <th class="p-3">Nivel de Riesgo</th>
+          <th class="p-3">Estrategia de Mitigación ISTQB</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-white/5 text-gray-300">
+        <tr *ngFor="let r of risks()" class="hover:bg-white/[0.02]">
+          <td class="p-3">
+            <span class="font-mono text-rose-400 text-[10px] block font-bold">{{ r.requirementCode }}</span>
+            <span class="text-white font-medium">{{ r.requirementTitle }}</span>
+          </td>
+          <td class="p-3 text-gray-400 font-mono">{{ r.category }}</td>
+          <td class="p-3 font-mono font-bold text-white">{{ r.probability }} x {{ r.impact }} = {{ r.riskScore }}</td>
+          <td class="p-3">
+            <span [class]="getRiskColor(r.riskLevel)" class="px-2.5 py-1 rounded-lg text-[9px] font-black uppercase border">
+              {{ r.riskLevel }}
+            </span>
+          </td>
+          <td class="p-3 text-gray-400 leading-tight max-w-xs">{{ r.mitigationStrategy }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, inject } from '@angular/core';
+import { Component, OnInit, signal, inject, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { UsersService } from '../../../core/services/users.service';
@@ -8,6 +8,7 @@ import { User, UpdateUser } from '../../../core/models/user.model';
 import { Role } from '../../../core/models/role.model';
 import { firstValueFrom } from 'rxjs';
 import Swal from 'sweetalert2';
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 
 @Component({
   selector: 'app-users',
@@ -17,6 +18,7 @@ import Swal from 'sweetalert2';
   styleUrl: './users.component.scss'
 })
 export class UsersComponent implements OnInit {
+    private destroyRef = inject(DestroyRef);
   private readonly usersService = inject(UsersService);
   private readonly rolesService = inject(RolesService);
   private readonly authService = inject(AuthService); // Inyectar AuthService
@@ -74,7 +76,7 @@ export class UsersComponent implements OnInit {
 
   loadData(): void {
     this.isLoading.set(true);
-    this.usersService.getUsers().subscribe({
+    this.usersService.getUsers().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (data) => {
         // Filtrar usuarios eliminados lógicamente (tanto is_deleted como isDeleted por formato JSON)
         const activeUsers = data.filter(u => u.is_deleted !== true && u.isDeleted !== true);
@@ -85,7 +87,7 @@ export class UsersComponent implements OnInit {
     });
 
     // Cargar roles para el selector
-    this.rolesService.getRoles().subscribe({
+    this.rolesService.getRoles().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (data) => this.roles.set(data)
     });
   }
@@ -222,7 +224,7 @@ export class UsersComponent implements OnInit {
         const previousUsers = this.users();
         this.users.set(previousUsers.filter(u => u.id !== userId));
 
-        this.usersService.deleteUser(userId).subscribe({
+        this.usersService.deleteUser(userId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
           next: () => {
             Swal.fire({
               title: '¡Eliminado!',
@@ -284,11 +286,11 @@ export class UsersComponent implements OnInit {
           .map(r => r.id);
 
         this.usersService.updateUser(user.id, {
-          email: user.email,
-          fullName: user.fullName,
-          isActive: newStatus,
-          roleIds: roleIds
-        }).subscribe({
+                    email: user.email,
+                    fullName: user.fullName,
+                    isActive: newStatus,
+                    roleIds: roleIds
+                  }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
           next: () => {
             this.loadData();
             Swal.fire({
@@ -375,7 +377,7 @@ export class UsersComponent implements OnInit {
       roleIds: roleIds
     };
 
-    this.usersService.updateUser(this.selectedUser.id, updateDto).subscribe({
+    this.usersService.updateUser(this.selectedUser.id, updateDto).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.isSubmitting.set(false);
         this.loadData();
@@ -446,7 +448,7 @@ export class UsersComponent implements OnInit {
       roleIds: [formValue.roleId]
     };
 
-    this.usersService.createUser(createDto).subscribe({
+    this.usersService.createUser(createDto).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.isSubmitting.set(false);
         this.loadData();

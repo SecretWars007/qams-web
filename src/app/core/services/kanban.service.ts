@@ -6,7 +6,6 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { KanbanBoard } from '../models/kanban.model';
-import { KanbanMockService } from './kanban.mock.service';
 
 @Injectable({ providedIn: 'root' })
 export class KanbanService {
@@ -17,7 +16,6 @@ export class KanbanService {
     private readonly apiUrl = `${environment.apiUrl}/Kanban`;
 
     private readonly http = inject(HttpClient);
-    private readonly mockService = inject(KanbanMockService);
 
     /**
      * Obtiene el tablero Kanban de un proyecto.
@@ -25,9 +23,6 @@ export class KanbanService {
      * @param projectId - ID del proyecto (requerido)
      */
     getBoard(projectId?: string): Observable<KanbanBoard> {
-        if (environment.useMock) {
-            return this.mockService.getBoard(projectId);
-        }
 
         if (!projectId) {
             console.error(this.LOG_TAG, 'projectId es requerido para cargar el tablero');
@@ -53,9 +48,6 @@ export class KanbanService {
      * @param board - Tablero con datos actualizados
      */
     updateBoard(board: KanbanBoard): Observable<KanbanBoard> {
-        if (environment.useMock) {
-            return this.mockService.updateBoard(board);
-        }
         console.log(this.LOG_TAG, 'Actualizando tablero:', board.id);
         return this.http.put<KanbanBoard>(`${this.apiUrl}/board/${board.id}`, board);
     }
@@ -67,9 +59,6 @@ export class KanbanService {
      * @param newOrder - Posición dentro de la columna destino
      */
     moveTask(taskId: string, targetColumnId: string, newOrder: number): Observable<any> {
-        if (environment.useMock) {
-            return this.mockService.moveTask(taskId, targetColumnId, newOrder);
-        }
         console.log(this.LOG_TAG, 'Moviendo tarea:', taskId, '→ columna:', targetColumnId);
         return this.http.put(`${this.apiUrl}/task/${taskId}/move`, {
             targetColumnId,

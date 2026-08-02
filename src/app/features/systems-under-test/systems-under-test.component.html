@@ -1,0 +1,125 @@
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/50 p-6 rounded-2xl border border-white/20 backdrop-blur-md shadow-sm">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-800 tracking-tight">Sistemas Bajo Prueba (SUT)</h1>
+      <p class="text-gray-500 text-sm mt-1">Gestiona los entornos, aplicaciones y repositorios que están siendo evaluados.</p>
+    </div>
+    <button *ngIf="hasRequiredRole()" (click)="openCreateModal()" class="btn-primary flex items-center gap-2">
+      <i class="ri-add-line"></i>
+      Nuevo SUT
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading()" class="flex justify-center p-12">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
+  </div>
+
+  <!-- Contenido -->
+  <div *ngIf="!loading()" class="bg-white/80 rounded-2xl border border-white/20 shadow-sm overflow-hidden backdrop-blur-md">
+
+    <!-- Empty State -->
+    <div *ngIf="suts().length === 0" class="text-center py-16 px-4">
+      <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-50 text-blue-400 mb-4 border border-blue-100">
+        <i class="ri-server-line text-2xl"></i>
+      </div>
+      <h3 class="text-lg font-medium text-gray-900 mb-1">No hay Sistemas Registrados</h3>
+      <p class="text-gray-500 text-sm">Registra tu primera aplicación, servicio o entorno para comenzar a probar.</p>
+    </div>
+
+    <!-- Lista de SUTs (Tarjetas en lugar de tabla para un look más moderno) -->
+    <div class="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" *ngIf="suts().length > 0">
+      
+      <div *ngFor="let sut of suts()" class="group bg-white rounded-xl border border-gray-100 hover:border-blue-200 hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col h-full">
+        <div class="p-5 flex-1 flex flex-col relative">
+          <div class="flex justify-between items-start mb-3">
+            <div class="flex items-center gap-3">
+              <!-- Icono dinámico según la plataforma -->
+              <div class="w-10 h-10 rounded-lg border flex items-center justify-center transition-colors"
+                   [ngClass]="{
+                     'bg-blue-50 border-blue-100 text-blue-600': sut.platformTypeCode === 'WEB' || !sut.platformTypeCode,
+                     'bg-purple-50 border-purple-100 text-purple-600': sut.platformTypeCode === 'DESKTOP',
+                     'bg-amber-50 border-amber-100 text-amber-600': sut.platformTypeCode === 'DATA_PROCESSING'
+                   }">
+                <i [ngClass]="{
+                  'ri-global-line': sut.platformTypeCode === 'WEB' || !sut.platformTypeCode,
+                  'ri-computer-line': sut.platformTypeCode === 'DESKTOP',
+                  'ri-cpu-line': sut.platformTypeCode === 'DATA_PROCESSING'
+                }" class="text-xl"></i>
+              </div>
+              <div>
+                <h3 class="font-semibold text-gray-800 text-lg leading-tight">{{ sut.name }}</h3>
+                <div class="flex flex-wrap gap-1 mt-1">
+                  <span class="text-xs font-medium px-2 py-0.5 rounded bg-gray-100 text-gray-600 border border-gray-200">
+                    v{{ sut.version }}
+                  </span>
+                  <span class="text-xs font-medium px-2 py-0.5 rounded border"
+                        [ngClass]="{
+                          'bg-blue-50/50 text-blue-700 border-blue-100': sut.platformTypeCode === 'WEB' || !sut.platformTypeCode,
+                          'bg-purple-50/50 text-purple-700 border-purple-100': sut.platformTypeCode === 'DESKTOP',
+                          'bg-amber-50/50 text-amber-700 border-amber-100': sut.platformTypeCode === 'DATA_PROCESSING'
+                        }">
+                    {{ sut.platformTypeName || 'Aplicación Web' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <!-- Acciones -->
+            <div class="flex opacity-0 group-hover:opacity-100 transition-opacity" *ngIf="hasRequiredRole()">
+              <button (click)="openEditModal(sut)" class="p-1.5 text-gray-400 hover:text-blue-600 rounded hover:bg-blue-50 transition-colors" title="Editar">
+                <i class="ri-pencil-line"></i>
+              </button>
+              <button (click)="deleteSut(sut)" class="p-1.5 text-gray-400 hover:text-red-600 rounded hover:bg-red-50 transition-colors" title="Eliminar">
+                <i class="ri-delete-bin-line"></i>
+              </button>
+            </div>
+          </div>
+          
+          <p class="text-sm text-gray-500 mb-4 line-clamp-2">{{ sut.description || 'Sin descripción' }}</p>
+          
+          <div class="mt-auto space-y-2 pt-2 border-t border-gray-50">
+            <!-- URL de acceso / BaseUrl -->
+            <div class="flex items-center text-xs text-gray-500" *ngIf="sut.baseUrl || sut.url">
+              <i class="ri-link-m mr-2 text-gray-400"></i>
+              <a [href]="sut.baseUrl || sut.url" target="_blank" class="text-blue-600 hover:underline truncate">{{ sut.baseUrl || sut.url }}</a>
+            </div>
+            <!-- Campos específicos de escritorio -->
+            <div class="flex items-center text-xs text-gray-500" *ngIf="sut.executablePath">
+              <i class="ri-folder-open-line mr-2 text-gray-400" title="Ruta del Ejecutable"></i>
+              <span class="truncate text-gray-700" [title]="sut.executablePath"><b>Ruta:</b> {{ sut.executablePath }}</span>
+            </div>
+            <div class="flex items-center text-xs text-gray-500" *ngIf="sut.processName">
+              <i class="ri-settings-3-line mr-2 text-gray-400" title="Nombre del Proceso"></i>
+              <span class="truncate text-gray-700"><b>Proceso:</b> {{ sut.processName }}</span>
+            </div>
+            <!-- Entorno -->
+            <div class="flex items-center text-xs text-gray-500" *ngIf="sut.environment">
+              <i class="ri-mac-line mr-2 text-gray-400"></i>
+              <span><b>Entorno:</b> {{ sut.environment }}</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-gray-50/50 px-5 py-3 border-t border-gray-100 flex justify-between items-center text-xs text-gray-500">
+          <div class="flex items-center gap-1">
+            <div class="w-2 h-2 rounded-full" [ngClass]="sut.isActive ? 'bg-green-500' : 'bg-red-500'"></div>
+            <span>{{ sut.isActive ? 'Activo' : 'Inactivo' }}</span>
+          </div>
+          <span>Actualizado {{ sut.updatedAt | date:'shortDate' }}</span>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+<!-- Modal Create/Edit SUT -->
+<app-system-under-test-modal
+  *ngIf="showModal()"
+  [sut]="selectedSut()"
+  [isEdit]="isEdit()"
+  (closeModal)="closeModal()"
+  (saveSut)="onSave($event)">
+</app-system-under-test-modal>
+

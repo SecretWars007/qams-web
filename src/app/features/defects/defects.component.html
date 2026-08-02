@@ -1,0 +1,141 @@
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/50 p-6 rounded-2xl border border-white/20 backdrop-blur-md shadow-sm">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-800 tracking-tight">Gestión de Defectos</h1>
+      <p class="text-gray-500 text-sm mt-1">Registra y haz seguimiento a los bugs encontrados en el sistema.</p>
+    </div>
+    <button (click)="openCreateModal()" class="btn-primary flex items-center gap-2">
+      <i class="ri-bug-line"></i>
+      Nuevo Defecto
+    </button>
+  </div>
+
+  <!-- Filtros rápidos tipo Chips -->
+  <div class="flex flex-wrap gap-2 items-center">
+    <span class="text-xs font-bold text-gray-400 tracking-widest mr-1">FILTRAR:</span>
+    <button
+      *ngFor="let f of filterChips"
+      (click)="onFilterChange(f.value)"
+      class="px-3 py-1.5 rounded-full text-xs font-bold border transition-all"
+      [class.bg-gray-800]="statusFilter() === f.value"
+      [class.text-white]="statusFilter() === f.value"
+      [class.border-gray-800]="statusFilter() === f.value"
+      [class.bg-white]="statusFilter() !== f.value"
+      [class.text-gray-500]="statusFilter() !== f.value"
+      [class.border-gray-200]="statusFilter() !== f.value"
+      [class.hover:border-gray-400]="statusFilter() !== f.value"
+    >{{ f.label }}</button>
+  </div>
+
+  <!-- Skeleton Loader -->
+  <div *ngIf="loading()" class="bg-white/80 rounded-2xl border border-white/20 shadow-sm overflow-hidden backdrop-blur-md">
+    <app-skeleton-loader [rows]="5" [columns]="4"></app-skeleton-loader>
+  </div>
+
+  <!-- Contenido -->
+  <div *ngIf="!loading()" class="bg-white/80 rounded-2xl border border-white/20 shadow-sm overflow-hidden backdrop-blur-md">
+
+    <!-- Empty State -->
+    <div *ngIf="defects().length === 0" class="text-center py-16 px-4">
+      <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-50 text-green-500 mb-4 border border-green-100">
+        <i class="ri-shield-check-line text-2xl"></i>
+      </div>
+      <h3 class="text-lg font-medium text-gray-900 mb-1">¡No hay defectos!</h3>
+      <p class="text-gray-500 text-sm">El proyecto está limpio o no hay bugs en este estado.</p>
+    </div>
+
+    <!-- Tabla de Defectos -->
+    <div class="overflow-x-auto" *ngIf="defects().length > 0">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-gray-50/50 border-b border-gray-100 text-xs text-gray-500 uppercase tracking-wider">
+            <th class="py-4 px-6 font-medium">Defecto</th>
+            <th class="py-4 px-6 font-medium">Estado</th>
+            <th class="py-4 px-6 font-medium">Prioridad / Severidad</th>
+            <th class="py-4 px-6 font-medium">Antigüedad</th>
+            <th class="py-4 px-6 font-medium">Asignado a</th>
+            <th class="py-4 px-6 font-medium text-right">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <tr *ngFor="let defect of defects()" class="hover:bg-gray-50/50 transition-colors group">
+            <td class="py-4 px-6">
+              <button type="button" class="text-left font-medium text-gray-800 line-clamp-1 hover:text-primary-600 transition-colors w-full" (click)="openEditModal(defect)">
+                {{ defect.title }}
+              </button>
+              <div class="text-xs text-gray-500 font-mono mt-1 flex items-center gap-2">
+                <span>#{{ defect.id.substring(0, 8) }}</span>
+                <button class="text-gray-400 hover:text-gray-600 transition-colors" title="Copiar ID"
+                  (click)="copyToClipboard(defect.id, $event)">
+                  <i class="ri-file-copy-line text-xs"></i>
+                </button>
+                <span *ngIf="defect.testCaseId" class="text-blue-500" title="Relacionado a caso de prueba">
+                  <i class="ri-flask-line"></i>
+                </span>
+              </div>
+            </td>
+            <td class="py-4 px-6">
+              <span class="px-2.5 py-1 text-xs font-semibold rounded-full border"
+                    [ngClass]="getStatusColor(defect.statusName || 'NEW')">
+                {{ defect.statusName || 'NEW' }}
+              </span>
+            </td>
+            <td class="py-4 px-6 space-y-1">
+              <span class="block px-2.5 py-1 text-xs font-semibold rounded-full border w-fit"
+                    [ngClass]="getPriorityColor(defect.priorityName || 'MEDIUM')">
+                {{ defect.priorityName || 'MEDIUM' }}
+              </span>
+              <span *ngIf="defect.severityName" class="block px-2 py-0.5 text-xs font-medium rounded bg-gray-100 text-gray-600 w-fit">
+                {{ defect.severityName }}
+              </span>
+            </td>
+            <td class="py-4 px-6">
+              <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold"
+                [class.bg-green-100]="getDaysOpen(defect.createdAt) < 3"
+                [class.text-green-700]="getDaysOpen(defect.createdAt) < 3"
+                [class.bg-amber-100]="getDaysOpen(defect.createdAt) >= 3 && getDaysOpen(defect.createdAt) <= 7"
+                [class.text-amber-700]="getDaysOpen(defect.createdAt) >= 3 && getDaysOpen(defect.createdAt) <= 7"
+                [class.bg-red-100]="getDaysOpen(defect.createdAt) > 7"
+                [class.text-red-700]="getDaysOpen(defect.createdAt) > 7"
+              >
+                <i class="ri-time-line text-xs"></i>
+                {{ getDaysOpen(defect.createdAt) }}d
+              </span>
+            </td>
+            <td class="py-4 px-6 text-sm text-gray-600">
+              <div class="flex items-center gap-2" *ngIf="defect.assignedToUserId">
+                <div class="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-bold text-indigo-600">
+                  <i class="ri-user-line"></i>
+                </div>
+                <span>{{ defect.assignedToName || 'Usuario Asignado' }}</span>
+              </div>
+              <span *ngIf="!defect.assignedToUserId" class="text-gray-400 italic">Sin asignar</span>
+            </td>
+            <td class="py-4 px-6 text-right">
+              <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button (click)="openEditModal(defect); $event.stopPropagation()"
+                        class="p-1.5 text-gray-400 hover:text-blue-600 rounded hover:bg-blue-50 transition-colors" title="Editar">
+                  <i class="ri-pencil-line"></i>
+                </button>
+                <button (click)="deleteDefect(defect); $event.stopPropagation()"
+                        class="p-1.5 text-gray-400 hover:text-red-600 rounded hover:bg-red-50 transition-colors" title="Eliminar">
+                  <i class="ri-delete-bin-line"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Create/Edit Defect -->
+<app-defect-modal
+  *ngIf="showModal()"
+  [defect]="selectedDefect()"
+  [isEdit]="isEdit()"
+  (close)="closeModal()"
+  (save)="onSave($event)">
+</app-defect-modal>

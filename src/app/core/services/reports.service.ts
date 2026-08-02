@@ -71,4 +71,22 @@ export class ReportsService {
             responseType: 'blob'
         });
     }
+
+    generateFullCertificationReport(projectId: string): Observable<Blob> {
+        return this.http.get(`${this.apiUrl}/project/${projectId}/certification`, {
+            responseType: 'blob'
+        });
+    }
+
+    generateExecutiveSummaryReport(projectId: string): Observable<Blob> {
+        return this.http.get(`${this.apiUrl}/project/${projectId}/executive-summary`, {
+            responseType: 'blob'
+        });
+    }
+
+    generateTestSummaryReport(planId: string): Observable<Blob> {
+        return this.http.get(`${this.apiUrl}/testplan/${planId}/summary`, {
+            responseType: 'blob'
+        });
+    }
 }

@@ -1,9 +1,10 @@
-// reports.component.scss - minimal, all design via Tailwind
+// src/app/features/reports/reports.component.scss
+// TailwindCSS-only — all design via Tailwind
+
 :host {
-  display: block;
+  @apply block;
 }
 
-// Visualización del PDF
 .report-preview-container {
-  height: 75vh;
+  @apply h-[75vh];
 }

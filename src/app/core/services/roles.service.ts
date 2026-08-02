@@ -71,9 +71,9 @@ export class RolesService {
      * Duplica un rol existente junto con sus permisos.
      * @param id - ID del rol a duplicar
      */
-    duplicateRole(id: string): Observable<Role> {
+    duplicateRole(id: string, newRoleName: string): Observable<Role> {
         console.log(this.LOG_TAG, 'Duplicando rol:', id);
-        return this.http.post<Role>(`${this.apiUrl}/${id}/duplicate`, {});
+        return this.http.post<Role>(`${this.apiUrl}/${id}/duplicate`, { newRoleName });
     }
 
     /**
@@ -81,18 +81,6 @@ export class RolesService {
      * En modo mock, retorna una lista estática.
      */
     getAllPermissions(): Observable<any[]> {
-        if (environment.useMock) {
-            return of([
-                { id: '1', name: 'DASHBOARD_VIEW' },
-                { id: '2', name: 'PROJECTS_VIEW' },
-                { id: '3', name: 'TEST_CASES_VIEW' },
-                { id: '4', name: 'EXECUTIONS_VIEW' },
-                { id: '5', name: 'KANBAN_VIEW' },
-                { id: '6', name: 'USERS_VIEW' },
-                { id: '7', name: 'ROLES_VIEW' },
-                { id: '8', name: 'CATALOGS_VIEW' }
-            ]);
-        }
         console.log(this.LOG_TAG, 'Obteniendo permisos del sistema');
         return this.http.get<any[]>(`${this.apiUrl}/permissions`);
     }
@@ -103,7 +91,6 @@ export class RolesService {
      * @param permissionIds - Lista de IDs de permisos a asignar
      */
     assignPermissions(roleId: string, permissionIds: string[]): Observable<void> {
-        if (environment.useMock) return of(undefined);
         console.log(this.LOG_TAG, 'Asignando', permissionIds.length, 'permisos al rol:', roleId);
         return this.http.post<void>(`${this.apiUrl}/${roleId}/permissions`, {
             permissionIds
@@ -116,7 +103,6 @@ export class RolesService {
      * @param permissionId - ID del permiso a añadir
      */
     addPermission(roleId: string, permissionId: string): Observable<void> {
-        if (environment.useMock) return of(undefined);
         console.log(this.LOG_TAG, `Añadiendo permiso ${permissionId} al rol ${roleId}`);
         return this.http.post<void>(`${this.apiUrl}/${roleId}/permissions/add`, { permissionId });
     }
@@ -127,7 +113,6 @@ export class RolesService {
      * @param permissionId - ID del permiso a remover
      */
     removePermission(roleId: string, permissionId: string): Observable<void> {
-        if (environment.useMock) return of(undefined);
         console.log(this.LOG_TAG, `Removiendo permiso ${permissionId} del rol ${roleId}`);
         return this.http.post<void>(`${this.apiUrl}/${roleId}/permissions/remove`, { permissionId });
     }

@@ -10,15 +10,6 @@
         </button>
     </div>
 
-    <!-- Project Selection -->
-    <div class="bg-gray-900/40 backdrop-blur-md rounded-3xl border border-white/5 shadow-sm p-6 mb-8">
-        <label for="projectSelect" class="block text-[10px] font-black tracking-widest text-gray-600 mb-2">Seleccionar proyecto</label>
-        <select id="projectSelect" (change)="onProjectChange($event)" [value]="selectedProjectId() || ''"
-            class="w-full max-w-md bg-gray-950 border border-white/5 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all shadow-sm font-bold text-xs appearance-none cursor-pointer">
-            <option value="">Selecciona un proyecto...</option>
-            <option *ngFor="let project of projects()" [value]="project.id">{{ project.name }}</option>
-        </select>
-    </div>
 
     <div *ngIf="loading()" class="flex justify-center items-center h-48">
         <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[#150fbd]"></div>
@@ -61,6 +52,16 @@
                     {{ suite.isActive ? 'Activo' : 'Inactivo' }}
                 </span>
             </div>
+
+            <!-- Overlay Actions (Hover) -->
+            <div class="absolute top-4 right-4 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button (click)="editSuite(suite, $event)" class="w-8 h-8 rounded-lg bg-indigo-500 text-white flex items-center justify-center hover:bg-indigo-600 shadow-md transition-colors" title="Editar escenario">
+                    <i class="fas fa-pen text-xs"></i>
+                </button>
+                <button (click)="deleteSuite(suite, $event)" class="w-8 h-8 rounded-lg bg-rose-500 text-white flex items-center justify-center hover:bg-rose-600 shadow-md transition-colors" title="Eliminar escenario">
+                    <i class="fas fa-trash text-xs"></i>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -70,7 +71,9 @@
         <div class="bg-gray-900 border-0 sm:border border-white/10 rounded-none sm:rounded-[2rem] w-full max-w-md h-full sm:h-auto overflow-hidden shadow-2xl flex flex-col">
             <div class="p-6 sm:p-8 overflow-y-auto custom-scrollbar flex-1">
                 <div class="flex justify-between items-center mb-8 pb-4 border-b border-white/5 shrink-0">
-                    <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight">Nuevo escenario</h2>
+                    <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight">
+                      {{ isEditing() ? 'Editar escenario' : 'Nuevo escenario' }}
+                    </h2>
                     <button (click)="closeModal()" class="w-10 h-10 rounded-xl bg-white/5 text-gray-500 hover:text-white transition-all flex items-center justify-center">
                         <i class="fas fa-times text-xl"></i>
                     </button>
@@ -101,8 +104,9 @@
                         </button>
                         <button type="submit" [disabled]="suiteForm.invalid || isSubmitting()" class="btn-primary flex-1">
                             <span *ngIf="isSubmitting()" class="w-5 h-5 border-3 border-white/20 border-t-white rounded-full animate-spin"></span>
-                            <i *ngIf="!isSubmitting()" class="fas fa-check-circle"></i>
-                            {{ isSubmitting() ? 'Creando...' : 'Crear escenario' }}
+                            <i *ngIf="!isSubmitting()" class="fas" [ngClass]="isEditing() ? 'fa-save' : 'fa-check-circle'"></i>
+                            <span *ngIf="!isSubmitting()">{{ isEditing() ? 'Guardar cambios' : 'Crear escenario' }}</span>
+                            <span *ngIf="isSubmitting()">{{ isEditing() ? 'Guardando...' : 'Creando...' }}</span>
                         </button>
                     </div>
                 </form>

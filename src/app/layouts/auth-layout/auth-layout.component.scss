@@ -1,8 +1,8 @@
 // src/app/layouts/auth-layout/auth-layout.component.scss
+// TailwindCSS-only component styles via @apply
 
 .auth-bg-pattern {
+  @apply bg-repeat z-0;
   background-image: url('/images/bg-qa.png?v=5');
-  background-repeat: repeat;
   background-size: 800px;
-  z-index: 0;
 }

@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit, signal, inject } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, signal, inject, DestroyRef } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RequirementsService } from '../../../core/services/requirements.service';
 import { CatalogsService } from '../../../core/services/catalogs.service';
@@ -6,6 +6,7 @@ import { Requirement, CreateRequirement, UpdateRequirement } from '../../../core
 import { Project } from '../../../core/models/project.model';
 import { catchError, of } from 'rxjs';
 import Swal from 'sweetalert2';
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 
 @Component({
   selector: 'app-requirement-modal',
@@ -14,11 +15,10 @@ import Swal from 'sweetalert2';
     ReactiveFormsModule
   ],
   templateUrl: './requirement-modal.component.html',
-  styles: [`
-    :host { display: block; }
-  `]
+  styleUrl: './requirement-modal.component.scss'
 })
 export class RequirementModalComponent implements OnInit {
+    private destroyRef = inject(DestroyRef);
   @Input() projectId: string | null = null;
   @Input() projects: Project[] = [];
   @Input() requirement: Requirement | null = null;
@@ -90,19 +90,19 @@ export class RequirementModalComponent implements OnInit {
 
   private loadCatalogs() {
     this.catalogsService.getActive('RequirementType').pipe(
-      catchError(() => of(this.fallbackTypes))
+      catchError(() => of(this.fallbackTypes)), takeUntilDestroyed(this.destroyRef)
     ).subscribe(data => this.requirementTypes.set(data.length ? data : this.fallbackTypes));
 
     this.catalogsService.getActive('RequirementPriority').pipe(
-      catchError(() => of(this.fallbackPriorities))
+      catchError(() => of(this.fallbackPriorities)), takeUntilDestroyed(this.destroyRef)
     ).subscribe(data => this.priorities.set(data.length ? data : this.fallbackPriorities));
 
     this.catalogsService.getActive('RequirementComplexity').pipe(
-      catchError(() => of(this.fallbackComplexities))
+      catchError(() => of(this.fallbackComplexities)), takeUntilDestroyed(this.destroyRef)
     ).subscribe(data => this.complexities.set(data.length ? data : this.fallbackComplexities));
 
     this.catalogsService.getActive('RequirementStatus').pipe(
-      catchError(() => of(this.fallbackStatuses))
+      catchError(() => of(this.fallbackStatuses)), takeUntilDestroyed(this.destroyRef)
     ).subscribe(data => this.statuses.set(data.length ? data : this.fallbackStatuses));
   }
 
@@ -127,7 +127,7 @@ export class RequirementModalComponent implements OnInit {
     if (this.requirement) {
       // Update
       const updateDto: UpdateRequirement = { ...payload };
-      this.requirementsService.updateRequirement(this.requirement.id, updateDto).subscribe({
+      this.requirementsService.updateRequirement(this.requirement.id, updateDto).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: () => {
           Swal.fire('Éxito', 'Requisito actualizado correctamente.', 'success');
           this.saved.emit();
@@ -141,7 +141,7 @@ export class RequirementModalComponent implements OnInit {
     } else {
       // Create
       const createDto: CreateRequirement = { ...payload };
-      this.requirementsService.createRequirement(targetProjectId, createDto).subscribe({
+      this.requirementsService.createRequirement(targetProjectId, createDto).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: () => {
           Swal.fire('Éxito', 'Requisito creado correctamente.', 'success');
           this.saved.emit();

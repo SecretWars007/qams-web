@@ -1,20 +1,20 @@
+// src/app/features/admin/users/users.component.scss
+// TailwindCSS-only component styles via @apply
+
 :host {
-  display: block;
-  width: 100%;
-  max-width: 100%;
-  overflow-x: hidden;
+  @apply block w-full max-w-full overflow-x-hidden;
 }
 
 .custom-scrollbar {
   &::-webkit-scrollbar {
-    height: 6px;
+    @apply h-1.5;
   }
   &::-webkit-scrollbar-track {
-    background: transparent;
+    @apply bg-transparent;
   }
   &::-webkit-scrollbar-thumb {
+    @apply rounded-[10px];
     background: rgba(21, 15, 189, 0.1);
-    border-radius: 10px;
     &:hover {
       background: rgba(21, 15, 189, 0.2);
     }
@@ -22,39 +22,26 @@
 }
 
 .remove-role-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-  border-radius: 6px;
-  border: none;
+  @apply flex items-center justify-center w-[18px] h-[18px] 
+         rounded-md border-none cursor-pointer transition-all 
+         duration-200 p-0 text-[10px];
   background: rgba(153, 0, 0, 0.05);
   color: #990000;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  padding: 0;
-  font-size: 10px;
 
   &:hover {
+    @apply scale-[1.15];
     background: #990000;
     color: white;
-    transform: scale(1.15);
   }
 }
 
 // Ensure the table utilizes available space
 table {
-  table-layout: auto;
-  min-width: 100%;
+  @apply table-auto min-w-full;
 
-  thead {
-    tr th {
-      background: #f8f9ff;
-      position: sticky;
-      top: 0;
-      z-index: 20;
-      border-bottom: 1px solid rgba(21, 15, 189, 0.05);
-    }
+  thead tr th {
+    @apply sticky top-0 z-20 border-b;
+    background: #f8f9ff;
+    border-bottom-color: rgba(21, 15, 189, 0.05);
   }
 }

@@ -20,7 +20,38 @@
         </button>
     </div>
 
-    <!-- Two-column layout: filters left, preview right -->
+    <!-- Tab Navigation -->
+    <div class="flex flex-wrap gap-2 mb-8 border-b border-white/10 pb-4">
+        <button (click)="activeTab.set('qualityGate')" 
+                [class]="activeTab() === 'qualityGate' ? 'px-5 py-2.5 rounded-xl bg-indigo-600 text-white font-bold text-xs shadow-lg' : 'px-5 py-2.5 rounded-xl bg-gray-900 text-gray-400 font-medium text-xs hover:text-white transition-colors'">
+            <i class="fas fa-chart-pie mr-2"></i> Quality Gate & Reportes PDF
+        </button>
+        <button (click)="activeTab.set('rtm')" 
+                [class]="activeTab() === 'rtm' ? 'px-5 py-2.5 rounded-xl bg-indigo-600 text-white font-bold text-xs shadow-lg' : 'px-5 py-2.5 rounded-xl bg-gray-900 text-gray-400 font-medium text-xs hover:text-white transition-colors'">
+            <i class="fas fa-network-wired mr-2"></i> Matriz RTM (Trazabilidad)
+        </button>
+        <button (click)="activeTab.set('rbt')" 
+                [class]="activeTab() === 'rbt' ? 'px-5 py-2.5 rounded-xl bg-indigo-600 text-white font-bold text-xs shadow-lg' : 'px-5 py-2.5 rounded-xl bg-gray-900 text-gray-400 font-medium text-xs hover:text-white transition-colors'">
+            <i class="fas fa-shield-halved mr-2"></i> Gestión de Riesgos RBT (Heatmap 5x5)
+        </button>
+        <button (click)="onBurndownTabSelect()" 
+                [class]="activeTab() === 'burndown' ? 'px-5 py-2.5 rounded-xl bg-indigo-600 text-white font-bold text-xs shadow-lg' : 'px-5 py-2.5 rounded-xl bg-gray-900 text-gray-400 font-medium text-xs hover:text-white transition-colors'">
+            <i class="fas fa-fire-alt mr-2"></i> Burndown & Métricas DDP
+        </button>
+    </div>
+
+    <!-- TAB 2: Matriz RTM -->
+    <div *ngIf="activeTab() === 'rtm'" class="animate-in fade-in duration-200">
+        <app-rtm-matrix></app-rtm-matrix>
+    </div>
+
+    <!-- TAB 3: Gestión de Riesgos RBT -->
+    <div *ngIf="activeTab() === 'rbt'" class="animate-in fade-in duration-200">
+        <app-risk-management></app-risk-management>
+    </div>
+
+    <!-- TAB 1: Quality Gate & Generación PDF -->
+    <div *ngIf="activeTab() === 'qualityGate'">
     <div class="grid grid-cols-1 xl:grid-cols-5 gap-6">
 
         <!-- ========== FILTERS PANEL ========== -->
@@ -52,6 +83,9 @@
                     </div>
                 </form>
             </div>
+
+            <!-- Quality Gate Widget -->
+            <app-quality-gate-widget *ngIf="hasProject" [projectId]="filterForm.get('projectId')?.value"></app-quality-gate-widget>
 
             <!-- Date range -->
             <div class="hidden bg-gray-900/40 rounded-[2rem] border border-white/5 p-8 backdrop-blur-md">
@@ -120,41 +154,73 @@
 
             <!-- Generate buttons grid -->
             <div class="space-y-4">
+                <!-- Nuevos Reportes de Certificación y Usuario Final -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <button (click)="generateReport('fullCertification')" [disabled]="!hasProject || generating()"
+                        class="group relative p-5 bg-gradient-to-br from-indigo-900/40 to-blue-900/20 hover:from-indigo-900/60 hover:to-blue-900/40 disabled:opacity-30 disabled:cursor-not-allowed border border-indigo-500/20 hover:border-indigo-500/50 rounded-[1.5rem] transition-all flex flex-col items-start gap-2 backdrop-blur-md active:scale-[0.98]">
+                        <div class="flex items-center justify-between w-full">
+                            <div class="w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center group-hover:bg-indigo-500/30 transition-colors">
+                                <i class="fas fa-certificate text-indigo-400 text-lg"></i>
+                            </div>
+                            <span class="text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">Completo</span>
+                        </div>
+                        <div>
+                            <span class="text-xs font-black text-white group-hover:text-indigo-300 tracking-tight block">Certificación Completa</span>
+                            <span class="text-[9px] text-gray-400 font-medium leading-tight block mt-0.5">Trazabilidad SUT, Reqs y Ejecuciones</span>
+                        </div>
+                    </button>
+
+                    <button (click)="generateReport('executiveSummary')" [disabled]="!hasProject || generating()"
+                        class="group relative p-5 bg-gradient-to-br from-emerald-900/40 to-teal-900/20 hover:from-emerald-900/60 hover:to-teal-900/40 disabled:opacity-30 disabled:cursor-not-allowed border border-emerald-500/20 hover:border-emerald-500/50 rounded-[1.5rem] transition-all flex flex-col items-start gap-2 backdrop-blur-md active:scale-[0.98]">
+                        <div class="flex items-center justify-between w-full">
+                            <div class="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center group-hover:bg-emerald-500/30 transition-colors">
+                                <i class="fas fa-user-check text-emerald-400 text-lg"></i>
+                            </div>
+                            <span class="text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Ejecutivo</span>
+                        </div>
+                        <div>
+                            <span class="text-xs font-black text-white group-hover:text-emerald-300 tracking-tight block">Resumen Usuario Final</span>
+                            <span class="text-[9px] text-gray-400 font-medium leading-tight block mt-0.5">Dictamen de liberación y KPIs</span>
+                        </div>
+                    </button>
+                </div>
+
                 <div class="grid grid-cols-2 gap-4">
                     <button (click)="generateReport('general')" [disabled]="!hasProject || generating()"
-                        class="group relative py-6 bg-gray-900/60 hover:bg-indigo-900/20 disabled:opacity-30 disabled:cursor-not-allowed border border-white/5 hover:border-indigo-500/30 rounded-[1.5rem] transition-all flex flex-col items-center justify-center gap-2 backdrop-blur-md active:scale-[0.98]">
+                        class="group relative py-4 bg-gray-900/60 hover:bg-indigo-900/20 disabled:opacity-30 disabled:cursor-not-allowed border border-white/5 hover:border-indigo-500/30 rounded-[1.5rem] transition-all flex flex-col items-center justify-center gap-2 backdrop-blur-md active:scale-[0.98]">
                         <div
-                            class="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center mb-1 group-hover:bg-indigo-500/20 transition-colors">
-                            <i class="fas fa-file-invoice text-indigo-400 text-lg"></i>
+                            class="w-8 h-8 rounded-xl bg-indigo-500/10 flex items-center justify-center mb-0.5 group-hover:bg-indigo-500/20 transition-colors">
+                            <i class="fas fa-file-invoice text-indigo-400 text-sm"></i>
                         </div>
                         <span
                             class="text-[10px] font-black text-gray-400 group-hover:text-indigo-400 tracking-[0.2em] transition-colors">General</span>
                     </button>
                     <button (click)="generateReport('observations')" [disabled]="!hasProject || generating()"
-                        class="group relative py-6 bg-gray-900/60 hover:bg-rose-900/20 disabled:opacity-30 disabled:cursor-not-allowed border border-white/5 hover:border-rose-500/30 rounded-[1.5rem] transition-all flex flex-col items-center justify-center gap-2 backdrop-blur-md active:scale-[0.98]">
+                        class="group relative py-4 bg-gray-900/60 hover:bg-rose-900/20 disabled:opacity-30 disabled:cursor-not-allowed border border-white/5 hover:border-rose-500/30 rounded-[1.5rem] transition-all flex flex-col items-center justify-center gap-2 backdrop-blur-md active:scale-[0.98]">
                         <div
-                            class="w-10 h-10 rounded-xl bg-rose-500/10 flex items-center justify-center mb-1 group-hover:bg-rose-500/20 transition-colors">
-                            <i class="fas fa-comment-exclamation text-rose-400 text-lg"></i>
+                            class="w-8 h-8 rounded-xl bg-rose-500/10 flex items-center justify-center mb-0.5 group-hover:bg-rose-500/20 transition-colors">
+                            <i class="fas fa-comment-exclamation text-rose-400 text-sm"></i>
                         </div>
                         <span
                             class="text-[10px] font-black text-gray-400 group-hover:text-rose-400 tracking-[0.2em] transition-colors">Devolución</span>
                     </button>
                 </div>
+
                 <div class="grid grid-cols-2 gap-4">
                     <button (click)="generateReport('compliance')" [disabled]="!hasProject || generating()"
-                        class="group relative py-6 bg-gray-900/60 hover:bg-emerald-900/20 disabled:opacity-30 disabled:cursor-not-allowed border border-white/5 hover:border-emerald-500/30 rounded-[1.5rem] transition-all flex flex-col items-center justify-center gap-2 backdrop-blur-md active:scale-[0.98]">
+                        class="group relative py-4 bg-gray-900/60 hover:bg-emerald-900/20 disabled:opacity-30 disabled:cursor-not-allowed border border-white/5 hover:border-emerald-500/30 rounded-[1.5rem] transition-all flex flex-col items-center justify-center gap-2 backdrop-blur-md active:scale-[0.98]">
                         <div
-                            class="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-1 group-hover:bg-emerald-500/20 transition-colors">
-                            <i class="fas fa-certificate text-emerald-400 text-lg"></i>
+                            class="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-0.5 group-hover:bg-emerald-500/20 transition-colors">
+                            <i class="fas fa-certificate text-emerald-400 text-sm"></i>
                         </div>
                         <span
                             class="text-[10px] font-black text-gray-400 group-hover:text-emerald-400 tracking-[0.2em] transition-colors">Evidencias</span>
                     </button>
                     <button (click)="generateReport('burndown')" [disabled]="!hasProject || generating()"
-                        class="group relative py-6 bg-gray-900/60 hover:bg-amber-900/20 disabled:opacity-30 disabled:cursor-not-allowed border border-white/5 hover:border-amber-500/30 rounded-[1.5rem] transition-all flex flex-col items-center justify-center gap-2 backdrop-blur-md active:scale-[0.98]">
+                        class="group relative py-4 bg-gray-900/60 hover:bg-amber-900/20 disabled:opacity-30 disabled:cursor-not-allowed border border-white/5 hover:border-amber-500/30 rounded-[1.5rem] transition-all flex flex-col items-center justify-center gap-2 backdrop-blur-md active:scale-[0.98]">
                         <div
-                            class="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center mb-1 group-hover:bg-amber-500/20 transition-colors">
-                            <i class="fas fa-chart-line text-amber-400 text-lg"></i>
+                            class="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center mb-0.5 group-hover:bg-amber-500/20 transition-colors">
+                            <i class="fas fa-chart-line text-amber-400 text-sm"></i>
                         </div>
                         <span
                             class="text-[10px] font-black text-gray-400 group-hover:text-amber-400 tracking-[0.2em] transition-colors">Seguimiento</span>
@@ -276,5 +342,106 @@
 
         </div>
 
+    </div>
+    </div>
+
+    <!-- TAB 4: Burndown & Métricas DDP -->
+    <div *ngIf="activeTab() === 'burndown'" class="animate-in fade-in duration-200">
+        <div class="grid grid-cols-1 xl:grid-cols-5 gap-6">
+            <!-- Left Info Panel -->
+            <div class="xl:col-span-2 space-y-5">
+                <div class="bg-gray-900/40 rounded-[2rem] border border-white/5 p-8 backdrop-blur-md">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 bg-amber-500/10 rounded-xl flex items-center justify-center border border-amber-500/20">
+                            <i class="fas fa-fire-alt text-amber-400 text-lg"></i>
+                        </div>
+                        <h2 class="text-sm font-black text-white uppercase tracking-wider">Métricas de Productividad & DDP</h2>
+                    </div>
+                    <p class="text-gray-400 text-xs leading-relaxed">
+                        El gráfico de quemado (Burndown Chart) muestra el ritmo de resolución de tareas en el tiempo contra el progreso ideal.
+                    </p>
+                    <div class="mt-6 space-y-4">
+                        <div class="p-4 bg-gray-950/50 rounded-xl border border-white/5 flex justify-between items-center">
+                            <div>
+                                <p class="text-[10px] font-black text-gray-500 tracking-wider uppercase">Indicador DDP</p>
+                                <p class="text-xs text-gray-400 mt-0.5">Defect Detection Percentage (Eficiencia de pruebas)</p>
+                            </div>
+                            <span class="text-lg font-black text-emerald-400">88.5%</span>
+                        </div>
+                        <div class="p-4 bg-gray-950/50 rounded-xl border border-white/5 flex justify-between items-center">
+                            <div>
+                                <p class="text-[10px] font-black text-gray-500 tracking-wider uppercase">Velocidad del Ciclo</p>
+                                <p class="text-xs text-gray-400 mt-0.5">Promedio de resolución de tareas por sprint</p>
+                            </div>
+                            <span class="text-lg font-black text-indigo-400">14.2 pts</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button (click)="generateReport('burndown')" [disabled]="generating()" 
+                    class="w-full py-4 bg-amber-600 hover:bg-amber-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold rounded-2xl transition-all shadow-lg shadow-amber-900/30 flex items-center justify-center gap-3 text-base active:scale-[0.98]">
+                    <span *ngIf="generating() && reportType() === 'burndown'" class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                    <i *ngIf="!(generating() && reportType() === 'burndown')" class="fas fa-rotate-right"></i>
+                    Actualizar Burndown Chart
+                </button>
+            </div>
+
+            <!-- Right Preview Panel -->
+            <div class="xl:col-span-3">
+                <!-- Generating loader -->
+                <div *ngIf="generating() && reportType() === 'burndown'"
+                    class="flex flex-col items-center justify-center h-full min-h-[400px] bg-gray-900/40 rounded-[2.5rem] border border-white/5 backdrop-blur-md">
+                    <div class="relative mb-6">
+                        <div class="w-20 h-20 border-4 border-amber-500/20 border-t-amber-500 rounded-full animate-spin"></div>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <i class="fas fa-fire-alt text-amber-400 text-xl"></i>
+                        </div>
+                    </div>
+                    <p class="text-white font-bold text-lg">Generando reporte Burndown...</p>
+                </div>
+
+                <!-- Error state -->
+                <div *ngIf="error() && reportType() === 'burndown' && !generating()"
+                    class="flex flex-col items-center justify-center h-full min-h-[400px] bg-gray-900/40 rounded-[2.5rem] border border-rose-500/10 p-12 text-center backdrop-blur-md">
+                    <div class="w-16 h-16 bg-rose-500/10 rounded-2xl flex items-center justify-center border border-rose-500/20 mb-4">
+                        <i class="fas fa-triangle-exclamation text-rose-400 text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-rose-400 mb-2">Error al generar</h3>
+                    <p class="text-gray-500 text-xs">{{ error() }}</p>
+                </div>
+
+                <!-- PDF Viewer -->
+                <div *ngIf="reportGenerated() && reportType() === 'burndown' && pdfUrl() && !generating()" class="space-y-4 animate-in fade-in duration-500">
+                    <div class="flex items-center justify-between bg-gray-900/60 rounded-[2rem] border border-white/5 px-8 py-4 backdrop-blur-md">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 bg-emerald-500/10 rounded-lg flex items-center justify-center border border-emerald-500/20">
+                                <i class="fas fa-check text-emerald-400 text-sm"></i>
+                            </div>
+                            <div>
+                                <p class="text-white text-xs font-bold">Reporte Burndown generado</p>
+                                <p class="text-gray-500 text-[9px]">{{ today | date:'dd/MM/yyyy HH:mm' }}</p>
+                            </div>
+                        </div>
+                        <button (click)="downloadReport()"
+                            class="flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-amber-900/20">
+                            <i class="fas fa-download"></i> Descargar PDF
+                        </button>
+                    </div>
+                    <div class="bg-gray-950 rounded-[2rem] border border-white/5 overflow-hidden shadow-2xl relative h-[450px]">
+                        <iframe [src]="pdfUrl() | safeUrl" class="w-full h-full border-none opacity-90 hover:opacity-100 transition-opacity"
+                            title="Reporte burndown PDF"></iframe>
+                    </div>
+                </div>
+
+                <!-- Empty state if no project -->
+                <div *ngIf="!reportGenerated() && !generating() && !error() && reportType() !== 'burndown'"
+                    class="flex flex-col items-center justify-center h-full min-h-[400px] bg-gray-900/40 rounded-[2.5rem] border border-dashed border-white/5 text-center p-12 backdrop-blur-md">
+                    <div class="w-20 h-20 bg-amber-500/10 rounded-[2rem] flex items-center justify-center border border-amber-500/10 mb-6">
+                        <i class="fas fa-fire-alt text-amber-400 text-3xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2">Presiona generar para cargar el gráfico</h3>
+                </div>
+            </div>
+        </div>
     </div>
 </div>

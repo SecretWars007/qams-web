@@ -15,7 +15,11 @@ export class DashboardMapper {
       passRate: dto.passRate || 0,
       taskProgress: (dto.taskProgress || []).map(item => this.fromTaskProgressDto(item)),
       executionsByStatus: dto.executionsByStatus || [],
-      projectTimeline: (dto.projectTimeline || []).map(item => this.fromTimelineDto(item))
+      projectTimeline: (dto.projectTimeline || []).map(item => this.fromTimelineDto(item)),
+      totalRequirements: dto.totalRequirements || 0,
+      coveredRequirements: dto.coveredRequirements || 0,
+      requirementCoverageRate: dto.requirementCoverageRate || 0,
+      openDefects: dto.openDefects || 0
     };
   }
 

@@ -1,10 +1,11 @@
 import Swal from 'sweetalert2';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RolesService } from '../../../core/services/roles.service';
 import { Role } from '../../../core/models/role.model';
 import { finalize } from 'rxjs';
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 
 @Component({
   selector: 'app-roles',
@@ -14,6 +15,7 @@ import { finalize } from 'rxjs';
   styleUrls: ['./roles.component.scss']
 })
 export class RolesComponent implements OnInit {
+    private destroyRef = inject(DestroyRef);
   private readonly rolesService = inject(RolesService);
   private readonly fb = inject(FormBuilder);
 
@@ -47,7 +49,7 @@ export class RolesComponent implements OnInit {
   loadRoles(): void {
     this.loading.set(true);
     this.rolesService.getRoles()
-      .pipe(finalize(() => this.loading.set(false)))
+      .pipe(finalize(() => this.loading.set(false)), takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (data) => this.roles.set(data),
         error: (err) => {
@@ -64,7 +66,7 @@ export class RolesComponent implements OnInit {
 
   /** Gets all system permissions to display in the editor */
   loadAllPermissions(): void {
-    this.rolesService.getAllPermissions().subscribe({
+    this.rolesService.getAllPermissions().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (data) => this.allPermissions.set(data),
       error: (err) => console.error('[RolesComponent] Error loading permissions', err)
     });
@@ -111,7 +113,7 @@ export class RolesComponent implements OnInit {
       ? this.rolesService.updateRole(this.selectedRole()!.id, data)
       : this.rolesService.createRole(data);
 
-    request$.pipe(finalize(() => this.isSubmitting.set(false))).subscribe({
+    request$.pipe(finalize(() => this.isSubmitting.set(false)), takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         Swal.fire({
           icon: 'success',
@@ -145,7 +147,7 @@ export class RolesComponent implements OnInit {
     });
          return;
     }
-    this.rolesService.toggleRoleStatus(role.id).subscribe({
+    this.rolesService.toggleRoleStatus(role.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         Swal.fire({
       icon: 'success',
@@ -170,7 +172,7 @@ export class RolesComponent implements OnInit {
   /** Duplicates a role */
   duplicateRole(role: Role): void {
     if (confirm(`¿Estás seguro de duplicar el rol "${role.name}"?`)) {
-      this.rolesService.duplicateRole(role.id).subscribe({
+      this.rolesService.duplicateRole(role.id, `${role.name}_Copia`).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: () => {
           Swal.fire({
       icon: 'success',
@@ -196,7 +198,7 @@ export class RolesComponent implements OnInit {
   /** Deletes a role */
   deleteRole(role: Role): void {
     if (confirm(`¿Estás seguro de eliminar el rol "${role.name}"? Esta acción no se puede deshacer.`)) {
-      this.rolesService.deleteRole(role.id).subscribe({
+      this.rolesService.deleteRole(role.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: () => {
           Swal.fire({
       icon: 'success',
@@ -263,7 +265,7 @@ export class RolesComponent implements OnInit {
       ? this.rolesService.addPermission(role.id, permission.id)
       : this.rolesService.removePermission(role.id, permission.id);
 
-    request$.subscribe({
+    request$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         // Optimistic UI update
         if (isChecked) {

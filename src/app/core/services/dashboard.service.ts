@@ -1,15 +1,14 @@
 // src/app/core/services/dashboard.service.ts
-// Servicio del dashboard: resumen de métricas, timeline, burndown y drawdown.
+// Servicio del dashboard: resumen de métricas, timeline, burndown, drawdown y KPIs ISTQB.
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
-import { map, catchError, switchMap, delay } from 'rxjs/operators';
+import { map, catchError, switchMap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
-import { DashboardSummaryDto } from '../dto/dashboard.dto';
+import { DashboardSummaryDto, IstqbMetricsDto, UpdateQualityGateRequest } from '../dto/dashboard.dto';
 import { DashboardSummary } from '../models/dashboard.model';
 import { DashboardMapper } from '../mappers/dashboard.mapper';
 import { ProjectsService } from './projects.service';
-import { DashboardMockService } from './dashboard.mock.service';
 import { AuthService } from './auth.service';
 
 @Injectable({ providedIn: 'root' })
@@ -22,7 +21,6 @@ export class DashboardService {
 
     private readonly http = inject(HttpClient);
     private readonly authService = inject(AuthService);
-    private readonly mockService = inject(DashboardMockService);
     private readonly projectsService = inject(ProjectsService);
 
     /**
@@ -30,12 +28,6 @@ export class DashboardService {
      * Si el backend no devuelve timeline, lo reconstruye desde ProjectsService.
      */
     getSummary(): Observable<DashboardSummary> {
-        if (environment.useMock) {
-            return this.mockService.getSummary();
-        }
-
-        // El backend obtiene el usuario del token JWT, no es necesario pasarlo por query string
-        // según el Swagger del usuario.
         return this.http.get<DashboardSummaryDto>(this.apiUrl).pipe(
             map(dto => {
                 if (!dto) return this.getEmptySummary();
@@ -86,10 +78,6 @@ export class DashboardService {
      * @param projectId - ID del proyecto
      */
     getProjectTimeline(projectId: string): Observable<any> {
-        if (environment.useMock) {
-            return this.mockService.getSummary().pipe(map(s => ({ events: s.projectTimeline || [] })));
-        }
-
         const url = `${this.apiUrl}/project/${projectId}/timeline-chart`;
         return this.http.get<any>(url).pipe(
             catchError(err => {
@@ -104,9 +92,6 @@ export class DashboardService {
      * @param projectId - ID del proyecto
      */
     getDrawdownData(projectId: string): Observable<any[]> {
-        if (environment.useMock) {
-            return of([]).pipe(delay(500));
-        }
         const url = `${this.apiUrl}/project/${projectId}/drawdown`;
         return this.http.get<any[]>(url).pipe(
             catchError(err => {
@@ -126,6 +111,37 @@ export class DashboardService {
             catchError(err => {
                 console.error(this.LOG_TAG, 'Error al obtener burndown:', err.status);
                 return of([]);
+            })
+        );
+    }
+
+    // ── ISTQB Phase 1: Métricas avanzadas y Quality Gate ──
+
+    /**
+     * ISTQB: Obtiene KPIs avanzados (DDP, DRE, MTTR) y el resultado del Quality Gate para un proyecto.
+     * @param projectId - ID del proyecto a evaluar
+     */
+    getIstqbMetrics(projectId: string): Observable<IstqbMetricsDto | null> {
+        const url = `${this.apiUrl}/project/${projectId}/istqb-metrics`;
+        return this.http.get<IstqbMetricsDto>(url).pipe(
+            catchError(err => {
+                console.error(this.LOG_TAG, 'Error al obtener métricas ISTQB:', err.status);
+                return of(null);
+            })
+        );
+    }
+
+    /**
+     * ISTQB: Actualiza los umbrales del Quality Gate de un proyecto.
+     * @param projectId - ID del proyecto
+     * @param request - Nuevos umbrales configurados
+     */
+    updateQualityGate(projectId: string, request: UpdateQualityGateRequest): Observable<void> {
+        const url = `${this.apiUrl}/project/${projectId}/quality-gate`;
+        return this.http.put<void>(url, request).pipe(
+            catchError(err => {
+                console.error(this.LOG_TAG, 'Error al actualizar Quality Gate:', err.status);
+                return of(undefined);
             })
         );
     }

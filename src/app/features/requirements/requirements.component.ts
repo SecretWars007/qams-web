@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, inject, forwardRef } from '@angular/core';
+import { Component, OnInit, signal, inject, forwardRef, DestroyRef } from '@angular/core';
 import { NgClass, DatePipe, TitleCasePipe } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { RequirementsService } from '../../core/services/requirements.service';
@@ -7,6 +7,7 @@ import { Requirement } from '../../core/models/requirement.model';
 import { Project } from '../../core/models/project.model';
 import { RequirementModalComponent } from './requirement-modal/requirement-modal.component';
 import Swal from 'sweetalert2';
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 
 @Component({
   selector: 'app-requirements',
@@ -18,11 +19,10 @@ import Swal from 'sweetalert2';
     forwardRef(() => RequirementModalComponent)
   ],
   templateUrl: './requirements.component.html',
-  styles: [`
-    :host { display: block; }
-  `]
+  styleUrl: './requirements.component.scss'
 })
 export class RequirementsComponent implements OnInit {
+    private destroyRef = inject(DestroyRef);
   requirements = signal<Requirement[]>([]);
   projects = signal<Project[]>([]);
   project = signal<Project | null>(null);
@@ -40,7 +40,7 @@ export class RequirementsComponent implements OnInit {
     // Siempre cargar la lista de proyectos (para el selector del modal)
     this.loadProjects();
 
-    this.route.queryParams.subscribe(params => {
+    this.route.queryParams.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
       const pid = params['projectId'];
       if (pid) {
         this.projectId.set(pid);
@@ -54,14 +54,14 @@ export class RequirementsComponent implements OnInit {
   }
 
   loadProjects() {
-    this.projectsService.getProjects().subscribe({
+    this.projectsService.getProjects().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (data) => this.projects.set(data),
       error: (err) => console.warn('No se pudieron cargar los proyectos', err)
     });
   }
 
   loadProject(id: string) {
-    this.projectsService.getProjectById(id).subscribe({
+    this.projectsService.getProjectById(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (proj) => this.project.set(proj),
       error: (err) => console.error('Error loading project', err)
     });
@@ -69,7 +69,7 @@ export class RequirementsComponent implements OnInit {
 
   loadRequirements(projectId: string) {
     this.loading.set(true);
-    this.requirementsService.getRequirementsByProject(projectId).subscribe({
+    this.requirementsService.getRequirementsByProject(projectId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (data) => {
         this.requirements.set(data);
         this.loading.set(false);
@@ -84,7 +84,7 @@ export class RequirementsComponent implements OnInit {
   loadAllRequirements() {
     this.loading.set(true);
     // Cargar requisitos de todos los proyectos disponibles
-    this.projectsService.getProjects().subscribe({
+    this.projectsService.getProjects().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (projects) => {
         if (projects.length === 0) {
           this.loading.set(false);
@@ -93,7 +93,7 @@ export class RequirementsComponent implements OnInit {
         let allReqs: Requirement[] = [];
         let loaded = 0;
         for (const proj of projects) {
-          this.requirementsService.getRequirementsByProject(proj.id).subscribe({
+          this.requirementsService.getRequirementsByProject(proj.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
             next: (reqs) => {
               allReqs = [...allReqs, ...reqs];
               loaded++;
@@ -148,7 +148,7 @@ export class RequirementsComponent implements OnInit {
       cancelButtonText: 'Cancelar'
     }).then((result) => {
       if (result.isConfirmed) {
-        this.requirementsService.deleteRequirement(id).subscribe({
+        this.requirementsService.deleteRequirement(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
           next: () => {
             Swal.fire('Eliminado', 'El requisito ha sido eliminado.', 'success');
             const pid = this.projectId();

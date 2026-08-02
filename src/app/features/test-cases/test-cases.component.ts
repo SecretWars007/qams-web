@@ -1,5 +1,5 @@
 import Swal from 'sweetalert2';
-import { Component, OnInit, signal, computed, inject } from '@angular/core';
+import { Component, OnInit, signal, computed, inject, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -11,6 +11,7 @@ import { User } from '../../core/models/user.model';
 import { Project } from '../../core/models/project.model';
 import { ProjectsService } from '../../core/services/projects.service';
 import { UsersService } from '../../core/services/users.service';
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 
 @Component({
   selector: 'app-test-cases',
@@ -20,6 +21,7 @@ import { UsersService } from '../../core/services/users.service';
   styleUrls: ['./test-cases.component.scss']
 })
 export class TestCasesComponent implements OnInit {
+  private destroyRef = inject(DestroyRef);
   projects = signal<Project[]>([]);
   testCases = signal<TestCase[]>([]);
   loading = signal<boolean>(true);
@@ -63,22 +65,19 @@ export class TestCasesComponent implements OnInit {
   private fb = inject(FormBuilder);
 
   ngOnInit(): void {
-    this.route.queryParams.subscribe(params => {
+    this.route.queryParams.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
       this.projectId.set(params['projectId'] || null);
       this.testSuiteId.set(params['testSuiteId'] || null);
 
-      // Initialize form AFTER projectId is set
       this.initForm();
-
       this.loadProjects();
       this.loadUsers();
+
       if (this.projectId()) {
         this.loadProjectDetails(this.projectId()!);
         this.loadTestSuites(this.projectId()!);
         this.loadTestCases();
       } else {
-        // If no project selected, we might want to load all or nothing. 
-        // For now, let's load all to maintain previous behavior if any.
         this.loadTestCases();
       }
     });
@@ -94,6 +93,8 @@ export class TestCasesComponent implements OnInit {
       expectedResult: ['', Validators.required],
       priorityId: [3, Validators.required], // 3: High
       testTypeId: [1, Validators.required],  // 1: Functional Manual
+      impactLevel: [3, [Validators.required, Validators.min(1), Validators.max(5)]],
+      likelihoodLevel: [3, [Validators.required, Validators.min(1), Validators.max(5)]],
       estimatedTimeHours: [0, [Validators.required, Validators.min(0)]],
       startDate: [new Date().toISOString().split('T')[0], Validators.required],
       endDate: [new Date().toISOString().split('T')[0], Validators.required],
@@ -122,7 +123,6 @@ export class TestCasesComponent implements OnInit {
   removeStep(index: number) {
     if (this.steps.length > 1) {
       this.steps.removeAt(index);
-      // Reorder remaining steps
       this.steps.controls.forEach((control, idx) => {
         control.patchValue({ stepOrder: idx + 1 });
       });
@@ -130,7 +130,7 @@ export class TestCasesComponent implements OnInit {
   }
 
   loadProjectDetails(id: string) {
-    this.projectsService.getProjectById(id).subscribe(project => {
+    this.projectsService.getProjectById(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(project => {
       if (project) {
         this.projectTitle.set(project.name);
         this.projectStatus.set(project.isActive ? 'Activo' : 'Inactivo');
@@ -139,14 +139,14 @@ export class TestCasesComponent implements OnInit {
   }
 
   loadUsers() {
-    this.usersService.getUsers().subscribe({
+    this.usersService.getUsers().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (users) => this.users.set(users),
       error: (err) => console.error('Error loading users:', err)
     });
   }
 
   loadProjects() {
-    this.projectsService.getProjects().subscribe({
+    this.projectsService.getProjects().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (data) => this.projects.set(data),
       error: (err) => console.error('Error loading projects:', err)
     });
@@ -155,7 +155,7 @@ export class TestCasesComponent implements OnInit {
   onProjectChange(event: any) {
     const projectId = event.target.value;
     this.projectId.set(projectId || null);
-    this.testSuiteId.set(null); // Reset suite when project changes
+    this.testSuiteId.set(null);
 
     if (projectId) {
       this.loadProjectDetails(projectId);
@@ -175,7 +175,7 @@ export class TestCasesComponent implements OnInit {
   }
 
   loadTestSuites(projectId: string) {
-    this.testSuitesService.getTestSuitesByProjectId(projectId).subscribe({
+    this.testSuitesService.getTestSuitesByProjectId(projectId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (suites) => this.testSuites.set(suites),
       error: (err) => console.error('Error loading test suites:', err)
     });
@@ -190,7 +190,7 @@ export class TestCasesComponent implements OnInit {
       ? this.projectsService.getTestCasesByProjectId(projectId)
       : this.testCasesService.getTestCases();
 
-    request$.subscribe({
+    request$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (data: TestCase[]) => {
         let filteredData = data;
         if (testSuiteId) {
@@ -203,6 +203,43 @@ export class TestCasesComponent implements OnInit {
     });
   }
 
+  exportCsv() {
+    const pid = this.projectId();
+    if (!pid) {
+      Swal.fire('Atención', 'Por favor selecciona un proyecto primero para exportar en CSV.', 'warning');
+      return;
+    }
+
+    this.testCasesService.exportCsv(pid).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Casos_Prueba_${this.projectTitle().replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+      },
+      error: (err) => {
+        console.error('Error exportando CSV:', err);
+        Swal.fire('Error', 'No se pudo generar el archivo CSV', 'error');
+      }
+    });
+  }
+
+  getRiskBadgeClass(tc: TestCase): string {
+    const score = tc.riskScore || ((tc.impactLevel || 3) * (tc.likelihoodLevel || 3));
+    if (score >= 15) return 'bg-rose-100 text-rose-700 border-rose-200';
+    if (score >= 8) return 'bg-amber-100 text-amber-700 border-amber-200';
+    return 'bg-emerald-100 text-emerald-700 border-emerald-200';
+  }
+
+  getRiskLevelName(tc: TestCase): string {
+    const score = tc.riskScore || ((tc.impactLevel || 3) * (tc.likelihoodLevel || 3));
+    if (score >= 15) return `Riesgo Alto (${score})`;
+    if (score >= 8) return `Riesgo Medio (${score})`;
+    return `Riesgo Bajo (${score})`;
+  }
+
   viewExecutions(testCaseId: string, event: Event) {
     event.stopPropagation();
     this.router.navigate(['/test-executions'], { queryParams: { testCaseId } });
@@ -211,7 +248,7 @@ export class TestCasesComponent implements OnInit {
   viewSteps(testCaseId: string, title: string, event: Event) {
     event.stopPropagation();
     this.selectedTestCaseTitle.set(title);
-    this.testCasesService.getTestSteps(testCaseId).subscribe({
+    this.testCasesService.getTestSteps(testCaseId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (steps) => {
         this.selectedTestCaseSteps.set(steps);
         this.showStepsModal.set(true);
@@ -219,11 +256,11 @@ export class TestCasesComponent implements OnInit {
       error: (err) => {
         console.error('Error fetching test steps:', err);
         Swal.fire({
-      icon: 'error',
-      title: 'Error',
-      text: 'Error al cargar los pasos del caso de prueba',
-      confirmButtonColor: '#150fbd'
-    });
+          icon: 'error',
+          title: 'Error',
+          text: 'Error al cargar los pasos del caso de prueba',
+          confirmButtonColor: '#150fbd'
+        });
       }
     });
   }
@@ -236,10 +273,9 @@ export class TestCasesComponent implements OnInit {
 
   editTestCase(testCase: TestCase, event: Event) {
     event.stopPropagation();
-
     this.isSubmitting.set(true);
 
-    this.testCasesService.getTestCaseById(testCase.id).subscribe({
+    this.testCasesService.getTestCaseById(testCase.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (fullTestCase) => {
         if (!fullTestCase) {
           this.isSubmitting.set(false);
@@ -248,7 +284,7 @@ export class TestCasesComponent implements OnInit {
 
         this.editingTestCaseId.set(testCase.id);
 
-        this.testCasesService.getTestSteps(testCase.id).subscribe({
+        this.testCasesService.getTestSteps(testCase.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
           next: (steps) => {
             this.showModal.set(true);
             this.steps.clear();
@@ -283,6 +319,8 @@ export class TestCasesComponent implements OnInit {
               expectedResult: fullTestCase.expectedResult || '',
               priorityId: fullTestCase.priority.id || 3,
               testTypeId: (fullTestCase as any).testTypeId || 1,
+              impactLevel: fullTestCase.impactLevel || 3,
+              likelihoodLevel: fullTestCase.likelihoodLevel || 3,
               estimatedTimeHours: (fullTestCase as any).estimatedTimeHours || 0,
               startDate: formatDate((fullTestCase as any).startDate || fullTestCase.createdAt),
               endDate: formatDate((fullTestCase as any).endDate || fullTestCase.createdAt),
@@ -321,7 +359,9 @@ export class TestCasesComponent implements OnInit {
       endDate: new Date().toISOString().split('T')[0],
       estimatedTimeHours: 0,
       priorityId: 3,
-      testTypeId: 1
+      testTypeId: 1,
+      impactLevel: 3,
+      likelihoodLevel: 3
     });
   }
 
@@ -334,10 +374,11 @@ export class TestCasesComponent implements OnInit {
         ...formValue,
         priorityId: Number(formValue.priorityId),
         testTypeId: Number(formValue.testTypeId),
+        impactLevel: Number(formValue.impactLevel),
+        likelihoodLevel: Number(formValue.likelihoodLevel),
         estimatedTimeHours: Number(formValue.estimatedTimeHours),
         startDate: new Date(formValue.startDate).toISOString(),
         endDate: new Date(formValue.endDate).toISOString(),
-        // Map steps to include stepOrder
         steps: (formValue.steps || []).map((step: any, index: number) => ({
           ...step,
           stepOrder: index + 1
@@ -345,44 +386,39 @@ export class TestCasesComponent implements OnInit {
       };
 
       if (this.editingTestCaseId()) {
-        console.log('TestCasesComponent: Updating test case with payload:', payload);
-        this.testCasesService.updateTestCase(this.editingTestCaseId()!, payload).subscribe({
+        this.testCasesService.updateTestCase(this.editingTestCaseId()!, payload).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
           next: () => {
-            console.log('TestCasesComponent: Test case updated successfully');
             this.loadTestCases();
             this.closeModal();
             this.isSubmitting.set(false);
           },
           error: (err) => {
-            console.error('TestCasesComponent: Error updating test case:', err);
+            console.error('Error updating test case:', err);
             this.isSubmitting.set(false);
             Swal.fire({
-      icon: 'error',
-      title: 'Error',
-      text: 'Error al actualizar el caso de prueba. Verifica los datos.',
-      confirmButtonColor: '#150fbd'
-    });
+              icon: 'error',
+              title: 'Error',
+              text: 'Error al actualizar el caso de prueba. Verifica los datos.',
+              confirmButtonColor: '#150fbd'
+            });
           }
         });
       } else {
-        console.log('TestCasesComponent: Creating test case with payload:', payload);
-
-        this.testCasesService.createTestCase(payload).subscribe({
-          next: (newTestCase) => {
-            console.log('TestCasesComponent: Test case created successfully:', newTestCase);
+        this.testCasesService.createTestCase(payload).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+          next: () => {
             this.loadTestCases();
             this.closeModal();
             this.isSubmitting.set(false);
           },
           error: (err) => {
-            console.error('TestCasesComponent: Error creating test case:', err);
+            console.error('Error creating test case:', err);
             this.isSubmitting.set(false);
             Swal.fire({
-      icon: 'error',
-      title: 'Error',
-      text: 'Error al crear el caso de prueba. Verifica los datos.',
-      confirmButtonColor: '#150fbd'
-    });
+              icon: 'error',
+              title: 'Error',
+              text: 'Error al crear el caso de prueba. Verifica los datos.',
+              confirmButtonColor: '#150fbd'
+            });
           }
         });
       }

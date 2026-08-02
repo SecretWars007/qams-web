@@ -1,0 +1,88 @@
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/50 p-6 rounded-2xl border border-white/20 backdrop-blur-md shadow-sm">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-800 tracking-tight">API Keys</h1>
+      <p class="text-gray-500 text-sm mt-1">Gestiona las claves de acceso para integraciones (Automatización, CI/CD, etc.).</p>
+    </div>
+    <button (click)="openCreateModal()" class="btn-primary flex items-center gap-2">
+      <i class="ri-key-line"></i>
+      Generar API Key
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading()" class="flex justify-center p-12">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
+  </div>
+
+  <!-- Contenido -->
+  <div *ngIf="!loading()" class="bg-white/80 rounded-2xl border border-white/20 shadow-sm overflow-hidden backdrop-blur-md">
+    <!-- Nuevo Token (solo se muestra al crear) -->
+    <div *ngIf="newApiKeyToken()" class="p-6 bg-green-50 border-b border-green-100 flex flex-col gap-3">
+      <h3 class="text-green-800 font-semibold flex items-center gap-2">
+        <i class="ri-checkbox-circle-fill"></i> API Key generada con éxito
+      </h3>
+      <p class="text-green-700 text-sm">Copia tu token ahora. Por seguridad, no se volverá a mostrar.</p>
+      <div class="flex items-center gap-2 bg-white p-3 rounded-lg border border-green-200">
+        <code class="text-gray-800 flex-1 font-mono break-all">{{ newApiKeyToken() }}</code>
+      </div>
+      <button (click)="newApiKeyToken.set(null)" class="text-green-700 text-sm hover:underline self-start">Ocultar</button>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="apiKeys().length === 0" class="text-center py-16 px-4">
+      <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-50 text-gray-400 mb-4">
+        <i class="ri-key-2-line text-2xl"></i>
+      </div>
+      <h3 class="text-lg font-medium text-gray-900 mb-1">No hay API Keys</h3>
+      <p class="text-gray-500 text-sm">Crea una llave para comenzar a integrar tus herramientas de testing.</p>
+    </div>
+
+    <!-- Tabla -->
+    <div class="overflow-x-auto" *ngIf="apiKeys().length > 0">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-gray-50/50 border-b border-gray-100 text-sm text-gray-500 uppercase tracking-wider">
+            <th class="py-4 px-6 font-medium">Nombre / Propósito</th>
+            <th class="py-4 px-6 font-medium">Creado / Expira</th>
+            <th class="py-4 px-6 font-medium">Estado</th>
+            <th class="py-4 px-6 font-medium text-right">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <tr *ngFor="let key of apiKeys()" class="hover:bg-gray-50/50 transition-colors">
+            <td class="py-4 px-6">
+              <div class="font-medium text-gray-800">{{ key.name }}</div>
+              <div class="text-xs text-gray-500 font-mono mt-1">Pre: {{ key.maskedKey }}...</div>
+            </td>
+            <td class="py-4 px-6 text-sm text-gray-600">
+              <div>{{ key.createdAt | date:'short' }}</div>
+              <div class="text-xs text-gray-400" *ngIf="key.expiresAt">Expira: {{ key.expiresAt | date:'short' }}</div>
+            </td>
+            <td class="py-4 px-6">
+              <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full"
+                    [ngClass]="key.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
+                {{ key.isActive ? 'Activa' : 'Revocada' }}
+              </span>
+            </td>
+            <td class="py-4 px-6 text-right">
+              <button *ngIf="key.isActive" (click)="revokeApiKey(key)" 
+                      class="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition-colors"
+                      title="Revocar">
+                <i class="ri-prohibited-line"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Create API Key -->
+<app-api-key-modal
+  *ngIf="showModal()"
+  (close)="closeModal()"
+  (save)="onSave($event)">
+</app-api-key-modal>

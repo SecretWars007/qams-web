@@ -1,0 +1,356 @@
+<div class="space-y-10 animate-in fade-in slide-in-from-bottom-6 duration-1000">
+  <!-- Título y Header -->
+  <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+    <div class="space-y-1">
+      <h1 class="text-4xl font-black text-slate-900 tracking-tight leading-none">
+        Tablero de <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-emerald-500">Control QA</span>
+      </h1>
+      <p class="text-slate-500 text-base font-medium">
+        Visión general en tiempo real del ciclo de calidad QAMS.
+      </p>
+    </div>
+
+    <div class="flex items-center gap-4">
+      <!-- Selector de Proyecto -->
+      <div class="flex items-center gap-2 px-4 py-2 bg-white rounded-2xl border border-slate-200 shadow-sm">
+        <label for="dashboardProjectSelector" class="flex items-center gap-2 cursor-pointer">
+          <i class="ri-folder-open-line text-indigo-600"></i>
+          <span class="sr-only">Seleccionar proyecto</span>
+        </label>
+        <select id="dashboardProjectSelector"
+          [ngModel]="selectedProjectId()"
+          (ngModelChange)="onProjectChange($event)"
+          class="bg-transparent border-none outline-none text-sm font-bold text-slate-700 pr-4 cursor-pointer">
+          <option *ngFor="let p of projects()" [value]="p.id">{{ p.name }}</option>
+        </select>
+      </div>
+
+      <div class="flex items-center gap-3 bg-white/80 p-2 px-5 rounded-2xl border border-slate-200 backdrop-blur-md shadow-sm">
+        <span class="text-[10px] font-black text-slate-400 tracking-[0.2em]">Hoy</span>
+        <div class="h-4 w-px bg-slate-200"></div>
+        <span class="text-sm font-bold text-indigo-700">{{ today | date:'dd MMM, yyyy' }}</span>
+      </div>
+    </div>
+  </div>
+
+  @if (summary()) {
+  <!-- ===== SEMÁFORO DE CALIDAD ===== -->
+  <div class="p-5 rounded-2xl border flex flex-col sm:flex-row items-center gap-4 shadow-sm"
+    [class.bg-emerald-50]="summary()!.passRate >= 80"
+    [class.border-emerald-200]="summary()!.passRate >= 80"
+    [class.bg-amber-50]="summary()!.passRate >= 60 && summary()!.passRate < 80"
+    [class.border-amber-200]="summary()!.passRate >= 60 && summary()!.passRate < 80"
+    [class.bg-rose-50]="summary()!.passRate < 60"
+    [class.border-rose-200]="summary()!.passRate < 60"
+  >
+    <div class="w-14 h-14 rounded-full flex items-center justify-center text-2xl shrink-0 font-black"
+      [class.bg-emerald-500]="summary()!.passRate >= 80"
+      [class.text-white]="summary()!.passRate >= 80"
+      [class.bg-amber-400]="summary()!.passRate >= 60 && summary()!.passRate < 80"
+      [class.text-white]="summary()!.passRate >= 60 && summary()!.passRate < 80"
+      [class.bg-rose-500]="summary()!.passRate < 60"
+      [class.text-white]="summary()!.passRate < 60"
+    >
+      <i class="ri-checkbox-circle-fill" *ngIf="summary()!.passRate >= 80"></i>
+      <i class="ri-error-warning-fill" *ngIf="summary()!.passRate >= 60 && summary()!.passRate < 80"></i>
+      <i class="ri-alarm-warning-fill" *ngIf="summary()!.passRate < 60"></i>
+    </div>
+    <div class="flex-1 text-center sm:text-left">
+      <p class="font-black text-lg"
+        [class.text-emerald-800]="summary()!.passRate >= 80"
+        [class.text-amber-800]="summary()!.passRate >= 60 && summary()!.passRate < 80"
+        [class.text-rose-800]="summary()!.passRate < 60"
+      >
+        <ng-container *ngIf="summary()!.passRate >= 80">✅ Estado del Proyecto: Saludable</ng-container>
+        <ng-container *ngIf="summary()!.passRate >= 60 && summary()!.passRate < 80">⚠️ Estado del Proyecto: Atención Requerida</ng-container>
+        <ng-container *ngIf="summary()!.passRate < 60">🔴 Estado del Proyecto: Crítico — Acción Inmediata</ng-container>
+      </p>
+      <p class="text-sm font-medium mt-0.5"
+        [class.text-emerald-600]="summary()!.passRate >= 80"
+        [class.text-amber-600]="summary()!.passRate >= 60 && summary()!.passRate < 80"
+        [class.text-rose-600]="summary()!.passRate < 60"
+      >
+        Tasa de aprobación: <strong>{{ summary()!.passRate }}%</strong> —
+        <ng-container *ngIf="summary()!.passRate >= 80">El ciclo QA cumple los umbrales ISTQB.</ng-container>
+        <ng-container *ngIf="summary()!.passRate >= 60 && summary()!.passRate < 80">Revisión de casos fallidos recomendada.</ng-container>
+        <ng-container *ngIf="summary()!.passRate < 60">Detenga la entrega hasta resolver los defectos críticos.</ng-container>
+      </p>
+    </div>
+    <div class="text-3xl font-black shrink-0"
+      [class.text-emerald-600]="summary()!.passRate >= 80"
+      [class.text-amber-600]="summary()!.passRate >= 60 && summary()!.passRate < 80"
+      [class.text-rose-600]="summary()!.passRate < 60"
+    >{{ summary()!.passRate }}%</div>
+  </div>
+
+  <!-- ===== KPI CARDS ===== -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    <!-- Proyectos -->
+    <div class="glass-card p-6 relative overflow-hidden group hover:-translate-y-1 border-l-4 border-indigo-500">
+      <div class="absolute -right-4 -top-4 w-24 h-24 bg-indigo-500/10 rounded-full blur-2xl group-hover:bg-indigo-500/20 transition-all"></div>
+      <div class="flex items-center justify-between relative z-10">
+        <div class="w-12 h-12 rounded-2xl bg-indigo-100 flex items-center justify-center border border-indigo-200">
+          <i class="ri-folder-info-fill text-indigo-600 text-xl"></i>
+        </div>
+        <span class="text-[10px] font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-lg border border-indigo-100">Proyectos</span>
+      </div>
+      <div class="relative z-10 mt-4">
+        <p class="text-xs font-bold text-slate-400 tracking-widest">Proyectos activos</p>
+        <p class="text-4xl font-black text-slate-900 mt-1">{{ summary()!.totalProjects }}</p>
+      </div>
+    </div>
+
+    <!-- Casos de Prueba -->
+    <div class="glass-card p-6 relative overflow-hidden group hover:-translate-y-1 border-l-4 border-purple-500">
+      <div class="absolute -right-4 -top-4 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl group-hover:bg-purple-500/20 transition-all"></div>
+      <div class="flex items-center justify-between relative z-10">
+        <div class="w-12 h-12 rounded-2xl bg-purple-100 flex items-center justify-center border border-purple-200">
+          <i class="ri-test-tube-fill text-purple-600 text-xl"></i>
+        </div>
+        <span class="text-[10px] font-black text-purple-600 bg-purple-50 px-2 py-0.5 rounded-lg border border-purple-100">Testing</span>
+      </div>
+      <div class="relative z-10 mt-4">
+        <p class="text-xs font-bold text-slate-400 tracking-widest">Casos de prueba</p>
+        <p class="text-4xl font-black text-slate-900 mt-1">{{ summary()!.totalTestCases }}</p>
+      </div>
+    </div>
+
+    <!-- Tasa de Aprobación -->
+    <div class="glass-card p-6 relative overflow-hidden group hover:-translate-y-1"
+      [class.border-l-4]="true"
+      [class.border-emerald-500]="summary()!.passRate >= 80"
+      [class.border-amber-500]="summary()!.passRate >= 60 && summary()!.passRate < 80"
+      [class.border-rose-500]="summary()!.passRate < 60"
+    >
+      <div class="absolute -right-4 -top-4 w-24 h-24 rounded-full blur-2xl transition-all"
+        [ngClass]="{
+          'bg-emerald-500/10': summary()!.passRate >= 80,
+          'bg-amber-500/10': summary()!.passRate >= 60 && summary()!.passRate < 80,
+          'bg-rose-500/10': summary()!.passRate < 60
+        }"
+      ></div>
+      <div class="flex items-center justify-between relative z-10">
+        <div class="w-12 h-12 rounded-2xl flex items-center justify-center border"
+          [class.bg-emerald-100]="summary()!.passRate >= 80"
+          [class.border-emerald-200]="summary()!.passRate >= 80"
+          [class.bg-amber-100]="summary()!.passRate >= 60 && summary()!.passRate < 80"
+          [class.border-amber-200]="summary()!.passRate >= 60 && summary()!.passRate < 80"
+          [class.bg-rose-100]="summary()!.passRate < 60"
+          [class.border-rose-200]="summary()!.passRate < 60"
+        >
+          <i class="ri-checkbox-circle-fill text-xl"
+            [class.text-emerald-600]="summary()!.passRate >= 80"
+            [class.text-amber-600]="summary()!.passRate >= 60 && summary()!.passRate < 80"
+            [class.text-rose-600]="summary()!.passRate < 60"
+          ></i>
+        </div>
+        <div class="flex items-center gap-1.5 px-2 py-0.5 rounded-lg border"
+          [class.bg-emerald-50]="summary()!.passRate >= 80"
+          [class.border-emerald-100]="summary()!.passRate >= 80"
+          [class.bg-amber-50]="summary()!.passRate >= 60 && summary()!.passRate < 80"
+          [class.border-amber-100]="summary()!.passRate >= 60 && summary()!.passRate < 80"
+          [class.bg-rose-50]="summary()!.passRate < 60"
+          [class.border-rose-100]="summary()!.passRate < 60"
+        >
+          <div class="w-1.5 h-1.5 rounded-full animate-pulse"
+            [class.bg-emerald-500]="summary()!.passRate >= 80"
+            [class.bg-amber-500]="summary()!.passRate >= 60 && summary()!.passRate < 80"
+            [class.bg-rose-500]="summary()!.passRate < 60"
+          ></div>
+          <span class="text-[10px] font-black"
+            [class.text-emerald-600]="summary()!.passRate >= 80"
+            [class.text-amber-600]="summary()!.passRate >= 60 && summary()!.passRate < 80"
+            [class.text-rose-600]="summary()!.passRate < 60"
+          >
+            <ng-container *ngIf="summary()!.passRate >= 80">Óptimo</ng-container>
+            <ng-container *ngIf="summary()!.passRate >= 60 && summary()!.passRate < 80">Moderado</ng-container>
+            <ng-container *ngIf="summary()!.passRate < 60">Crítico</ng-container>
+          </span>
+        </div>
+      </div>
+      <div class="relative z-10 mt-4">
+        <p class="text-xs font-bold text-slate-400 tracking-widest">Tasa de aprobación</p>
+        <div class="flex items-baseline gap-1">
+          <p class="text-4xl font-black text-slate-900 mt-1">{{ summary()!.passRate }}</p>
+          <span class="text-xl font-bold text-slate-400">%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pendientes -->
+    <div class="glass-card p-6 relative overflow-hidden group hover:-translate-y-1 border-l-4 border-amber-500">
+      <div class="absolute -right-4 -top-4 w-24 h-24 bg-amber-500/10 rounded-full blur-2xl group-hover:bg-amber-500/20 transition-all"></div>
+      <div class="flex items-center justify-between relative z-10">
+        <div class="w-12 h-12 rounded-2xl bg-amber-100 flex items-center justify-center border border-amber-200">
+          <i class="ri-time-fill text-amber-600 text-xl"></i>
+        </div>
+        <span class="text-[10px] font-black text-amber-600 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-100">Pendiente</span>
+      </div>
+      <div class="relative z-10 mt-4">
+        <p class="text-xs font-bold text-slate-400 tracking-widest">Casos pendientes</p>
+        <p class="text-4xl font-black text-slate-900 mt-1">{{ summary()!.pendingTestCases }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ACCESOS RÁPIDOS ===== -->
+  <div class="bg-white/70 backdrop-blur-sm border border-slate-200 rounded-2xl p-6 shadow-sm">
+    <p class="text-xs font-black tracking-widest text-slate-400 mb-4">⚡ ACCIONES RÁPIDAS</p>
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      <a routerLink="/test-executions"
+        class="flex flex-col items-center gap-2 p-4 rounded-xl bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 hover:border-indigo-200 transition-all group cursor-pointer text-center">
+        <div class="w-10 h-10 rounded-xl bg-indigo-500 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+          <i class="ri-play-circle-fill text-white text-lg"></i>
+        </div>
+        <span class="text-xs font-bold text-indigo-700">Nueva Ejecución</span>
+      </a>
+      <a routerLink="/exploratory"
+        class="flex flex-col items-center gap-2 p-4 rounded-xl bg-sky-50 border border-sky-100 hover:bg-sky-100 hover:border-sky-200 transition-all group cursor-pointer text-center">
+        <div class="w-10 h-10 rounded-xl bg-sky-500 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+          <i class="ri-compass-3-fill text-white text-lg"></i>
+        </div>
+        <span class="text-xs font-bold text-sky-700">Exploratorias</span>
+      </a>
+      <a routerLink="/test-environments"
+        class="flex flex-col items-center gap-2 p-4 rounded-xl bg-emerald-50 border border-emerald-100 hover:bg-emerald-100 hover:border-emerald-200 transition-all group cursor-pointer text-center">
+        <div class="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+          <i class="ri-server-fill text-white text-lg"></i>
+        </div>
+        <span class="text-xs font-bold text-emerald-700">Entornos QA</span>
+      </a>
+      <a routerLink="/defects"
+        class="flex flex-col items-center gap-2 p-4 rounded-xl bg-rose-50 border border-rose-100 hover:bg-rose-100 hover:border-rose-200 transition-all group cursor-pointer text-center">
+        <div class="w-10 h-10 rounded-xl bg-rose-500 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+          <i class="ri-bug-fill text-white text-lg"></i>
+        </div>
+        <span class="text-xs font-bold text-rose-700">Reportar Defecto</span>
+      </a>
+      <a routerLink="/reviews"
+        class="flex flex-col items-center gap-2 p-4 rounded-xl bg-amber-50 border border-amber-100 hover:bg-amber-100 hover:border-amber-200 transition-all group cursor-pointer text-center">
+        <div class="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+          <i class="ri-microscope-fill text-white text-lg"></i>
+        </div>
+        <span class="text-xs font-bold text-amber-700">Revisiones ISTQB</span>
+      </a>
+      <a routerLink="/test-plans"
+        class="flex flex-col items-center gap-2 p-4 rounded-xl bg-purple-50 border border-purple-100 hover:bg-purple-100 hover:border-purple-200 transition-all group cursor-pointer text-center">
+        <div class="w-10 h-10 rounded-xl bg-purple-500 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+          <i class="ri-article-fill text-white text-lg"></i>
+        </div>
+        <span class="text-xs font-bold text-purple-700">Plan de Pruebas</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- ===== MÉTRICAS AVANZADAS ISTQB (Cap 5.2) ===== -->
+  @if (summary()!.istqbMetrics) {
+  <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-6 text-white border border-indigo-900/50 shadow-2xl relative overflow-hidden">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-indigo-800/40 pb-4 mb-6">
+      <div class="space-y-1">
+        <div class="flex items-center gap-2">
+          <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+            ISTQB Standard Metrics
+          </span>
+          <span class="text-xs text-indigo-300/80 font-mono">DDP • DRE • MTTR • Gate</span>
+        </div>
+        <h3 class="text-xl font-bold text-white flex items-center gap-2">
+          <i class="ri-shield-check-fill text-emerald-400"></i>
+          Indicadores de Madurez & Control de Calidad
+        </h3>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-xs text-slate-300">Quality Gate:</span>
+        <span class="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider shadow-sm"
+          [class.bg-emerald-500]="summary()!.istqbMetrics!.qualityGatePassed"
+          [class.text-white]="summary()!.istqbMetrics!.qualityGatePassed"
+          [class.bg-rose-500]="!summary()!.istqbMetrics!.qualityGatePassed"
+        >
+          {{ summary()!.istqbMetrics!.qualityGateStatus }}
+        </span>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="bg-white/5 backdrop-blur-md rounded-2xl p-4 border border-white/10">
+        <div class="flex items-center justify-between text-xs text-slate-300 mb-1 font-bold">
+          <span>DDP (Defect Detection %)</span>
+          <i class="ri-radar-fill text-indigo-400"></i>
+        </div>
+        <div class="text-2xl font-black text-white">{{ summary()!.istqbMetrics!.defectDetectionPercentage }}%</div>
+        <p class="text-[10px] text-slate-400 mt-1">Efectividad de detección en ciclo QA</p>
+      </div>
+
+      <div class="bg-white/5 backdrop-blur-md rounded-2xl p-4 border border-white/10">
+        <div class="flex items-center justify-between text-xs text-slate-300 mb-1 font-bold">
+          <span>DRE (Removal Efficiency)</span>
+          <i class="ri-shield-flash-fill text-emerald-400"></i>
+        </div>
+        <div class="text-2xl font-black text-white">{{ summary()!.istqbMetrics!.defectRemovalEfficiency }}%</div>
+        <p class="text-[10px] text-slate-400 mt-1">Defectos removidos antes de Release</p>
+      </div>
+
+      <div class="bg-white/5 backdrop-blur-md rounded-2xl p-4 border border-white/10">
+        <div class="flex items-center justify-between text-xs text-slate-300 mb-1 font-bold">
+          <span>MTTR (Resolución)</span>
+          <i class="ri-timer-flash-fill text-amber-400"></i>
+        </div>
+        <div class="text-2xl font-black text-white">{{ summary()!.istqbMetrics!.meanTimeToRepairHours }}h</div>
+        <p class="text-[10px] text-slate-400 mt-1">Tiempo promedio de corrección</p>
+      </div>
+
+      <div class="bg-white/5 backdrop-blur-md rounded-2xl p-4 border border-white/10">
+        <div class="flex items-center justify-between text-xs text-slate-300 mb-1 font-bold">
+          <span>Densidad de Defectos</span>
+          <i class="ri-bubble-chart-fill text-purple-400"></i>
+        </div>
+        <div class="text-2xl font-black text-white">{{ summary()!.istqbMetrics!.defectDensityPerRequirement }}</div>
+        <p class="text-[10px] text-slate-400 mt-1">Defectos por cada Requisito</p>
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- ===== GRÁFICOS ===== -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <div class="lg:col-span-12 card !p-0 overflow-hidden">
+      <div class="p-8 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
+        <h3 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+          <i class="ri-pie-chart-2-line text-purple-600"></i>
+          Distribución por Estado de Ejecuciones
+        </h3>
+      </div>
+      <div class="p-8 h-[400px] flex items-center justify-center">
+        <canvas baseChart [data]="doughnutData" [options]="doughnutOptions" type="doughnut"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 gap-8">
+    <div class="card">
+      <div class="flex items-center justify-between mb-8">
+        <h3 class="text-xl font-bold text-slate-900">Progreso de Tareas Kanban</h3>
+        <span class="text-xs font-bold text-amber-600 bg-amber-50 px-3 py-1 rounded-full tracking-tighter">Progreso del Ciclo</span>
+      </div>
+      <div class="h-80">
+        <canvas baseChart [data]="barData" [options]="barOptions" type="bar"></canvas>
+      </div>
+    </div>
+  </div>
+
+  } @else {
+  <!-- Cargando -->
+  <div class="flex flex-col items-center justify-center h-[500px] gap-8 bg-white border border-slate-100 rounded-[2.5rem] shadow-xl shadow-slate-200/50">
+    <div class="relative">
+      <div class="w-24 h-24 border-8 border-indigo-50 border-t-indigo-600 rounded-full animate-spin"></div>
+      <div class="absolute inset-0 flex items-center justify-center">
+        <i class="ri-flashlight-line text-3xl text-indigo-600 animate-pulse"></i>
+      </div>
+    </div>
+    <div class="text-center space-y-2">
+      <h2 class="text-2xl font-black text-slate-900 tracking-tight">Analizando métricas...</h2>
+      <p class="text-slate-400 font-medium">Sincronizando con el motor de calidad QAMS</p>
+    </div>
+  </div>
+  }
+
+</div>

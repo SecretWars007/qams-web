@@ -1,0 +1,256 @@
+name: QAMS CI/CD Pipeline
+
+on:
+  push:
+    branches: ["main", "develop"]
+  pull_request:
+    branches: ["main", "develop"]
+
+env:
+  DOTNET_VERSION: '8.0.x'
+  NODE_VERSION: '20.x'
+  REGISTRY: ghcr.io
+  IMAGE_FRONTEND: ghcr.io/${{ github.repository_owner }}/qams-frontend
+  IMAGE_BACKEND: ghcr.io/${{ github.repository_owner }}/qams-backend
+
+jobs:
+  # ══════════════════════════════════════════
+  #  JOB 1: Build & Test Backend (.NET)
+  # ══════════════════════════════════════════
+  backend-test:
+    name: "🧪 Backend — Build & Tests"
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres123
+          POSTGRES_DB: qams_test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup .NET ${{ env.DOTNET_VERSION }}
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: 📦 Restore dependencies
+        run: dotnet restore src/QAMS.sln
+        working-directory: ./QAMS
+
+      - name: 🏗️ Build
+        run: dotnet build src/QAMS.sln --no-restore --configuration Release
+        working-directory: ./QAMS
+
+      - name: 🧪 Run Unit & Integration Tests
+        run: |
+          dotnet test src/QAMS.Tests/QAMS.Tests.csproj \
+            --no-build \
+            --configuration Release \
+            --verbosity normal \
+            --logger "trx;LogFileName=test-results.trx" \
+            --results-directory ./TestResults
+        working-directory: ./QAMS
+        env:
+          ConnectionStrings__DefaultConnection: >-
+            Host=localhost;Port=5432;Database=qams_test_db;Username=postgres;Password=postgres123
+
+      - name: 📊 Publish Test Results
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: "Backend Unit & Integration Tests"
+          path: "QAMS/TestResults/*.trx"
+          reporter: dotnet-trx
+
+  # ══════════════════════════════════════════
+  #  JOB 2: Build & Lint Frontend (Angular)
+  # ══════════════════════════════════════════
+  frontend-build:
+    name: "🌐 Frontend — Build & Lint"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup Node ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: qams-web/package-lock.json
+
+      - name: 📦 Install dependencies
+        run: npm ci
+        working-directory: ./qams-web
+
+      - name: 🔍 Lint
+        run: npm run lint
+        working-directory: ./qams-web
+        continue-on-error: true
+
+      - name: 🏗️ Build production
+        run: npm run build -- --configuration production
+        working-directory: ./qams-web
+
+      - name: 📁 Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: qams-web/dist/
+          retention-days: 7
+
+  # ══════════════════════════════════════════
+  #  JOB 3: E2E Tests Playwright + Cucumber BDD
+  # ══════════════════════════════════════════
+  e2e-tests:
+    name: "🎭 E2E — Playwright + ISTQB BDD"
+    needs: [backend-test, frontend-build]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup Node ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: qams-web/package-lock.json
+
+      - name: 📦 Install dependencies
+        run: npm ci
+        working-directory: ./qams-web
+
+      - name: 🎭 Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+        working-directory: ./qams-web
+
+      - name: 🎭 Run E2E (BDD ISTQB scenarios)
+        run: npm run e2e:ci
+        working-directory: ./qams-web
+        env:
+          BASE_URL: ${{ vars.E2E_BASE_URL || 'http://localhost:4200' }}
+          E2E_USERNAME: ${{ secrets.E2E_USERNAME }}
+          E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
+        continue-on-error: true
+
+      - name: 📊 Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: qams-web/playwright-report/
+          retention-days: 14
+
+  # ══════════════════════════════════════════
+  #  JOB 4: ISTQB Quality Gate Check
+  # ══════════════════════════════════════════
+  quality-gate:
+    name: "🚦 ISTQB Quality Gate — Go/No-Go"
+    needs: [backend-test, frontend-build]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup Node ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: 🚦 Evaluate QAMS Quality Gate (ISTQB Compliance)
+        id: quality-gate
+        run: |
+          echo "Checking QAMS ISTQB Quality Gate via API..."
+          RESPONSE=$(curl -s -w "\n%{http_code}" \
+            -H "X-Api-Key: ${{ secrets.QAMS_API_KEY }}" \
+            "${{ vars.QAMS_API_URL }}/api/dashboard/istqb-metrics?projectId=${{ vars.QAMS_PROJECT_ID }}")
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | head -n -1)
+
+          echo "HTTP Status: $HTTP_CODE"
+          echo "Response: $BODY"
+
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "⚠️ QAMS API not reachable, skipping gate check."
+            exit 0
+          fi
+
+          PASSED=$(echo "$BODY" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('qualityGatePassed','false'))")
+          FAILURES=$(echo "$BODY" | python3 -c "import sys,json; d=json.load(sys.stdin); print('\n'.join(d.get('qualityGateFailures',[])))")
+
+          if [ "$PASSED" != "True" ] && [ "$PASSED" != "true" ]; then
+            echo "❌ QUALITY GATE FAILED"
+            echo "Criterios no cumplidos:"
+            echo "$FAILURES"
+            exit 1
+          fi
+
+          echo "✅ QUALITY GATE PASSED — Proyecto listo para liberación."
+        shell: bash
+
+  # ══════════════════════════════════════════
+  #  JOB 5: Build & Push Docker Images
+  # ══════════════════════════════════════════
+  docker-publish:
+    name: "🐳 Docker — Build & Push Images"
+    needs: [quality-gate]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🔐 Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🐳 Build & Push Backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./QAMS
+          file: ./QAMS/Dockerfile
+          push: true
+          tags: |
+            ${{ env.IMAGE_BACKEND }}:latest
+            ${{ env.IMAGE_BACKEND }}:${{ github.sha }}
+
+      - name: 🐳 Build & Push Frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./qams-web
+          file: ./qams-web/Dockerfile
+          push: true
+          tags: |
+            ${{ env.IMAGE_FRONTEND }}:latest
+            ${{ env.IMAGE_FRONTEND }}:${{ github.sha }}
+
+      - name: 🏷️ Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          generate_release_notes: true

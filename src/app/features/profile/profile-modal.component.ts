@@ -1,4 +1,4 @@
-import { Component, signal, inject, output } from '@angular/core';
+import { Component, signal, inject, output, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
@@ -7,6 +7,7 @@ import { RolesService } from '../../core/services/roles.service';
 import { Role } from '../../core/models/role.model';
 import { UpdateUser } from '../../core/models/user.model';
 import Swal from 'sweetalert2';
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 
 @Component({
   selector: 'app-profile-modal',
@@ -16,6 +17,7 @@ import Swal from 'sweetalert2';
   styleUrl: './profile-modal.component.scss'
 })
 export class ProfileModalComponent {
+    private destroyRef = inject(DestroyRef);
   show = signal(false);
   loading = signal(false);
   profileUpdated = output<void>();
@@ -44,14 +46,14 @@ export class ProfileModalComponent {
 
     // Solo intentar cargar roles si el usuario es Admin y aún no los tenemos
     if (this.authService.isAdmin() && this.allRoles().length === 0) {
-      this.rolesService.getRoles().subscribe({
+      this.rolesService.getRoles().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: (roles) => this.allRoles.set(roles),
         error: () => console.warn('No se pudieron cargar los roles para el perfil.')
       });
     }
 
     this.loading.set(true);
-    this.usersService.getUserById(userId).subscribe({
+    this.usersService.getUserById(userId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (user) => {
         this.currentUserData = user;
         this.profileForm.patchValue({
@@ -91,7 +93,7 @@ export class ProfileModalComponent {
       updateDto.roleIds = roleIds;
     }
 
-    this.usersService.updateUser(this.currentUserData.id, updateDto).subscribe({
+    this.usersService.updateUser(this.currentUserData.id, updateDto).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         // Actualizar datos del usuario localmente para reflejar cambios en la UI
         this.authService.updateUserClaims(formValue.fullName, formValue.email);

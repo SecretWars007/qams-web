@@ -1,0 +1,94 @@
+// src/app/features/shared/loading-overlay/loading-overlay.component.scss
+// TailwindCSS-only component styles via @apply
+
+.qams-loading-overlay {
+  @apply fixed top-0 left-0 w-screen h-screen flex items-center justify-center z-[99999];
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  animation: fadeIn 0.3s ease-out;
+}
+
+.qams-loading-card {
+  @apply p-12 flex flex-col items-center rounded-[2.5rem];
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.paw-container {
+  @apply relative w-20 h-20 flex items-center justify-center mb-8;
+}
+
+.paw-ring {
+  @apply absolute w-full h-full rounded-full;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+.paw-icon {
+  @apply text-5xl text-white;
+  filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.4));
+  animation: pulse 2s infinite;
+}
+
+.loading-text {
+  @apply text-white text-xs font-black tracking-[0.3em] mt-4;
+  text-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.loading-dots {
+  @apply flex gap-2 mt-3;
+}
+
+.dot {
+  @apply w-1.5 h-1.5 bg-white rounded-full;
+  animation: bounce 1.4s infinite ease-in-out both;
+}
+
+.dot:nth-child(1) {
+  animation-delay: -0.32s;
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.dot:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+.dot:nth-child(3) {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.encryption-hint {
+  @apply mt-10 text-[10px] font-bold tracking-widest;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+@keyframes fadeIn {
+  from { @apply opacity-0; }
+  to { @apply opacity-100; }
+}
+
+@keyframes ping {
+  75%, 100% {
+    @apply scale-150 opacity-0;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    @apply opacity-100 scale-100;
+  }
+  50% {
+    @apply opacity-70 scale-95;
+  }
+}
+
+@keyframes bounce {
+  0%, 80%, 100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1);
+  }
+}

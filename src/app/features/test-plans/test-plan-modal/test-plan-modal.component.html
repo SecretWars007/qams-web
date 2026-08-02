@@ -1,0 +1,250 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/70 backdrop-blur-md p-4 animate-fade-in">
+  <div class="bg-gray-900 border border-white/10 rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[92vh] text-white">
+
+    <!-- Header -->
+    <div class="px-6 py-4 border-b border-white/10 flex justify-between items-center bg-gray-950/50">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+          <i class="ri-file-list-3-line text-xl"></i>
+        </div>
+        <div>
+          <h2 class="text-lg font-bold text-white tracking-tight">
+            {{ isEdit ? 'Editar Plan de Pruebas (ISTQB)' : 'Nuevo Plan de Pruebas (ISTQB / ISO 29119)' }}
+          </h2>
+          <p class="text-xs text-gray-400">Planificación de pruebas, estrategia y criterios de calidad</p>
+        </div>
+      </div>
+      <button type="button" (click)="closeModal.emit()" class="text-gray-400 hover:text-white transition-colors p-2 rounded-lg hover:bg-white/5">
+        <i class="ri-close-line text-xl"></i>
+      </button>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="px-6 pt-3 border-b border-white/5 flex gap-4 bg-gray-950/30 text-xs font-semibold">
+      <button type="button" (click)="activeTab = 'general'"
+              [class]="activeTab === 'general' ? 'border-b-2 border-indigo-500 text-indigo-400 pb-2.5' : 'text-gray-400 hover:text-gray-200 pb-2.5'">
+        <i class="ri-information-line mr-1.5"></i> 1. Información General
+      </button>
+      <button type="button" (click)="activeTab = 'strategy'"
+              [class]="activeTab === 'strategy' ? 'border-b-2 border-indigo-500 text-indigo-400 pb-2.5' : 'text-gray-400 hover:text-gray-200 pb-2.5'">
+        <i class="ri-compass-3-line mr-1.5"></i> 2. Alcance y Estrategia
+      </button>
+      <button type="button" (click)="activeTab = 'criteria'"
+              [class]="activeTab === 'criteria' ? 'border-b-2 border-indigo-500 text-indigo-400 pb-2.5' : 'text-gray-400 hover:text-gray-200 pb-2.5'">
+        <i class="ri-checkbox-multiple-line mr-1.5"></i> 3. Criterios Entry / Exit (Exit Criteria)
+        <span class="ml-1.5 px-1.5 py-0.5 rounded-full text-[10px] bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+          {{ criteriaList.length }}
+        </span>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="p-6 overflow-y-auto flex-1 text-xs">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6" id="test-plan-form">
+
+        <!-- TAB 1: GENERAL -->
+        <div *ngIf="activeTab === 'general'" class="space-y-5">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Name -->
+            <div class="md:col-span-2 space-y-1">
+              <label class="font-medium text-gray-300" for="name">Nombre del Plan <span class="text-rose-400">*</span></label>
+              <input type="text" id="name" formControlName="name" class="w-full bg-gray-950 border border-white/10 rounded-xl px-3 py-2 text-white focus:border-indigo-500 focus:outline-none" placeholder="Ej: Master Test Plan Sprint 4">
+              <div *ngIf="form.get('name')?.invalid && form.get('name')?.touched" class="text-rose-400 text-[10px]">
+                Nombre requerido (mínimo 5 caracteres).
+              </div>
+            </div>
+
+            <!-- Status -->
+            <div class="space-y-1">
+              <label class="font-medium text-gray-300" for="statusId">Estado del Plan</label>
+              <select id="statusId" formControlName="statusId" class="w-full bg-gray-950 border border-white/10 rounded-xl px-3 py-2 text-white focus:border-indigo-500 focus:outline-none">
+                <option *ngFor="let s of statuses" [value]="s.id">{{ s.name }}</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Objectives -->
+          <div class="space-y-1">
+            <label class="font-medium text-gray-300" for="objectives">Objetivos del Plan (ISTQB Test Objectives)</label>
+            <textarea id="objectives" formControlName="objectives" rows="3" class="w-full bg-gray-950 border border-white/10 rounded-xl px-3 py-2 text-white focus:border-indigo-500 focus:outline-none" placeholder="Describa el objetivo principal de este plan de pruebas..."></textarea>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Start Date -->
+            <div class="space-y-1">
+              <label class="font-medium text-gray-300" for="startDate">Fecha de Inicio <span class="text-rose-400">*</span></label>
+              <input type="date" id="startDate" formControlName="startDate" class="w-full bg-gray-950 border border-white/10 rounded-xl px-3 py-2 text-white focus:border-indigo-500 focus:outline-none">
+            </div>
+
+            <!-- End Date -->
+            <div class="space-y-1">
+              <label class="font-medium text-gray-300" for="endDate">Fecha Fin Estimada <span class="text-rose-400">*</span></label>
+              <input type="date" id="endDate" formControlName="endDate" class="w-full bg-gray-950 border border-white/10 rounded-xl px-3 py-2 text-white focus:border-indigo-500 focus:outline-none">
+            </div>
+
+            <!-- Effort Hours -->
+            <div class="space-y-1">
+              <label class="font-medium text-gray-300" for="estimatedEffortHours">Esfuerzo Estimado (Horas)</label>
+              <input type="number" id="estimatedEffortHours" formControlName="estimatedEffortHours" class="w-full bg-gray-950 border border-white/10 rounded-xl px-3 py-2 text-white focus:border-indigo-500 focus:outline-none" placeholder="0">
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 2: ALCANCE Y ESTRATEGIA -->
+        <div *ngIf="activeTab === 'strategy'" class="space-y-5">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Scope -->
+            <div class="space-y-1">
+              <label class="font-medium text-gray-300" for="scope">Alcance de Pruebas (In-Scope)</label>
+              <textarea id="scope" formControlName="scope" rows="3" class="w-full bg-gray-950 border border-white/10 rounded-xl px-3 py-2 text-white focus:border-indigo-500 focus:outline-none" placeholder="Módulos, funcionalidades y componentes a probar..."></textarea>
+            </div>
+
+            <!-- Out of Scope -->
+            <div class="space-y-1">
+              <label class="font-medium text-gray-300" for="outOfScope">Fuera de Alcance (Out-of-Scope)</label>
+              <textarea id="outOfScope" formControlName="outOfScope" rows="3" class="w-full bg-gray-950 border border-white/10 rounded-xl px-3 py-2 text-white focus:border-indigo-500 focus:outline-none" placeholder="Funcionalidades excluidas explícitamente de esta iteración..."></textarea>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Strategy -->
+            <div class="space-y-1">
+              <label class="font-medium text-gray-300" for="testStrategy">Estrategia de Prueba (Test Approach / Strategy)</label>
+              <textarea id="testStrategy" formControlName="testStrategy" rows="3" class="w-full bg-gray-950 border border-white/10 rounded-xl px-3 py-2 text-white focus:border-indigo-500 focus:outline-none" placeholder="Tipos de pruebas: Funcional, Regresión, Seguridad, Automatizada..."></textarea>
+            </div>
+
+            <!-- Risk Analysis -->
+            <div class="space-y-1">
+              <label class="font-medium text-gray-300" for="riskAnalysis">Análisis de Riesgos (Product / Quality Risks)</label>
+              <textarea id="riskAnalysis" formControlName="riskAnalysis" rows="3" class="w-full bg-gray-950 border border-white/10 rounded-xl px-3 py-2 text-white focus:border-indigo-500 focus:outline-none" placeholder="Riesgos identificados y planes de mitigación..."></textarea>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Environment -->
+            <div class="space-y-1">
+              <label class="font-medium text-gray-300" for="environmentRequirements">Requisitos de Ambiente (Test Environment)</label>
+              <textarea id="environmentRequirements" formControlName="environmentRequirements" rows="2" class="w-full bg-gray-950 border border-white/10 rounded-xl px-3 py-2 text-white focus:border-indigo-500 focus:outline-none" placeholder="Servidores, bases de datos, navegadores y plataformas requeridas..."></textarea>
+            </div>
+
+            <!-- Schedule -->
+            <div class="space-y-1">
+              <label class="font-medium text-gray-300" for="testSchedule">Hitos y Cronograma (Test Schedule)</label>
+              <textarea id="testSchedule" formControlName="testSchedule" rows="2" class="w-full bg-gray-950 border border-white/10 rounded-xl px-3 py-2 text-white focus:border-indigo-500 focus:outline-none" placeholder="Hitos clave, entregas de builds y ventanas de ejecución..."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 3: CRITERIOS ENTRY / EXIT -->
+        <div *ngIf="activeTab === 'criteria'" class="space-y-6">
+
+          <!-- Section: ENTRY CRITERIA -->
+          <div class="bg-gray-950/60 p-4 rounded-xl border border-white/10 space-y-3">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">ENTRY CRITERIA</span>
+                <h3 class="font-bold text-gray-200">Criterios de Entrada (Premisas para Iniciar Pruebas)</h3>
+              </div>
+              <span class="text-[10px] text-gray-400 font-mono">
+                {{ entryCriteria.length }} criterio(s)
+              </span>
+            </div>
+
+            <!-- Add Entry Criteria Input -->
+            <div class="flex gap-2">
+              <input type="text" [(ngModel)]="newEntryDescription" [ngModelOptions]="{standalone: true}"
+                     (keyup.enter)="addEntryCriteria()"
+                     aria-label="Nuevo criterio de entrada"
+                     placeholder="Agregar nuevo criterio de entrada..."
+                     class="flex-1 bg-gray-900 border border-white/10 rounded-lg px-3 py-1.5 text-white focus:outline-none focus:border-indigo-500">
+              <button type="button" (click)="addEntryCriteria()" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white rounded-lg font-medium transition-colors">
+                + Agregar
+              </button>
+            </div>
+
+            <!-- Entry Criteria List -->
+            <div class="space-y-2">
+              <div *ngFor="let item of entryCriteria" class="flex items-center justify-between p-2.5 bg-gray-900/80 rounded-lg border border-white/5">
+                <div class="flex items-center gap-3 flex-1">
+                  <button type="button" (click)="toggleCriteriaMet(item)"
+                          [class]="item.isMet ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-gray-800 text-gray-400 border-gray-700'"
+                          class="px-2 py-1 rounded text-[10px] font-mono border font-bold">
+                    {{ item.isMet ? '✓ CUMPLIDO' : '○ PENDIENTE' }}
+                  </button>
+                  <span [class]="item.isMet ? 'line-through text-gray-400' : 'text-gray-200'">{{ item.description }}</span>
+                </div>
+                <button type="button" (click)="removeCriteria(item)" class="text-rose-400 hover:text-rose-300 p-1">
+                  <i class="ri-delete-bin-line"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section: EXIT CRITERIA -->
+          <div class="bg-gray-950/60 p-4 rounded-xl border border-white/10 space-y-3">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">EXIT CRITERIA</span>
+                <h3 class="font-bold text-gray-200">Criterios de Salida (Exit Criteria ISTQB)</h3>
+              </div>
+              <span class="text-[10px] text-gray-400 font-mono">
+                {{ exitCriteria.length }} criterio(s)
+              </span>
+            </div>
+
+            <p class="text-[10px] text-gray-400 italic">
+              * ISTQB Rule: El plan de pruebas no podrá cerrarse (Estado CLOSED) a menos que el 100% de los criterios de salida estén en estado CUMPLIDO.
+            </p>
+
+            <!-- Add Exit Criteria Input -->
+            <div class="flex gap-2">
+              <input type="text" [(ngModel)]="newExitDescription" [ngModelOptions]="{standalone: true}"
+                     (keyup.enter)="addExitCriteria()"
+                     aria-label="Nuevo criterio de salida"
+                     placeholder="Agregar nuevo criterio de salida..."
+                     class="flex-1 bg-gray-900 border border-white/10 rounded-lg px-3 py-1.5 text-white focus:outline-none focus:border-indigo-500">
+              <button type="button" (click)="addExitCriteria()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-medium transition-colors">
+                + Agregar
+              </button>
+            </div>
+
+            <!-- Exit Criteria List -->
+            <div class="space-y-2">
+              <div *ngFor="let item of exitCriteria" class="flex items-center justify-between p-2.5 bg-gray-900/80 rounded-lg border border-white/5">
+                <div class="flex items-center gap-3 flex-1">
+                  <button type="button" (click)="toggleCriteriaMet(item)"
+                          [class]="item.isMet ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-gray-800 text-gray-400 border-gray-700'"
+                          class="px-2 py-1 rounded text-[10px] font-mono border font-bold">
+                    {{ item.isMet ? '✓ CUMPLIDO' : '○ PENDIENTE' }}
+                  </button>
+                  <span [class]="item.isMet ? 'line-through text-gray-400' : 'text-gray-200'">{{ item.description }}</span>
+                </div>
+                <button type="button" (click)="removeCriteria(item)" class="text-rose-400 hover:text-rose-300 p-1">
+                  <i class="ri-delete-bin-line"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </form>
+    </div>
+
+    <!-- Footer -->
+    <div class="px-6 py-4 border-t border-white/10 bg-gray-950/50 flex justify-between items-center">
+      <div class="text-[10px] text-gray-400 font-mono">
+        ISTQB ISO/IEC/IEEE 29119-3 Standard Compliant
+      </div>
+      <div class="flex gap-3">
+        <button type="button" (click)="closeModal.emit()" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl transition-colors font-medium text-xs">
+          Cancelar
+        </button>
+        <button type="submit" form="test-plan-form" [disabled]="form.invalid" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white rounded-xl transition-colors font-medium text-xs shadow-lg shadow-indigo-500/25">
+          {{ isEdit ? 'Guardar Cambios' : 'Crear Plan de Pruebas' }}
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>

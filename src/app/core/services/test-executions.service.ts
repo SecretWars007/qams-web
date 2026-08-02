@@ -7,7 +7,6 @@ import { environment } from '../../../environments/environment';
 import { TestExecutionDto } from '../dto/test-execution.dto';
 import { TestExecution } from '../models/test-execution.model';
 import { TestExecutionMapper } from '../mappers/test-execution.mapper';
-import { TestExecutionsMockService } from './test-executions.mock.service';
 
 @Injectable({ providedIn: 'root' })
 export class TestExecutionsService {
@@ -18,7 +17,6 @@ export class TestExecutionsService {
     private readonly apiUrl = `${environment.apiUrl}/TestExecutions`;
 
     private readonly http = inject(HttpClient);
-    private readonly mockService = inject(TestExecutionsMockService);
 
     /**
      * Obtiene ejecuciones, opcionalmente filtradas por caso, proyecto o suite.
@@ -27,9 +25,6 @@ export class TestExecutionsService {
      * @param testSuiteId - Filtro por suite de prueba (opcional)
      */
     getExecutions(testCaseId?: string, projectId?: string, testSuiteId?: string): Observable<TestExecution[]> {
-        if (environment.useMock) {
-            return this.mockService.getExecutions(testCaseId, projectId, testSuiteId);
-        }
 
         if (testCaseId) {
             const url = `${this.apiUrl}/testcase/${testCaseId}`;
@@ -51,11 +46,6 @@ export class TestExecutionsService {
      * @param id - ID de la ejecución
      */
     getExecutionById(id: string): Observable<TestExecution> {
-        if (environment.useMock) {
-            return this.mockService.getExecutions().pipe(
-                map((list: TestExecution[]) => list.find((e: TestExecution) => e.id === id)!)
-            );
-        }
         return this.http.get<TestExecutionDto>(`${this.apiUrl}/${id}`).pipe(
             map(dto => TestExecutionMapper.fromDto(dto))
         );
@@ -66,9 +56,6 @@ export class TestExecutionsService {
      * @param execution - Datos de la ejecución a crear
      */
     createExecution(execution: any): Observable<TestExecution> {
-        if (environment.useMock) {
-            return this.mockService.createExecution(execution);
-        }
         console.log(this.LOG_TAG, 'Creando ejecución para caso:', execution.testCaseId);
         return this.http.post<TestExecution>(`${this.apiUrl}/complete`, execution);
     }
@@ -79,9 +66,6 @@ export class TestExecutionsService {
      * @param execution - Datos a actualizar (puede incluir stepResults)
      */
     updateExecution(id: string, execution: any): Observable<TestExecution> {
-        if (environment.useMock) {
-            return this.mockService.updateExecution(id, execution);
-        }
 
         // Actualización completa con resultados de pasos → re-evaluación automática del backend
         if (execution.stepResults && execution.stepResults.length > 0) {
@@ -114,9 +98,6 @@ export class TestExecutionsService {
      * @param stepResultId - ID del resultado de paso asociado (opcional)
      */
     uploadEvidence(executionId: string, file: File, description?: string, stepResultId?: string): Observable<any> {
-        if (environment.useMock) {
-            return this.mockService.uploadEvidence(executionId, file, description, stepResultId);
-        }
 
         const formData = new FormData();
         formData.append('File', file);
@@ -134,9 +115,6 @@ export class TestExecutionsService {
      * @param file - Archivo adjunto (opcional)
      */
     addObservation(stepResultId: string, observation: string, file?: File): Observable<any> {
-        if (environment.useMock) {
-            return this.mockService.addObservation(stepResultId, observation, file);
-        }
         const formData = new FormData();
         formData.append('ExecutionStepResultId', stepResultId);
         formData.append('Observation', observation);
@@ -152,9 +130,6 @@ export class TestExecutionsService {
      * @param response - Texto de respuesta
      */
     respondToObservation(observationId: string, response: string): Observable<any> {
-        if (environment.useMock) {
-            return this.mockService.respondToObservation(observationId, response);
-        }
         console.log(this.LOG_TAG, 'Respondiendo observación:', observationId);
         return this.http.post(`${this.apiUrl}/observation/${observationId}/response`, { response });
     }
@@ -166,9 +141,6 @@ export class TestExecutionsService {
      * @param payload - Datos del paso (statusId, actualResult, notes)
      */
     updateStepResult(executionId: string, stepResultId: string, payload: any): Observable<any> {
-        if (environment.useMock) {
-            return this.mockService.updateStepResult(executionId, stepResultId, payload);
-        }
         console.log(this.LOG_TAG, 'Actualizando resultado de paso:', stepResultId);
         return this.http.put(`${this.apiUrl}/${executionId}/step-result`, {
             testStepId: payload.testStepId,
@@ -184,9 +156,6 @@ export class TestExecutionsService {
      * @param statusId - ID del estado final (e.g., 1=PASSED, 2=FAILED)
      */
     completeExecution(executionId: string, statusId: number): Observable<any> {
-        if (environment.useMock) {
-            return this.mockService.completeExecution(executionId, statusId);
-        }
         console.log(this.LOG_TAG, 'Completando ejecución:', executionId, 'con estado:', statusId);
         return this.http.put(`${this.apiUrl}/${executionId}/complete/${statusId}`, {});
     }

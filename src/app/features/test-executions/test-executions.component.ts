@@ -1,5 +1,5 @@
 import Swal from 'sweetalert2';
-import { Component, OnInit, signal, inject } from '@angular/core';
+import { Component, OnInit, signal, inject, DestroyRef } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators, FormsModule } from '@angular/forms';
 import { TestExecutionsService } from '../../core/services/test-executions.service';
@@ -12,6 +12,8 @@ import { TestSuitesService } from '../../core/services/test-suites.service';
 import { Project } from '../../core/models/project.model';
 import { TestSuite } from '../../core/models/test-suite.model';
 import { TestCase } from '../../core/models/test-case.model';
+import { SkeletonLoaderComponent } from '../shared/skeleton-loader/skeleton-loader.component';
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 
 /**
  * Componente para visualizar, crear, editar y subir evidencias a Ejecuciones de Prueba.
@@ -19,11 +21,12 @@ import { TestCase } from '../../core/models/test-case.model';
 @Component({
   selector: 'app-test-executions',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule, SkeletonLoaderComponent],
   templateUrl: './test-executions.component.html',
   styleUrls: ['./test-executions.component.scss']
 })
 export class TestExecutionsComponent implements OnInit {
+    private destroyRef = inject(DestroyRef);
   executions = signal<TestExecution[]>([]);
   isEditing = signal<boolean>(false);
   editingExecutionId = signal<string | null>(null);
@@ -67,14 +70,14 @@ export class TestExecutionsComponent implements OnInit {
     this.initForm();
     this.initUploadForm();
     this.loadProjects();
-    this.route.queryParams.subscribe(params => {
+    this.route.queryParams.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
       const testCaseId = params['testCaseId'];
       const editExecutionId = params['editExecutionId'];
 
       if (testCaseId) {
         this.selectedTestCaseId.set(testCaseId);
         this.loadTestCaseTitle(testCaseId);
-        this.testCasesService.getTestCaseById(testCaseId).subscribe(tc => {
+        this.testCasesService.getTestCaseById(testCaseId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(tc => {
           if (tc) {
             this.selectedProjectId.set(tc.projectId);
             this.loadScenarios(tc.projectId);
@@ -86,7 +89,7 @@ export class TestExecutionsComponent implements OnInit {
 
       if (editExecutionId) {
         // We handle the auto-edit after executions are loaded or directly if it's a deep link
-        this.executionsService.getExecutionById(editExecutionId).subscribe(exec => {
+        this.executionsService.getExecutionById(editExecutionId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(exec => {
           if (exec) {
             this.editExecution(exec);
           }
@@ -108,7 +111,7 @@ export class TestExecutionsComponent implements OnInit {
     });
 
     // Sync statusId and statusCode
-    this.executionForm.get('statusId')?.valueChanges.subscribe(val => {
+    this.executionForm.get('statusId')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
       const statusMap: any = {
         1: 'PASSED',
         2: 'FAILED',
@@ -121,7 +124,7 @@ export class TestExecutionsComponent implements OnInit {
     });
 
     // Load steps and title when testCaseId changes
-    this.executionForm.get('testCaseId')?.valueChanges.subscribe(val => {
+    this.executionForm.get('testCaseId')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
       this.stepResults.clear();
       if (val) {
         this.loadTestCaseSteps(val);
@@ -169,7 +172,7 @@ export class TestExecutionsComponent implements OnInit {
 
     this.loading.set(true);
     // Fetch full execution details to ensure we have all steps
-    this.executionsService.getExecutionById(execution.id).subscribe({
+    this.executionsService.getExecutionById(execution.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (fullExecution) => {
         this.isEditing.set(true);
         this.editingExecutionId.set(fullExecution.id);
@@ -196,7 +199,7 @@ export class TestExecutionsComponent implements OnInit {
   }
 
   loadTestCaseSteps(testCaseId: string) {
-    this.testCasesService.getTestSteps(testCaseId).subscribe(steps => {
+    this.testCasesService.getTestSteps(testCaseId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(steps => {
       steps.forEach(step => this.addStepResult(step));
     });
   }
@@ -228,7 +231,7 @@ export class TestExecutionsComponent implements OnInit {
       ? this.executionsService.updateExecution(this.editingExecutionId()!, payload)
       : this.executionsService.createExecution(payload);
 
-    obs$.subscribe({
+    obs$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.isSubmitting.set(false);
         this.showModal.set(false);
@@ -254,7 +257,7 @@ export class TestExecutionsComponent implements OnInit {
   }
 
   loadProjects() {
-    this.projectsService.getProjects().subscribe(data => this.projects.set(data));
+    this.projectsService.getProjects().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => this.projects.set(data));
   }
 
   loadScenarios(projectId: string) {
@@ -263,7 +266,7 @@ export class TestExecutionsComponent implements OnInit {
       this.testCases.set([]);
       return;
     }
-    this.scenariosService.getTestSuitesByProjectId(projectId).subscribe(data => this.scenarios.set(data));
+    this.scenariosService.getTestSuitesByProjectId(projectId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => this.scenarios.set(data));
   }
 
   loadTestCases(scenarioId: string) {
@@ -272,7 +275,7 @@ export class TestExecutionsComponent implements OnInit {
       return;
     }
     // We filter local test cases or fetch from service if it supports it
-    this.testCasesService.getTestCases(this.selectedProjectId()).subscribe(data => {
+    this.testCasesService.getTestCases(this.selectedProjectId()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
       this.testCases.set(data.filter(tc => tc.suite.id === scenarioId));
     });
   }
@@ -303,10 +306,10 @@ export class TestExecutionsComponent implements OnInit {
   loadExecutions() {
     this.loading.set(true);
     this.executionsService.getExecutions(
-      this.selectedTestCaseId() || undefined,
-      this.selectedProjectId() || undefined,
-      this.selectedScenarioId() || undefined
-    ).subscribe({
+            this.selectedTestCaseId() || undefined,
+            this.selectedProjectId() || undefined,
+            this.selectedScenarioId() || undefined
+          ).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (data: TestExecution[]) => {
         this.executions.set(data);
         this.loading.set(false);
@@ -316,7 +319,7 @@ export class TestExecutionsComponent implements OnInit {
   }
 
   loadTestCaseTitle(id: string) {
-    this.testCasesService.getTestCaseById(id).subscribe(testCase => {
+    this.testCasesService.getTestCaseById(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(testCase => {
       if (testCase) {
         this.testCaseTitle.set(testCase.title);
       }
@@ -326,7 +329,7 @@ export class TestExecutionsComponent implements OnInit {
   // Details & Evidence Methods
   openDetailsModal(execution: TestExecution) {
     this.loading.set(true);
-    this.executionsService.getExecutionById(execution.id).subscribe({
+    this.executionsService.getExecutionById(execution.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (fullExecution) => {
         this.selectedExecution.set(fullExecution);
         this.showDetailsModal.set(true);
@@ -402,11 +405,11 @@ export class TestExecutionsComponent implements OnInit {
     const { description, stepResultId } = this.uploadForm.value;
 
     this.executionsService.uploadEvidence(
-      executionId,
-      this.selectedFile,
-      description,
-      stepResultId
-    ).subscribe({
+            executionId,
+            this.selectedFile,
+            description,
+            stepResultId
+          ).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.isUploading.set(false);
         this.showUploadModal.set(false);
@@ -439,7 +442,7 @@ export class TestExecutionsComponent implements OnInit {
     if (!stepResultId || !text.trim()) return;
 
     this.isSubmitting.set(true);
-    this.executionsService.addObservation(stepResultId, text).subscribe({
+    this.executionsService.addObservation(stepResultId, text).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.isSubmitting.set(false);
         this.closeObservationModal();
@@ -468,7 +471,7 @@ export class TestExecutionsComponent implements OnInit {
 
   onRespondObservation(observationId: string, response: string) {
     if (!response.trim()) return;
-    this.executionsService.respondToObservation(observationId, response).subscribe({
+    this.executionsService.respondToObservation(observationId, response).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         Swal.fire({
       icon: 'success',
@@ -490,5 +493,15 @@ export class TestExecutionsComponent implements OnInit {
     });
       }
     });
+  }
+
+  calculateProgress(execution: TestExecution): number {
+    if (!execution.stepResults || execution.stepResults.length === 0) {
+      // If there are no steps, we define progress based on global status
+      return execution.status.id === 1 ? 100 : execution.status.id === 5 ? 0 : 50; 
+    }
+    const total = execution.stepResults.length;
+    const completed = execution.stepResults.filter(s => s.status.id === 1 || s.status.id === 2 || s.status.id === 3).length;
+    return Math.round((completed / total) * 100);
   }
 }

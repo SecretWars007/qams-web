@@ -1,9 +1,10 @@
 import Swal from 'sweetalert2';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CatalogsService } from '../../../core/services/catalogs.service';
 import { finalize } from 'rxjs';
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 
 interface CatalogConfig {
   name: string;
@@ -23,6 +24,7 @@ interface CatalogConfig {
   styleUrls: ['./catalogs.component.scss']
 })
 export class CatalogsComponent implements OnInit {
+    private destroyRef = inject(DestroyRef);
   private readonly catalogsService = inject(CatalogsService);
   private readonly fb = inject(FormBuilder);
 
@@ -64,6 +66,7 @@ export class CatalogsComponent implements OnInit {
    * Selecciona un catálogo para visualizar sus elementos.
    * @param catalog - Configuración del catálogo seleccionado
    */
+
   selectCatalog(catalog: CatalogConfig): void {
     if (this.selectedCatalog.name === catalog.name) return;
     this.selectedCatalog = catalog;
@@ -73,11 +76,11 @@ export class CatalogsComponent implements OnInit {
   /** Carga los elementos del catálogo seleccionado desde el backend */
   loadCatalogItems(): void {
     this.loading = true;
-    this.catalogsService.getAll(this.selectedCatalog.name)
-      .pipe(finalize(() => this.loading = false))
+    this.catalogsService.getAllByCatalog(this.selectedCatalog.name)
+      .pipe(finalize(() => this.loading = false), takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (data) => this.items = data,
-        error: (err) => {
+        next: (data: any) => this.items = data,
+        error: (err: any) => {
           Swal.fire({
             icon: 'error',
             title: 'Error',
@@ -124,11 +127,11 @@ export class CatalogsComponent implements OnInit {
 
     const itemData = this.itemForm.value;
     const request = this.isEdit && this.currentItemId
-      ? this.catalogsService.updateItem(this.selectedCatalog.name, this.currentItemId, itemData)
-      : this.catalogsService.createItem(this.selectedCatalog.name, itemData);
+      ? this.catalogsService.updateCatalogItem(this.selectedCatalog.name, this.currentItemId, itemData)
+      : this.catalogsService.createCatalogItem(this.selectedCatalog.name, itemData);
 
     this.loading = true;
-    request.pipe(finalize(() => this.loading = false))
+    request.pipe(finalize(() => this.loading = false), takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
           Swal.fire({
@@ -140,7 +143,7 @@ export class CatalogsComponent implements OnInit {
           this.loadCatalogItems();
           this.closeModal();
         },
-        error: (err) => {
+        error: (err: any) => {
           Swal.fire({
             icon: 'error',
             title: 'Error',
@@ -157,7 +160,7 @@ export class CatalogsComponent implements OnInit {
    */
   toggleActive(item: any): void {
     const updatedItem = { ...item, isActive: !item.isActive };
-    this.catalogsService.updateItem(this.selectedCatalog.name, item.id, updatedItem)
+    this.catalogsService.updateCatalogItem(this.selectedCatalog.name, item.id, updatedItem).pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
           Swal.fire({

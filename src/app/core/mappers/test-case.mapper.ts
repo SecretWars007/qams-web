@@ -29,7 +29,10 @@ export class TestCaseMapper {
         stepOrder: s.stepOrder,
         action: s.action,
         expectedResult: s.expectedResult
-      })) || []
+      })) || [],
+      dto.impactLevel ?? 3,
+      dto.likelihoodLevel ?? 3,
+      dto.riskScore ?? ((dto.impactLevel ?? 3) * (dto.likelihoodLevel ?? 3))
     );
   }
 }

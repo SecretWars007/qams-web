@@ -21,7 +21,10 @@ export class TestCase {
     public isActive: boolean,
     public createdAt: Date,
     public createdBy: string,
-    public steps: TestCaseStep[] = []
+    public steps: TestCaseStep[] = [],
+    public impactLevel: number = 3,
+    public likelihoodLevel: number = 3,
+    public riskScore: number = 9
   ) {}
 }
 

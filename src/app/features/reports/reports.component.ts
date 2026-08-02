@@ -1,12 +1,17 @@
-// src/app/features/reports/reports.component.ts
-import { Component, OnInit, signal, inject } from '@angular/core';
+import { Component, OnInit, signal, inject, DestroyRef, effect } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { ReportsService } from '../../core/services/reports.service';
 import { ProjectsService } from '../../core/services/projects.service';
+import { ProjectContextService } from '../../core/services/project-context.service';
 import { Project } from '../../core/models/project.model';
 import { SafeUrlPipe } from '../../shared/pipes/safe-url.pipe';
+import { RtmMatrixComponent } from './rtm-matrix/rtm-matrix.component';
+import { RiskManagementComponent } from './risk-management/risk-management.component';
+import { QualityGateWidgetComponent } from './quality-gate-widget/quality-gate-widget.component';
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 
 interface ExecutionStatusOption {
     id: number;
@@ -20,18 +25,23 @@ interface TaskStatusOption {
     label: string;
 }
 
-/**
- * Componente para la generación y descarga de reportes PDF.
- * Permite filtrar por proyecto, fechas, estados de ejecución y tareas.
- */
 @Component({
     selector: 'app-reports',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, SafeUrlPipe, DatePipe],
+    imports: [
+      CommonModule,
+      ReactiveFormsModule,
+      SafeUrlPipe,
+      DatePipe,
+      RtmMatrixComponent,
+      RiskManagementComponent,
+      QualityGateWidgetComponent
+    ],
     templateUrl: './reports.component.html',
     styleUrls: ['./reports.component.scss']
 })
 export class ReportsComponent implements OnInit {
+    private destroyRef = inject(DestroyRef);
     today = new Date();
     projects = signal<Project[]>([]);
     loading = signal(false);
@@ -39,7 +49,8 @@ export class ReportsComponent implements OnInit {
     error = signal<string | null>(null);
     pdfUrl = signal<string | null>(null);
     reportGenerated = signal<boolean>(false);
-    reportType = signal<'general' | 'observations' | 'compliance' | 'burndown'>('general');
+    reportType = signal<'general' | 'observations' | 'compliance' | 'burndown' | 'fullCertification' | 'executiveSummary'>('general');
+    activeTab = signal<'qualityGate' | 'rtm' | 'rbt' | 'burndown'>('qualityGate');
 
     filterForm!: FormGroup;
 
@@ -59,13 +70,26 @@ export class ReportsComponent implements OnInit {
         { name: 'Completado', label: 'Completado' },
     ];
 
-    // Map for selected checkboxes
     selectedExecStatuses = signal<Set<number>>(new Set());
     selectedTaskStatuses = signal<Set<string>>(new Set());
 
     private reportsService = inject(ReportsService);
     private projectsService = inject(ProjectsService);
+    private projectContext = inject(ProjectContextService);
+    private route = inject(ActivatedRoute);
     private fb = inject(FormBuilder);
+
+    constructor() {
+        effect(() => {
+            const activeId = this.projectContext.activeProjectId();
+            if (activeId) {
+                this.filterForm.patchValue({ projectId: activeId });
+                if (this.activeTab() === 'burndown') {
+                    this.generateReport('burndown');
+                }
+            }
+        });
+    }
 
     ngOnInit(): void {
         this.filterForm = this.fb.group({
@@ -74,12 +98,31 @@ export class ReportsComponent implements OnInit {
             endDate: ['']
         });
         this.loadProjects();
+        this.route.queryParams.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
+            if (params['tab'] === 'rtm') {
+                this.activeTab.set('rtm');
+            } else if (params['tab'] === 'rbt') {
+                this.activeTab.set('rbt');
+            } else if (params['tab'] === 'qualityGate') {
+                this.activeTab.set('qualityGate');
+            } else if (params['tab'] === 'burndown') {
+                this.activeTab.set('burndown');
+            }
+        });
+    }
+
+    onBurndownTabSelect(): void {
+        this.activeTab.set('burndown');
+        const activeId = this.projectContext.activeProjectId();
+        if (activeId) {
+            this.generateReport('burndown');
+        }
     }
 
     /** Carga la lista de proyectos para los filtros de reportes */
     loadProjects(): void {
         this.loading.set(true);
-        this.projectsService.getProjects().subscribe({
+        this.projectsService.getProjects().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
             next: (data) => {
                 this.projects.set(data);
                 this.loading.set(false);
@@ -117,7 +160,7 @@ export class ReportsComponent implements OnInit {
      * Genera un reporte basado en el tipo seleccionado y los filtros.
      * @param type - Tipo de reporte a generar
      */
-    generateReport(type: 'general' | 'observations' | 'compliance' | 'burndown' = 'general'): void {
+    generateReport(type: 'general' | 'observations' | 'compliance' | 'burndown' | 'fullCertification' | 'executiveSummary' = 'general'): void {
         const { projectId, startDate, endDate } = this.filterForm.value;
         if (!projectId) return;
 
@@ -139,6 +182,12 @@ export class ReportsComponent implements OnInit {
             case 'burndown':
                 request = this.reportsService.generateBurndownReport(projectId);
                 break;
+            case 'fullCertification':
+                request = this.reportsService.generateFullCertificationReport(projectId);
+                break;
+            case 'executiveSummary':
+                request = this.reportsService.generateExecutiveSummaryReport(projectId);
+                break;
             default:
                 const filter = {
                     projectId,
@@ -150,7 +199,7 @@ export class ReportsComponent implements OnInit {
                 request = this.reportsService.generateProjectReport(filter);
         }
 
-        request.subscribe({
+        request.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
             next: (blob) => {
                 const url = URL.createObjectURL(blob);
                 this.pdfUrl.set(url);
@@ -165,7 +214,6 @@ export class ReportsComponent implements OnInit {
         });
     }
 
-
     /** Descarga el reporte PDF generado al equipo local */
     downloadReport(): void {
         const url = this.pdfUrl();
@@ -176,7 +224,9 @@ export class ReportsComponent implements OnInit {
             'general': 'General',
             'observations': 'Observaciones',
             'compliance': 'Cumplimiento',
-            'burndown': 'Burndown'
+            'burndown': 'Burndown',
+            'fullCertification': 'Certificacion_QA_Completa',
+            'executiveSummary': 'Resumen_Ejecutivo_Usuario_Final'
         };
         const typeLabel = typeMap[this.reportType()] || 'General';
         const a = document.createElement('a');
