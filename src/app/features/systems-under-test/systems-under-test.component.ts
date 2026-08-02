@@ -35,15 +35,37 @@ export class SystemsUnderTestComponent implements OnInit {
   } 
 
   canCreateSut(): boolean {
-    return this.authService.isAdmin() || this.authService.hasPermission('SUT_CREATE');
+    return this.authService.isAdmin() || 
+           this.authService.hasPermission('SUT_CREATE') || 
+           this.authService.hasRole('qa lead') || 
+           this.authService.hasRole('líder de pruebas (lead)') || 
+           this.authService.hasRole('lead') || 
+           this.authService.hasRole('tester') || 
+           this.authService.hasRole('qa tester') ||
+           this.authService.hasRole('administrador') ||
+           this.authService.hasRole('admin');
   }
 
   canEditSut(): boolean {
-    return this.authService.isAdmin() || this.authService.hasPermission('SUT_UPDATE');
+    return this.authService.isAdmin() || 
+           this.authService.hasPermission('SUT_UPDATE') || 
+           this.authService.hasRole('qa lead') || 
+           this.authService.hasRole('líder de pruebas (lead)') || 
+           this.authService.hasRole('lead') || 
+           this.authService.hasRole('tester') || 
+           this.authService.hasRole('qa tester') ||
+           this.authService.hasRole('administrador') ||
+           this.authService.hasRole('admin');
   }
 
   canDeleteSut(): boolean {
-    return this.authService.isAdmin() || this.authService.hasPermission('SUT_DELETE');
+    return this.authService.isAdmin() || 
+           this.authService.hasPermission('SUT_DELETE') || 
+           this.authService.hasRole('qa lead') || 
+           this.authService.hasRole('líder de pruebas (lead)') || 
+           this.authService.hasRole('lead') ||
+           this.authService.hasRole('administrador') ||
+           this.authService.hasRole('admin');
   }
 
   ngOnInit(): void {

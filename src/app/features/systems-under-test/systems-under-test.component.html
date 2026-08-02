@@ -28,19 +28,19 @@
       <p class="text-gray-500 text-sm">Registra tu primera aplicación, servicio o entorno para comenzar a probar.</p>
     </div>
 
-    <!-- Lista de SUTs (Tarjetas en lugar de tabla para un look más moderno) -->
+    <!-- Lista de SUTs (Tarjetas modernas con acciones visibles) -->
     <div class="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" *ngIf="suts().length > 0">
       
-      <div *ngFor="let sut of suts()" class="group bg-white rounded-xl border border-gray-100 hover:border-blue-200 hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col h-full">
+      <div *ngFor="let sut of suts()" class="group bg-white rounded-xl border border-gray-200 hover:border-indigo-300 hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col h-full">
         <div class="p-5 flex-1 flex flex-col relative">
-          <div class="flex justify-between items-start mb-3">
+          <div class="flex justify-between items-start mb-3 gap-2">
             <div class="flex items-center gap-3">
               <!-- Icono dinámico según la plataforma -->
-              <div class="w-10 h-10 rounded-lg border flex items-center justify-center transition-colors"
+              <div class="w-11 h-11 rounded-xl border flex items-center justify-center transition-colors shadow-sm"
                    [ngClass]="{
-                     'bg-blue-50 border-blue-100 text-blue-600': sut.platformTypeCode === 'WEB' || !sut.platformTypeCode,
-                     'bg-purple-50 border-purple-100 text-purple-600': sut.platformTypeCode === 'DESKTOP',
-                     'bg-amber-50 border-amber-100 text-amber-600': sut.platformTypeCode === 'DATA_PROCESSING'
+                     'bg-blue-50 border-blue-200 text-blue-600': sut.platformTypeCode === 'WEB' || !sut.platformTypeCode,
+                     'bg-purple-50 border-purple-200 text-purple-600': sut.platformTypeCode === 'DESKTOP',
+                     'bg-amber-50 border-amber-200 text-amber-600': sut.platformTypeCode === 'DATA_PROCESSING'
                    }">
                 <i [ngClass]="{
                   'ri-global-line': sut.platformTypeCode === 'WEB' || !sut.platformTypeCode,
@@ -49,64 +49,86 @@
                 }" class="text-xl"></i>
               </div>
               <div>
-                <h3 class="font-semibold text-gray-800 text-lg leading-tight">{{ sut.name }}</h3>
-                <div class="flex flex-wrap gap-1 mt-1">
-                  <span class="text-xs font-medium px-2 py-0.5 rounded bg-gray-100 text-gray-600 border border-gray-200">
+                <h3 class="font-bold text-gray-800 text-lg leading-tight">{{ sut.name }}</h3>
+                <div class="flex flex-wrap gap-1.5 mt-1">
+                  <span class="text-xs font-semibold px-2 py-0.5 rounded bg-gray-100 text-gray-700 border border-gray-200">
                     v{{ sut.version }}
                   </span>
-                  <span class="text-xs font-medium px-2 py-0.5 rounded border"
+                  <span class="text-xs font-semibold px-2 py-0.5 rounded border"
                         [ngClass]="{
-                          'bg-blue-50/50 text-blue-700 border-blue-100': sut.platformTypeCode === 'WEB' || !sut.platformTypeCode,
-                          'bg-purple-50/50 text-purple-700 border-purple-100': sut.platformTypeCode === 'DESKTOP',
-                          'bg-amber-50/50 text-amber-700 border-amber-100': sut.platformTypeCode === 'DATA_PROCESSING'
+                          'bg-blue-50 text-blue-700 border-blue-200': sut.platformTypeCode === 'WEB' || !sut.platformTypeCode,
+                          'bg-purple-50 text-purple-700 border-purple-200': sut.platformTypeCode === 'DESKTOP',
+                          'bg-amber-50 text-amber-700 border-amber-200': sut.platformTypeCode === 'DATA_PROCESSING'
                         }">
                     {{ sut.platformTypeName || 'Aplicación Web' }}
                   </span>
                 </div>
               </div>
             </div>
-            <!-- Acciones -->
-            <div class="flex opacity-0 group-hover:opacity-100 transition-opacity">
-              <button *ngIf="canEditSut()" (click)="openEditModal(sut)" class="p-1.5 text-gray-400 hover:text-blue-600 rounded hover:bg-blue-50 transition-colors" title="Editar">
-                <i class="ri-pencil-line"></i>
+
+            <!-- Botones de Acción Rápidos en la Cabecera -->
+            <div class="flex items-center gap-1.5 shrink-0">
+              <button *ngIf="canEditSut()" 
+                      (click)="openEditModal(sut)" 
+                      class="p-2 text-indigo-600 hover:text-white bg-indigo-50 hover:bg-indigo-600 border border-indigo-200 rounded-lg transition-all shadow-sm" 
+                      title="Editar SUT">
+                <i class="ri-pencil-line text-sm"></i>
               </button>
-              <button *ngIf="canDeleteSut()" (click)="deleteSut(sut)" class="p-1.5 text-gray-400 hover:text-red-600 rounded hover:bg-red-50 transition-colors" title="Eliminar">
-                <i class="ri-delete-bin-line"></i>
+              <button *ngIf="canDeleteSut()" 
+                      (click)="deleteSut(sut)" 
+                      class="p-2 text-red-600 hover:text-white bg-red-50 hover:bg-red-600 border border-red-200 rounded-lg transition-all shadow-sm" 
+                      title="Eliminar SUT">
+                <i class="ri-delete-bin-line text-sm"></i>
               </button>
             </div>
           </div>
           
-          <p class="text-sm text-gray-500 mb-4 line-clamp-2">{{ sut.description || 'Sin descripción' }}</p>
+          <p class="text-sm text-gray-600 mb-4 line-clamp-2 leading-relaxed">{{ sut.description || 'Sin descripción detallada' }}</p>
           
-          <div class="mt-auto space-y-2 pt-2 border-t border-gray-50">
+          <div class="mt-auto space-y-2 pt-3 border-t border-gray-100">
             <!-- URL de acceso / BaseUrl -->
-            <div class="flex items-center text-xs text-gray-500" *ngIf="sut.baseUrl || sut.url">
-              <i class="ri-link-m mr-2 text-gray-400"></i>
-              <a [href]="sut.baseUrl || sut.url" target="_blank" class="text-blue-600 hover:underline truncate">{{ sut.baseUrl || sut.url }}</a>
+            <div class="flex items-center text-xs text-gray-600" *ngIf="sut.baseUrl || sut.url">
+              <i class="ri-link-m mr-2 text-indigo-500 font-bold"></i>
+              <a [href]="sut.baseUrl || sut.url" target="_blank" class="text-indigo-600 font-medium hover:underline truncate">{{ sut.baseUrl || sut.url }}</a>
             </div>
             <!-- Campos específicos de escritorio -->
-            <div class="flex items-center text-xs text-gray-500" *ngIf="sut.executablePath">
-              <i class="ri-folder-open-line mr-2 text-gray-400" title="Ruta del Ejecutable"></i>
-              <span class="truncate text-gray-700" [title]="sut.executablePath"><b>Ruta:</b> {{ sut.executablePath }}</span>
+            <div class="flex items-center text-xs text-gray-600" *ngIf="sut.executablePath">
+              <i class="ri-folder-open-line mr-2 text-purple-500" title="Ruta del Ejecutable"></i>
+              <span class="truncate" [title]="sut.executablePath"><b class="text-gray-700">Ruta:</b> {{ sut.executablePath }}</span>
             </div>
-            <div class="flex items-center text-xs text-gray-500" *ngIf="sut.processName">
-              <i class="ri-settings-3-line mr-2 text-gray-400" title="Nombre del Proceso"></i>
-              <span class="truncate text-gray-700"><b>Proceso:</b> {{ sut.processName }}</span>
+            <div class="flex items-center text-xs text-gray-600" *ngIf="sut.processName">
+              <i class="ri-settings-3-line mr-2 text-purple-500" title="Nombre del Proceso"></i>
+              <span class="truncate"><b class="text-gray-700">Proceso:</b> {{ sut.processName }}</span>
             </div>
             <!-- Entorno -->
-            <div class="flex items-center text-xs text-gray-500" *ngIf="sut.environment">
-              <i class="ri-mac-line mr-2 text-gray-400"></i>
-              <span><b>Entorno:</b> {{ sut.environment }}</span>
+            <div class="flex items-center text-xs text-gray-600" *ngIf="sut.environment">
+              <i class="ri-mac-line mr-2 text-emerald-500"></i>
+              <span><b class="text-gray-700">Entorno:</b> {{ sut.environment }}</span>
             </div>
           </div>
         </div>
         
-        <div class="bg-gray-50/50 px-5 py-3 border-t border-gray-100 flex justify-between items-center text-xs text-gray-500">
-          <div class="flex items-center gap-1">
-            <div class="w-2 h-2 rounded-full" [ngClass]="sut.isActive ? 'bg-green-500' : 'bg-red-500'"></div>
-            <span>{{ sut.isActive ? 'Activo' : 'Inactivo' }}</span>
+        <!-- Footer de la Tarjeta con Estado y Botones de Acción Explícitos -->
+        <div class="bg-gray-50/80 px-5 py-3 border-t border-gray-100 flex flex-wrap justify-between items-center gap-2 text-xs text-gray-500">
+          <div class="flex items-center gap-1.5">
+            <div class="w-2.5 h-2.5 rounded-full" [ngClass]="sut.isActive ? 'bg-emerald-500 ring-2 ring-emerald-200' : 'bg-red-500 ring-2 ring-red-200'"></div>
+            <span class="font-medium" [ngClass]="sut.isActive ? 'text-emerald-700' : 'text-red-700'">{{ sut.isActive ? 'Activo' : 'Inactivo' }}</span>
           </div>
-          <span>Actualizado {{ sut.updatedAt | date:'shortDate' }}</span>
+
+          <div class="flex items-center gap-2">
+            <button *ngIf="canEditSut()" 
+                    (click)="openEditModal(sut)"
+                    class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-md bg-indigo-50 text-indigo-700 hover:bg-indigo-600 hover:text-white border border-indigo-200 transition-all">
+              <i class="ri-edit-line"></i>
+              Editar
+            </button>
+            <button *ngIf="canDeleteSut()" 
+                    (click)="deleteSut(sut)"
+                    class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-md bg-red-50 text-red-700 hover:bg-red-600 hover:text-white border border-red-200 transition-all">
+              <i class="ri-delete-bin-line"></i>
+              Eliminar
+            </button>
+          </div>
         </div>
       </div>
       
