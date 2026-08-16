@@ -11,12 +11,15 @@ import { User } from '../../core/models/user.model';
 import { Project } from '../../core/models/project.model';
 import { ProjectsService } from '../../core/services/projects.service';
 import { UsersService } from '../../core/services/users.service';
+import { RequirementsService } from '../../core/services/requirements.service';
+import { Requirement } from '../../core/models/requirement.model';
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { HasPermissionDirective } from '../../shared/directives/has-permission.directive';
 
 @Component({
   selector: 'app-test-cases',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, HasPermissionDirective],
   templateUrl: './test-cases.component.html',
   styleUrls: ['./test-cases.component.scss']
 })
@@ -31,6 +34,7 @@ export class TestCasesComponent implements OnInit {
   projectStatus = signal<string>('');
   users = signal<User[]>([]);
   testSuites = signal<TestSuite[]>([]);
+  requirements = signal<Requirement[]>([]);
   showModal = signal<boolean>(false);
   isSubmitting = signal<boolean>(false);
   showStepsModal = signal<boolean>(false);
@@ -38,6 +42,8 @@ export class TestCasesComponent implements OnInit {
   selectedTestCaseTitle = signal<string>('');
   editingTestCaseId = signal<string | null>(null);
   testCaseForm!: FormGroup;
+
+  activeTab: 'general' | 'execution' | 'steps' = 'general';
 
   // Computed signal for grouped test cases
   groupedTestCases = computed(() => {
@@ -60,6 +66,7 @@ export class TestCasesComponent implements OnInit {
   private testSuitesService = inject(TestSuitesService);
   private projectsService = inject(ProjectsService);
   private usersService = inject(UsersService);
+  private requirementsService = inject(RequirementsService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private fb = inject(FormBuilder);
@@ -76,6 +83,7 @@ export class TestCasesComponent implements OnInit {
       if (this.projectId()) {
         this.loadProjectDetails(this.projectId()!);
         this.loadTestSuites(this.projectId()!);
+        this.loadRequirements(this.projectId()!);
         this.loadTestCases();
       } else {
         this.loadTestCases();
@@ -91,15 +99,30 @@ export class TestCasesComponent implements OnInit {
       description: [''],
       preconditions: [''],
       expectedResult: ['', Validators.required],
+      postconditions: [''],
       priorityId: [3, Validators.required], // 3: High
       testTypeId: [1, Validators.required],  // 1: Functional Manual
       impactLevel: [3, [Validators.required, Validators.min(1), Validators.max(5)]],
       likelihoodLevel: [3, [Validators.required, Validators.min(1), Validators.max(5)]],
       estimatedTimeHours: [0, [Validators.required, Validators.min(0)]],
-      startDate: [new Date().toISOString().split('T')[0], Validators.required],
-      endDate: [new Date().toISOString().split('T')[0], Validators.required],
-      certifierUserIds: [[]],
-      steps: this.fb.array([this.createStepFormGroup(1)])
+      requirementIds: [[]],
+      isBdd: [false],
+      bddScenario: [''],
+      steps: this.fb.array([this.createStepFormGroup(1)]),
+      bddSteps: this.fb.array([this.createBddStepFormGroup()])
+    });
+
+    // Disable BDD steps by default since isBdd is false
+    this.testCaseForm.get('bddSteps')?.disable();
+
+    this.testCaseForm.get('isBdd')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(isBdd => {
+      if (isBdd) {
+        this.testCaseForm.get('steps')?.disable();
+        this.testCaseForm.get('bddSteps')?.enable();
+      } else {
+        this.testCaseForm.get('steps')?.enable();
+        this.testCaseForm.get('bddSteps')?.disable();
+      }
     });
   }
 
@@ -126,6 +149,28 @@ export class TestCasesComponent implements OnInit {
       this.steps.controls.forEach((control, idx) => {
         control.patchValue({ stepOrder: idx + 1 });
       });
+    }
+  }
+
+  // --- BDD Steps ---
+  createBddStepFormGroup(keyword: string = 'Dado'): FormGroup {
+    return this.fb.group({
+      keyword: [keyword, Validators.required],
+      text: ['', Validators.required]
+    });
+  }
+
+  get bddSteps(): FormArray {
+    return this.testCaseForm.get('bddSteps') as FormArray;
+  }
+
+  addBddStep() {
+    this.bddSteps.push(this.createBddStepFormGroup('Y'));
+  }
+
+  removeBddStep(index: number) {
+    if (this.bddSteps.length > 1) {
+      this.bddSteps.removeAt(index);
     }
   }
 
@@ -160,10 +205,12 @@ export class TestCasesComponent implements OnInit {
     if (projectId) {
       this.loadProjectDetails(projectId);
       this.loadTestSuites(projectId);
+      this.loadRequirements(projectId);
     } else {
       this.projectTitle.set('');
       this.projectStatus.set('');
       this.testSuites.set([]);
+      this.requirements.set([]);
     }
     this.loadTestCases();
   }
@@ -178,6 +225,13 @@ export class TestCasesComponent implements OnInit {
     this.testSuitesService.getTestSuitesByProjectId(projectId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (suites) => this.testSuites.set(suites),
       error: (err) => console.error('Error loading test suites:', err)
+    });
+  }
+
+  loadRequirements(projectId: string) {
+    this.requirementsService.getRequirementsByProject(projectId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (reqs) => this.requirements.set(reqs),
+      error: (err) => console.error('Error loading requirements:', err)
     });
   }
 
@@ -301,15 +355,6 @@ export class TestCasesComponent implements OnInit {
               this.steps.push(this.createStepFormGroup(1));
             }
 
-            const formatDate = (dateStr?: string) => {
-              if (!dateStr) return new Date().toISOString().split('T')[0];
-              try {
-                return new Date(dateStr).toISOString().split('T')[0];
-              } catch {
-                return new Date().toISOString().split('T')[0];
-              }
-            };
-
             this.testCaseForm.patchValue({
               projectId: fullTestCase.projectId || this.projectId(),
               testSuiteId: fullTestCase.suite.id || '',
@@ -317,15 +362,47 @@ export class TestCasesComponent implements OnInit {
               description: fullTestCase.description || '',
               preconditions: fullTestCase.preconditions || '',
               expectedResult: fullTestCase.expectedResult || '',
+              postconditions: fullTestCase.postconditions || '',
               priorityId: fullTestCase.priority.id || 3,
               testTypeId: (fullTestCase as any).testTypeId || 1,
               impactLevel: fullTestCase.impactLevel || 3,
               likelihoodLevel: fullTestCase.likelihoodLevel || 3,
               estimatedTimeHours: (fullTestCase as any).estimatedTimeHours || 0,
-              startDate: formatDate((fullTestCase as any).startDate || fullTestCase.createdAt),
-              endDate: formatDate((fullTestCase as any).endDate || fullTestCase.createdAt),
-              certifierUserIds: (fullTestCase as any).certifierUserIds || []
+              requirementIds: fullTestCase.requirementIds || [],
+              isBdd: (fullTestCase as any).isBdd || false,
+              bddScenario: (fullTestCase as any).bddScenario || ''
             });
+            
+            // Enable/disable the correct arrays based on the loaded data
+            const isBdd = (fullTestCase as any).isBdd || false;
+            if (isBdd) {
+              this.testCaseForm.get('steps')?.disable();
+              this.testCaseForm.get('bddSteps')?.enable();
+            } else {
+              this.testCaseForm.get('steps')?.enable();
+              this.testCaseForm.get('bddSteps')?.disable();
+            }
+
+            // Parse BDD Scenario
+            this.bddSteps.clear();
+            if ((fullTestCase as any).isBdd && (fullTestCase as any).bddScenario) {
+              const lines = ((fullTestCase as any).bddScenario as string).split('\n');
+              lines.forEach(line => {
+                const parts = line.trim().split(' ');
+                if (parts.length > 0) {
+                  const keyword = parts[0];
+                  const text = parts.slice(1).join(' ');
+                  this.bddSteps.push(this.fb.group({
+                    keyword: [keyword, Validators.required],
+                    text: [text, Validators.required]
+                  }));
+                }
+              });
+            }
+            if (this.bddSteps.length === 0) {
+              this.bddSteps.push(this.createBddStepFormGroup('Dado'));
+            }
+
             this.isSubmitting.set(false);
           },
           error: (err) => {
@@ -342,27 +419,15 @@ export class TestCasesComponent implements OnInit {
   }
 
   openModal() {
-    this.testCaseForm.patchValue({
-      projectId: this.projectId() || ''
-    });
+    this.initForm();
+    this.editingTestCaseId.set(null);
+    this.activeTab = 'general';
     this.showModal.set(true);
   }
 
   closeModal() {
     this.showModal.set(false);
     this.editingTestCaseId.set(null);
-    this.testCaseForm.reset();
-    this.steps.clear();
-    this.steps.push(this.createStepFormGroup(1));
-    this.testCaseForm.patchValue({
-      startDate: new Date().toISOString().split('T')[0],
-      endDate: new Date().toISOString().split('T')[0],
-      estimatedTimeHours: 0,
-      priorityId: 3,
-      testTypeId: 1,
-      impactLevel: 3,
-      likelihoodLevel: 3
-    });
   }
 
   onSubmit() {
@@ -370,20 +435,25 @@ export class TestCasesComponent implements OnInit {
       this.isSubmitting.set(true);
       const formValue = this.testCaseForm.value;
 
-      const payload = {
+      const payload: any = {
         ...formValue,
         priorityId: Number(formValue.priorityId),
         testTypeId: Number(formValue.testTypeId),
         impactLevel: Number(formValue.impactLevel),
         likelihoodLevel: Number(formValue.likelihoodLevel),
-        estimatedTimeHours: Number(formValue.estimatedTimeHours),
-        startDate: new Date(formValue.startDate).toISOString(),
-        endDate: new Date(formValue.endDate).toISOString(),
-        steps: (formValue.steps || []).map((step: any, index: number) => ({
+        estimatedTimeHours: Number(formValue.estimatedTimeHours)
+      };
+
+      if (formValue.isBdd) {
+        payload.bddScenario = (formValue.bddSteps || []).map((s: any) => `${s.keyword} ${s.text}`).join('\n');
+        payload.steps = []; // Limpiar pasos tradicionales
+      } else {
+        payload.bddScenario = '';
+        payload.steps = (formValue.steps || []).map((step: any, index: number) => ({
           ...step,
           stepOrder: index + 1
-        }))
-      };
+        }));
+      }
 
       if (this.editingTestCaseId()) {
         this.testCasesService.updateTestCase(this.editingTestCaseId()!, payload).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
@@ -423,5 +493,37 @@ export class TestCasesComponent implements OnInit {
         });
       }
     }
+  }
+
+  /**
+   * Elimina un caso de prueba con confirmación de SweetAlert2
+   */
+  deleteTestCase(testCase: TestCase, event: Event) {
+    event.stopPropagation();
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: `Se eliminará el caso de prueba "${testCase.title}". Esta acción no se puede deshacer.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#e3342f',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.loading.set(true);
+        this.testCasesService.deleteTestCase(testCase.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+          next: () => {
+            Swal.fire('Eliminado', 'El caso de prueba ha sido eliminado.', 'success');
+            this.loadTestCases();
+          },
+          error: (err) => {
+            console.error('Error deleting test case', err);
+            this.loading.set(false);
+            Swal.fire('Error', 'No se pudo eliminar el caso de prueba.', 'error');
+          }
+        });
+      }
+    });
   }
 }

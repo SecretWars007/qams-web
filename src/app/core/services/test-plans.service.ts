@@ -34,6 +34,16 @@ export class TestPlansService {
     );
   }
 
+  getBySut(sutId: string): Observable<TestPlan[]> {
+    return this.http.get<TestPlanDto[]>(`${this.apiUrl}/sut/${sutId}`).pipe(
+      map(dtos => dtos.map(dto => TestPlanMapper.fromDto(dto))),
+      catchError(err => {
+        console.error(this.LOG_TAG, `Error fetching test plans for SUT ${sutId}`, err);
+        return of([]);
+      })
+    );
+  }
+
   getById(id: string): Observable<TestPlan> {
     return this.http.get<TestPlanDto>(`${this.apiUrl}/${id}`).pipe(
       map(dto => TestPlanMapper.fromDto(dto))

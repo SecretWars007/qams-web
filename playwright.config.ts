@@ -24,7 +24,7 @@ export default defineConfig({
     baseURL,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
-    video: 'retain-on-failure',
+    video: 'off',
     // Usar Chromium del sistema en CI (Alpine/Docker)
     ...(isCI && {
       launchOptions: {

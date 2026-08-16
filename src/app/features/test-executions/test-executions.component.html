@@ -20,7 +20,7 @@
   </div>
 
   <!-- Filters Section -->
-  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+  <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-4">
     <!-- Project Filter -->
     <div class="relative">
       <label for="projectSelector" class="block text-xs font-bold text-gray-400 tracking-widest mb-1 ml-1">PROYECTO</label>
@@ -29,6 +29,19 @@
           class="w-full bg-white border border-gray-200 text-gray-700 text-sm rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 px-4 py-3 outline-none transition-all appearance-none cursor-pointer hover:border-gray-300">
           <option value="">Todos los proyectos</option>
           <option *ngFor="let project of projects()" [value]="project.id">{{ project.name }}</option>
+        </select>
+        <i class="ri-arrow-down-s-line absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+      </div>
+    </div>
+
+    <!-- Test Plan Filter -->
+    <div class="relative">
+      <label for="testPlanSelector" class="block text-xs font-bold text-gray-400 tracking-widest mb-1 ml-1">PLAN DE PRUEBAS</label>
+      <div class="relative group">
+        <select id="testPlanSelector" [value]="selectedTestPlanId()" (change)="onTestPlanChange($event)" [disabled]="!selectedProjectId()"
+          class="w-full bg-white border border-gray-200 text-gray-700 text-sm rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 px-4 py-3 outline-none transition-all appearance-none cursor-pointer disabled:opacity-50 disabled:bg-gray-50 hover:border-gray-300">
+          <option value="">Todos los planes</option>
+          <option *ngFor="let plan of testPlans()" [value]="plan.id">{{ plan.name }}</option>
         </select>
         <i class="ri-arrow-down-s-line absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
       </div>
@@ -61,13 +74,35 @@
     </div>
   </div>
 
+  <!-- Status Filter Tabs -->
+  <div class="flex items-center gap-2 mb-4 flex-wrap">
+    <span class="text-xs font-bold text-gray-400 tracking-widest mr-2">ESTADO:</span>
+    <button
+      *ngFor="let tab of [
+        {key: 'active', label: 'Activas', icon: 'ri-time-line', cls: 'text-indigo-600 border-indigo-500 bg-indigo-50'},
+        {key: 'all', label: 'Todas', icon: 'ri-list-check', cls: 'text-gray-600 border-gray-400 bg-gray-50'},
+        {key: 'passed', label: 'Aprobadas', icon: 'ri-checkbox-circle-line', cls: 'text-emerald-600 border-emerald-500 bg-emerald-50'},
+        {key: 'failed', label: 'Fallidas', icon: 'ri-close-circle-line', cls: 'text-rose-600 border-rose-500 bg-rose-50'},
+        {key: 'blocked', label: 'Bloqueadas', icon: 'ri-error-warning-line', cls: 'text-amber-600 border-amber-500 bg-amber-50'}
+      ]"
+      (click)="onStatusFilterChange(tab.key)"
+      [ngClass]="selectedStatusFilter() === tab.key
+        ? tab.cls + ' border font-bold shadow-sm'
+        : 'text-gray-400 border border-transparent hover:bg-gray-50 hover:text-gray-600'"
+      class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all">
+      <i [class]="tab.icon"></i>
+      {{ tab.label }}
+      <span *ngIf="tab.key === 'active'" class="ml-0.5 bg-indigo-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full">ISTQB</span>
+    </button>
+  </div>
+
   <!-- Loading State -->
   <div *ngIf="loading()" class="bg-white/80 rounded-2xl border border-white/20 shadow-sm overflow-hidden backdrop-blur-md">
     <app-skeleton-loader [rows]="5" [columns]="5"></app-skeleton-loader>
   </div>
 
   <!-- Empty State -->
-  <div *ngIf="!loading() && executions().length === 0" class="text-center py-16 px-4 bg-white/80 rounded-2xl border border-white/20 shadow-sm backdrop-blur-md">
+  <div *ngIf="!loading() && filteredExecutions.length === 0" class="text-center py-16 px-4 bg-white/80 rounded-2xl border border-white/20 shadow-sm backdrop-blur-md">
     <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-indigo-50 text-indigo-500 mb-4 border border-indigo-100">
       <i class="ri-play-circle-line text-2xl"></i>
     </div>
@@ -76,23 +111,34 @@
   </div>
 
   <!-- Executions List -->
-  <div *ngIf="!loading() && executions().length > 0" class="bg-white/80 rounded-2xl border border-white/20 shadow-sm overflow-hidden backdrop-blur-md">
+  <div *ngIf="!loading() && filteredExecutions.length > 0" class="bg-white/80 rounded-2xl border border-white/20 shadow-sm overflow-hidden backdrop-blur-md">
     <div class="overflow-x-auto">
       <table class="w-full text-left border-collapse">
         <thead>
           <tr class="bg-gray-50/50 border-b border-gray-100 text-xs text-gray-500 uppercase tracking-wider">
-            <th class="py-4 px-6 font-medium">Ejecución</th>
+            <th class="py-4 px-6 font-medium">Ejecución / Ciclo</th>
             <th class="py-4 px-6 font-medium">Caso de Prueba</th>
             <th class="py-4 px-6 font-medium text-center">Estado</th>
             <th class="py-4 px-6 font-medium text-center">Progreso</th>
+            <th class="py-4 px-6 font-medium text-center">
+              <span class="flex items-center justify-center gap-1"><i class="ri-image-line text-indigo-400"></i> Evidencias</span>
+            </th>
+            <th class="py-4 px-6 font-medium text-center">
+              <span class="flex items-center justify-center gap-1"><i class="ri-bug-line text-rose-400"></i> Defectos</span>
+            </th>
             <th class="py-4 px-6 font-medium">Tester / Fecha</th>
             <th class="py-4 px-6 font-medium text-right">Acciones</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100">
-          <tr *ngFor="let execution of executions()" (dblclick)="editExecution(execution)" class="hover:bg-gray-50/50 transition-colors group cursor-pointer">
+          <tr *ngFor="let execution of filteredExecutions" (dblclick)="editExecution(execution)" class="hover:bg-gray-50/50 transition-colors group cursor-pointer">
             <td class="py-4 px-6">
-              <span class="text-gray-800 font-mono text-xs font-medium">#{{ execution.id.substring(0,8) }}</span>
+              <div class="flex items-center gap-2">
+                <span class="text-gray-800 font-mono text-xs font-medium">#{{ execution.id.substring(0,8) }}</span>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 tracking-wider">
+                  Ciclo {{ execution.cycleNumber || 1 }}
+                </span>
+              </div>
             </td>
             <td class="py-4 px-6">
               <span class="text-sm font-semibold text-gray-800 group-hover:text-indigo-600 transition-colors">{{ execution.testCase.title }}</span>
@@ -121,14 +167,38 @@
                 <span class="text-[10px] font-bold text-gray-500">{{ calculateProgress(execution) }}%</span>
               </div>
             </td>
+            <!-- Evidencias -->
+            <td class="py-4 px-6 text-center">
+              <button (click)="openDetailsModal(execution); $event.stopPropagation()"
+                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition-colors"
+                [ngClass]="getEvidenceCount(execution) > 0
+                  ? 'bg-indigo-50 text-indigo-600 border border-indigo-200 hover:bg-indigo-100'
+                  : 'text-gray-300 cursor-default'"
+                [title]="getEvidenceCount(execution) > 0 ? 'Ver evidencias' : 'Sin evidencias'">
+                <i class="ri-image-line"></i>
+                {{ getEvidenceCount(execution) }}
+              </button>
+            </td>
+            <!-- Defectos -->
+            <td class="py-4 px-6 text-center">
+              <span
+                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold"
+                [ngClass]="getDefectCount(execution) > 0
+                  ? 'bg-rose-50 text-rose-600 border border-rose-200'
+                  : 'text-gray-300'"
+                [title]="getDefectCount(execution) > 0 ? 'Defectos registrados' : 'Sin defectos'">
+                <i class="ri-bug-line"></i>
+                {{ getDefectCount(execution) }}
+              </span>
+            </td>
             <td class="py-4 px-6">
               <div class="flex items-center gap-2">
-                <div class="w-6 h-6 rounded-full bg-indigo-100 border border-indigo-200 flex items-center justify-center text-xs font-bold text-indigo-600">
-                  {{ (execution.executedBy || 'U').slice(0,1) }}
+                <div class="w-7 h-7 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-bold ring-2 ring-white">
+                  {{ (execution.tester?.name || 'U').slice(0,1) }}
                 </div>
                 <div>
-                  <div class="text-xs font-medium text-gray-700">{{ execution.executedBy || 'No Asignado' }}</div>
-                  <div class="text-[10px] text-gray-500">{{ execution.executionDate | date:'MMM d, HH:mm' }}</div>
+                  <div class="text-xs font-medium text-gray-700">{{ execution.tester?.name || 'No Asignado' }}</div>
+                  <div class="text-[10px] text-gray-400">{{ execution.executionDate | date:'shortDate' }}</div>
                 </div>
               </div>
             </td>
@@ -137,7 +207,7 @@
                 <button (click)="editExecution(execution, $event)" class="p-1.5 text-gray-400 hover:text-blue-600 rounded hover:bg-blue-50 transition-colors" title="Editar">
                   <i class="ri-pencil-line"></i>
                 </button>
-                <button (click)="openDetailsModal(execution); $event.stopPropagation()" class="p-1.5 text-gray-400 hover:text-indigo-600 rounded hover:bg-indigo-50 transition-colors" title="Detalles">
+                <button (click)="openDetailsModal(execution); $event.stopPropagation()" class="p-1.5 text-gray-400 hover:text-indigo-600 rounded hover:bg-indigo-50 transition-colors" title="Detalles y Evidencias">
                   <i class="ri-eye-line"></i>
                 </button>
               </div>
@@ -147,6 +217,8 @@
       </table>
     </div>
   </div>
+
+
 
   <!-- Registration Modal -->
   <div *ngIf="showModal()" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm animate-in fade-in duration-300">
@@ -165,13 +237,29 @@
 
       <div class="p-6 flex-1 overflow-y-auto">
         <form [formGroup]="executionForm" (ngSubmit)="onSubmit()" class="space-y-6">
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="grid grid-cols-1 md:grid-cols-5 gap-6">
             <!-- Test Case -->
             <div>
               <label class="block text-xs font-bold text-gray-500 mb-1 ml-1">Caso de prueba</label>
               <select formControlName="testCaseId" class="form-control" [class.border-red-500]="executionForm.get('testCaseId')?.invalid && executionForm.get('testCaseId')?.touched">
                 <option value="">Seleccionar caso...</option>
                 <option *ngFor="let tc of testCases()" [value]="tc.id">{{ tc.title }}</option>
+              </select>
+            </div>
+            <!-- Test Plan -->
+            <div>
+              <label class="block text-xs font-bold text-gray-500 mb-1 ml-1">Plan de pruebas</label>
+              <select formControlName="testPlanId" class="form-control">
+                <option [ngValue]="null">Ninguno</option>
+                <option *ngFor="let plan of testPlans()" [value]="plan.id">{{ plan.name }}</option>
+              </select>
+            </div>
+            <!-- Tester (Asignado a) -->
+            <div>
+              <label class="block text-xs font-bold text-gray-500 mb-1 ml-1">Asignado a</label>
+              <select formControlName="testerId" class="form-control">
+                <option [ngValue]="null">Mi Usuario</option>
+                <option *ngFor="let user of users()" [value]="user.id">{{ user.firstName }} {{ user.lastName }}</option>
               </select>
             </div>
             <!-- Status -->
@@ -283,9 +371,10 @@
           </div>
           <p class="text-sm text-gray-600 mb-4" *ngIf="selectedExecution()?.notes">{{ selectedExecution()?.notes }}</p>
           <div class="flex items-center gap-6 text-sm">
-            <div class="flex items-center gap-2 text-gray-500">
-              <i class="ri-user-line"></i>
-              <span class="font-medium">{{ selectedExecution()?.executedBy || 'No asignado' }}</span>
+            <div class="flex items-center gap-2 mt-1 text-sm text-gray-600">
+              <i class="ri-user-line text-gray-400"></i>
+              <span class="font-medium">{{ selectedExecution()?.tester?.name || 'No asignado' }}</span>
+              <span class="mx-2 text-gray-300">•</span>
             </div>
             <div class="flex items-center gap-2 text-gray-500">
               <i class="ri-time-line"></i>
@@ -294,6 +383,10 @@
             <div class="flex items-center gap-2 text-gray-500" *ngIf="selectedExecution()?.actualTimeHours">
               <i class="ri-timer-line"></i>
               <span class="font-medium">{{ selectedExecution()?.actualTimeHours }}h</span>
+            </div>
+            <div class="flex items-center gap-2 text-indigo-600 font-semibold" *ngIf="selectedExecution()?.testPlan">
+              <i class="ri-folder-shield-line"></i>
+              <span>{{ selectedExecution()?.testPlan?.name }}</span>
             </div>
           </div>
         </div>

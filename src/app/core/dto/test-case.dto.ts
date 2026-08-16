@@ -20,6 +20,11 @@ export interface TestCaseDto {
   impactLevel?: number;
   likelihoodLevel?: number;
   riskScore?: number;
+  requirementIds?: string[];
+  postconditions?: string | null;
+  isBdd?: boolean;
+  bddScenario?: string | null;
+  lastCycleNumber?: number | null;
 }
 
 export interface TestCaseStepDto {
@@ -39,4 +44,11 @@ export interface CreateTestCaseDto {
   priorityId: number;
   impactLevel?: number;
   likelihoodLevel?: number;
+  requirementIds?: string[];
+  postconditions?: string | null;
+  isBdd?: boolean;
+  bddScenario?: string | null;
+  testTypeId?: number;
+  estimatedTimeHours?: number;
+  steps?: any[];
 }

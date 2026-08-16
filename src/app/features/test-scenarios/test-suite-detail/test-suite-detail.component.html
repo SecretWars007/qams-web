@@ -1,0 +1,182 @@
+<div class="h-full flex flex-col bg-slate-50 relative">
+  <!-- Header -->
+  <header class="bg-white border-b border-slate-200 px-6 py-4 flex-shrink-0 z-10 sticky top-0">
+    <div class="flex flex-col gap-3 max-w-7xl mx-auto w-full">
+      <div class="flex items-center text-sm text-slate-500 font-medium">
+        <a (click)="goBack()" class="cursor-pointer hover:text-indigo-600 transition-colors flex items-center gap-1.5">
+          <i class="fas fa-arrow-left"></i> Volver a Escenarios
+        </a>
+        <span class="mx-2 text-slate-300">/</span>
+        <span class="text-slate-700 truncate max-w-xs" *ngIf="suite()">{{ suite()?.name }}</span>
+      </div>
+      
+      <div class="flex items-center justify-between" *ngIf="suite()">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center shadow-md shadow-indigo-200">
+            <i class="fas fa-layer-group text-white text-xl"></i>
+          </div>
+          <div>
+            <h1 class="text-2xl font-black text-slate-800 tracking-tight">{{ suite()?.name }}</h1>
+            <p class="text-sm text-slate-500 mt-0.5">{{ suite()?.description || 'Sin descripción' }}</p>
+          </div>
+        </div>
+        
+        <div class="flex items-center gap-3">
+          <button class="bg-white border border-slate-200 text-slate-700 px-4 py-2 rounded-lg text-sm font-bold shadow-sm hover:bg-slate-50 transition-all flex items-center gap-2">
+            <i class="fas fa-edit text-slate-400"></i> Editar
+          </button>
+          <button class="bg-indigo-600 text-white px-5 py-2 rounded-lg text-sm font-bold shadow-md shadow-indigo-200 hover:bg-indigo-700 hover:shadow-lg transition-all flex items-center gap-2">
+            <i class="fas fa-play text-indigo-200"></i> Ejecutar Suite
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Body -->
+  <div class="flex-1 overflow-y-auto p-6">
+    <div class="max-w-7xl mx-auto w-full" *ngIf="loading()">
+      <div class="flex justify-center py-12">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto w-full" *ngIf="error()">
+      <div class="bg-rose-50 border border-rose-200 text-rose-700 p-4 rounded-xl flex items-center gap-3">
+        <i class="fas fa-exclamation-circle text-rose-500 text-xl"></i>
+        <span class="font-medium">{{ error() }}</span>
+      </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-3 gap-6" *ngIf="suite()">
+      
+      <!-- Left Column: Metrics & Main Data -->
+      <div class="lg:col-span-2 space-y-6">
+        
+        <!-- Metrics Cards -->
+        <div class="grid grid-cols-4 gap-4">
+          <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col justify-between">
+            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Progreso</span>
+            <div class="flex items-baseline gap-1 mt-2">
+              <span class="text-3xl font-black text-slate-800">{{ suite()?.executionProgress }}</span>
+              <span class="text-sm font-medium text-slate-500">%</span>
+            </div>
+          </div>
+          
+          <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col justify-between">
+            <span class="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">Aprobados</span>
+            <div class="flex items-baseline gap-1 mt-2">
+              <span class="text-3xl font-black text-emerald-600">{{ suite()?.passedCount }}</span>
+            </div>
+          </div>
+          
+          <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col justify-between">
+            <span class="text-[10px] font-bold text-rose-500 uppercase tracking-widest">Fallidos</span>
+            <div class="flex items-baseline gap-1 mt-2">
+              <span class="text-3xl font-black text-rose-600">{{ suite()?.failedCount }}</span>
+            </div>
+          </div>
+          
+          <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col justify-between">
+            <span class="text-[10px] font-bold text-amber-500 uppercase tracking-widest">Bloqueados</span>
+            <div class="flex items-baseline gap-1 mt-2">
+              <span class="text-3xl font-black text-amber-600">{{ suite()?.blockedCount }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress Bar Visual -->
+        <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+          <h3 class="text-sm font-bold text-slate-800 mb-3">Estado de Ejecución Global</h3>
+          <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden flex" *ngIf="(suite()?.testCaseCount || 0) > 0">
+            <div class="bg-emerald-500 h-full transition-all duration-500" [style.width.%]="((suite()?.passedCount || 0) / (suite()?.testCaseCount || 1)) * 100"></div>
+            <div class="bg-rose-500 h-full transition-all duration-500" [style.width.%]="((suite()?.failedCount || 0) / (suite()?.testCaseCount || 1)) * 100"></div>
+            <div class="bg-amber-500 h-full transition-all duration-500" [style.width.%]="((suite()?.blockedCount || 0) / (suite()?.testCaseCount || 1)) * 100"></div>
+            <div class="bg-slate-300 h-full transition-all duration-500" [style.width.%]="((suite()?.pendingCount || 0) / (suite()?.testCaseCount || 1)) * 100"></div>
+          </div>
+          <div class="flex justify-between items-center mt-3 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+            <span>{{ suite()?.testCaseCount }} Casos en total</span>
+            <span>{{ suite()?.pendingCount }} Pendientes</span>
+          </div>
+        </div>
+
+        <!-- Preconditions & Objective -->
+        <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+          <div class="border-b border-slate-100 px-5 py-4 bg-slate-50/50">
+            <h3 class="text-sm font-bold text-slate-800"><i class="fas fa-clipboard-check text-indigo-500 mr-2"></i> Alcance y Precondiciones</h3>
+          </div>
+          <div class="p-5 space-y-4">
+            <div>
+              <h4 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Precondiciones</h4>
+              <p class="text-sm text-slate-700 bg-slate-50 p-3 rounded-lg border border-slate-100">{{ suite()?.preconditions || 'No se han definido precondiciones.' }}</p>
+            </div>
+            <div>
+              <h4 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1.5">Objetivo de Cobertura</h4>
+              <p class="text-sm text-slate-700 bg-slate-50 p-3 rounded-lg border border-slate-100">{{ suite()?.coverageObjective || 'No se ha definido un objetivo específico.' }}</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Column: Context & Metadata -->
+      <div class="space-y-6">
+        
+        <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+          <div class="border-b border-slate-100 px-5 py-4 bg-slate-50/50">
+            <h3 class="text-sm font-bold text-slate-800"><i class="fas fa-info-circle text-indigo-500 mr-2"></i> Detalles ISTQB</h3>
+          </div>
+          <div class="p-0">
+            <ul class="divide-y divide-slate-100">
+              <li class="px-5 py-3 flex justify-between items-center">
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-widest">Nivel</span>
+                <span class="text-sm font-medium text-slate-800 bg-slate-100 px-2.5 py-0.5 rounded">{{ suite()?.testLevelName || 'N/A' }}</span>
+              </li>
+              <li class="px-5 py-3 flex justify-between items-center">
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-widest">Tipo</span>
+                <span class="text-sm font-medium text-slate-800 bg-slate-100 px-2.5 py-0.5 rounded">{{ suite()?.testTypeName || 'N/A' }}</span>
+              </li>
+              <li class="px-5 py-3 flex justify-between items-center">
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-widest">Prioridad</span>
+                <span class="text-sm font-medium text-slate-800 bg-slate-100 px-2.5 py-0.5 rounded">{{ suite()?.executionPriorityName || 'N/A' }}</span>
+              </li>
+              <li class="px-5 py-3 flex justify-between items-center">
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-widest">Automatización</span>
+                <span class="text-xs font-bold px-2 py-0.5 rounded border" 
+                  [ngClass]="{
+                    'bg-emerald-50 text-emerald-700 border-emerald-200': suite()?.automationStatusName === 'AUTOMATED',
+                    'bg-amber-50 text-amber-700 border-amber-200': suite()?.automationStatusName === 'PARTIAL',
+                    'bg-slate-100 text-slate-700 border-slate-200': suite()?.automationStatusName === 'MANUAL' || !suite()?.automationStatusName
+                  }">
+                  {{ suite()?.automationStatusName || 'N/A' }}
+                </span>
+              </li>
+              <li class="px-5 py-3 flex justify-between items-center">
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-widest">Duración Estimada</span>
+                <span class="text-sm font-medium text-slate-800"><i class="far fa-clock text-slate-400 mr-1"></i> {{ suite()?.estimatedDurationHours }}h</span>
+              </li>
+              <li class="px-5 py-3 flex justify-between items-center">
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-widest">Defectos Totales</span>
+                <span class="text-sm font-bold" [ngClass]="(suite()?.defectCount || 0) > 0 ? 'text-rose-600' : 'text-slate-400'">
+                  {{ suite()?.defectCount }}
+                </span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden" *ngIf="suite()?.tags && suite()!.tags!.length > 0">
+          <div class="border-b border-slate-100 px-5 py-4 bg-slate-50/50">
+            <h3 class="text-sm font-bold text-slate-800"><i class="fas fa-tags text-indigo-500 mr-2"></i> Etiquetas</h3>
+          </div>
+          <div class="p-5 flex flex-wrap gap-2">
+            <span *ngFor="let tag of suite()?.tags" class="px-2.5 py-1 bg-indigo-50 text-indigo-700 text-xs font-bold rounded-lg border border-indigo-100 flex items-center gap-1.5">
+              <i class="fas fa-hashtag text-indigo-400/70"></i> {{ tag }}
+            </span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

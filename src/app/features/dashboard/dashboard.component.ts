@@ -10,7 +10,12 @@ import { DashboardService } from '../../core/services/dashboard.service';
 import { ProjectsService } from '../../core/services/projects.service';
 import { DashboardSummary } from '../../core/models/dashboard.model';
 import { Project } from '../../core/models/project.model';
+import { SystemUnderTest } from '../../core/models/system-under-test.model';
+import { User } from '../../core/models/user.model';
 import { ProjectContextService } from '../../core/services/project-context.service';
+import { AuthService } from '../../core/services/auth.service';
+import { SystemsUnderTestService } from '../../core/services/systems-under-test.service';
+import { UsersService } from '../../core/services/users.service';
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 
 @Component({
@@ -27,6 +32,19 @@ export class DashboardComponent implements OnInit {
   selectedProjectId = signal<string | null>(null);
   loading = signal<boolean>(false);
   today = new Date();
+
+  // Filtros activos
+  selectedSutId = signal<string | null>(null);
+  selectedTesterUserId = signal<string | null>(null);
+
+  // Catálogos para los selects
+  suts = signal<SystemUnderTest[]>([]);
+  testers = signal<User[]>([]);
+
+  // Derivados del auth service
+  private authServiceRef = inject(AuthService);
+  readonly canUseAdvancedFilters = this.authServiceRef.canUseAdvancedFilters;
+  readonly isTesterOnly = this.authServiceRef.isTesterOnly;
 
   // Configuración del gráfico Doughnut
   doughnutData: ChartConfiguration<'doughnut'>['data'] = {
@@ -52,7 +70,7 @@ export class DashboardComponent implements OnInit {
     plugins: {
       legend: { display: false },
       tooltip: {
-        backgroundColor: 'rgba(17, 24, 39, 0.9)',
+        backgroundColor: 'rgba(30, 27, 75, 0.9)',
         padding: 12,
         cornerRadius: 8,
       }
@@ -60,11 +78,11 @@ export class DashboardComponent implements OnInit {
     scales: {
       y: {
         beginAtZero: true,
-        ticks: { stepSize: 1, color: '#9ca3af' },
-        grid: { color: 'rgba(229, 231, 235, 0.1)' }
+        ticks: { stepSize: 1, color: '#6b7280' },
+        grid: { color: 'rgba(229, 231, 235, 0.8)' }
       },
       x: {
-        ticks: { color: '#9ca3af' },
+        ticks: { color: '#6b7280' },
         grid: { display: false }
       }
     },
@@ -85,40 +103,77 @@ export class DashboardComponent implements OnInit {
   constructor(
     private readonly dashboardService: DashboardService,
     private readonly projectsService: ProjectsService,
-    private readonly projectContextService: ProjectContextService
+    private readonly projectContextService: ProjectContextService,
+    private readonly authService: AuthService,
+    private readonly sutService: SystemsUnderTestService,
+    private readonly usersService: UsersService
   ) { }
 
   ngOnInit(): void {
     this.loading.set(true);
 
-    // Flujo secuencial: 
-    // 1. Obtener Resumen (incluye Tasa de Aprobación)
-    // 2. Obtener Lista de Proyectos
-    // 3. Inicializar primer proyecto si existe
-    this.dashboardService.getSummary().pipe(
+    if (this.canUseAdvancedFilters()) {
+      this.sutService.getAll().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => this.suts.set(data));
+      this.usersService.getUsers().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(users => {
+        // Filtrar solo usuarios con rol Tester
+        this.testers.set(users.filter(u => {
+          const roles = Array.isArray(u.roles) ? u.roles : [u.roles];
+          return roles.some(r => r && r.toLowerCase() === 'tester');
+        }));
+      });
+    }
+
+    this.applyFilters();
+  }
+
+  applyFilters(): void {
+    this.loading.set(true);
+    const sutId = this.selectedSutId() || undefined;
+    const testerId = this.selectedTesterUserId() || undefined;
+
+    this.dashboardService.getSummary(sutId, testerId).pipe(
       tap((data: DashboardSummary) => {
         this.summary.set(data);
         this.buildCharts(data);
       }),
-      switchMap(() => this.projectsService.getProjects()),
+      switchMap(() => this.projectsService.getProjects(sutId, testerId)),
       tap((projects: Project[]) => {
         this.projects.set(projects);
+        
+        // Sobreescribir el totalProjects del resumen global con los proyectos filtrados
+        const currentSummary = this.summary();
+        if (currentSummary) {
+          this.summary.set({ ...currentSummary, totalProjects: projects.length });
+        }
+
         if (projects.length > 0) {
           const firstProjectId = projects[0].id;
-          if (!this.selectedProjectId()) {
+          if (!this.selectedProjectId() || !projects.find(p => p.id === this.selectedProjectId())) {
             this.selectedProjectId.set(firstProjectId);
             this.loadProjectMetrics(firstProjectId);
           }
           this.projectContextService.initializeIfEmpty(firstProjectId);
+        } else {
+          this.selectedProjectId.set(null);
         }
       }), takeUntilDestroyed(this.destroyRef)
     ).subscribe({
       next: () => this.loading.set(false),
       error: (err) => {
-        console.error('DashboardComponent: Error loading initial data:', err);
+        console.error('DashboardComponent: Error loading data:', err);
         this.loading.set(false);
       }
     });
+  }
+
+  onSutChange(sutId: string): void {
+    this.selectedSutId.set(sutId === 'ALL' ? null : sutId);
+    this.applyFilters();
+  }
+
+  onTesterChange(testerId: string): void {
+    this.selectedTesterUserId.set(testerId === 'ALL' ? null : testerId);
+    this.applyFilters();
   }
 
   /** Carga y renderiza los datos de todas las métricas del proyecto */
@@ -128,9 +183,11 @@ export class DashboardComponent implements OnInit {
   }
 
   onProjectChange(projectId: string): void {
-    this.selectedProjectId.set(projectId);
-    this.projectContextService.setActiveProject(projectId);
-    this.loadProjectMetrics(projectId);
+    this.selectedProjectId.set(projectId === 'ALL' ? null : projectId);
+    if (this.selectedProjectId()) {
+       this.projectContextService.setActiveProject(this.selectedProjectId()!);
+       this.loadProjectMetrics(this.selectedProjectId()!);
+    }
   }
 
 

@@ -17,11 +17,19 @@ export class TestExecution {
       code: string;
     },
     public executionDate: Date,
-    public executedBy: string,
+    public tester: {
+      id: string;
+      name: string;
+    },
     public actualTimeHours: number,
     public notes: string,
+    public testPlan?: {
+      id: string;
+      name: string;
+    },
     public stepResults: TestExecutionStepResult[] = [],
-    public evidences: Evidence[] = []
+    public evidences: Evidence[] = [],
+    public cycleNumber: number = 1
   ) {}
 }
 
@@ -33,6 +41,7 @@ export interface Evidence {
   fileSize: number;
   description: string | null;
   uploadedAt: Date;
+  executionStepResultId?: string;
 }
 
 export interface Observation {

@@ -109,6 +109,17 @@ export const routes: Routes = [
         data: { permission: 'TEST_CASES_VIEW' },
         canActivate: [permissionGuard],
       },
+      
+      // Detalle de Escenario (Test Suite)
+      {
+        path: 'test-scenarios/:id',
+        loadComponent: () =>
+          import('./features/test-scenarios/test-suite-detail/test-suite-detail.component').then(
+            (m) => m.TestSuiteDetailComponent,
+          ),
+        data: { permission: 'TEST_CASES_VIEW' },
+        canActivate: [permissionGuard],
+      },
 
       // Ejecuciones de Prueba
       {
@@ -127,6 +138,17 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/test-executions/execution-detail/execution-detail.component').then(
             (m) => m.ExecutionDetailComponent,
+          ),
+        data: { permission: 'EXECUTIONS_VIEW' },
+        canActivate: [permissionGuard],
+      },
+
+      // Evidencias de Ejecución
+      {
+        path: 'evidences',
+        loadComponent: () =>
+          import('./features/evidences/evidences.component').then(
+            (m) => m.EvidencesComponent,
           ),
         data: { permission: 'EXECUTIONS_VIEW' },
         canActivate: [permissionGuard],
@@ -186,7 +208,7 @@ export const routes: Routes = [
           import('./features/requirements/requirements.component').then(
             (m) => m.RequirementsComponent,
           ),
-        data: { permission: 'REQUIREMENTS_VIEW' },
+        data: { permission: 'PROJECTS_VIEW' },
         canActivate: [permissionGuard],
       },
 

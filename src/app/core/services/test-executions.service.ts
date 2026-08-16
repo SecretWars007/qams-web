@@ -24,12 +24,18 @@ export class TestExecutionsService {
      * @param projectId - Filtro por proyecto (opcional)
      * @param testSuiteId - Filtro por suite de prueba (opcional)
      */
-    getExecutions(testCaseId?: string, projectId?: string, testSuiteId?: string): Observable<TestExecution[]> {
+    getExecutions(testCaseId?: string, projectId?: string, testSuiteId?: string, testPlanId?: string): Observable<TestExecution[]> {
+        const params: any = {};
+        if (testCaseId) params.testCaseId = testCaseId;
+        if (projectId) params.projectId = projectId;
+        if (testSuiteId) params.testSuiteId = testSuiteId;
+        if (testPlanId) params.testPlanId = testPlanId;
 
-        if (testCaseId) {
-            const url = `${this.apiUrl}/testcase/${testCaseId}`;
-            console.log(this.LOG_TAG, 'Obteniendo ejecuciones del caso:', testCaseId);
-            return this.http.get<TestExecutionDto[]>(url).pipe(
+        const hasFilters = Object.keys(params).length > 0;
+
+        if (hasFilters) {
+            console.log(this.LOG_TAG, 'Obteniendo ejecuciones filtradas:', params);
+            return this.http.get<TestExecutionDto[]>(this.apiUrl, { params }).pipe(
                 map(dtos => dtos.map(dto => TestExecutionMapper.fromDto(dto)))
             );
         }
@@ -72,6 +78,8 @@ export class TestExecutionsService {
             const payload = {
                 notes: execution.notes,
                 actualTimeHours: execution.actualTimeHours,
+                testerId: execution.testerId,
+                testPlanId: execution.testPlanId,
                 globalStatusId: execution.statusId,
                 stepResults: execution.stepResults.map((sr: any) => ({
                     testStepId: sr.testStepId,

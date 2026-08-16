@@ -1,0 +1,67 @@
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/50 p-6 rounded-2xl border border-white/20 backdrop-blur-md shadow-sm transition-all duration-300">
+  <div>
+    <div class="flex items-center gap-2 mb-1 flex-wrap">
+      <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Planes de Prueba ISTQB</h1>
+      <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-indigo-50 text-indigo-700 border border-indigo-100">ISO/IEC/IEEE 29119-3</span>
+
+      <!-- SUT Filter Dropdown -->
+      <div class="relative ml-4 mt-2 sm:mt-0">
+        <select [ngModel]="activeSutId" (ngModelChange)="onSutChange($event)"
+          class="pl-10 pr-8 py-2 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none shadow-sm min-w-[200px] transition-colors">
+          <option [value]="null">Filtrar por SUT (Todos)</option>
+          @for (s of suts; track s.id) {
+            <option [value]="s.id">{{ s.name }}</option>
+          }
+        </select>
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-indigo-500">
+          <i class="ri-server-line"></i>
+        </div>
+        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400">
+          <i class="fas fa-chevron-down text-xs"></i>
+        </div>
+      </div>
+
+      <!-- Project Filter Dropdown -->
+      <div class="relative ml-2 mt-2 sm:mt-0">
+        <select [ngModel]="activeProjectId" (ngModelChange)="onProjectChange($event)"
+          class="pl-10 pr-8 py-2 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none shadow-sm min-w-[200px] transition-colors">
+          <option [value]="null">Filtrar por proyecto (Todos)</option>
+          @for (p of projects; track p.id) {
+            <option [value]="p.id">{{ p.name }}</option>
+          }
+        </select>
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-indigo-500">
+          <i class="fas fa-project-diagram"></i>
+        </div>
+        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400">
+          <i class="fas fa-chevron-down text-xs"></i>
+        </div>
+      </div>
+    </div>
+    @if (activeProject) {
+      <p class="text-slate-500 text-xs mt-1 animate-fade-in">
+        Gestionando planes para <span class="text-indigo-600 font-bold">{{ activeProject.name }}</span>.
+      </p>
+    } @else {
+      <p class="text-slate-500 text-xs mt-1 animate-fade-in">Estrategia, alcance, análisis de riesgo y Criterios de Entrada/Salida (Entry &amp; Exit Criteria).</p>
+    }
+  </div>
+  
+  <div class="flex items-center gap-3 w-full sm:w-auto">
+    <!-- Search Bar -->
+    <div class="relative flex-1 sm:w-64">
+      <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        <i class="ri-search-line text-slate-400"></i>
+      </div>
+      <input type="text" [ngModel]="searchTerm" (ngModelChange)="onSearchChange($event)"
+        class="block w-full pl-10 pr-3 py-2 border border-slate-200 rounded-xl text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm transition-all bg-white/70"
+        placeholder="Buscar planes de prueba..." />
+    </div>
+
+    <!-- Create Button -->
+    <button (click)="onCreateClick()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-medium text-xs flex items-center gap-2 shadow-lg shadow-indigo-500/25 transition-all transform hover:scale-105 active:scale-95 whitespace-nowrap">
+      <i class="ri-file-list-3-line text-sm"></i>
+      Nuevo Plan
+    </button>
+  </div>
+</div>

@@ -91,29 +91,46 @@ export class DefectsComponent implements OnInit {
     this.showModal.set(false);
   }
 
-  onSave(defectData: any): void {
+  onSave(eventData: { defect: any; file: File | null }): void {
     const projectId = this.currentProjectId;
     if (!projectId) return;
 
-    const request = this.isEdit() && this.selectedDefect()
-      ? this.defectsService.update(projectId, this.selectedDefect()!.id, defectData)
-      : this.defectsService.create(projectId, defectData);
+    const { defect, file } = eventData;
+    defect.projectId = projectId;
 
-    request.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: () => {
-        Swal.fire({
-          icon: 'success',
-          title: 'Éxito',
-          text: `Defecto ${this.isEdit() ? 'actualizado' : 'creado'} correctamente`,
-          confirmButtonColor: '#150fbd'
-        });
-        this.closeModal();
-        this.loadDefects();
+    const request$ = this.isEdit() && this.selectedDefect()
+      ? this.defectsService.update(projectId, this.selectedDefect()!.id, defect)
+      : this.defectsService.create(projectId, defect);
+
+    request$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (savedDefect) => {
+        if (file && savedDefect?.id) {
+          this.defectsService.uploadAttachment(projectId, savedDefect.id, file).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+            next: () => this.handleSaveSuccess(),
+            error: (err) => {
+              console.error('[DefectsComponent] Error subiendo evidencia de defecto:', err);
+              this.handleSaveSuccess();
+            }
+          });
+        } else {
+          this.handleSaveSuccess();
+        }
       },
       error: () => {
         Swal.fire('Error', 'Error al guardar el defecto', 'error');
       }
     });
+  }
+
+  private handleSaveSuccess(): void {
+    Swal.fire({
+      icon: 'success',
+      title: 'Éxito',
+      text: `Defecto ${this.isEdit() ? 'actualizado' : 'creado'} correctamente`,
+      confirmButtonColor: '#150fbd'
+    });
+    this.closeModal();
+    this.loadDefects();
   }
 
   deleteDefect(defect: Defect): void {

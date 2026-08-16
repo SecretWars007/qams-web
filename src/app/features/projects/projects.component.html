@@ -12,7 +12,7 @@
   </div>
 
   <!-- Filters & SUT Toolbar -->
-  <div class="bg-white border border-slate-200/80 rounded-2xl p-4 mb-8 shadow-sm">
+  <div class="bg-white/50 p-6 rounded-2xl border border-white/20 backdrop-blur-md shadow-sm mb-6">
     <div class="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center justify-between">
       
       <!-- SUT Dropdown Filter -->
@@ -93,13 +93,13 @@
 
   <!-- Loading State -->
   <div *ngIf="loading()" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
-    <div *ngFor="let i of [1,2,3]" class="h-64 bg-gray-900/50 rounded-3xl border border-white/5"></div>
+    <div *ngFor="let i of [1,2,3]" class="h-64 bg-white rounded-xl border border-gray-200 shadow-sm"></div>
   </div>
 
   <!-- Empty State (No Projects in System) -->
   <div *ngIf="!loading() && projects().length === 0"
-    class="flex flex-col items-center justify-center py-20 bg-slate-100 rounded-3xl border-2 border-dashed border-slate-200">
-    <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-6 border border-slate-100 shadow-sm">
+    class="flex flex-col items-center justify-center py-20 bg-white/80 rounded-2xl border border-white/20 shadow-sm backdrop-blur-md">
+    <div class="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center mb-6 border border-indigo-100 shadow-sm">
       <i class="fas fa-folder-open text-3xl text-slate-300"></i>
     </div>
     <h2 class="text-xl font-bold text-slate-900 mb-2">No hay proyectos todavía</h2>
@@ -113,8 +113,8 @@
 
   <!-- Filtered Empty State (No matches for SUT / Search) -->
   <div *ngIf="!loading() && projects().length > 0 && filteredProjects().length === 0"
-    class="flex flex-col items-center justify-center py-16 bg-slate-50 rounded-3xl border border-dashed border-slate-200">
-    <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mb-4 border border-slate-200 shadow-sm text-indigo-500">
+    class="flex flex-col items-center justify-center py-16 bg-white/80 rounded-2xl border border-white/20 shadow-sm backdrop-blur-md">
+    <div class="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center mb-4 border border-indigo-100 shadow-sm text-indigo-500">
       <i class="fas fa-filter text-2xl text-slate-400"></i>
     </div>
     <h3 class="text-base font-bold text-slate-800 mb-1">Sin resultados con los filtros actuales</h3>
@@ -128,152 +128,88 @@
   <!-- Projects Grid -->
   <div *ngIf="!loading() && filteredProjects().length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
     <div *ngFor="let project of filteredProjects()" (dblclick)="openProject(project.id)"
-      class="bg-gray-900 border border-white/5 rounded-3xl p-6 hover:border-indigo-500/30 transition-all hover:shadow-2xl hover:shadow-black/40 group cursor-pointer relative overflow-hidden flex flex-col h-full">
-
-      <!-- Status Badge & Top Quick Actions -->
-      <div class="absolute top-0 right-0 z-10 flex items-center">
-        <button *ngIf="canEditProject()" (click)="openEditModal(project, $event)"
-                class="px-2.5 py-1.5 bg-indigo-500/20 hover:bg-indigo-600 text-indigo-300 hover:text-white border-b border-l border-indigo-500/20 text-xs transition-all outline-none"
-                title="Editar Proyecto">
-          <i class="fas fa-edit"></i>
-        </button>
-        <button *ngIf="canDeleteProject()" (click)="onDeleteProject(project.id, $event)"
-                class="px-2.5 py-1.5 bg-rose-500/20 hover:bg-rose-600 text-rose-300 hover:text-white border-b border-l border-rose-500/20 text-xs transition-all outline-none"
-                title="Eliminar Proyecto">
-          <i class="fas fa-trash-can"></i>
-        </button>
-        <button type="button" (click)="onToggleStatus(project, $event)" [ngClass]="{
-            'bg-emerald-500/10 text-emerald-400 border-emerald-500/10': project.isActive,
-            'bg-rose-500/10 text-rose-400 border-rose-500/10': !project.isActive
-          }"
-          class="px-4 py-1.5 rounded-bl-2xl border-b border-l text-[10px] font-black tracking-widest cursor-pointer hover:brightness-125 transition-all backdrop-blur-md outline-none">
-          {{ project.isActive ? 'Activo' : 'Inactivo' }}
-        </button>
-      </div>
-
-      <!-- Content -->
-      <div class="mb-3 pr-28"> <!-- Space for badges & buttons -->
-        <div class="flex items-start gap-4">
-          <div
-            class="w-12 h-12 shrink-0 rounded-2xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 shadow-lg shadow-indigo-500/5 group-hover:scale-110 transition-transform duration-500">
-            <i class="fas fa-cube text-xl"></i>
-          </div>
-          <div class="min-w-0">
-            <h3
-              class="text-lg font-bold text-white group-hover:text-indigo-400 transition-colors leading-tight mb-1 truncate"
-              [title]="project.name">
-              {{ project.name }}
-            </h3>
-            <div class="flex items-center gap-2 text-[10px] font-bold tracking-wider text-gray-500">
-              <span class="text-indigo-500/70">{{ project.status.name || 'Pendiente' | titlecase }}</span>
-              <span>•</span>
-              <span>{{ project.createdAt | date:'MMM d, y' }}</span>
+      class="group bg-white rounded-xl border border-gray-200 hover:border-indigo-300 hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col h-full cursor-pointer relative">
+      
+      <div class="p-5 flex-1 flex flex-col relative">
+        <div class="flex justify-between items-start mb-3 gap-2">
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 shrink-0 rounded-xl border flex items-center justify-center transition-colors shadow-sm bg-indigo-50 border-indigo-200 text-indigo-600">
+              <i class="fas fa-cube text-xl"></i>
+            </div>
+            <div class="min-w-0">
+              <h3 class="font-bold text-gray-800 text-lg leading-tight truncate" [title]="project.name">{{ project.name }}</h3>
+              <div class="flex flex-wrap gap-1.5 mt-1">
+                <span class="text-xs font-semibold px-2 py-0.5 rounded bg-gray-100 text-gray-700 border border-gray-200">
+                  {{ project.createdAt | date:'MMM d, y' }}
+                </span>
+                <span *ngIf="project.systemUnderTestName" class="text-[11px] font-semibold px-2 py-0.5 rounded border bg-indigo-50 text-indigo-700 border-indigo-200 truncate max-w-[180px]" [title]="'SUT: ' + project.systemUnderTestName">
+                  <i class="fas fa-microchip mr-1"></i>{{ project.systemUnderTestName }}
+                </span>
+                <span *ngIf="!project.systemUnderTestName" class="text-[11px] font-semibold px-2 py-0.5 rounded border bg-gray-50 text-gray-500 border-gray-200">
+                  <i class="fas fa-link-slash mr-1"></i>Sin SUT
+                </span>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
-
-      <!-- SUT Badge (Prominent) -->
-      <div class="mb-4">
-        <div *ngIf="project.systemUnderTestName"
-          class="inline-flex items-center gap-2 px-3 py-1 rounded-xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-xs font-bold tracking-wide"
-          [title]="'SUT: ' + project.systemUnderTestName">
-          <i class="fas fa-microchip text-[11px] text-indigo-400"></i>
-          <span class="truncate max-w-[200px]">{{ project.systemUnderTestName }}</span>
-        </div>
-        <div *ngIf="!project.systemUnderTestName"
-          class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-gray-800/60 border border-white/5 text-gray-500 text-xs font-semibold">
-          <i class="fas fa-link-slash text-[10px]"></i>
-          <span>Sin SUT asignado</span>
-        </div>
-      </div>
-
-      <!-- Description -->
-      <p class="text-gray-500 text-sm mb-6 line-clamp-2 leading-relaxed min-h-[2.5rem]">
-        {{ project.description || 'Sin descripción detallada disponible.' }}
-      </p>
-
-      <!-- Metadata Grid -->
-      <div class="grid grid-cols-2 gap-3 mb-6">
-        <div class="bg-gray-950/50 rounded-2xl p-3 border border-white/5">
-          <p class="text-[9px] text-gray-600 tracking-widest font-black mb-1">Duración</p>
-          <div class="flex items-center gap-2 text-[11px] text-gray-400 font-medium">
-            <i class="far fa-calendar-alt text-indigo-500/50"></i>
-            <span>{{ project.startDate | date:'dd/MM' }} - {{ project.endDate | date:'dd/MM' }}</span>
+          
+          <!-- Botones de Acción Rápidos Superiores (Opcional) -->
+          <div class="flex items-center gap-1.5 shrink-0">
+             <button *ngIf="project.stats.devolutions > 0" (click)="openDevolutionModal(project, $event)" class="p-1.5 text-rose-600 hover:text-white bg-rose-50 hover:bg-rose-500 border border-rose-200 rounded-lg transition-all shadow-sm" title="Ver Devoluciones">
+               <span class="text-xs font-bold px-1"><i class="fas fa-undo mr-1"></i>{{ project.stats.devolutions }}</span>
+             </button>
           </div>
         </div>
-        <div class="bg-gray-950/50 rounded-2xl p-3 border border-white/5">
-          <p class="text-[9px] text-gray-600 tracking-widest font-black mb-1">Responsable</p>
-          <div class="flex items-center gap-2 text-[11px] text-gray-400 font-medium truncate">
-            <i class="far fa-user text-purple-500/50"></i>
-            <span class="truncate">{{ project.createdBy || 'Sistema' }}</span>
+
+        <p class="text-sm text-gray-600 mb-4 line-clamp-2 leading-relaxed">{{ project.description || 'Sin descripción detallada.' }}</p>
+
+        <!-- Información Específica -->
+        <div class="mt-auto space-y-2 pt-3 border-t border-gray-100">
+          <div class="flex items-center text-xs text-gray-600">
+             <i class="far fa-calendar-alt mr-2 text-indigo-500"></i>
+             <span><b class="text-gray-700">Duración:</b> {{ project.startDate | date:'dd/MM' }} - {{ project.endDate | date:'dd/MM' }}</span>
+          </div>
+          <div class="flex items-center text-xs text-gray-600">
+             <i class="far fa-user mr-2 text-purple-500"></i>
+             <span class="truncate"><b class="text-gray-700">Resp:</b> {{ project.createdBy || 'Sistema' }}</span>
+          </div>
+          <div class="flex items-center text-xs text-gray-600">
+             <i class="fas fa-users mr-2 text-emerald-500"></i>
+             <span class="text-xs text-gray-600"><b class="text-gray-700">QA:</b> {{ project.testerNames.length || 0 }} miembros</span>
+          </div>
+          <div class="flex items-center gap-3 text-xs text-gray-600 pt-1">
+             <span title="Suites"><b class="text-gray-700">S:</b> {{ project.stats.suites || 0 }}</span>
+             <span title="Boards"><b class="text-gray-700">B:</b> {{ project.stats.kanbanTasks || 0 }}</span>
           </div>
         </div>
       </div>
 
-      <!-- Equipo y Métricas Wrapper -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <!-- Testers -->
-        <div *ngIf="project.testerNames && project.testerNames.length">
-          <p class="text-[9px] text-gray-600 tracking-widest font-black mb-2">Equipo QA</p>
-          <div class="flex -space-x-2">
-            <div *ngFor="let name of project.testerNames.slice(0, 4)"
-              class="h-8 w-8 rounded-full border-2 border-gray-900 bg-gray-800 flex items-center justify-center text-[10px] font-black text-indigo-400"
-              [title]="name">
-              {{ name.charAt(0) }}
-            </div>
-            <div *ngIf="project.testerNames.length > 4"
-              class="h-8 w-8 rounded-full border-2 border-gray-900 bg-gray-800 flex items-center justify-center text-[10px] font-black text-white">
-              +{{ project.testerNames.length - 4 }}
-            </div>
-          </div>
+      <!-- Footer de la Tarjeta con Estado y Botones de Acción Explícitos -->
+      <div class="bg-gray-50/80 px-4 py-3 border-t border-gray-100 flex flex-wrap justify-between items-center gap-2 text-xs text-gray-500">
+        <div class="flex items-center gap-1.5 cursor-pointer hover:bg-gray-200/50 p-1 rounded transition-colors" (click)="onToggleStatus(project, $event)" title="Cambiar estado">
+          <div class="w-2.5 h-2.5 rounded-full" [ngClass]="project.isActive ? 'bg-emerald-500 ring-2 ring-emerald-200' : 'bg-red-500 ring-2 ring-red-200'"></div>
+          <span class="font-medium" [ngClass]="project.isActive ? 'text-emerald-700' : 'text-red-700'">{{ project.isActive ? 'Activo' : 'Inactivo' }}</span>
         </div>
 
-        <!-- Metrics (Compact on mobile) -->
-        <div class="flex items-center gap-4 py-2 px-3 bg-gray-950/30 rounded-2xl border border-white/5">
-          <div class="flex flex-col items-center px-1" title="Suites">
-            <span class="text-[10px] font-black text-gray-600 leading-none mb-1">S</span>
-            <span class="text-xs font-black text-white leading-none">{{ project.stats.suites || 0 }}</span>
-          </div>
-          <div class="w-px h-4 bg-white/5"></div>
-          <div class="flex flex-col items-center px-1" title="Boards">
-            <span class="text-[10px] font-black text-gray-600 leading-none mb-1">B</span>
-            <span class="text-xs font-black text-white leading-none">{{ project.stats.kanbanTasks || 0 }}</span>
-          </div>
-          <div class="w-px h-4 bg-white/5"></div>
-          <button type="button" class="flex flex-col items-center px-1 hover:bg-white/5 rounded-lg transition-colors outline-none" title="Devoluciones"
-            (click)="openDevolutionModal(project, $event)">
-            <span class="text-[10px] font-black text-rose-500/50 leading-none mb-1">D</span>
-            <span class="text-xs font-black text-rose-500 leading-none">{{ project.stats.devolutions || 0 }}</span>
+        <div class="flex items-center gap-1.5 overflow-x-auto custom-scrollbar">
+          <button (click)="viewKanban(project.id, $event)" 
+                  class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-md bg-sky-50 text-sky-700 hover:bg-sky-600 hover:text-white border border-sky-200 transition-all whitespace-nowrap">
+            <i class="fas fa-trello"></i>
+            Kanban
+          </button>
+          <button (click)="viewRequirements(project.id, $event)" 
+                  class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-md bg-purple-50 text-purple-700 hover:bg-purple-600 hover:text-white border border-purple-200 transition-all whitespace-nowrap">
+            <i class="fas fa-list-check"></i>
+            Requisitos
+          </button>
+          <button *ngIf="canEditProject()" (click)="openEditModal(project, $event)"
+                  class="inline-flex items-center justify-center w-7 h-7 rounded-md bg-indigo-50 text-indigo-700 hover:bg-indigo-600 hover:text-white border border-indigo-200 transition-all" title="Editar">
+            <i class="fas fa-edit text-xs"></i>
+          </button>
+          <button *ngIf="canDeleteProject()" (click)="onDeleteProject(project.id, $event)"
+                  class="inline-flex items-center justify-center w-7 h-7 rounded-md bg-red-50 text-red-700 hover:bg-red-600 hover:text-white border border-red-200 transition-all" title="Eliminar">
+            <i class="fas fa-trash-can text-xs"></i>
           </button>
         </div>
-      </div>
-
-      <!-- Footer Actions -->
-      <div class="mt-auto pt-5 border-t border-white/5 flex flex-wrap gap-2">
-        <button (click)="viewKanban(project.id, $event)" class="btn-info flex-1 py-2 text-xs font-bold">
-          <i class="fas fa-trello"></i>
-          <span>Kanban</span>
-        </button>
-
-        <button (click)="openDevolutionModal(project, $event)" class="btn-warning flex-1 py-2 text-xs font-bold">
-          <i class="fas fa-undo"></i>
-          <span>Devolver</span>
-        </button>
-
-        <button *ngIf="canEditProject()" (click)="openEditModal(project, $event)" 
-                class="px-3 py-2 rounded-xl bg-indigo-600/30 hover:bg-indigo-600 text-indigo-200 hover:text-white border border-indigo-500/30 text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm"
-                title="Editar Proyecto">
-          <i class="fas fa-edit"></i>
-          <span>Editar</span>
-        </button>
-
-        <button *ngIf="canDeleteProject()" (click)="onDeleteProject(project.id, $event)" 
-                class="px-3 py-2 rounded-xl bg-rose-600/30 hover:bg-rose-600 text-rose-200 hover:text-white border border-rose-500/30 text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm" 
-                title="Eliminar Proyecto">
-          <i class="fas fa-trash-can"></i>
-          <span>Eliminar</span>
-        </button>
       </div>
     </div>
   </div>
@@ -325,13 +261,13 @@
             <!-- Sistema Bajo Prueba (SUT) -->
             <div class="md:col-span-2">
               <label for="systemUnderTestId" class="text-[10px] font-bold text-slate-500 tracking-widest uppercase ml-1">
-                Sistema Bajo Prueba (SUT)
+                Sistema Bajo Prueba (SUT) <span class="text-red-500">*</span>
               </label>
               <div class="relative flex items-center group mt-1">
                 <i class="fas fa-microchip absolute left-3 text-slate-400 group-focus-within:text-indigo-600 transition-colors text-xs"></i>
                 <select id="systemUnderTestId" formControlName="systemUnderTestId"
                   class="w-full bg-slate-50 border border-slate-200 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all font-medium">
-                  <option [ngValue]="null">-- Sin vincular a un SUT --</option>
+                  <option [ngValue]="null" disabled>-- Selecciona un SUT --</option>
                   <option *ngFor="let sut of suts()" [value]="sut.id">
                     {{ sut.name }} ({{ sut.platformTypeName || sut.platformTypeCode || 'SUT' }})
                   </option>
@@ -372,7 +308,7 @@
 
             <!-- QA -->
             <div class="md:col-span-2">
-              <label for="testerIds" class="text-[10px] font-bold text-slate-500 tracking-widest uppercase ml-1">Liderazgo QA (Múltiple) <small class="text-rose-500">*</small></label>
+              <label for="testerIds" class="text-[10px] font-bold text-slate-500 tracking-widest uppercase ml-1">Liderazgo QA (Múltiple) <small class="text-slate-400">(Opcional)</small></label>
               <div class="relative flex items-start group mt-1">
                 <i class="fas fa-users-gear absolute left-3 top-2.5 text-slate-400 group-focus-within:text-indigo-600 transition-colors text-xs"></i>
                 <select id="testerIds" formControlName="testerIds" multiple
@@ -494,8 +430,12 @@
           <button type="button" (click)="closeModal()" class="flex-1 h-10 flex items-center justify-center gap-2 rounded-xl bg-white border border-slate-200 text-slate-600 text-sm font-bold hover:bg-slate-100 transition-all">
             <i class="fas fa-xmark text-xs"></i> Cancelar
           </button>
-          <button type="button" (click)="nextStep()" [disabled]="projectForm.invalid" class="flex-[2] h-10 flex items-center justify-center gap-2 rounded-xl bg-indigo-600 text-white text-sm font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-            Siguiente Paso <i class="fas fa-arrow-right text-xs"></i>
+          <button type="button" (click)="onSubmit()" [disabled]="projectForm.invalid || isSubmitting()" class="flex-1 h-10 flex items-center justify-center gap-2 rounded-xl bg-white border border-indigo-200 text-indigo-700 text-sm font-bold hover:bg-indigo-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+            <div *ngIf="isSubmitting()" class="w-4 h-4 border-2 border-indigo-700/20 border-t-indigo-700 rounded-full animate-spin"></div>
+            <i *ngIf="!isSubmitting()" class="fas fa-save text-xs"></i> Guardar
+          </button>
+          <button type="button" (click)="nextStep()" [disabled]="projectForm.invalid || isSubmitting()" class="flex-[1.5] h-10 flex items-center justify-center gap-2 rounded-xl bg-indigo-600 text-white text-sm font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+            Agregar Requisitos <i class="fas fa-arrow-right text-xs"></i>
           </button>
         </ng-container>
 

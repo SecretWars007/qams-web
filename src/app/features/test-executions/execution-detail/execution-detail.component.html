@@ -51,7 +51,7 @@
         <div>
           <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Ejecutado Por</label>
           <div class="text-sm font-medium text-slate-700 bg-slate-50 px-3 py-2 rounded-xl border border-slate-100 flex items-center gap-2">
-            <i class="fas fa-user text-slate-400"></i> {{ execution()?.executedBy }}
+            <i class="fas fa-user text-slate-400"></i> {{ execution()?.tester?.name || 'No asignado' }}
           </div>
         </div>
         <div>
@@ -213,3 +213,17 @@
   </div>
 
 </div>
+
+<!-- Defect Modal for Reporting Step Failures -->
+<app-defect-modal
+  *ngIf="showDefectModal()"
+  [defect]="defectModalData()"
+  [isEdit]="false"
+  [projectId]="execution()?.project?.id || null"
+  [testCaseId]="execution()?.testCase?.id || null"
+  [testExecutionId]="execution()?.id || null"
+  [testExecutionStepResultId]="selectedStepId()"
+  (close)="showDefectModal.set(false)"
+  (save)="onSaveDefect($event)">
+</app-defect-modal>
+

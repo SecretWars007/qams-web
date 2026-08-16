@@ -27,8 +27,12 @@ export class DashboardService {
      * Obtiene el resumen general del dashboard (KPIs, gráficos, timeline).
      * Si el backend no devuelve timeline, lo reconstruye desde ProjectsService.
      */
-    getSummary(): Observable<DashboardSummary> {
-        return this.http.get<DashboardSummaryDto>(this.apiUrl).pipe(
+    getSummary(sutId?: string, testerUserId?: string): Observable<DashboardSummary> {
+        const params: any = {};
+        if (sutId && sutId !== 'ALL') params.sutId = sutId;
+        if (testerUserId && testerUserId !== 'ALL') params.testerUserId = testerUserId;
+
+        return this.http.get<DashboardSummaryDto>(this.apiUrl, { params }).pipe(
             map(dto => {
                 if (!dto) return this.getEmptySummary();
                 return DashboardMapper.fromSummaryDto(dto);

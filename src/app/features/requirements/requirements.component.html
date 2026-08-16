@@ -1,28 +1,40 @@
 <div class="p-4 sm:p-6 max-w-7xl mx-auto animate-in fade-in duration-500">
   <!-- Header -->
-  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+  <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white/50 p-6 rounded-2xl border border-white/20 backdrop-blur-md shadow-sm mb-6">
     <div>
-      @if (projectId()) {
-        <div class="flex items-center gap-2 text-slate-500 mb-1">
-          <button (click)="goBack()" class="hover:text-indigo-600 transition-colors">
-            <i class="fas fa-arrow-left"></i>
-            <span class="ml-2 text-xs font-bold tracking-widest">Proyectos</span>
-          </button>
+      <div class="flex items-center gap-2 mb-2">
+        <h1 class="text-3xl font-black text-slate-900 tracking-tight">Requisitos</h1>
+        
+        <!-- Project Filter Dropdown -->
+        <div class="relative ml-4">
+          <select [ngModel]="projectId()" (ngModelChange)="onProjectSelect($event)"
+            class="pl-10 pr-8 py-2 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none shadow-sm min-w-[200px]">
+            <option [value]="null" disabled>Selecciona un proyecto</option>
+            @for (p of projects(); track p.id) {
+              <option [value]="p.id">{{ p.name }}</option>
+            }
+          </select>
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-indigo-500">
+            <i class="fas fa-project-diagram"></i>
+          </div>
+          <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400">
+            <i class="fas fa-chevron-down text-xs"></i>
+          </div>
         </div>
-      }
-      <h1 class="text-3xl font-black text-slate-900 tracking-tight">Requisitos</h1>
+      </div>
+      
       @if (project()) {
         <p class="text-slate-500 text-sm mt-1">
           Gestionando el alcance para <span class="text-indigo-600 font-bold">{{ project()?.name }}</span>.
         </p>
       } @else {
         <p class="text-slate-500 text-sm mt-1">
-          Gestiona los requisitos funcionales y técnicos de tus proyectos.
+          Selecciona un proyecto para gestionar sus requisitos.
         </p>
       }
     </div>
     <div class="flex gap-2 w-full sm:w-auto">
-      <button (click)="openModal()" class="btn-primary w-full sm:w-auto">
+      <button (click)="openModal()" class="btn-primary w-full sm:w-auto" [disabled]="!projectId()">
         <i class="fas fa-plus-circle"></i>
         <span>Nuevo Requisito</span>
       </button>
@@ -33,15 +45,15 @@
   @if (loading()) {
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 animate-pulse">
       @for (i of [1,2,3,4]; track i) {
-        <div class="h-48 bg-gray-200 rounded-3xl border border-slate-200"></div>
+        <div class="h-48 bg-white rounded-xl border border-gray-200 shadow-sm"></div>
       }
     </div>
   } @else {
     <!-- Empty State -->
     @if (requirements().length === 0) {
-      <div class="flex flex-col items-center justify-center py-20 bg-white rounded-3xl border-2 border-dashed border-slate-200">
-        <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-6 border border-slate-100 shadow-sm">
-          <i class="fas fa-list-check text-3xl text-slate-300"></i>
+      <div class="flex flex-col items-center justify-center py-20 bg-white/80 rounded-2xl border border-white/20 shadow-sm backdrop-blur-md">
+        <div class="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center mb-6 border border-indigo-100 shadow-sm text-indigo-500">
+          <i class="fas fa-list-check text-3xl"></i>
         </div>
         <h2 class="text-xl font-bold text-slate-900 mb-2">No hay requisitos definidos</h2>
         <p class="text-gray-500 mb-8 max-w-xs text-center">Comienza definiendo los requisitos funcionales y técnicos del proyecto.</p>
@@ -54,7 +66,7 @@
       <!-- Requirements Grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         @for (req of requirements(); track req.id) {
-          <div class="bg-white border border-slate-200 rounded-3xl p-6 hover:border-indigo-500/30 transition-all hover:shadow-xl group relative overflow-hidden flex flex-col h-full shadow-sm">
+          <div class="bg-white rounded-xl border border-gray-200 p-6 hover:border-indigo-300 transition-all hover:shadow-lg group relative overflow-hidden flex flex-col h-full">
             
             <!-- Top Badges -->
             <div class="flex justify-between items-start mb-4">

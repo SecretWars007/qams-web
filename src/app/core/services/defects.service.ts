@@ -42,6 +42,14 @@ export class DefectsService {
     );
   }
 
+  uploadAttachment(projectId: string, id: string, file: File): Observable<Defect> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<DefectDto>(`${this.apiUrl}/${projectId}/defects/${id}/attachment`, formData).pipe(
+      map(dto => DefectMapper.fromDto(dto))
+    );
+  }
+
   delete(projectId: string, id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${projectId}/defects/${id}`);
   }

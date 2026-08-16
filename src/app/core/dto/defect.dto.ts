@@ -17,7 +17,13 @@ export interface DefectDto {
   assignedToName?: string;
   testCaseId?: string;
   testExecutionId?: string;
+  testExecutionStepResultId?: string;
   stepsToReproduce?: string;
+  expectedResult?: string;
+  actualResult?: string;
+  environmentInfo?: string;
+  attachmentUrl?: string;
+  attachmentFileName?: string;
   createdAt: string;
   updatedAt?: string;
 }
@@ -28,10 +34,17 @@ export interface CreateDefectDto {
   description?: string;
   severityId?: number;
   priorityId?: number;
+  defectPriorityId?: number;
+  defectSeverityId?: number;
+  defectStatusId?: number;
   assignedToUserId?: string;
   testCaseId?: string;
   testExecutionId?: string;
+  testExecutionStepResultId?: string;
   stepsToReproduce?: string;
+  expectedResult?: string;
+  actualResult?: string;
+  environmentInfo?: string;
 }
 
 export interface UpdateDefectDto {
@@ -40,6 +53,12 @@ export interface UpdateDefectDto {
   severityId?: number;
   statusId?: number;
   priorityId?: number;
+  defectPriorityId?: number;
+  defectSeverityId?: number;
+  defectStatusId?: number;
   assignedToUserId?: string;
   stepsToReproduce?: string;
+  expectedResult?: string;
+  actualResult?: string;
+  environmentInfo?: string;
 }

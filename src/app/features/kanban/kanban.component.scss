@@ -1,25 +1,25 @@
 /* src/app/features/kanban/kanban.component.scss */
 
-/* ── Colores de columna según estado ── */
-.col-pending    { @apply bg-amber-500/[0.03] border-amber-500/15; }
-.col-inprogress { @apply bg-blue-500/[0.03] border-blue-500/15; }
-.col-review     { @apply bg-purple-500/[0.03] border-purple-500/15; }
-.col-done       { @apply bg-emerald-500/[0.03] border-emerald-500/15; }
-.col-default    { @apply bg-white/[0.02] border-white/5; }
+/* ── Colores de columna según estado (Light Theme) ── */
+.col-pending    { @apply bg-amber-50 border-amber-200; }
+.col-inprogress { @apply bg-blue-50 border-blue-200; }
+.col-review     { @apply bg-purple-50 border-purple-200; }
+.col-done       { @apply bg-emerald-50 border-emerald-200; }
+.col-default    { @apply bg-gray-50 border-gray-200; }
 
 /* ── Iconos de columna ── */
-.col-pending    .col-icon { @apply text-amber-400/70; }
-.col-inprogress .col-icon { @apply text-blue-400/70; }
-.col-review     .col-icon { @apply text-purple-400/70; }
-.col-done       .col-icon { @apply text-emerald-400/70; }
-.col-default    .col-icon { @apply text-gray-500; }
+.col-pending    .col-icon { @apply text-amber-500; }
+.col-inprogress .col-icon { @apply text-blue-500; }
+.col-review     .col-icon { @apply text-purple-500; }
+.col-done       .col-icon { @apply text-emerald-500; }
+.col-default    .col-icon { @apply text-gray-400; }
 
 /* ── Badges de columna ── */
-.col-pending    .col-badge { @apply bg-amber-500/10 text-amber-400 border border-amber-500/20; }
-.col-inprogress .col-badge { @apply bg-blue-500/10 text-blue-400 border border-blue-500/20; }
-.col-review     .col-badge { @apply bg-purple-500/10 text-purple-400 border border-purple-500/20; }
-.col-done       .col-badge { @apply bg-emerald-500/10 text-emerald-400 border border-emerald-500/20; }
-.col-default    .col-badge { @apply bg-white/5 text-gray-400 border border-white/10; }
+.col-pending    .col-badge { @apply bg-amber-100 text-amber-700 border border-amber-200; }
+.col-inprogress .col-badge { @apply bg-blue-100 text-blue-700 border border-blue-200; }
+.col-review     .col-badge { @apply bg-purple-100 text-purple-700 border border-purple-200; }
+.col-done       .col-badge { @apply bg-emerald-100 text-emerald-700 border border-emerald-200; }
+.col-default    .col-badge { @apply bg-gray-100 text-gray-600 border border-gray-200; }
 
 /* ── Scrollbar personalizada ── */
 .custom-scrollbar::-webkit-scrollbar       { width: 4px; }

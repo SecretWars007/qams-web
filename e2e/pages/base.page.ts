@@ -12,7 +12,8 @@ export class BasePage {
       };
       await route.continue({ headers });
     });
-    await this.page.goto(`http://localhost:4200${path}`, { waitUntil: 'networkidle' });
+    const baseUrl = process.env['BASE_URL'] ?? 'http://localhost:4200';
+    await this.page.goto(`${baseUrl}${path}`, { waitUntil: 'networkidle' });
   }
 
   /** Cierra el modal SweetAlert2 si está visible antes de interactuar con la UI */

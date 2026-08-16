@@ -18,7 +18,7 @@ import { AuthService } from '../../core/services/auth.service';
   selector: '[hasPermission]',
   standalone: true,
 })
-export class HasPermissionDirective implements OnInit {
+export class HasPermissionDirective implements OnInit  {
   // Permiso requerido recibido como input
   @Input('hasPermission') permission: string = '';
 

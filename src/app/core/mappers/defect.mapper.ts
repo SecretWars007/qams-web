@@ -21,7 +21,13 @@ export class DefectMapper {
       assignedToName: dto.assignedToName,
       testCaseId: dto.testCaseId,
       testExecutionId: dto.testExecutionId,
+      testExecutionStepResultId: dto.testExecutionStepResultId,
       stepsToReproduce: dto.stepsToReproduce,
+      expectedResult: dto.expectedResult,
+      actualResult: dto.actualResult,
+      environmentInfo: dto.environmentInfo,
+      attachmentUrl: dto.attachmentUrl,
+      attachmentFileName: dto.attachmentFileName,
       createdAt: new Date(dto.createdAt),
       updatedAt: dto.updatedAt ? new Date(dto.updatedAt) : undefined,
     };

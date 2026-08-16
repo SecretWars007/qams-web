@@ -7,6 +7,37 @@ export interface TestPlanCriteria {
   criteriaType: 'ENTRY' | 'EXIT';
   description: string;
   isMet: boolean;
+  priority?: string;
+  category?: string;
+}
+
+export interface TestPlanMilestone {
+  id?: string;
+  testPlanId?: string;
+  name: string;
+  description?: string;
+  targetDate: string;
+  isCompleted: boolean;
+}
+
+export interface TestPlanRisk {
+  id?: string;
+  testPlanId?: string;
+  description: string;
+  likelihood: string; // HIGH, MEDIUM, LOW
+  impact: string;     // HIGH, MEDIUM, LOW
+  mitigationStrategy?: string;
+}
+
+export interface TestPlanApprovalLog {
+  id: string;
+  testPlanId: string;
+  userId: string;
+  userFullName?: string;
+  userEmail?: string;
+  status: string; // APPROVED, REJECTED
+  comments?: string;
+  signatureDate: Date;
 }
 
 export interface TestPlan {
@@ -20,9 +51,18 @@ export interface TestPlan {
   // ISTQB Fields
   scope?: string;
   outOfScope?: string;
-  testStrategy?: string;
-  riskAnalysis?: string;
-  environmentRequirements?: string;
+  testStrategyId?: number;
+  testStrategy?: any;
+  testPlanTypeId?: number;
+  testPlanType?: any;
+  testLevelId?: number;
+  testLevel?: any;
+  testManagerId?: string;
+  testManagerName?: string;
+  riskLevelId?: number;
+  riskLevel?: any;
+  testEnvironmentId?: number;
+  testEnvironment?: any;
   testSchedule?: string;
   estimatedEffortHours?: number;
 
@@ -34,6 +74,9 @@ export interface TestPlan {
   updatedAt?: Date;
 
   criteria?: TestPlanCriteria[];
+  milestones?: TestPlanMilestone[];
+  risks?: TestPlanRisk[];
+  approvalLogs?: TestPlanApprovalLog[];
   isClosed?: boolean;
 }
 
@@ -45,15 +88,20 @@ export interface CreateTestPlan {
 
   scope?: string;
   outOfScope?: string;
-  testStrategy?: string;
-  riskAnalysis?: string;
-  environmentRequirements?: string;
+  testStrategyId?: number;
+  testPlanTypeId?: number;
+  testLevelId?: number;
+  testManagerId?: string;
+  riskLevelId?: number;
+  testEnvironmentId?: number;
   testSchedule?: string;
   estimatedEffortHours?: number;
 
   startDate: string;
   endDate: string;
   criteria?: TestPlanCriteria[];
+  milestones?: TestPlanMilestone[];
+  risks?: TestPlanRisk[];
 }
 
 export interface UpdateTestPlan {
@@ -63,9 +111,12 @@ export interface UpdateTestPlan {
 
   scope?: string;
   outOfScope?: string;
-  testStrategy?: string;
-  riskAnalysis?: string;
-  environmentRequirements?: string;
+  testStrategyId?: number;
+  testPlanTypeId?: number;
+  testLevelId?: number;
+  testManagerId?: string;
+  riskLevelId?: number;
+  testEnvironmentId?: number;
   testSchedule?: string;
   estimatedEffortHours?: number;
 
@@ -73,6 +124,8 @@ export interface UpdateTestPlan {
   endDate: string;
   statusId: number;
   criteria?: TestPlanCriteria[];
+  milestones?: TestPlanMilestone[];
+  risks?: TestPlanRisk[];
 }
 
 export interface ApproveTestPlan {

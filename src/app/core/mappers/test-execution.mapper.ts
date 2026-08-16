@@ -1,6 +1,6 @@
 // src/app/core/mappers/test-execution.mapper.ts
-import { TestExecutionDto, TestExecutionStepResultDto } from '../dto/test-execution.dto';
-import { TestExecution, TestExecutionStepResult } from '../models/test-execution.model';
+import { TestExecutionDto, TestExecutionStepResultDto, EvidenceDto, ObservationDto } from '../dto/test-execution.dto';
+import { TestExecution, TestExecutionStepResult, Evidence, Observation } from '../models/test-execution.model';
 
 export class TestExecutionMapper {
   static fromDto(dto: TestExecutionDto): TestExecution {
@@ -10,10 +10,13 @@ export class TestExecutionMapper {
       { id: dto.projectId, name: dto.projectName },
       { id: dto.statusId, name: dto.statusName, code: dto.statusCode },
       new Date(dto.executionDate),
-      dto.executedByUserName,
+      { id: dto.testerId, name: dto.testerName },
       dto.actualTimeHours,
       dto.notes,
-      dto.stepResults?.map(this.fromStepResultDto) || []
+      dto.testPlanId ? { id: dto.testPlanId, name: dto.testPlanName || '' } : undefined,
+      dto.stepResults?.map(sr => this.fromStepResultDto(sr)) || [],
+      dto.evidences?.map(ev => this.fromEvidenceDto(ev)) || [],
+      dto.cycleNumber || 1
     );
   }
 
@@ -31,8 +34,31 @@ export class TestExecutionMapper {
       },
       actualResult: dto.actualResult,
       notes: dto.notes,
-      evidences: [],
-      observations: []
+      evidences: dto.evidences?.map(ev => this.fromEvidenceDto(ev)) || [],
+      observations: dto.observations?.map(ob => this.fromObservationDto(ob)) || []
+    };
+  }
+
+  static fromEvidenceDto(dto: EvidenceDto): Evidence {
+    return {
+      id: dto.id,
+      fileName: dto.fileName,
+      fileUrl: dto.fileUrl || `/api/testexecutions/evidence/${dto.id}/file`,
+      fileTypeName: dto.fileTypeName,
+      fileSize: dto.fileSize,
+      description: dto.description,
+      uploadedAt: new Date(dto.uploadedAt),
+      executionStepResultId: dto.executionStepResultId
+    };
+  }
+
+  static fromObservationDto(dto: ObservationDto): Observation {
+    return {
+      id: dto.id,
+      observation: dto.observation,
+      createdBy: dto.createdByUserName,
+      createdAt: new Date(dto.createdAt),
+      response: dto.response
     };
   }
 }

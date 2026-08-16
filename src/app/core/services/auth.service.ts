@@ -40,6 +40,11 @@ export class AuthService {
   readonly isAuthenticated = computed(() => this.currentUserSignal() !== null);
   readonly fullName = computed(() => this.currentUserSignal()?.FullName ?? '');
 
+  // Señales de roles para el dashboard
+  readonly isLeadTester = computed(() => this.hasRole('Líder de Pruebas (Lead)'));
+  readonly isTesterOnly = computed(() => this.hasRole('Tester') && !this.isAdmin() && !this.isLeadTester());
+  readonly canUseAdvancedFilters = computed(() => this.isAdmin() || this.isLeadTester());
+
   constructor() {
     this.checkInitialSession();
   }

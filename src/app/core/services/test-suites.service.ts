@@ -19,6 +19,12 @@ export class TestSuitesService {
         );
     }
 
+    getTestSuitesByPlanId(planId: string): Observable<TestSuite[]> {
+        return this.http.get<TestSuiteDto[]>(`${this.apiUrl}/plan/${planId}`).pipe(
+            map(dtos => dtos.map(dto => TestSuiteMapper.fromDto(dto)))
+        );
+    }
+
     createTestSuite(testSuite: CreateTestSuite): Observable<TestSuite> {
         return this.http.post<TestSuiteDto>(this.apiUrl, testSuite).pipe(
             map(dto => TestSuiteMapper.fromDto(dto))
@@ -37,5 +43,11 @@ export class TestSuitesService {
 
     deleteTestSuite(id: string): Observable<void> {
         return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    }
+
+    toggleStatus(id: string): Observable<TestSuite> {
+        return this.http.patch<TestSuiteDto>(`${this.apiUrl}/${id}/toggle-status`, {}).pipe(
+            map(dto => TestSuiteMapper.fromDto(dto))
+        );
     }
 }

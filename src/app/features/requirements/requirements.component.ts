@@ -1,5 +1,6 @@
-import { Component, OnInit, signal, inject, forwardRef, DestroyRef } from '@angular/core';
+import { Component, OnInit, signal, inject, forwardRef, DestroyRef, effect } from '@angular/core';
 import { NgClass, DatePipe, TitleCasePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { RequirementsService } from '../../core/services/requirements.service';
 import { ProjectsService } from '../../core/services/projects.service';
@@ -8,6 +9,7 @@ import { Project } from '../../core/models/project.model';
 import { RequirementModalComponent } from './requirement-modal/requirement-modal.component';
 import Swal from 'sweetalert2';
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { ProjectContextService } from '../../core/services/project-context.service';
 
 @Component({
   selector: 'app-requirements',
@@ -16,6 +18,7 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
     NgClass,
     DatePipe,
     TitleCasePipe,
+    FormsModule,
     forwardRef(() => RequirementModalComponent)
   ],
   templateUrl: './requirements.component.html',
@@ -33,37 +36,55 @@ export class RequirementsComponent implements OnInit {
 
   private readonly requirementsService = inject(RequirementsService);
   private readonly projectsService = inject(ProjectsService);
-  private readonly route = inject(ActivatedRoute);
+  private readonly projectContext = inject(ProjectContextService);
   private readonly router = inject(Router);
 
-  ngOnInit(): void {
-    // Siempre cargar la lista de proyectos (para el selector del modal)
-    this.loadProjects();
-
-    this.route.queryParams.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
-      const pid = params['projectId'];
+  constructor() {
+    effect(() => {
+      const pid = this.projectContext.activeProjectId();
       if (pid) {
-        this.projectId.set(pid);
-        this.loadProject(pid);
-        this.loadRequirements(pid);
-      } else {
-        // Sin proyecto específico: cargar requisitos de todos los proyectos
-        this.loadAllRequirements();
+        this.onProjectSelect(pid);
       }
     });
   }
 
+  ngOnInit(): void {
+    this.loadProjects();
+  }
+
   loadProjects() {
     this.projectsService.getProjects().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (data) => this.projects.set(data),
-      error: (err) => console.warn('No se pudieron cargar los proyectos', err)
+      next: (data) => {
+        this.projects.set(data);
+        const pid = this.projectContext.activeProjectId();
+        if (!pid && data.length > 0) {
+          // Si no hay proyecto activo en contexto, autoselecciona el primero
+          this.onProjectSelect(data[0].id);
+        } else if (!pid && data.length === 0) {
+          this.loading.set(false);
+        }
+      },
+      error: (err) => {
+        console.warn('No se pudieron cargar los proyectos', err);
+        this.loading.set(false);
+      }
     });
   }
 
-  loadProject(id: string) {
-    this.projectsService.getProjectById(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (proj) => this.project.set(proj),
-      error: (err) => console.error('Error loading project', err)
+  onProjectSelect(projectId: string) {
+    if (!projectId) return;
+    this.projectId.set(projectId);
+    this.projectContext.setActiveProject(projectId);
+    
+    this.projectsService.getProjectById(projectId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (proj) => {
+        this.project.set(proj);
+        this.loadRequirements(projectId);
+      },
+      error: (err) => {
+        console.error('Error loading project', err);
+        this.loading.set(false);
+      }
     });
   }
 
@@ -81,42 +102,11 @@ export class RequirementsComponent implements OnInit {
     });
   }
 
-  loadAllRequirements() {
-    this.loading.set(true);
-    // Cargar requisitos de todos los proyectos disponibles
-    this.projectsService.getProjects().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (projects) => {
-        if (projects.length === 0) {
-          this.loading.set(false);
-          return;
-        }
-        let allReqs: Requirement[] = [];
-        let loaded = 0;
-        for (const proj of projects) {
-          this.requirementsService.getRequirementsByProject(proj.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-            next: (reqs) => {
-              allReqs = [...allReqs, ...reqs];
-              loaded++;
-              if (loaded === projects.length) {
-                this.requirements.set(allReqs);
-                this.loading.set(false);
-              }
-            },
-            error: () => {
-              loaded++;
-              if (loaded === projects.length) {
-                this.requirements.set(allReqs);
-                this.loading.set(false);
-              }
-            }
-          });
-        }
-      },
-      error: () => this.loading.set(false)
-    });
-  }
-
   openModal(requirement: Requirement | null = null) {
+    if (!this.projectId()) {
+      Swal.fire('Advertencia', 'Debe seleccionar un proyecto primero', 'warning');
+      return;
+    }
     this.selectedRequirement.set(requirement);
     this.showModal.set(true);
   }
@@ -130,8 +120,6 @@ export class RequirementsComponent implements OnInit {
     const pid = this.projectId();
     if (pid) {
       this.loadRequirements(pid);
-    } else {
-      this.loadAllRequirements();
     }
     this.closeModal();
   }
@@ -154,8 +142,6 @@ export class RequirementsComponent implements OnInit {
             const pid = this.projectId();
             if (pid) {
               this.loadRequirements(pid);
-            } else {
-              this.loadAllRequirements();
             }
           },
           error: (err) => {

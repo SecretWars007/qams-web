@@ -8,6 +8,7 @@ import { UsersService } from '../../core/services/users.service';
 import { RequirementsService } from '../../core/services/requirements.service';
 import { SystemsUnderTestService } from '../../core/services/systems-under-test.service';
 import { AuthService } from '../../core/services/auth.service';
+import { ProjectContextService } from '../../core/services/project-context.service';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { User } from '../../core/models/user.model';
@@ -91,6 +92,7 @@ export class ProjectsComponent implements OnInit {
   private readonly requirementsService = inject(RequirementsService);
   private readonly sutService = inject(SystemsUnderTestService);
   private readonly authService = inject(AuthService);
+  private readonly projectContext = inject(ProjectContextService);
 
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
@@ -190,10 +192,10 @@ export class ProjectsComponent implements OnInit {
     this.projectForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3)]],
       description: [''],
-      systemUnderTestId: [null],
+      systemUnderTestId: [null, Validators.required],
       startDate: [new Date().toISOString().split('T')[0], Validators.required],
       endDate: ['', Validators.required],
-      testerIds: [[], Validators.required]
+      testerIds: [[]]
     });
 
     this.requirementForm = this.fb.group({
@@ -224,17 +226,20 @@ export class ProjectsComponent implements OnInit {
   }
 
   openProject(projectId: string) {
-    this.router.navigate(['/test-scenarios'], { queryParams: { projectId } });
+    this.projectContext.setActiveProject(projectId);
+    this.router.navigate(['/test-scenarios']);
   }
 
   viewKanban(projectId: string, event: Event) {
     event.stopPropagation();
-    this.router.navigate(['/kanban'], { queryParams: { projectId } });
+    this.projectContext.setActiveProject(projectId);
+    this.router.navigate(['/kanban']);
   }
 
   viewRequirements(projectId: string, event: Event) {
     event.stopPropagation();
-    this.router.navigate(['/requirements'], { queryParams: { projectId } });
+    this.projectContext.setActiveProject(projectId);
+    this.router.navigate(['/requirements']);
   }
 
   loadProjects() {
@@ -436,7 +441,8 @@ export class ProjectsComponent implements OnInit {
       },
       error: (err) => {
         this.isSubmitting.set(false);
-        this.showErrorMessage('No se pudo crear el proyecto.');
+        const msg = err?.error?.message || err?.error?.detail || 'No se pudo crear el proyecto.';
+        this.showErrorMessage(msg);
       }
     });
   }

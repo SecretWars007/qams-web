@@ -39,7 +39,7 @@ export interface CreateProjectDto {
   endDate: string | null;
   priority: number;
   projectStatusId: number;
-  systemUnderTestId?: string | null;
+  systemUnderTestId: string;
   testerIds: string[];
 }
 

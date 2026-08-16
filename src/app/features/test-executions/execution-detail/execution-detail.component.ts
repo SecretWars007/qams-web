@@ -4,13 +4,14 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { TestExecutionsService } from '../../../core/services/test-executions.service';
 import { DefectsService } from '../../../core/services/defects.service';
 import { TestExecution } from '../../../core/models/test-execution.model';
+import { DefectModalComponent } from '../../defects/defect-modal/defect-modal.component';
 import Swal from 'sweetalert2';
-import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-execution-detail',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, DefectModalComponent],
   templateUrl: './execution-detail.component.html',
   styleUrls: ['./execution-detail.component.scss']
 })
@@ -18,6 +19,11 @@ export class ExecutionDetailComponent implements OnInit {
   private destroyRef = inject(DestroyRef);
   execution = signal<TestExecution | null>(null);
   loading = signal<boolean>(true);
+
+  // Defect Modal State
+  showDefectModal = signal<boolean>(false);
+  defectModalData = signal<any>(null);
+  selectedStepId = signal<string | null>(null);
 
   private route = inject(ActivatedRoute);
   private router = inject(Router);
@@ -54,75 +60,66 @@ export class ExecutionDetailComponent implements OnInit {
     this.location.back();
   }
 
-  async reportDefectForStep(step: any): Promise<void> {
+  reportDefectForStep(step: any): void {
     const exec = this.execution();
     if (!exec) return;
 
-    const { value: formValues } = await Swal.fire({
-      title: 'Reportar Defecto de Paso Fallido',
-      html: `
-        <div class="text-left space-y-3">
-          <div>
-            <label class="text-xs font-bold text-slate-600 block mb-1">Título del Defecto</label>
-            <input id="swal-defect-title" class="w-full border border-slate-200 rounded-lg p-2 text-sm" value="Fallo en paso: ${step.action ? step.action.replace(/"/g, '&quot;') : 'Sin acción'}" />
-          </div>
-          <div>
-            <label class="text-xs font-bold text-slate-600 block mb-1">Descripción / Resultado Obtenido</label>
-            <textarea id="swal-defect-desc" class="w-full border border-slate-200 rounded-lg p-2 text-sm" rows="3">${step.actualResult || ''}</textarea>
-          </div>
-          <div>
-            <label class="text-xs font-bold text-slate-600 block mb-1">Prioridad del Defecto</label>
-            <select id="swal-defect-priority" class="w-full border border-slate-200 rounded-lg p-2 text-sm">
-              <option value="1">Alta / Crítica</option>
-              <option value="2" selected>Media / Normal</option>
-              <option value="3">Baja</option>
-            </select>
-          </div>
-        </div>
-      `,
-      focusConfirm: false,
-      showCancelButton: true,
-      confirmButtonText: 'Crear y Vincular Defecto',
-      cancelButtonText: 'Cancelar',
-      confirmButtonColor: '#150fbd',
-      preConfirm: () => {
-        return {
-          title: (document.getElementById('swal-defect-title') as HTMLInputElement).value,
-          description: (document.getElementById('swal-defect-desc') as HTMLTextAreaElement).value,
-          defectPriorityId: parseInt((document.getElementById('swal-defect-priority') as HTMLSelectElement).value, 10)
-        };
+    this.selectedStepId.set(step.id);
+    this.defectModalData.set({
+      title: `Fallo en paso ${step.stepOrder || ''}: ${step.action || ''}`.trim(),
+      description: `Defecto detectado durante la ejecución #${exec.cycleNumber || ''} del caso de prueba "${exec.testCase?.title || ''}".`,
+      stepsToReproduce: `1. Acción: ${step.action || '-'}\n2. Resultado Esperado: ${step.expectedResult || '-'}\n3. Resultado Obtenido: ${step.actualResult || '-'}`,
+      expectedResult: step.expectedResult || '',
+      actualResult: step.actualResult || '',
+      priorityId: 2,
+      severityId: 2,
+      statusId: 1,
+      testCaseId: exec.testCase?.id || null,
+      testExecutionId: exec.id,
+      testExecutionStepResultId: step.id
+    });
+    this.showDefectModal.set(true);
+  }
+
+  onSaveDefect(eventData: { defect: any; file: File | null }): void {
+    const exec = this.execution();
+    if (!exec || !exec.project?.id) return;
+
+    const projectId = exec.project.id;
+    const { defect, file } = eventData;
+    defect.projectId = projectId;
+    defect.testExecutionId = exec.id;
+    defect.testExecutionStepResultId = this.selectedStepId();
+
+    this.defectsService.create(projectId, defect).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (savedDefect) => {
+        if (file && savedDefect?.id) {
+          this.defectsService.uploadAttachment(projectId, savedDefect.id, file).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+            next: () => this.handleDefectSavedSuccess(savedDefect),
+            error: (err) => {
+              console.error('[ExecutionDetail] Error subiendo evidencia del defecto:', err);
+              this.handleDefectSavedSuccess(savedDefect);
+            }
+          });
+        } else {
+          this.handleDefectSavedSuccess(savedDefect);
+        }
+      },
+      error: (err) => {
+        console.error('[ExecutionDetail] Error al crear defecto:', err);
+        Swal.fire('Error', 'No se pudo registrar el defecto', 'error');
       }
     });
+  }
 
-    if (formValues && formValues.title) {
-      const projectId = exec.project?.id || '';
-      const testCaseId = exec.testCase?.id || '';
-
-      this.defectsService.create(projectId, {
-        projectId: projectId,
-        title: formValues.title,
-        description: formValues.description,
-        defectPriorityId: formValues.defectPriorityId,
-        priorityId: formValues.defectPriorityId,
-        testCaseId: testCaseId,
-        testExecutionId: exec.id,
-        testExecutionStepResultId: step.id,
-        stepsToReproduce: `Acción: ${step.action || ''}\nResultado Esperado: ${step.expectedResult || ''}\nResultado Obtenido: ${step.actualResult || ''}`
-      }).subscribe({
-        next: (defect) => {
-          Swal.fire({
-            icon: 'success',
-            title: 'Defecto Creado y Vinculado',
-            text: `Se ha registrado el defecto "${defect.title}" vinculado a esta ejecución.`,
-            confirmButtonColor: '#150fbd'
-          });
-        },
-        error: (err) => {
-          console.error('[ExecutionDetail] Error al crear defecto:', err);
-          Swal.fire('Error', 'No se pudo vincular el defecto', 'error');
-        }
-      });
-    }
+  private handleDefectSavedSuccess(defect: any): void {
+    this.showDefectModal.set(false);
+    Swal.fire({
+      icon: 'success',
+      title: 'Defecto Registrado',
+      text: `Se ha registrado el defecto "${defect.title}" exitosamente vinculado a este paso.`,
+      confirmButtonColor: '#150fbd'
+    });
   }
 
   getStatusBadgeClasses(statusCode: string): string {

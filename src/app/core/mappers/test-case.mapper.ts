@@ -32,7 +32,10 @@ export class TestCaseMapper {
       })) || [],
       dto.impactLevel ?? 3,
       dto.likelihoodLevel ?? 3,
-      dto.riskScore ?? ((dto.impactLevel ?? 3) * (dto.likelihoodLevel ?? 3))
+      dto.riskScore ?? ((dto.impactLevel ?? 3) * (dto.likelihoodLevel ?? 3)),
+      dto.requirementIds || [],
+      dto.postconditions || null,
+      dto.lastCycleNumber ?? null
     );
   }
 }

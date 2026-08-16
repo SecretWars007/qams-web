@@ -73,7 +73,7 @@ export class ReportsService {
     }
 
     generateFullCertificationReport(projectId: string): Observable<Blob> {
-        return this.http.get(`${this.apiUrl}/project/${projectId}/certification`, {
+        return this.http.get(`${this.apiUrl}/project/${projectId}/full-certification`, {
             responseType: 'blob'
         });
     }
@@ -85,7 +85,7 @@ export class ReportsService {
     }
 
     generateTestSummaryReport(planId: string): Observable<Blob> {
-        return this.http.get(`${this.apiUrl}/testplan/${planId}/summary`, {
+        return this.http.get(`${this.apiUrl}/test-plan/${planId}/summary`, {
             responseType: 'blob'
         });
     }

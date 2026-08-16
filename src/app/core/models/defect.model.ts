@@ -20,6 +20,11 @@ export interface Defect {
   testExecutionId?: string;
   testExecutionStepResultId?: string;
   stepsToReproduce?: string;
+  expectedResult?: string;
+  actualResult?: string;
+  environmentInfo?: string;
+  attachmentUrl?: string;
+  attachmentFileName?: string;
   createdAt: Date;
   updatedAt?: Date;
 }
@@ -31,11 +36,16 @@ export interface CreateDefect {
   severityId?: number;
   priorityId?: number;
   defectPriorityId?: number;
+  defectSeverityId?: number;
+  defectStatusId?: number;
   assignedToUserId?: string;
   testCaseId?: string;
   testExecutionId?: string;
   testExecutionStepResultId?: string;
   stepsToReproduce?: string;
+  expectedResult?: string;
+  actualResult?: string;
+  environmentInfo?: string;
 }
 
 export interface UpdateDefect {
@@ -44,6 +54,12 @@ export interface UpdateDefect {
   severityId?: number;
   statusId?: number;
   priorityId?: number;
+  defectPriorityId?: number;
+  defectSeverityId?: number;
+  defectStatusId?: number;
   assignedToUserId?: string;
   stepsToReproduce?: string;
+  expectedResult?: string;
+  actualResult?: string;
+  environmentInfo?: string;
 }

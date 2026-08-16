@@ -9,9 +9,12 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { TestCasesService } from '../../core/services/test-cases.service';
 import { ProjectsService } from '../../core/services/projects.service';
 import { TestSuitesService } from '../../core/services/test-suites.service';
+import { TestPlansService } from '../../core/services/test-plans.service';
+import { UsersService } from '../../core/services/users.service';
 import { Project } from '../../core/models/project.model';
 import { TestSuite } from '../../core/models/test-suite.model';
 import { TestCase } from '../../core/models/test-case.model';
+import { TestPlan } from '../../core/models/test-plan.model';
 import { SkeletonLoaderComponent } from '../shared/skeleton-loader/skeleton-loader.component';
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 
@@ -38,12 +41,16 @@ export class TestExecutionsComponent implements OnInit {
 
   // Filter signals
   selectedProjectId = signal<string>('');
+  selectedTestPlanId = signal<string>('');
   selectedScenarioId = signal<string>('');
   selectedTestCaseId = signal<string>('');
+  selectedStatusFilter = signal<string>('active'); // 'all' | 'active' | 'passed' | 'failed' | 'blocked'
 
   projects = signal<Project[]>([]);
+  testPlans = signal<TestPlan[]>([]);
   scenarios = signal<TestSuite[]>([]);
   testCases = signal<TestCase[]>([]);
+  users = signal<any[]>([]);
 
   selectedExecution = signal<TestExecution | null>(null);
   showModal = signal<boolean>(false);
@@ -63,13 +70,46 @@ export class TestExecutionsComponent implements OnInit {
   private readonly testCasesService = inject(TestCasesService);
   private readonly projectsService = inject(ProjectsService);
   private readonly scenariosService = inject(TestSuitesService);
+  private readonly testPlansService = inject(TestPlansService);
+  private readonly usersService = inject(UsersService);
   private readonly route = inject(ActivatedRoute);
   private readonly location = inject(Location);
+
+  /** Executions filtered client-side by status (excludes CERTIFIED/CLOSED by default) */
+  get filteredExecutions(): TestExecution[] {
+    const all = this.executions();
+    const filter = this.selectedStatusFilter();
+    if (filter === 'all') return all;
+    if (filter === 'active') {
+      // Exclude "certified" = PASSED and also fully-certified (status codes CERTIFIED, CLOSED, APPROVED)
+      return all.filter(e => {
+        const code = e.status?.code?.toUpperCase() ?? '';
+        return code !== 'CERTIFIED' && code !== 'CLOSED' && code !== 'APPROVED';
+      });
+    }
+    return all.filter(e => e.status?.code?.toUpperCase() === filter.toUpperCase());
+  }
+
+  /** Count total evidences across all step results */
+  getEvidenceCount(execution: TestExecution): number {
+    if (!execution) return 0;
+    const stepEvs = (execution.stepResults ?? []).reduce((sum, s) => sum + ((s as any).evidences?.length ?? 0), 0);
+    const globalEvs = (execution as any).evidences?.length ?? 0;
+    return stepEvs + globalEvs;
+  }
+
+  /** Count defects linked through step results */
+  getDefectCount(execution: TestExecution): number {
+    if (!execution) return 0;
+    return (execution.stepResults ?? []).reduce((sum, s) => sum + ((s as any).defects?.length ?? 0), 0);
+  }
+
 
   ngOnInit(): void {
     this.initForm();
     this.initUploadForm();
     this.loadProjects();
+    this.loadUsers();
     this.route.queryParams.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
       const testCaseId = params['testCaseId'];
       const editExecutionId = params['editExecutionId'];
@@ -80,6 +120,7 @@ export class TestExecutionsComponent implements OnInit {
         this.testCasesService.getTestCaseById(testCaseId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(tc => {
           if (tc) {
             this.selectedProjectId.set(tc.projectId);
+            this.loadTestPlans(tc.projectId);
             this.loadScenarios(tc.projectId);
             this.selectedScenarioId.set(tc.suite.id);
             this.loadTestCases(tc.suite.id);
@@ -103,10 +144,12 @@ export class TestExecutionsComponent implements OnInit {
   private initForm() {
     this.executionForm = this.fb.group({
       testCaseId: ['', Validators.required],
+      testerId: [null],
       notes: [''],
       statusId: [1, Validators.required], // 1: Passed
       statusCode: ['PASSED'],
       actualTimeHours: [null],
+      testPlanId: [null],
       stepResults: this.fb.array([])
     });
 
@@ -125,10 +168,12 @@ export class TestExecutionsComponent implements OnInit {
 
     // Load steps and title when testCaseId changes
     this.executionForm.get('testCaseId')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
-      this.stepResults.clear();
-      if (val) {
-        this.loadTestCaseSteps(val);
-        this.loadTestCaseTitle(val);
+      if (!this.isEditing()) {
+        this.stepResults.clear();
+        if (val) {
+          this.loadTestCaseSteps(val);
+          this.loadTestCaseTitle(val);
+        }
       }
     });
   }
@@ -146,10 +191,10 @@ export class TestExecutionsComponent implements OnInit {
 
   addStepResult(step?: any) {
     this.stepResults.push(this.fb.group({
-      testStepId: [step?.id || step?.testStepId || ''],
+      testStepId: [step?.stepId || step?.testStepId || step?.id || ''],
       stepOrder: [step?.stepOrder || 0],
       action: [step?.action || ''],
-      statusId: [step?.statusId || 1, Validators.required],
+      statusId: [step?.status?.id || step?.statusId || 1, Validators.required],
       actualResult: [step?.actualResult || '', Validators.required],
       notes: [step?.notes || '']
     }));
@@ -158,12 +203,21 @@ export class TestExecutionsComponent implements OnInit {
   openModal() {
     this.isEditing.set(false);
     this.editingExecutionId.set(null);
+    this.stepResults.clear();
+    const defaultTcId = this.selectedTestCaseId() || '';
     this.executionForm.reset({
-      testCaseId: this.selectedTestCaseId() || '',
+      testCaseId: defaultTcId,
+      testerId: null,
       statusId: 1,
       statusCode: 'PASSED',
-      notes: ''
-    });
+      testPlanId: this.selectedTestPlanId() || null,
+      notes: '',
+      actualTimeHours: null
+    }, { emitEvent: false });
+    if (defaultTcId) {
+      this.loadTestCaseSteps(defaultTcId);
+      this.loadTestCaseTitle(defaultTcId);
+    }
     this.showModal.set(true);
   }
 
@@ -171,20 +225,23 @@ export class TestExecutionsComponent implements OnInit {
     if (event) event.stopPropagation();
 
     this.loading.set(true);
+    this.isEditing.set(true);
+    this.editingExecutionId.set(execution.id);
+
     // Fetch full execution details to ensure we have all steps
     this.executionsService.getExecutionById(execution.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (fullExecution) => {
-        this.isEditing.set(true);
-        this.editingExecutionId.set(fullExecution.id);
         this.loadTestCaseTitle(fullExecution.testCase.id);
 
         this.executionForm.patchValue({
           testCaseId: fullExecution.testCase.id,
+          testerId: fullExecution.tester?.id || null,
           notes: fullExecution.notes,
           actualTimeHours: fullExecution.actualTimeHours,
           statusId: fullExecution.status.id,
-          statusCode: fullExecution.status.code
-        });
+          statusCode: fullExecution.status.code,
+          testPlanId: fullExecution.testPlan?.id || null
+        }, { emitEvent: false });
 
         this.stepResults.clear();
         if (fullExecution.stepResults && fullExecution.stepResults.length > 0) {
@@ -199,8 +256,15 @@ export class TestExecutionsComponent implements OnInit {
   }
 
   loadTestCaseSteps(testCaseId: string) {
+    if (!testCaseId) {
+      this.stepResults.clear();
+      return;
+    }
     this.testCasesService.getTestSteps(testCaseId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(steps => {
-      steps.forEach(step => this.addStepResult(step));
+      this.stepResults.clear();
+      if (steps && steps.length > 0) {
+        steps.forEach(step => this.addStepResult(step));
+      }
     });
   }
 
@@ -260,6 +324,14 @@ export class TestExecutionsComponent implements OnInit {
     this.projectsService.getProjects().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => this.projects.set(data));
   }
 
+  loadTestPlans(projectId: string) {
+    if (!projectId) {
+      this.testPlans.set([]);
+      return;
+    }
+    this.testPlansService.getByProject(projectId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => this.testPlans.set(data));
+  }
+
   loadScenarios(projectId: string) {
     if (!projectId) {
       this.scenarios.set([]);
@@ -283,9 +355,19 @@ export class TestExecutionsComponent implements OnInit {
   onProjectChange(event: Event) {
     const projectId = (event.target as HTMLSelectElement).value;
     this.selectedProjectId.set(projectId);
+    this.selectedTestPlanId.set('');
     this.selectedScenarioId.set('');
     this.selectedTestCaseId.set('');
+    this.loadTestPlans(projectId);
     this.loadScenarios(projectId);
+    this.loadExecutions();
+  }
+
+  onTestPlanChange(event: Event) {
+    const testPlanId = (event.target as HTMLSelectElement).value;
+    this.selectedTestPlanId.set(testPlanId);
+    this.selectedScenarioId.set('');
+    this.selectedTestCaseId.set('');
     this.loadExecutions();
   }
 
@@ -303,12 +385,19 @@ export class TestExecutionsComponent implements OnInit {
     this.loadExecutions();
   }
 
+  onStatusFilterChange(filter: string) {
+    this.selectedStatusFilter.set(filter);
+    // No API call needed — filtering is done client-side via filteredExecutions getter
+  }
+
+
   loadExecutions() {
     this.loading.set(true);
     this.executionsService.getExecutions(
             this.selectedTestCaseId() || undefined,
             this.selectedProjectId() || undefined,
-            this.selectedScenarioId() || undefined
+            this.selectedScenarioId() || undefined,
+            this.selectedTestPlanId() || undefined
           ).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (data: TestExecution[]) => {
         this.executions.set(data);
@@ -326,7 +415,14 @@ export class TestExecutionsComponent implements OnInit {
     });
   }
 
-  // Details & Evidence Methods
+  loadUsers() {
+    this.usersService.getUsers().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (users) => this.users.set(users),
+      error: (err) => console.error('Error loading users', err)
+    });
+  }
+
+  // --- Filter methods ---& Evidence Methods
   openDetailsModal(execution: TestExecution) {
     this.loading.set(true);
     this.executionsService.getExecutionById(execution.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({

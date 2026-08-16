@@ -83,4 +83,14 @@ export class TestCasesService {
         const params = new HttpParams().set('projectId', projectId);
         return this.http.get(`${this.apiUrl}/export/csv`, { params, responseType: 'blob' });
     }
+
+    /**
+     * Realiza la eliminación lógica de un caso de prueba.
+     * @param id - ID del caso de prueba a eliminar
+     */
+    deleteTestCase(id: string): Observable<void> {
+        console.log(this.LOG_TAG, 'Eliminando caso de prueba:', id);
+        return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    }
 }
+

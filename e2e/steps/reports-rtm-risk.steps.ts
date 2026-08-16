@@ -21,7 +21,8 @@ Before(async ({ page }) => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 Given('el usuario navega directamente a la ruta {string}', async ({ page }, route: string) => {
-  await page.goto(`http://localhost:4200/${route}`, { waitUntil: 'networkidle' });
+  const baseUrl = process.env['BASE_URL'] ?? 'http://localhost:4200';
+  await page.goto(`${baseUrl}/${route}`, { waitUntil: 'networkidle' });
   await page.waitForLoadState('networkidle');
   reportsPage = new ReportsPage(page);
 });

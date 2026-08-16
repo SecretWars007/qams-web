@@ -24,7 +24,10 @@ export class TestCase {
     public steps: TestCaseStep[] = [],
     public impactLevel: number = 3,
     public likelihoodLevel: number = 3,
-    public riskScore: number = 9
+    public riskScore: number = 9,
+    public requirementIds: string[] = [],
+    public postconditions: string | null = null,
+    public lastCycleNumber: number | null = null
   ) {}
 }
 

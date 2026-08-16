@@ -1,17 +1,17 @@
 <!-- src/app/features/kanban/kanban.component.html -->
-<div class="flex flex-col h-full bg-[#0d0d14] rounded-3xl border border-white/5 overflow-hidden shadow-2xl">
+<div class="flex flex-col h-full bg-white/60 rounded-3xl border border-white/20 overflow-hidden shadow-sm backdrop-blur-md">
 
   <!-- ══════════════════════ HEADER ══════════════════════ -->
-  <div class="px-6 py-4 bg-gradient-to-r from-[#0f0f1a] to-[#0d0d14] border-b border-white/5">
+  <div class="px-6 py-4 bg-white/80 border-b border-gray-100 backdrop-blur-md">
     <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
 
       <!-- Título e ícono -->
       <div class="flex items-center gap-3">
-        <div class="p-2.5 bg-indigo-500/10 rounded-xl border border-indigo-500/20 text-indigo-400">
+        <div class="p-2.5 bg-indigo-50 rounded-xl border border-indigo-100 text-indigo-600">
           <i class="ri-kanban-view text-xl"></i>
         </div>
         <div>
-          <h2 class="text-base font-bold text-white leading-tight tracking-tight">Tablero de Certificación</h2>
+          <h2 class="text-base font-bold text-gray-900 leading-tight tracking-tight">Tablero de Certificación</h2>
           <p class="text-[11px] text-gray-500 font-medium tracking-widest uppercase">Kanban · Seguimiento ISTQB</p>
         </div>
       </div>
@@ -23,8 +23,8 @@
           <label for="kanban-project-select" class="sr-only">Seleccionar Proyecto</label>
           <select
             id="kanban-project-select"
-            class="pl-9 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl text-sm text-gray-200
-                   focus:outline-none focus:border-indigo-500/50 focus:bg-white/8 transition-all cursor-pointer"
+            class="pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-xl text-sm text-gray-700
+                   focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all cursor-pointer"
             (change)="onProjectChange($event)">
             <option value="">— Seleccionar Proyecto —</option>
             <option *ngFor="let p of projects()" [value]="p.id">{{ p.name }}</option>
@@ -39,8 +39,8 @@
             id="kanban-search"
             type="text"
             placeholder="Buscar tarea…"
-            class="pl-9 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl text-sm text-gray-200
-                   placeholder:text-gray-600 focus:outline-none focus:border-indigo-500/50 transition-all w-44"
+            class="pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-xl text-sm text-gray-700
+                   placeholder:text-gray-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all w-44"
             (input)="onSearchChange($event)" />
         </div>
       </div>
@@ -48,24 +48,24 @@
 
     <!-- ── Stats rápidas del tablero ── -->
     <div *ngIf="board() && !loading()" class="mt-4 flex flex-wrap gap-2">
-      <div class="flex items-center gap-1.5 px-3 py-1.5 bg-white/4 rounded-lg border border-white/6 text-xs font-medium text-gray-400">
-        <span class="w-2 h-2 rounded-full bg-gray-500"></span>
-        <span>Total: <strong class="text-white">{{ boardStats().total }}</strong></span>
+      <div class="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-200 text-xs font-medium text-gray-600">
+        <span class="w-2 h-2 rounded-full bg-gray-400"></span>
+        <span>Total: <strong class="text-gray-800">{{ boardStats().total }}</strong></span>
       </div>
-      <div class="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/8 rounded-lg border border-emerald-500/15 text-xs font-medium text-emerald-400">
+      <div class="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 rounded-lg border border-emerald-200 text-xs font-medium text-emerald-700">
         <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
         <span>Aprobados: <strong>{{ boardStats().passed }}</strong></span>
       </div>
-      <div class="flex items-center gap-1.5 px-3 py-1.5 bg-red-500/8 rounded-lg border border-red-500/15 text-xs font-medium text-red-400">
-        <span class="w-2 h-2 rounded-full bg-red-500"></span>
+      <div class="flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 rounded-lg border border-rose-200 text-xs font-medium text-rose-700">
+        <span class="w-2 h-2 rounded-full bg-rose-500"></span>
         <span>Fallidos: <strong>{{ boardStats().failed }}</strong></span>
       </div>
-      <div class="flex items-center gap-1.5 px-3 py-1.5 bg-blue-500/8 rounded-lg border border-blue-500/15 text-xs font-medium text-blue-400">
+      <div class="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 rounded-lg border border-blue-200 text-xs font-medium text-blue-700">
         <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
         <span>En progreso: <strong>{{ boardStats().inProgress }}</strong></span>
       </div>
       <div *ngIf="boardStats().withDefects > 0"
-           class="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/8 rounded-lg border border-amber-500/15 text-xs font-medium text-amber-400">
+           class="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 rounded-lg border border-amber-200 text-xs font-medium text-amber-700">
         <i class="ri-bug-line"></i>
         <span>Con defectos: <strong>{{ boardStats().withDefects }}</strong></span>
       </div>
@@ -73,7 +73,7 @@
 
     <!-- ── Filtros rápidos ── -->
     <div *ngIf="board() && !loading()" class="mt-3 flex flex-wrap gap-1.5">
-      <button *ngFor="let f of quickFilters" [id]="'filter-' + f.key" (click)="setFilter(f.key)" [ngClass]="{'border-indigo-500 text-indigo-300 bg-indigo-500/10': activeFilter() === f.key}" class="flex items-center gap-1.5 px-3 py-1 rounded-lg border border-white/10 bg-white/3 text-[11px] font-semibold text-gray-500 hover:text-gray-300 hover:border-white/20 hover:bg-white/5 transition-all tracking-wide">
+      <button *ngFor="let f of quickFilters" [id]="'filter-' + f.key" (click)="setFilter(f.key)" [ngClass]="{'border-indigo-500 text-indigo-600 bg-indigo-50': activeFilter() === f.key}" class="flex items-center gap-1.5 px-3 py-1 rounded-lg border border-gray-200 bg-gray-50 text-[11px] font-semibold text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-100 transition-all tracking-wide">
         <i [class]="f.icon"></i> {{ f.label }}
       </button>
     </div>
@@ -93,20 +93,20 @@
 
   <!-- Loading -->
   <div *ngIf="loading()" class="flex-1 flex flex-col items-center justify-center gap-4 text-gray-500">
-    <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
-      <i class="ri-loader-4-line text-2xl text-indigo-400 animate-spin"></i>
+    <div class="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center">
+      <i class="ri-loader-4-line text-2xl text-indigo-500 animate-spin"></i>
     </div>
-    <p class="text-sm font-medium text-gray-400">Cargando tablero…</p>
+    <p class="text-sm font-medium text-gray-500">Cargando tablero…</p>
   </div>
 
   <!-- Sin proyecto -->
   <div *ngIf="!loading() && !board()" class="flex-1 flex flex-col items-center justify-center gap-4 text-center px-8">
-    <div class="p-4 bg-indigo-500/8 rounded-2xl border border-indigo-500/15">
-      <i class="ri-kanban-view text-4xl text-indigo-400/50"></i>
+    <div class="p-4 bg-indigo-50 rounded-2xl border border-indigo-100">
+      <i class="ri-kanban-view text-4xl text-indigo-400"></i>
     </div>
     <div>
-      <h3 class="text-base font-bold text-gray-300 mb-1">Selecciona un Proyecto</h3>
-      <p class="text-sm text-gray-600 max-w-xs">Elige un proyecto del selector para cargar su tablero de certificación Kanban.</p>
+      <h3 class="text-base font-bold text-gray-700 mb-1">Selecciona un Proyecto</h3>
+      <p class="text-sm text-gray-500 max-w-xs">Elige un proyecto del selector para cargar su tablero de certificación Kanban.</p>
     </div>
   </div>
 
@@ -118,7 +118,7 @@
 
   <!-- ══════════════════════ TABLERO ══════════════════════ -->
   <div *ngIf="!loading() && board()"
-       class="flex-1 overflow-x-auto p-5 bg-[#08080f]" cdkDropListGroup>
+       class="flex-1 overflow-x-auto p-5 bg-gray-50/80" cdkDropListGroup>
     <div class="flex gap-5 h-full" style="min-width: max-content;">
 
       <!-- ── Columna ── -->
@@ -126,10 +126,10 @@
            [class]="'flex flex-col w-80 rounded-2xl border overflow-hidden transition-all ' + getColumnAccentClass(column.name)">
 
         <!-- Encabezado de columna -->
-        <div class="px-4 py-3.5 flex items-center justify-between border-b border-white/5 bg-white/[0.02]">
+        <div class="px-4 py-3.5 flex items-center justify-between border-b border-gray-100 bg-white/80">
           <div class="flex items-center gap-2.5">
             <i [class]="getColumnIcon(column.name) + ' text-base col-icon'"></i>
-            <span class="text-sm font-bold text-gray-200 tracking-tight">{{ column.name }}</span>
+            <span class="text-sm font-bold text-gray-700 tracking-tight">{{ column.name }}</span>
           </div>
           <span class="px-2 py-0.5 rounded-full text-[10px] font-black col-badge">
             {{ column.tasks.length }}
@@ -147,9 +147,9 @@
           <!-- ── Tarjeta de Tarea ── -->
           <div *ngFor="let task of column.tasks"
                cdkDrag
-               class="group relative bg-[#12121e] rounded-xl border border-white/6 overflow-hidden
-                      hover:border-indigo-500/40 transition-all duration-200 cursor-grab active:cursor-grabbing
-                      hover:shadow-lg hover:shadow-indigo-950/30 hover:-translate-y-0.5">
+               class="group relative bg-white rounded-xl border border-gray-100 overflow-hidden
+                      hover:border-indigo-300 transition-all duration-200 cursor-grab active:cursor-grabbing
+                      hover:shadow-md hover:-translate-y-0.5">
 
             <!-- Borde de estado de ejecución -->
             <div class="absolute top-0 left-0 w-1 h-full"
@@ -167,10 +167,10 @@
                 <div class="flex items-center gap-1.5 flex-wrap">
                   <!-- Badge prioridad -->
                   <span [ngClass]="{
-                    'bg-red-500/10 text-red-400 border-red-500/20':    task.priorityCode === 'P0' || task.priorityCode === 'P1',
-                    'bg-amber-500/10 text-amber-400 border-amber-500/20': task.priorityCode === 'P2',
-                    'bg-blue-500/10 text-blue-400 border-blue-500/20':  task.priorityCode === 'P3',
-                    'bg-gray-500/10 text-gray-400 border-gray-500/20':  task.priorityCode === 'P4'
+                    'bg-rose-50 text-rose-700 border-rose-200':    task.priorityCode === 'P0' || task.priorityCode === 'P1',
+                    'bg-amber-50 text-amber-700 border-amber-200': task.priorityCode === 'P2',
+                    'bg-blue-50 text-blue-700 border-blue-200':  task.priorityCode === 'P3',
+                    'bg-gray-50 text-gray-600 border-gray-200':  task.priorityCode === 'P4'
                   }" class="text-[9px] font-black px-2 py-0.5 rounded-md border tracking-widest uppercase">
                     {{ task.priorityCode }} · {{ task.priorityName }}
                   </span>
@@ -185,14 +185,14 @@
               </div>
 
               <!-- Título -->
-              <h4 class="text-sm font-bold text-gray-200 leading-snug line-clamp-2
-                         group-hover:text-indigo-200 transition-colors mb-3">
+              <h4 class="text-sm font-bold text-gray-800 leading-snug line-clamp-2
+                         group-hover:text-indigo-700 transition-colors mb-3">
                 {{ task.title }}
               </h4>
 
               <!-- Subtítulo (caso de prueba vinculado) -->
-              <p *ngIf="task.testCaseTitle" class="text-[11px] text-gray-600 mb-3 flex items-center gap-1.5 line-clamp-1">
-                <i class="ri-test-tube-line text-gray-700 shrink-0"></i>
+              <p *ngIf="task.testCaseTitle" class="text-[11px] text-gray-500 mb-3 flex items-center gap-1.5 line-clamp-1">
+                <i class="ri-test-tube-line text-gray-400 shrink-0"></i>
                 {{ task.testCaseTitle }}
               </p>
 
@@ -208,20 +208,20 @@
                     'text-gray-500':    task.stepProgressPercent === 0
                   }" class="text-[10px] font-black">{{ task.stepProgressPercent }}%</span>
                 </div>
-                <div class="h-1.5 bg-white/5 rounded-full overflow-hidden">
+                <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden">
                   <div class="h-full rounded-full transition-all duration-500"
                        [style.width.%]="task.stepProgressPercent"
                        [ngClass]="{
                          'bg-emerald-500': task.stepProgressPercent === 100,
                          'bg-blue-500':    task.stepProgressPercent > 0 && task.stepProgressPercent < 100,
-                         'bg-gray-700':    task.stepProgressPercent === 0
+                         'bg-gray-300':    task.stepProgressPercent === 0
                        }">
                   </div>
                 </div>
               </div>
 
               <!-- Footer: assignee + SUT + defectos + fecha -->
-              <div class="flex items-center justify-between pt-3 border-t border-white/5">
+              <div class="flex items-center justify-between pt-3 border-t border-gray-100">
                 <!-- Izquierda: avatar + SUT -->
                 <div class="flex items-center gap-2 overflow-hidden">
                   <div *ngIf="task.assigneeName"
@@ -233,8 +233,8 @@
                     {{ task.assigneeName || 'Sin asignar' }}
                   </span>
                   <span *ngIf="task.sutName"
-                        class="hidden sm:flex items-center gap-1 text-[9px] text-gray-600 bg-white/4
-                               px-1.5 py-0.5 rounded-md border border-white/6 truncate max-w-[80px]">
+                        class="hidden sm:flex items-center gap-1 text-[9px] text-gray-500 bg-gray-50
+                               px-1.5 py-0.5 rounded-md border border-gray-200 truncate max-w-[80px]">
                     <i class="ri-computer-line"></i>
                     {{ task.sutName }}
                   </span>
@@ -263,10 +263,10 @@
               <div *ngIf="task.lastExecutionStatusCode"
                    class="mt-2.5 flex items-center gap-1.5 text-[10px] font-semibold"
                    [ngClass]="{
-                     'text-emerald-400': task.lastExecutionStatusCode === 'PASSED',
-                     'text-red-400':     task.lastExecutionStatusCode === 'FAILED',
-                     'text-blue-400':    task.lastExecutionStatusCode === 'IN_PROGRESS',
-                     'text-amber-400':   task.lastExecutionStatusCode === 'BLOCKED',
+                     'text-emerald-600': task.lastExecutionStatusCode === 'PASSED',
+                     'text-rose-600':    task.lastExecutionStatusCode === 'FAILED',
+                     'text-blue-600':    task.lastExecutionStatusCode === 'IN_PROGRESS',
+                     'text-amber-600':   task.lastExecutionStatusCode === 'BLOCKED',
                      'text-gray-500':    task.lastExecutionStatusCode === 'PENDING'
                    }">
                 <span class="w-1.5 h-1.5 rounded-full"
@@ -285,9 +285,9 @@
           </div>
 
           <!-- Añadir tarea (placeholder) -->
-          <button class="w-full py-2.5 px-4 bg-transparent border border-white/5 border-dashed rounded-xl
-                         text-[11px] font-bold text-gray-600 hover:text-gray-400 hover:border-white/15
-                         hover:bg-white/[0.02] transition-all flex items-center justify-center gap-2">
+          <button class="w-full py-2.5 px-4 bg-transparent border border-gray-200 border-dashed rounded-xl
+                         text-[11px] font-bold text-gray-400 hover:text-gray-600 hover:border-gray-300
+                         hover:bg-gray-50 transition-all flex items-center justify-center gap-2">
             <i class="ri-add-line text-sm"></i>
             <span>Añadir tarea</span>
           </button>
