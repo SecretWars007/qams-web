@@ -15,16 +15,24 @@ import { User } from '../../core/models/user.model';
 import { Project } from '../../core/models/project.model';
 import { SystemUnderTest } from '../../core/models/system-under-test.model';
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { EmptyStateComponent } from '../shared/empty-state/empty-state.component';
+import { AvatarGroupComponent } from '../shared/avatar-group/avatar-group.component';
 
 @Component({
   selector: 'app-projects',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, EmptyStateComponent, AvatarGroupComponent],
   templateUrl: './projects.component.html',
   styleUrls: ['./projects.component.scss']
 })
 export class ProjectsComponent implements OnInit {
-  private destroyRef = inject(DestroyRef);
+  private readonly destroyRef = inject(DestroyRef);
+
+  /** Converts a list of tester name strings to AvatarItem objects for qams-avatar-group */
+  getProjectAvatars(names: string[]): { name: string }[] {
+    return (names || []).map(name => ({ name }));
+  }
+
   projects = signal<Project[]>([]);
   users = signal<User[]>([]);
   suts = signal<SystemUnderTest[]>([]);

@@ -17,10 +17,10 @@
 
       <!-- Search Input -->
       <div class="relative flex-1 min-w-[240px]">
-        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">Buscar escenario</label>
+        <label for="search-input" class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">Buscar escenario</label>
         <div class="relative flex items-center">
           <i class="fas fa-search absolute left-3 text-slate-400 text-xs"></i>
-          <input type="text" [ngModel]="searchQuery()" (ngModelChange)="onSearchChange($event)"
+          <input id="search-input" type="text" [ngModel]="searchQuery()" (ngModelChange)="onSearchChange($event)"
             placeholder="Buscar por nombre o descripción..."
             class="w-full bg-slate-50 hover:bg-slate-100/80 border border-slate-200 rounded-xl pl-9 pr-8 py-2 text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all">
           <button *ngIf="searchQuery()" (click)="onSearchChange('')"
@@ -32,10 +32,10 @@
 
       <!-- Plan Select -->
       <div class="relative flex-1 min-w-[200px]" *ngIf="selectedProjectId()">
-        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">Plan de Pruebas</label>
+        <label for="plan-select" class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">Plan de Pruebas</label>
         <div class="relative flex items-center">
           <i class="fas fa-clipboard-list absolute left-3 text-slate-400 text-xs"></i>
-          <select [ngModel]="selectedTestPlanId()" (ngModelChange)="onTestPlanChange($event)"
+          <select id="plan-select" [ngModel]="selectedTestPlanId()" (ngModelChange)="onTestPlanChange($event)"
             [disabled]="testPlans().length === 0"
             class="w-full bg-slate-50 hover:bg-slate-100/80 border border-slate-200 rounded-xl pl-9 pr-8 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all appearance-none cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed">
             <option *ngIf="testPlans().length === 0" value="">[Sin Planes Registrados]</option>
@@ -194,11 +194,11 @@
       </div>
 
       <div class="bg-gray-50/80 px-4 py-3 border-t border-gray-100 flex flex-wrap justify-between items-center gap-2 text-xs text-gray-500">
-        <div class="flex items-center gap-1.5 cursor-pointer hover:bg-gray-200/50 p-1 rounded transition-colors"
+        <button type="button" class="flex items-center gap-1.5 cursor-pointer hover:bg-gray-200/50 p-1 rounded transition-colors"
              (click)="toggleStatus(suite, $event)" title="Cambiar estado">
           <div class="w-2.5 h-2.5 rounded-full" [ngClass]="suite.statusId === 1 ? 'bg-emerald-500 ring-2 ring-emerald-200' : 'bg-red-500 ring-2 ring-red-200'"></div>
           <span class="font-medium" [ngClass]="suite.statusId === 1 ? 'text-emerald-700' : 'text-red-700'">{{ suite.statusId === 1 ? 'Activo' : 'Inactivo' }}</span>
-        </div>
+        </button>
 
         <div class="flex items-center gap-1.5">
           <button (click)="openScenario(suite.id); $event.stopPropagation()"
@@ -290,8 +290,8 @@
           <div class="grid grid-cols-2 gap-4">
             <!-- Nivel -->
             <div>
-              <label class="text-[10px] font-bold text-slate-500 tracking-widest uppercase ml-1">Nivel</label>
-              <select formControlName="testLevelId" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-medium appearance-none">
+              <label for="testLevelId" class="text-[10px] font-bold text-slate-500 tracking-widest uppercase ml-1">Nivel</label>
+              <select id="testLevelId" formControlName="testLevelId" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-medium appearance-none">
                 <option [ngValue]="null">Seleccionar nivel</option>
                 <option *ngFor="let item of levels()" [ngValue]="item.id">{{ item.name }}</option>
               </select>
@@ -299,8 +299,8 @@
             
             <!-- Tipo -->
             <div>
-              <label class="text-[10px] font-bold text-slate-500 tracking-widest uppercase ml-1">Tipo</label>
-              <select formControlName="testTypeId" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-medium appearance-none">
+              <label for="testTypeId" class="text-[10px] font-bold text-slate-500 tracking-widest uppercase ml-1">Tipo</label>
+              <select id="testTypeId" formControlName="testTypeId" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-medium appearance-none">
                 <option [ngValue]="null">Seleccionar tipo</option>
                 <option *ngFor="let item of types()" [ngValue]="item.id">{{ item.name }}</option>
               </select>
@@ -308,8 +308,8 @@
 
             <!-- Técnica de Diseño -->
             <div>
-              <label class="text-[10px] font-bold text-slate-500 tracking-widest uppercase ml-1">Técnica de Diseño</label>
-              <select formControlName="testDesignTechniqueId" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-medium appearance-none">
+              <label for="testDesignTechniqueId" class="text-[10px] font-bold text-slate-500 tracking-widest uppercase ml-1">Técnica de Diseño</label>
+              <select id="testDesignTechniqueId" formControlName="testDesignTechniqueId" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-medium appearance-none">
                 <option [ngValue]="null">Seleccionar técnica</option>
                 <option *ngFor="let item of testDesignTechniques()" [ngValue]="item.id">{{ item.name }}</option>
               </select>
@@ -317,8 +317,8 @@
 
             <!-- Entorno de Prueba -->
             <div>
-              <label class="text-[10px] font-bold text-slate-500 tracking-widest uppercase ml-1">Entorno de Prueba</label>
-              <select formControlName="testEnvironmentId" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-medium appearance-none">
+              <label for="testEnvironmentId" class="text-[10px] font-bold text-slate-500 tracking-widest uppercase ml-1">Entorno de Prueba</label>
+              <select id="testEnvironmentId" formControlName="testEnvironmentId" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-medium appearance-none">
                 <option [ngValue]="null">Seleccionar entorno</option>
                 <option *ngFor="let item of testEnvironments()" [ngValue]="item.id">{{ item.name }}</option>
               </select>
@@ -326,8 +326,8 @@
             
             <!-- Estado de Revisión -->
             <div>
-              <label class="text-[10px] font-bold text-slate-500 tracking-widest uppercase ml-1">Estado de Revisión</label>
-              <select formControlName="reviewStatusId" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-medium appearance-none">
+              <label for="reviewStatusId" class="text-[10px] font-bold text-slate-500 tracking-widest uppercase ml-1">Estado de Revisión</label>
+              <select id="reviewStatusId" formControlName="reviewStatusId" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-medium appearance-none">
                 <option [ngValue]="null">Seleccionar estado</option>
                 <option *ngFor="let item of reviewStatuses()" [ngValue]="item.id">{{ item.name }}</option>
               </select>
@@ -335,8 +335,8 @@
 
             <!-- Prioridad -->
             <div>
-              <label class="text-[10px] font-bold text-slate-500 tracking-widest uppercase ml-1">Prioridad</label>
-              <select formControlName="executionPriorityId" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-medium appearance-none">
+              <label for="executionPriorityId" class="text-[10px] font-bold text-slate-500 tracking-widest uppercase ml-1">Prioridad</label>
+              <select id="executionPriorityId" formControlName="executionPriorityId" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-medium appearance-none">
                 <option [ngValue]="null">Seleccionar prioridad</option>
                 <option *ngFor="let item of priorities()" [ngValue]="item.id">{{ item.name }}</option>
               </select>
@@ -344,8 +344,8 @@
 
             <!-- Automatización -->
             <div>
-              <label class="text-[10px] font-bold text-slate-500 tracking-widest uppercase ml-1">Automatización</label>
-              <select formControlName="automationStatusId" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-medium appearance-none">
+              <label for="automationStatusId" class="text-[10px] font-bold text-slate-500 tracking-widest uppercase ml-1">Automatización</label>
+              <select id="automationStatusId" formControlName="automationStatusId" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-medium appearance-none">
                 <option [ngValue]="null">Seleccionar estado</option>
                 <option *ngFor="let item of automationStatuses()" [ngValue]="item.id">{{ item.name }}</option>
               </select>
@@ -353,8 +353,8 @@
 
             <!-- Dueño -->
             <div>
-              <label class="text-[10px] font-bold text-slate-500 tracking-widest uppercase ml-1">Responsable</label>
-              <select formControlName="ownerUserId" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-medium appearance-none">
+              <label for="ownerUserId" class="text-[10px] font-bold text-slate-500 tracking-widest uppercase ml-1">Responsable</label>
+              <select id="ownerUserId" formControlName="ownerUserId" class="w-full mt-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-medium appearance-none">
                 <option [ngValue]="null">Sin asignar</option>
                 <option *ngFor="let user of users()" [ngValue]="user.id">{{ user.fullName }}</option>
               </select>
@@ -362,15 +362,15 @@
 
             <!-- Duración -->
             <div>
-              <label class="text-[10px] font-bold text-slate-500 tracking-widest uppercase ml-1">Duración (Horas)</label>
-              <input type="number" formControlName="estimatedDurationHours" min="0" step="0.5"
+              <label for="estimatedDurationHours" class="text-[10px] font-bold text-slate-500 tracking-widest uppercase ml-1">Duración (Horas)</label>
+              <input id="estimatedDurationHours" type="number" formControlName="estimatedDurationHours" min="0" step="0.5"
                 class="w-full mt-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-medium">
             </div>
             
             <!-- Tags -->
             <div class="col-span-2">
-              <label class="text-[10px] font-bold text-slate-500 tracking-widest uppercase ml-1">Etiquetas (Tags)</label>
-              <select formControlName="tagIds" multiple class="w-full mt-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-medium h-24">
+              <label for="tagIds" class="text-[10px] font-bold text-slate-500 tracking-widest uppercase ml-1">Etiquetas (Tags)</label>
+              <select id="tagIds" formControlName="tagIds" multiple class="w-full mt-1 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-medium h-24">
                 <option *ngFor="let tag of tags()" [value]="tag.id">{{ tag.name }}</option>
               </select>
               <p class="text-[10px] text-slate-400 mt-1 ml-1">Mantén presionado Ctrl (o Cmd) para seleccionar múltiples.</p>

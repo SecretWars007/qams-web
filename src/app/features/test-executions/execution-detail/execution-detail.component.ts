@@ -7,6 +7,7 @@ import { TestExecution } from '../../../core/models/test-execution.model';
 import { DefectModalComponent } from '../../defects/defect-modal/defect-modal.component';
 import Swal from 'sweetalert2';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-execution-detail',
@@ -16,42 +17,38 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
   styleUrls: ['./execution-detail.component.scss']
 })
 export class ExecutionDetailComponent implements OnInit {
-  private destroyRef = inject(DestroyRef);
-  execution = signal<TestExecution | null>(null);
-  loading = signal<boolean>(true);
+  private readonly destroyRef = inject(DestroyRef);
+  readonly execution = signal<TestExecution | null>(null);
+  readonly loading = signal<boolean>(true);
 
   // Defect Modal State
-  showDefectModal = signal<boolean>(false);
-  defectModalData = signal<any>(null);
-  selectedStepId = signal<string | null>(null);
+  readonly showDefectModal = signal<boolean>(false);
+  readonly defectModalData = signal<any>(null);
+  readonly selectedStepId = signal<string | null>(null);
 
-  private route = inject(ActivatedRoute);
-  private router = inject(Router);
-  private location = inject(Location);
-  private testExecutionsService = inject(TestExecutionsService);
-  private defectsService = inject(DefectsService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly location = inject(Location);
+  private readonly testExecutionsService = inject(TestExecutionsService);
+  private readonly defectsService = inject(DefectsService);
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.loadExecution(id);
-    } else {
-      this.loading.set(false);
-      Swal.fire('Error', 'ID de ejecución no proporcionado', 'error');
     }
   }
 
-  private loadExecution(id: string): void {
+  loadExecution(id: string): void {
     this.loading.set(true);
     this.testExecutionsService.getExecutionById(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (data) => {
         this.execution.set(data);
         this.loading.set(false);
       },
-      error: (err) => {
-        console.error('[ExecutionDetail] Error cargando ejecución:', err);
+      error: () => {
         this.loading.set(false);
-        Swal.fire('Error', 'No se pudo cargar el detalle de la ejecución', 'error');
+        Swal.fire('Error', 'No se pudo cargar la ejecución', 'error');
       }
     });
   }
@@ -66,35 +63,35 @@ export class ExecutionDetailComponent implements OnInit {
 
     this.selectedStepId.set(step.id);
     this.defectModalData.set({
-      title: `Fallo en paso ${step.stepOrder || ''}: ${step.action || ''}`.trim(),
-      description: `Defecto detectado durante la ejecución #${exec.cycleNumber || ''} del caso de prueba "${exec.testCase?.title || ''}".`,
-      stepsToReproduce: `1. Acción: ${step.action || '-'}\n2. Resultado Esperado: ${step.expectedResult || '-'}\n3. Resultado Obtenido: ${step.actualResult || '-'}`,
+      title: `Falla en paso #${step.stepOrder || 0}: ${step.action || ''}`,
+      description: `Falla detectada en la ejecución #${exec.id.substring(0, 8)}:\nResultado Obtenido: ${step.actualResult || 'Sin resultado'}`,
       expectedResult: step.expectedResult || '',
       actualResult: step.actualResult || '',
-      priorityId: 2,
       severityId: 2,
+      priorityId: 2,
       statusId: 1,
-      testCaseId: exec.testCase?.id || null,
+      testCaseId: exec.testCase.id,
       testExecutionId: exec.id,
       testExecutionStepResultId: step.id
     });
     this.showDefectModal.set(true);
   }
 
-  onSaveDefect(eventData: { defect: any; file: File | null }): void {
+  onSaveDefect(eventData: { defect: any; files: File[] }): void {
     const exec = this.execution();
-    if (!exec || !exec.project?.id) return;
+    if (!exec?.project?.id) return;
 
     const projectId = exec.project.id;
-    const { defect, file } = eventData;
+    const { defect, files } = eventData;
     defect.projectId = projectId;
     defect.testExecutionId = exec.id;
     defect.testExecutionStepResultId = this.selectedStepId();
 
     this.defectsService.create(projectId, defect).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (savedDefect) => {
-        if (file && savedDefect?.id) {
-          this.defectsService.uploadAttachment(projectId, savedDefect.id, file).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+        if (files && files.length > 0 && savedDefect?.id) {
+          const uploads$ = files.map(file => this.defectsService.uploadAttachment(projectId, savedDefect.id, file));
+          forkJoin(uploads$).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
             next: () => this.handleDefectSavedSuccess(savedDefect),
             error: (err) => {
               console.error('[ExecutionDetail] Error subiendo evidencia del defecto:', err);

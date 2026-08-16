@@ -23,7 +23,7 @@
     </div>
 
     <!-- Navegación -->
-    <nav class="flex-1 px-4 space-y-1 overflow-y-auto custom-scrollbar pb-6">
+    <nav aria-label="Navegación lateral principal" class="flex-1 px-4 space-y-1 overflow-y-auto custom-scrollbar pb-6">
 
       <!-- GENERAL -->
       <p class="px-4 text-[10px] font-bold text-slate-500 tracking-widest mb-3 mt-2">GENERAL</p>
@@ -47,87 +47,137 @@
         </p>
       </div>
 
-      <!-- 01 · SUT -->
-      <a
-        *hasPermission="'SUT_VIEW'"
-        routerLink="/systems-under-test"
-        routerLinkActive="bg-[#150fbd]/20 text-white border-l-4 border-[#150fbd] shadow-[inset_0_0_20px_rgba(21,15,189,0.15)]"
-        class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
-                text-slate-400 hover:text-white hover:bg-white/5 transition-all group"
-      >
-        <span class="text-[9px] font-black text-slate-600 w-5 text-center shrink-0">01</span>
-        <i class="fas fa-server w-5 text-center group-hover:scale-110 transition-transform text-sky-400"></i>
-        <span class="font-medium">Sistemas Bajo Prueba</span>
-      </a>
+      <!-- 01 · Planificación (con submenú: Sistemas Bajo Prueba, Proyectos y Requisitos) -->
+      <ng-container *hasPermission="'PROJECTS_VIEW'">
+        <!-- Ítem principal Planificación -->
+        <a
+          routerLink="/systems-under-test"
+          routerLinkActive="bg-[#150fbd]/20 text-white border-l-4 border-[#150fbd] shadow-[inset_0_0_20px_rgba(21,15,189,0.15)]"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
+                  text-slate-400 hover:text-white hover:bg-white/5 transition-all group"
+          (click)="planningMenuOpen.set(true)"
+        >
+          <span class="text-[9px] font-black text-slate-600 w-5 text-center shrink-0">01</span>
+          <i class="fas fa-sitemap w-5 text-center group-hover:scale-110 transition-transform text-sky-400"></i>
+          <span class="font-medium flex-1">Planificación</span>
+          <button
+            type="button"
+            class="w-5 h-5 flex items-center justify-center rounded text-slate-500 hover:text-white hover:bg-white/10 transition-all"
+            (click)="togglePlanningMenu($event)"
+            [title]="planningMenuOpen() ? 'Colapsar' : 'Expandir'"
+          >
+            <i class="fas text-[10px] transition-transform duration-200"
+               [class.fa-chevron-down]="!planningMenuOpen()"
+               [class.fa-chevron-up]="planningMenuOpen()"></i>
+          </button>
+        </a>
 
-      <!-- 02 · Proyectos -->
-      <a
-        *hasPermission="'PROJECTS_VIEW'"
-        routerLink="/projects"
-        routerLinkActive="bg-[#150fbd]/20 text-white border-l-4 border-[#150fbd] shadow-[inset_0_0_20px_rgba(21,15,189,0.15)]"
-        class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
-                text-slate-400 hover:text-white hover:bg-white/5 transition-all group"
-      >
-        <span class="text-[9px] font-black text-slate-600 w-5 text-center shrink-0">02</span>
-        <i class="fas fa-project-diagram w-5 text-center group-hover:scale-110 transition-transform"></i>
-        <span class="font-medium">Proyectos</span>
-      </a>
+        <!-- Sub-ítems agrupados: Sistemas Bajo Prueba, Proyectos y Requisitos -->
+        <div *ngIf="planningMenuOpen()" class="ml-6 space-y-0.5 border-l border-white/10 pl-3 mt-0.5">
+          <!-- Sistemas Bajo Prueba -->
+          <a
+            *hasPermission="'SUT_VIEW'"
+            routerLink="/systems-under-test"
+            routerLinkActive="text-sky-300 bg-sky-500/10 border-l-2 border-sky-400"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs
+                    text-slate-500 hover:text-white hover:bg-white/5 transition-all group"
+          >
+            <i class="fas fa-server w-4 text-center group-hover:scale-110 transition-transform text-sky-400"></i>
+            <span class="font-medium">Sistemas Bajo Prueba</span>
+          </a>
 
-      <!-- 03 · Requisitos -->
-      <a
-        *hasPermission="'PROJECTS_VIEW'"
-        routerLink="/requirements"
-        routerLinkActive="bg-[#150fbd]/20 text-white border-l-4 border-[#150fbd] shadow-[inset_0_0_20px_rgba(21,15,189,0.15)]"
-        class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
-                text-slate-400 hover:text-white hover:bg-white/5 transition-all group"
-      >
-        <span class="text-[9px] font-black text-slate-600 w-5 text-center shrink-0">03</span>
-        <i class="fas fa-list-check w-5 text-center group-hover:scale-110 transition-transform text-violet-400"></i>
-        <span class="font-medium">Requisitos</span>
-      </a>
+          <!-- Proyectos -->
+          <a
+            *hasPermission="'PROJECTS_VIEW'"
+            routerLink="/projects"
+            routerLinkActive="text-slate-200 bg-white/10 border-l-2 border-slate-300"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs
+                    text-slate-500 hover:text-white hover:bg-white/5 transition-all group"
+          >
+            <i class="fas fa-project-diagram w-4 text-center group-hover:scale-110 transition-transform text-slate-400"></i>
+            <span class="font-medium">Proyectos</span>
+          </a>
 
-      <!-- 04 · Planes de Prueba -->
-      <a
-        *hasPermission="'TEST_CASES_VIEW'"
-        routerLink="/test-plans"
-        routerLinkActive="bg-[#150fbd]/20 text-white border-l-4 border-[#150fbd] shadow-[inset_0_0_20px_rgba(21,15,189,0.15)]"
-        class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
-                text-slate-400 hover:text-white hover:bg-white/5 transition-all group"
-      >
-        <span class="text-[9px] font-black text-slate-600 w-5 text-center shrink-0">04</span>
-        <i class="fas fa-clipboard-list w-5 text-center group-hover:scale-110 transition-transform text-indigo-400"></i>
-        <span class="font-medium">Planes de Prueba</span>
-      </a>
+          <!-- Requisitos -->
+          <a
+            *hasPermission="'PROJECTS_VIEW'"
+            routerLink="/requirements"
+            routerLinkActive="text-violet-300 bg-violet-500/10 border-l-2 border-violet-400"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs
+                    text-slate-500 hover:text-white hover:bg-white/5 transition-all group"
+          >
+            <i class="fas fa-list-check w-4 text-center group-hover:scale-110 transition-transform text-violet-400"></i>
+            <span class="font-medium">Requisitos</span>
+          </a>
+        </div>
+      </ng-container>
 
-      <!-- 05 · Escenarios -->
-      <a
-        *hasPermission="'TEST_CASES_VIEW'"
-        routerLink="/test-scenarios"
-        routerLinkActive="bg-[#150fbd]/20 text-white border-l-4 border-[#150fbd] shadow-[inset_0_0_20px_rgba(21,15,189,0.15)]"
-        class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
-                text-slate-400 hover:text-white hover:bg-white/5 transition-all group"
-      >
-        <span class="text-[9px] font-black text-slate-600 w-5 text-center shrink-0">05</span>
-        <i class="fas fa-vials w-5 text-center group-hover:scale-110 transition-transform text-purple-400"></i>
-        <span class="font-medium">Escenarios de Prueba</span>
-      </a>
+      <!-- 02 · Planes de Prueba (con submenú agrupado: Escenarios y Casos) -->
+      <ng-container *hasPermission="'TEST_CASES_VIEW'">
+        <!-- Ítem principal Planes de Prueba -->
+        <a
+          routerLink="/test-plans"
+          routerLinkActive="bg-[#150fbd]/20 text-white border-l-4 border-[#150fbd] shadow-[inset_0_0_20px_rgba(21,15,189,0.15)]"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
+                  text-slate-400 hover:text-white hover:bg-white/5 transition-all group"
+          (click)="testPlansMenuOpen.set(true)"
+        >
+          <span class="text-[9px] font-black text-slate-600 w-5 text-center shrink-0">02</span>
+          <i class="fas fa-clipboard-list w-5 text-center group-hover:scale-110 transition-transform text-indigo-400"></i>
+          <span class="font-medium flex-1">Planes de Prueba</span>
+          <button
+            type="button"
+            class="w-5 h-5 flex items-center justify-center rounded text-slate-500 hover:text-white hover:bg-white/10 transition-all"
+            (click)="toggleTestPlansMenu($event)"
+            [title]="testPlansMenuOpen() ? 'Colapsar' : 'Expandir'"
+          >
+            <i class="fas text-[10px] transition-transform duration-200"
+               [class.fa-chevron-down]="!testPlansMenuOpen()"
+               [class.fa-chevron-up]="testPlansMenuOpen()"></i>
+          </button>
+        </a>
 
-      <!-- 06 · Casos de Prueba -->
-      <a
-        *hasPermission="'TEST_CASES_VIEW'"
-        routerLink="/test-cases"
-        routerLinkActive="bg-[#150fbd]/20 text-white border-l-4 border-[#150fbd] shadow-[inset_0_0_20px_rgba(21,15,189,0.15)]"
-        class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
-                text-slate-400 hover:text-white hover:bg-white/5 transition-all group"
-      >
-        <span class="text-[9px] font-black text-slate-600 w-5 text-center shrink-0">06</span>
-        <i class="fas fa-flask w-5 text-center group-hover:scale-110 transition-transform text-blue-400"></i>
-        <span class="font-medium">Casos de Prueba</span>
-      </a>
+        <!-- Sub-ítems agrupados: Planes, Escenarios y Casos de Prueba -->
+        <div *ngIf="testPlansMenuOpen()" class="ml-6 space-y-0.5 border-l border-white/10 pl-3 mt-0.5">
+          <!-- Planes de Prueba -->
+          <a
+            routerLink="/test-plans"
+            routerLinkActive="text-indigo-300 bg-indigo-500/10 border-l-2 border-indigo-400"
+            [routerLinkActiveOptions]="{exact: true}"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs
+                    text-slate-500 hover:text-white hover:bg-white/5 transition-all group"
+          >
+            <i class="fas fa-clipboard-check w-4 text-center group-hover:scale-110 transition-transform text-indigo-400"></i>
+            <span class="font-medium">Lista de Planes</span>
+          </a>
 
-      <!-- 07 · Ejecuciones (con submenú colapsable) -->
+          <!-- Escenarios de Prueba -->
+          <a
+            routerLink="/test-scenarios"
+            routerLinkActive="text-purple-300 bg-purple-500/10 border-l-2 border-purple-400"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs
+                    text-slate-500 hover:text-white hover:bg-white/5 transition-all group"
+          >
+            <i class="fas fa-vials w-4 text-center group-hover:scale-110 transition-transform text-purple-400"></i>
+            <span class="font-medium">Escenarios de Prueba</span>
+          </a>
+
+          <!-- Casos de Prueba -->
+          <a
+            routerLink="/test-cases"
+            routerLinkActive="text-blue-300 bg-blue-500/10 border-l-2 border-blue-400"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs
+                    text-slate-500 hover:text-white hover:bg-white/5 transition-all group"
+          >
+            <i class="fas fa-flask w-4 text-center group-hover:scale-110 transition-transform text-blue-400"></i>
+            <span class="font-medium">Casos de Prueba</span>
+          </a>
+        </div>
+      </ng-container>
+
+      <!-- 03 · Ejecución de Pruebas (con submenú colapsable) -->
       <ng-container *hasPermission="'EXECUTIONS_VIEW'">
-        <!-- Ítem principal Ejecuciones -->
+        <!-- Ítem principal Ejecución de Pruebas -->
         <a
           routerLink="/test-executions"
           routerLinkActive="bg-[#150fbd]/20 text-white border-l-4 border-[#150fbd] shadow-[inset_0_0_20px_rgba(21,15,189,0.15)]"
@@ -135,10 +185,11 @@
                   text-slate-400 hover:text-white hover:bg-white/5 transition-all group"
           (click)="executionsMenuOpen.set(true)"
         >
-          <span class="text-[9px] font-black text-slate-600 w-5 text-center shrink-0">07</span>
+          <span class="text-[9px] font-black text-slate-600 w-5 text-center shrink-0">03</span>
           <i class="fas fa-rocket w-5 text-center group-hover:scale-110 transition-transform text-emerald-400"></i>
-          <span class="font-medium flex-1">Ejecuciones</span>
+          <span class="font-medium flex-1">Ejecución de Pruebas</span>
           <button
+            type="button"
             class="w-5 h-5 flex items-center justify-center rounded text-slate-500 hover:text-white hover:bg-white/10 transition-all"
             (click)="toggleExecutionsMenu($event)"
             [title]="executionsMenuOpen() ? 'Colapsar' : 'Expandir'"
@@ -149,8 +200,20 @@
           </button>
         </a>
 
-        <!-- Sub-ítems: Evidencias (dentro del módulo) y Defectos -->
+        <!-- Sub-ítems: Lista de Ejecuciones, Evidencias y Defectos -->
         <div *ngIf="executionsMenuOpen()" class="ml-6 space-y-0.5 border-l border-white/10 pl-3 mt-0.5">
+
+          <!-- Lista de Ejecuciones de Pruebas -->
+          <a
+            routerLink="/test-executions"
+            routerLinkActive="text-emerald-300 bg-emerald-500/10 border-l-2 border-emerald-400"
+            [routerLinkActiveOptions]="{exact: true}"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs
+                    text-slate-500 hover:text-white hover:bg-white/5 transition-all group"
+          >
+            <i class="fas fa-play-circle w-4 text-center group-hover:scale-110 transition-transform text-emerald-400"></i>
+            <span class="font-medium">Lista de Ejecuciones</span>
+          </a>
 
           <!-- Evidencias -->
           <a
@@ -159,7 +222,7 @@
             class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs
                     text-slate-500 hover:text-white hover:bg-white/5 transition-all group"
           >
-            <i class="fas fa-images w-4 text-center group-hover:scale-110 transition-transform text-indigo-450"></i>
+            <i class="fas fa-images w-4 text-center group-hover:scale-110 transition-transform text-indigo-400"></i>
             <span class="font-medium">Evidencias Vinculadas</span>
           </a>
 
@@ -183,30 +246,6 @@
           ANÁLISIS & CALIDAD
         </p>
       </div>
-
-      <!-- Pruebas Exploratorias -->
-      <a
-        *hasPermission="'EXPLORATORY_VIEW'"
-        routerLink="/exploratory"
-        routerLinkActive="bg-[#150fbd]/20 text-white border-l-4 border-[#150fbd] shadow-[inset_0_0_20px_rgba(21,15,189,0.15)]"
-        class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
-                text-slate-400 hover:text-white hover:bg-white/5 transition-all group"
-      >
-        <i class="fas fa-compass w-5 text-center group-hover:scale-110 transition-transform text-sky-400"></i>
-        <span class="font-medium">Exploratorias</span>
-      </a>
-
-      <!-- Pruebas Estáticas -->
-      <a
-        *hasPermission="'REVIEWS_VIEW'"
-        routerLink="/reviews"
-        routerLinkActive="bg-[#150fbd]/20 text-white border-l-4 border-[#150fbd] shadow-[inset_0_0_20px_rgba(21,15,189,0.15)]"
-        class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
-                text-slate-400 hover:text-white hover:bg-white/5 transition-all group"
-      >
-        <i class="fas fa-microscope w-5 text-center group-hover:scale-110 transition-transform text-amber-400"></i>
-        <span class="font-medium">Pruebas Estáticas</span>
-      </a>
 
       <!-- Reportes -->
       <a
@@ -315,7 +354,7 @@
           </button>
 
         <div class="hidden sm:flex flex-col">
-          <nav class="flex items-center text-xs text-slate-500 mb-1 font-medium">
+          <nav aria-label="Ruta de navegación" class="flex items-center text-xs text-slate-500 mb-1 font-medium">
             <span>QAMS</span>
             <i class="fas fa-chevron-right text-[8px] mx-2 text-slate-300"></i>
             <span class="text-[#150fbd]">Portal</span>
@@ -325,7 +364,9 @@
 
         <!-- Project Selection Dropdown in Navbar -->
         <div class="relative group ml-4">
+          <label for="projectSelectNavbar" class="sr-only">Seleccionar Proyecto</label>
           <select 
+            id="projectSelectNavbar"
             [ngModel]="activeProjectId()" 
             (ngModelChange)="onProjectChange($event)"
             class="bg-slate-100 hover:bg-slate-200/80 border border-slate-200 text-slate-700 text-xs font-bold rounded-xl px-4 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all appearance-none cursor-pointer shadow-sm"
@@ -341,12 +382,13 @@
         <!-- Global Search Bar -->
         <div class="hidden md:flex items-center relative mr-2">
           <i class="ri-search-line absolute left-3 text-slate-400"></i>
-          <input type="text" placeholder="Buscar casos, defectos, proyectos..." 
+          <label for="globalSearchInput" class="sr-only">Buscar casos, defectos, proyectos</label>
+          <input id="globalSearchInput" type="text" placeholder="Buscar casos, defectos, proyectos..." 
                  class="bg-white border border-slate-200 text-sm rounded-full pl-9 pr-4 py-2 w-72 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-slate-700 placeholder-slate-400 shadow-sm">
           <div class="absolute right-2 px-2 py-0.5 bg-slate-100 rounded text-[10px] font-bold text-slate-400 border border-slate-200 pointer-events-none">Ctrl K</div>
         </div>
 
-        <button class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-500 relative hover:text-slate-800 transition-colors shadow-sm">
+        <button type="button" aria-label="Notificaciones" class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-500 relative hover:text-slate-800 transition-colors shadow-sm">
           <i class="fas fa-bell"></i>
           <span class="absolute top-2.5 right-2.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-white"></span>
         </button>
@@ -363,7 +405,8 @@
             <span class="text-xs text-slate-500 font-medium">En línea</span>
           </div>
 
-          <div class="relative cursor-pointer" (click)="toggleUserMenu($event)">
+          <button type="button" aria-haspopup="true" [attr.aria-expanded]="userMenuOpen" class="relative cursor-pointer flex items-center bg-transparent border-0 p-0" (click)="toggleUserMenu($event)">
+            <span class="sr-only">Abrir menú de usuario</span>
             <div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center ring-2 ring-indigo-500/20 shadow-sm overflow-hidden">
                {{ getInitials() }}
             </div>
@@ -372,7 +415,7 @@
             <!-- Menú Desplegable -->
             @if (userMenuOpen) {
               <!-- Overlay para cerrar el menú desde clickear afuera -->
-              <div class="fixed inset-0 z-40 bg-transparent" (click)="closeUserMenu()"></div>
+              <button type="button" aria-label="Cerrar menú" class="fixed inset-0 z-40 bg-transparent cursor-default w-full h-full border-0 p-0" (click)="closeUserMenu()"></button>
               
               <div
                 class="absolute right-0 mt-3 w-56 bg-white rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] border border-slate-100 py-2 z-50 animate-in fade-in slide-in-from-top-2 origin-top-right"
@@ -408,7 +451,7 @@
                 </button>
               </div>
             }
-          </div>
+          </button>
         </div>
       </div>
     </header>
@@ -421,11 +464,13 @@
     </main>
   </div>
 
-  <div
+  <button
+    type="button"
+    aria-label="Cerrar menú lateral móvil"
     *ngIf="sidebarOpen()"
     (click)="toggleSidebar($event)"
-    class="fixed inset-0 z-30 bg-slate-900/40 backdrop-blur-sm lg:hidden transition-all duration-300"
-  ></div>
+    class="fixed inset-0 z-30 bg-slate-900/40 backdrop-blur-sm lg:hidden transition-all duration-300 w-full h-full border-0 p-0"
+  ></button>
 
   <!-- Marca Personal Oculta (Easter Egg) -->
   <div class="fixed bottom-10 left-1/2 -translate-x-1/2 z-50 pointer-events-none flex flex-col items-center group">

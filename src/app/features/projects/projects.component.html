@@ -18,10 +18,10 @@
       <!-- SUT Dropdown Filter -->
       <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1">
         <div class="relative min-w-[240px] flex-1 sm:flex-initial">
-          <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">Filtrar por SUT</label>
+          <label for="sutFilter" class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">Filtrar por SUT</label>
           <div class="relative flex items-center">
             <i class="fas fa-microchip absolute left-3 text-indigo-500 text-xs"></i>
-            <select [ngModel]="selectedSutId()" (ngModelChange)="onSutFilterChange($event)"
+            <select id="sutFilter" [ngModel]="selectedSutId()" (ngModelChange)="onSutFilterChange($event)"
               class="w-full bg-slate-50 hover:bg-slate-100/80 border border-slate-200 rounded-xl pl-9 pr-8 py-2 text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all appearance-none cursor-pointer">
               <option value="ALL">🏢 Todos los SUTs ({{ projects().length }})</option>
               <option value="NONE">⚡ Sin SUT asignado</option>
@@ -35,10 +35,10 @@
 
         <!-- Search Input -->
         <div class="relative flex-1">
-          <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">Buscar proyecto</label>
+          <label for="searchQuery" class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">Buscar proyecto</label>
           <div class="relative flex items-center">
             <i class="fas fa-search absolute left-3 text-slate-400 text-xs"></i>
-            <input type="text" [ngModel]="searchQuery()" (ngModelChange)="onSearchChange($event)"
+            <input type="text" id="searchQuery" [ngModel]="searchQuery()" (ngModelChange)="onSearchChange($event)"
               placeholder="Buscar por nombre, SUT o responsable..."
               class="w-full bg-slate-50 hover:bg-slate-100/80 border border-slate-200 rounded-xl pl-9 pr-8 py-2 text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all">
             <button *ngIf="searchQuery()" (click)="onSearchChange('')" 
@@ -98,31 +98,32 @@
 
   <!-- Empty State (No Projects in System) -->
   <div *ngIf="!loading() && projects().length === 0"
-    class="flex flex-col items-center justify-center py-20 bg-white/80 rounded-2xl border border-white/20 shadow-sm backdrop-blur-md">
-    <div class="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center mb-6 border border-indigo-100 shadow-sm">
-      <i class="fas fa-folder-open text-3xl text-slate-300"></i>
-    </div>
-    <h2 class="text-xl font-bold text-slate-900 mb-2">No hay proyectos todavía</h2>
-    <p class="text-gray-500 mb-8 max-w-xs text-center">Comienza creando tu primer proyecto de pruebas para empezar el
-      monitoreo.</p>
-    <button *ngIf="canCreateProject()" (click)="openModal()" class="btn-secondary mt-4">
-      <i class="fas fa-plus-circle"></i>
-      Crear proyecto ahora
-    </button>
+    class="bg-white/80 rounded-2xl border border-white/20 shadow-sm backdrop-blur-md">
+    <qams-empty-state
+      icon="fas fa-folder-open"
+      title="No hay proyectos todavía"
+      description="Comienza creando tu primer proyecto de pruebas para iniciar el monitoreo del ciclo de calidad."
+      variant="indigo">
+      <button *ngIf="canCreateProject()" (click)="openModal()" class="btn-primary mt-2">
+        <i class="fas fa-plus-circle"></i>
+        Crear primer proyecto
+      </button>
+    </qams-empty-state>
   </div>
 
   <!-- Filtered Empty State (No matches for SUT / Search) -->
   <div *ngIf="!loading() && projects().length > 0 && filteredProjects().length === 0"
-    class="flex flex-col items-center justify-center py-16 bg-white/80 rounded-2xl border border-white/20 shadow-sm backdrop-blur-md">
-    <div class="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center mb-4 border border-indigo-100 shadow-sm text-indigo-500">
-      <i class="fas fa-filter text-2xl text-slate-400"></i>
-    </div>
-    <h3 class="text-base font-bold text-slate-800 mb-1">Sin resultados con los filtros actuales</h3>
-    <p class="text-slate-500 text-xs mb-5 max-w-sm text-center">No encontramos proyectos asociados al SUT o término de búsqueda seleccionado.</p>
-    <button (click)="clearFilters()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-2">
-      <i class="fas fa-rotate-left"></i>
-      Restablecer todos los filtros
-    </button>
+    class="bg-white/80 rounded-2xl border border-white/20 shadow-sm backdrop-blur-md">
+    <qams-empty-state
+      icon="fas fa-filter"
+      title="Sin resultados con los filtros actuales"
+      description="No encontramos proyectos asociados al SUT o término de búsqueda seleccionado."
+      variant="amber">
+      <button (click)="clearFilters()" class="btn-primary">
+        <i class="fas fa-rotate-left"></i>
+        Restablecer filtros
+      </button>
+    </qams-empty-state>
   </div>
 
   <!-- Projects Grid -->
@@ -172,9 +173,13 @@
              <i class="far fa-user mr-2 text-purple-500"></i>
              <span class="truncate"><b class="text-gray-700">Resp:</b> {{ project.createdBy || 'Sistema' }}</span>
           </div>
+          <!-- Team avatars -->
           <div class="flex items-center text-xs text-gray-600">
-             <i class="fas fa-users mr-2 text-emerald-500"></i>
-             <span class="text-xs text-gray-600"><b class="text-gray-700">QA:</b> {{ project.testerNames.length || 0 }} miembros</span>
+            <qams-avatar-group
+              [avatars]="getProjectAvatars(project.testerNames)"
+              [max]="3"
+              [showLabel]="true">
+            </qams-avatar-group>
           </div>
           <div class="flex items-center gap-3 text-xs text-gray-600 pt-1">
              <span title="Suites"><b class="text-gray-700">S:</b> {{ project.stats.suites || 0 }}</span>
@@ -185,10 +190,10 @@
 
       <!-- Footer de la Tarjeta con Estado y Botones de Acción Explícitos -->
       <div class="bg-gray-50/80 px-4 py-3 border-t border-gray-100 flex flex-wrap justify-between items-center gap-2 text-xs text-gray-500">
-        <div class="flex items-center gap-1.5 cursor-pointer hover:bg-gray-200/50 p-1 rounded transition-colors" (click)="onToggleStatus(project, $event)" title="Cambiar estado">
+        <button type="button" class="flex items-center gap-1.5 cursor-pointer hover:bg-gray-200/50 p-1 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500/50" (click)="onToggleStatus(project, $event)" title="Cambiar estado">
           <div class="w-2.5 h-2.5 rounded-full" [ngClass]="project.isActive ? 'bg-emerald-500 ring-2 ring-emerald-200' : 'bg-red-500 ring-2 ring-red-200'"></div>
           <span class="font-medium" [ngClass]="project.isActive ? 'text-emerald-700' : 'text-red-700'">{{ project.isActive ? 'Activo' : 'Inactivo' }}</span>
-        </div>
+        </button>
 
         <div class="flex items-center gap-1.5 overflow-x-auto custom-scrollbar">
           <button (click)="viewKanban(project.id, $event)" 
@@ -520,10 +525,10 @@
         <!-- New Devolution Input -->
         <div class="space-y-4">
           <div class="flex items-center gap-4">
-            <p class="text-[10px] font-black text-gray-600 tracking-widest uppercase">Nuevo registro de hallazgo</p>
+            <label for="devolutionNotesInput" class="text-[10px] font-black text-gray-600 tracking-widest uppercase">Nuevo registro de hallazgo</label>
             <div class="flex-1 h-px bg-white/5"></div>
           </div>
-          <textarea [(ngModel)]="devolutionNotes" [ngModelOptions]="{standalone: true}" rows="5"
+          <textarea id="devolutionNotesInput" [(ngModel)]="devolutionNotes" [ngModelOptions]="{standalone: true}" rows="5"
             placeholder="Describe los motivos técnicos para la devolución. Se notificará inmediatamente al equipo responsable..."
             class="w-full bg-gray-900 border border-white/5 rounded-3xl px-6 py-5 text-white placeholder-gray-700 focus:outline-none focus:ring-2 focus:ring-rose-500/50 focus:border-rose-500 transition-all resize-none text-sm leading-relaxed font-medium"></textarea>
           <div class="flex items-start gap-3 p-4 bg-rose-500/5 rounded-2xl border border-rose-500/10">

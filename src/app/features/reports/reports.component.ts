@@ -1,17 +1,31 @@
 import { Component, OnInit, signal, inject, DestroyRef, effect } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
 import { ReportsService } from '../../core/services/reports.service';
 import { ProjectsService } from '../../core/services/projects.service';
 import { ProjectContextService } from '../../core/services/project-context.service';
+import { TestExecutionsService } from '../../core/services/test-executions.service';
+import { DefectsService } from '../../core/services/defects.service';
 import { Project } from '../../core/models/project.model';
 import { SafeUrlPipe } from '../../shared/pipes/safe-url.pipe';
 import { RtmMatrixComponent } from './rtm-matrix/rtm-matrix.component';
 import { RiskManagementComponent } from './risk-management/risk-management.component';
 import { QualityGateWidgetComponent } from './quality-gate-widget/quality-gate-widget.component';
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+
+export interface CycleStats {
+  cycleNumber: number;
+  totalExecutions: number;
+  passedCount: number;
+  failedCount: number;
+  blockedCount: number;
+  passRate: number;
+  defectsCount: number;
+  durationHours: number;
+  statusSummary: string;
+}
 
 interface ExecutionStatusOption {
     id: number;
@@ -41,8 +55,8 @@ interface TaskStatusOption {
     styleUrls: ['./reports.component.scss']
 })
 export class ReportsComponent implements OnInit {
-    private destroyRef = inject(DestroyRef);
-    today = new Date();
+    private readonly destroyRef = inject(DestroyRef);
+    readonly today = new Date();
     projects = signal<Project[]>([]);
     loading = signal(false);
     generating = signal(false);
@@ -50,11 +64,15 @@ export class ReportsComponent implements OnInit {
     pdfUrl = signal<string | null>(null);
     reportGenerated = signal<boolean>(false);
     reportType = signal<'general' | 'observations' | 'compliance' | 'burndown' | 'fullCertification' | 'executiveSummary'>('general');
-    activeTab = signal<'qualityGate' | 'rtm' | 'rbt' | 'burndown'>('qualityGate');
+    activeTab = signal<'qualityGate' | 'rtm' | 'rbt' | 'burndown' | 'cycles'>('qualityGate');
+
+    // Cycle Comparison Signals
+    cyclesData = signal<CycleStats[]>([]);
+    loadingCycles = signal<boolean>(false);
 
     filterForm!: FormGroup;
 
-    executionStatuses: ExecutionStatusOption[] = [
+    readonly executionStatuses: readonly ExecutionStatusOption[] = [
         { id: 1, label: 'Exitoso', code: 'PASSED', color: 'green' },
         { id: 2, label: 'Fallido', code: 'FAILED', color: 'red' },
         { id: 3, label: 'Bloqueado', code: 'BLOCKED', color: 'orange' },
@@ -63,7 +81,7 @@ export class ReportsComponent implements OnInit {
         { id: 6, label: 'Omitido', code: 'SKIPPED', color: 'purple' },
     ];
 
-    taskStatuses: TaskStatusOption[] = [
+    readonly taskStatuses: readonly TaskStatusOption[] = [
         { name: 'Por Hacer', label: 'Por Hacer' },
         { name: 'En Progreso', label: 'En Progreso' },
         { name: 'En Revisión', label: 'En Revisión' },
@@ -73,11 +91,13 @@ export class ReportsComponent implements OnInit {
     selectedExecStatuses = signal<Set<number>>(new Set());
     selectedTaskStatuses = signal<Set<string>>(new Set());
 
-    private reportsService = inject(ReportsService);
-    private projectsService = inject(ProjectsService);
-    private projectContext = inject(ProjectContextService);
-    private route = inject(ActivatedRoute);
-    private fb = inject(FormBuilder);
+    private readonly reportsService = inject(ReportsService);
+    private readonly projectsService = inject(ProjectsService);
+    private readonly executionsService = inject(TestExecutionsService);
+    private readonly defectsService = inject(DefectsService);
+    private readonly projectContext = inject(ProjectContextService);
+    private readonly route = inject(ActivatedRoute);
+    private readonly fb = inject(FormBuilder);
 
     constructor() {
         effect(() => {
@@ -86,6 +106,8 @@ export class ReportsComponent implements OnInit {
                 this.filterForm.patchValue({ projectId: activeId });
                 if (this.activeTab() === 'burndown') {
                     this.generateReport('burndown');
+                } else if (this.activeTab() === 'cycles') {
+                    this.loadCycleComparison(activeId);
                 }
             }
         });
@@ -107,6 +129,8 @@ export class ReportsComponent implements OnInit {
                 this.activeTab.set('qualityGate');
             } else if (params['tab'] === 'burndown') {
                 this.activeTab.set('burndown');
+            } else if (params['tab'] === 'cycles') {
+                this.onCyclesTabSelect();
             }
         });
     }
@@ -117,6 +141,81 @@ export class ReportsComponent implements OnInit {
         if (activeId) {
             this.generateReport('burndown');
         }
+    }
+
+    onCyclesTabSelect(): void {
+        this.activeTab.set('cycles');
+        const activeId = this.projectContext.activeProjectId() || this.filterForm.get('projectId')?.value;
+        if (activeId) {
+            this.loadCycleComparison(activeId);
+        }
+    }
+
+    loadCycleComparison(projectId: string): void {
+        if (!projectId) return;
+        this.loadingCycles.set(true);
+
+        this.executionsService.getExecutions(undefined, projectId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+            next: (execs) => {
+                this.defectsService.getByProject(projectId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+                    next: (defects) => {
+                        this.loadingCycles.set(false);
+                        if (!execs || execs.length === 0) {
+                            this.cyclesData.set([]);
+                            return;
+                        }
+
+                        // Group by cycleNumber
+                        const cyclesMap = new Map<number, typeof execs>();
+                        execs.forEach(e => {
+                            const cycleNum = e.cycleNumber || 1;
+                            if (!cyclesMap.has(cycleNum)) {
+                                cyclesMap.set(cycleNum, []);
+                            }
+                            cyclesMap.get(cycleNum)!.push(e);
+                        });
+
+                        const stats: CycleStats[] = [];
+                        const sortedCycles = Array.from(cyclesMap.keys()).sort((a, b) => a - b);
+
+                        sortedCycles.forEach(cycleNum => {
+                            const cycleExecs = cyclesMap.get(cycleNum)!;
+                            const total = cycleExecs.length;
+                            const passed = cycleExecs.filter(e => e.status?.code === 'PASSED').length;
+                            const failed = cycleExecs.filter(e => e.status?.code === 'FAILED').length;
+                            const blocked = cycleExecs.filter(e => e.status?.code === 'BLOCKED').length;
+                            const passRate = total > 0 ? Math.round((passed / total) * 100) : 0;
+                            const duration = cycleExecs.reduce((acc, e) => acc + (e.actualTimeHours || 0), 0);
+                            
+                            // Find defects for this cycle's executions
+                            const cycleExecIds = new Set(cycleExecs.map(e => e.id));
+                            const cycleDefects = defects.filter(d => d.testExecutionId && cycleExecIds.has(d.testExecutionId));
+
+                            let summary = 'En Progreso';
+                            if (passRate === 100) summary = 'Certificado (100% Exitoso)';
+                            else if (failed > 0) summary = `Con Fallas (${failed} casos)`;
+                            else if (blocked > 0) summary = `Bloqueado (${blocked} casos)`;
+
+                            stats.push({
+                                cycleNumber: cycleNum,
+                                totalExecutions: total,
+                                passedCount: passed,
+                                failedCount: failed,
+                                blockedCount: blocked,
+                                passRate,
+                                defectsCount: cycleDefects.length,
+                                durationHours: Math.round(duration * 10) / 10,
+                                statusSummary: summary
+                            });
+                        });
+
+                        this.cyclesData.set(stats);
+                    },
+                    error: () => this.loadingCycles.set(false)
+                });
+            },
+            error: () => this.loadingCycles.set(false)
+        });
     }
 
     /** Carga la lista de proyectos para los filtros de reportes */
@@ -138,6 +237,7 @@ export class ReportsComponent implements OnInit {
         this.selectedExecStatuses.set(set);
     }
 
+    /** Alterna la selección de un estado de tarea Kanban en los filtros */
     toggleTaskStatus(name: string): void {
         const set = new Set(this.selectedTaskStatuses());
         if (set.has(name)) set.delete(name); else set.add(name);
@@ -156,18 +256,21 @@ export class ReportsComponent implements OnInit {
         return !!this.filterForm.get('projectId')?.value;
     }
 
-    /**
-     * Genera un reporte basado en el tipo seleccionado y los filtros.
-     * @param type - Tipo de reporte a generar
-     */
+    /** Genera el reporte según el tipo especificado */
     generateReport(type: 'general' | 'observations' | 'compliance' | 'burndown' | 'fullCertification' | 'executiveSummary' = 'general'): void {
-        const { projectId, startDate, endDate } = this.filterForm.value;
-        if (!projectId) return;
-
-        this.generating.set(true);
         this.error.set(null);
-        this.pdfUrl.set(null);
+        this.generating.set(true);
         this.reportGenerated.set(false);
+        this.pdfUrl.set(null);
+
+        const { projectId, startDate, endDate } = this.filterForm.value;
+
+        if (!projectId) {
+            this.error.set('Por favor, selecciona un proyecto para generar el reporte.');
+            this.generating.set(false);
+            return;
+        }
+
         this.reportType.set(type);
 
         let request: Observable<Blob>;
@@ -188,7 +291,7 @@ export class ReportsComponent implements OnInit {
             case 'executiveSummary':
                 request = this.reportsService.generateExecutiveSummaryReport(projectId);
                 break;
-            default:
+            default: {
                 const filter = {
                     projectId,
                     executionStatusIds: Array.from(this.selectedExecStatuses()),
@@ -197,6 +300,8 @@ export class ReportsComponent implements OnInit {
                     endDate: endDate || undefined
                 };
                 request = this.reportsService.generateProjectReport(filter);
+                break;
+            }
         }
 
         request.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({

@@ -1,50 +1,52 @@
-<div class="space-y-10 animate-in fade-in slide-in-from-bottom-6 duration-1000">
-  <!-- Título y Header -->
-  <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
-    <div class="space-y-1">
-      <h1 class="text-4xl font-black text-slate-900 tracking-tight leading-none">
-        Tablero de <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-emerald-500">Control QA</span>
-      </h1>
-      <p class="text-slate-500 text-base font-medium">
-        Visión general en tiempo real del ciclo de calidad QAMS.
-      </p>
-    </div>
+<div class="space-y-8 animate-in fade-in slide-in-from-bottom-6 duration-1000">
 
-    <div class="flex flex-col items-end gap-4">
-      <!-- Badge de Rol y Contexto -->
-      <div class="flex items-center gap-2">
-        <span *ngIf="isTesterOnly()" class="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-blue-100 text-blue-700 border border-blue-200">
-          👤 Mis Proyectos
-        </span>
-        <span *ngIf="canUseAdvancedFilters()" class="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-100 text-emerald-700 border border-emerald-200">
-          🛡️ Vista Completa
-        </span>
-        <span class="text-sm font-bold text-slate-500">
-          <ng-container *ngIf="isTesterOnly()">Mostrando {{ projects().length }} proyecto(s) asignados a ti</ng-container>
-          <ng-container *ngIf="canUseAdvancedFilters()">Mostrando {{ projects().length }} de todos los proyectos activos</ng-container>
-        </span>
+  <!-- ===== HERO HEADER con gradiente ===== -->
+  <div class="relative rounded-3xl overflow-hidden shadow-lg" style="background: var(--qams-hero-gradient)">
+    <!-- Decorative blobs -->
+    <div class="absolute -top-8 -right-8 w-48 h-48 bg-white/10 rounded-full blur-3xl"></div>
+    <div class="absolute -bottom-10 -left-10 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
+
+    <div class="relative z-10 p-7 flex flex-col md:flex-row md:items-center justify-between gap-5">
+      <!-- Title -->
+      <div class="space-y-1.5">
+        <div class="flex items-center gap-2 mb-2">
+          <span *ngIf="isTesterOnly()" class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-white/20 text-white border border-white/30">
+            👤 Tester
+          </span>
+          <span *ngIf="canUseAdvancedFilters()" class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-white/20 text-white border border-white/30">
+            🛡️ Admin / Lead
+          </span>
+        </div>
+        <h1 class="text-4xl font-black text-white tracking-tight leading-none" style="font-family: var(--font-display)">
+          Tablero de <span class="text-white/80">Control QA</span>
+        </h1>
+        <p class="text-white/70 text-sm font-medium">
+          Visión general en tiempo real del ciclo de calidad QAMS.
+        </p>
       </div>
 
-      <div class="flex items-center gap-4">
-        <!-- Selector de Proyecto (solo para Tester) -->
-        <div *ngIf="!canUseAdvancedFilters()" class="flex items-center gap-2 px-4 py-2 bg-white rounded-2xl border border-slate-200 shadow-sm">
-          <label for="dashboardProjectSelector" class="flex items-center gap-2 cursor-pointer">
-            <i class="ri-folder-open-line text-indigo-600"></i>
-            <span class="sr-only">Seleccionar proyecto</span>
-          </label>
+      <!-- Date + project selector -->
+      <div class="flex flex-col items-end gap-3">
+        <div class="flex items-center gap-3 bg-white/15 backdrop-blur-md p-2.5 px-5 rounded-2xl border border-white/20">
+          <i class="fas fa-calendar-day text-white/70 text-sm"></i>
+          <span class="text-sm font-bold text-white">{{ today | date:'dd MMM, yyyy' }}</span>
+        </div>
+
+        <div *ngIf="!canUseAdvancedFilters()" class="flex items-center gap-2 px-4 py-2 bg-white/15 rounded-2xl border border-white/20 backdrop-blur-md">
+          <i class="ri-folder-open-line text-white/80"></i>
           <select id="dashboardProjectSelector"
+            aria-label="Seleccionar Proyecto"
             [ngModel]="selectedProjectId()"
             (ngModelChange)="onProjectChange($event)"
-            class="bg-transparent border-none outline-none text-sm font-bold text-slate-700 pr-4 cursor-pointer">
+            class="bg-transparent border-none outline-none text-sm font-bold text-white pr-4 cursor-pointer [&>option]:text-slate-900">
             <option *ngFor="let p of projects()" [value]="p.id">{{ p.name }}</option>
           </select>
         </div>
 
-        <div class="flex items-center gap-3 bg-white/80 p-2 px-5 rounded-2xl border border-slate-200 backdrop-blur-md shadow-sm">
-          <span class="text-[10px] font-black text-slate-400 tracking-[0.2em]">Hoy</span>
-          <div class="h-4 w-px bg-slate-200"></div>
-          <span class="text-sm font-bold text-indigo-700">{{ today | date:'dd MMM, yyyy' }}</span>
-        </div>
+        <span class="text-white/60 text-xs">
+          <ng-container *ngIf="isTesterOnly()">{{ projects().length }} proyecto(s) asignado(s) a ti</ng-container>
+          <ng-container *ngIf="canUseAdvancedFilters()">{{ projects().length }} proyectos activos en total</ng-container>
+        </span>
       </div>
     </div>
   </div>
@@ -57,8 +59,8 @@
       
       <!-- Filtro SUT -->
       <div class="flex flex-col gap-1">
-        <label class="text-xs font-bold text-slate-500">Sistema Bajo Prueba</label>
-        <select [ngModel]="selectedSutId()" (ngModelChange)="onSutChange($event)" class="bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm font-medium outline-none focus:border-indigo-500">
+        <label for="dashboardSutFilter" class="text-xs font-bold text-slate-500">Sistema Bajo Prueba</label>
+        <select id="dashboardSutFilter" [ngModel]="selectedSutId()" (ngModelChange)="onSutChange($event)" class="bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm font-medium outline-none focus:border-indigo-500">
           <option [value]="null">Todos los SUTs</option>
           <option *ngFor="let s of suts()" [value]="s.id">{{ s.name }}</option>
         </select>
@@ -66,8 +68,8 @@
 
       <!-- Filtro Proyecto (reemplaza al selector del header) -->
       <div class="flex flex-col gap-1">
-        <label class="text-xs font-bold text-slate-500">Proyecto</label>
-        <select [ngModel]="selectedProjectId()" (ngModelChange)="onProjectChange($event)" class="bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm font-medium outline-none focus:border-indigo-500">
+        <label for="dashboardProjectFilter" class="text-xs font-bold text-slate-500">Proyecto</label>
+        <select id="dashboardProjectFilter" [ngModel]="selectedProjectId()" (ngModelChange)="onProjectChange($event)" class="bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm font-medium outline-none focus:border-indigo-500">
           <option [value]="null">Todos los Proyectos</option>
           <option *ngFor="let p of projects()" [value]="p.id">{{ p.name }}</option>
         </select>
@@ -75,8 +77,8 @@
 
       <!-- Filtro Tester -->
       <div class="flex flex-col gap-1">
-        <label class="text-xs font-bold text-slate-500">Tester Asignado</label>
-        <select [ngModel]="selectedTesterUserId()" (ngModelChange)="onTesterChange($event)" class="bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm font-medium outline-none focus:border-indigo-500">
+        <label for="dashboardTesterFilter" class="text-xs font-bold text-slate-500">Tester Asignado</label>
+        <select id="dashboardTesterFilter" [ngModel]="selectedTesterUserId()" (ngModelChange)="onTesterChange($event)" class="bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm font-medium outline-none focus:border-indigo-500">
           <option [value]="null">Todos los Testers</option>
           <option *ngFor="let t of testers()" [value]="t.id">{{ t.fullName }}</option>
         </select>
@@ -136,8 +138,8 @@
     >{{ summary()!.passRate }}%</div>
   </div>
 
-  <!-- ===== KPI CARDS ===== -->
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+  <!-- ===== KPI CARDS mejoradas ===== -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
     <!-- Proyectos -->
     <a routerLink="/projects" class="glass-card p-6 relative overflow-hidden group hover:-translate-y-1 border-l-4 border-indigo-500 block cursor-pointer">
       <div class="absolute -right-4 -top-4 w-24 h-24 bg-indigo-500/10 rounded-full blur-2xl group-hover:bg-indigo-500/20 transition-all"></div>
@@ -372,6 +374,86 @@
     </div>
   </div>
   }
+
+  <!-- ===== GRÁFICO TESTRAIL: TENDENCIA Y ACTIVIDAD DE PRUEBAS ===== -->
+  <div class="card !p-0 overflow-hidden shadow-sm border border-slate-200/80">
+    <div class="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/40">
+      <div>
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-200 mb-1.5">
+          <i class="ri-pulse-line"></i> TestRail Style &bull; Ritmo de Ejecución
+        </div>
+        <h3 class="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+          <i class="ri-line-chart-line text-indigo-600"></i>
+          Actividad y Tendencia de Pruebas
+        </h3>
+        <p class="text-xs text-slate-500 font-medium">Volumen y estado de ejecuciones diarias en el periodo seleccionado</p>
+      </div>
+
+      <!-- Selector de rango de días (TestRail range) -->
+      <div class="flex items-center gap-1 bg-white border border-slate-200 rounded-xl p-1 shadow-sm">
+        <button type="button" (click)="setTrendDays(5)"
+                [class.bg-indigo-600]="trendDaysRange() === 5"
+                [class.text-white]="trendDaysRange() === 5"
+                [class.text-slate-600]="trendDaysRange() !== 5"
+                class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all">
+          5 días
+        </button>
+        <button type="button" (click)="setTrendDays(7)"
+                [class.bg-indigo-600]="trendDaysRange() === 7"
+                [class.text-white]="trendDaysRange() === 7"
+                [class.text-slate-600]="trendDaysRange() !== 7"
+                class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all">
+          7 días
+        </button>
+        <button type="button" (click)="setTrendDays(14)"
+                [class.bg-indigo-600]="trendDaysRange() === 14"
+                [class.text-white]="trendDaysRange() === 14"
+                [class.text-slate-600]="trendDaysRange() !== 14"
+                class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all">
+          14 días
+        </button>
+        <button type="button" (click)="setTrendDays(30)"
+                [class.bg-indigo-600]="trendDaysRange() === 30"
+                [class.text-white]="trendDaysRange() === 30"
+                [class.text-slate-600]="trendDaysRange() !== 30"
+                class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all">
+          30 días
+        </button>
+      </div>
+    </div>
+
+    <div class="p-6 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+      <!-- Columna Izquierda: Line Chart -->
+      <div class="lg:col-span-8 h-[290px] w-full">
+        <canvas baseChart [data]="activityLineData" [options]="activityLineOptions" type="line"></canvas>
+      </div>
+
+      <!-- Columna Derecha: Leyenda y Métricas TestRail (Español & Catálogo) -->
+      <div class="lg:col-span-4 bg-slate-50/60 p-6 rounded-2xl border border-slate-200/80 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-200 pb-2.5">
+          <p class="text-xs font-black text-slate-600 uppercase tracking-wider">
+            En los últimos {{ trendDaysRange() }} días:
+          </p>
+          <span class="text-xs font-extrabold text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-md border border-indigo-100">
+            {{ trendTotal() }} total
+          </span>
+        </div>
+
+        <div class="space-y-3">
+          <div *ngFor="let item of trendStatusSummaries()" class="flex items-start gap-3">
+            <span class="w-3.5 h-3.5 rounded-full shrink-0 mt-0.5 shadow-sm" [style.backgroundColor]="item.color"></span>
+            <div class="flex-1 leading-tight">
+              <div class="flex items-baseline justify-between">
+                <span class="text-sm font-black text-slate-800">{{ item.count }} {{ item.name }}</span>
+                <span class="text-xs font-bold" [style.color]="item.color">{{ item.percentage }}%</span>
+              </div>
+              <p class="text-[11px] text-slate-400 font-medium mt-0.5">{{ item.percentage }} % configuradas como {{ item.name }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- ===== GRÁFICOS ===== -->
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">

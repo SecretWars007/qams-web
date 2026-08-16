@@ -5,7 +5,7 @@ import Swal from 'sweetalert2';
 import { Component, OnInit, signal, inject, DestroyRef, effect, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+
 import { TestSuitesService } from '../../core/services/test-suites.service';
 import { ProjectContextService } from '../../core/services/project-context.service';
 import { TestPlansService } from '../../core/services/test-plans.service';
@@ -16,8 +16,7 @@ import { TestPlan } from '../../core/models/test-plan.model';
 import { User } from '../../core/models/user.model';
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { forkJoin } from 'rxjs';
-import { RouterModule } from '@angular/router';
-
+import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 @Component({
   selector: 'app-test-scenarios',
   standalone: true,
@@ -26,7 +25,7 @@ import { RouterModule } from '@angular/router';
   styleUrls: ['./test-scenarios.component.scss']
 })
 export class TestScenariosComponent implements OnInit {
-    private destroyRef = inject(DestroyRef);
+    private readonly destroyRef = inject(DestroyRef);
   /** Lista de escenarios (suites) cargados */
   testSuites = signal<TestSuite[]>([]);
   testPlans = signal<TestPlan[]>([]);
@@ -72,14 +71,14 @@ export class TestScenariosComponent implements OnInit {
     return suites;
   });
 
-  private testSuitesService = inject(TestSuitesService);
-  private testPlansService = inject(TestPlansService);
-  private catalogsService = inject(CatalogsService);
-  private usersService = inject(UsersService);
-  private projectContext = inject(ProjectContextService);
-  private route = inject(ActivatedRoute);
-  private router = inject(Router);
-  private fb = inject(FormBuilder);
+  private readonly testSuitesService = inject(TestSuitesService);
+  private readonly testPlansService = inject(TestPlansService);
+  private readonly catalogsService = inject(CatalogsService);
+  private readonly usersService = inject(UsersService);
+  private readonly projectContext = inject(ProjectContextService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly fb = inject(FormBuilder);
 
   constructor() {
     effect(() => {

@@ -5,20 +5,22 @@ import { DefectsService } from '../../core/services/defects.service';
 import { Defect } from '../../core/models/defect.model';
 import { DefectModalComponent } from './defect-modal/defect-modal.component';
 import { ProjectContextService } from '../../core/services/project-context.service';
-import { finalize } from 'rxjs';
+import { finalize, forkJoin } from 'rxjs';
 import Swal from 'sweetalert2';
 import { SkeletonLoaderComponent } from '../shared/skeleton-loader/skeleton-loader.component';
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { BadgeComponent, BadgeVariant } from '../shared/badge/badge.component';
+import { EmptyStateComponent } from '../shared/empty-state/empty-state.component';
 
 @Component({
   selector: 'app-defects',
   standalone: true,
-  imports: [CommonModule, FormsModule, DefectModalComponent, SkeletonLoaderComponent],
+  imports: [CommonModule, FormsModule, DefectModalComponent, SkeletonLoaderComponent, BadgeComponent, EmptyStateComponent],
   templateUrl: './defects.component.html',
   styleUrls: ['./defects.component.scss']
 })
 export class DefectsComponent implements OnInit {
-    private destroyRef = inject(DestroyRef);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly defectsService = inject(DefectsService);
   private readonly projectContextService = inject(ProjectContextService);
 
@@ -91,11 +93,11 @@ export class DefectsComponent implements OnInit {
     this.showModal.set(false);
   }
 
-  onSave(eventData: { defect: any; file: File | null }): void {
+  onSave(eventData: { defect: any; files: File[] }): void {
     const projectId = this.currentProjectId;
     if (!projectId) return;
 
-    const { defect, file } = eventData;
+    const { defect, files } = eventData;
     defect.projectId = projectId;
 
     const request$ = this.isEdit() && this.selectedDefect()
@@ -104,11 +106,13 @@ export class DefectsComponent implements OnInit {
 
     request$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (savedDefect) => {
-        if (file && savedDefect?.id) {
-          this.defectsService.uploadAttachment(projectId, savedDefect.id, file).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+        const defectId = savedDefect?.id || this.selectedDefect()?.id;
+        if (files && files.length > 0 && defectId) {
+          const uploads$ = files.map((file: File) => this.defectsService.uploadAttachment(projectId, defectId, file));
+          forkJoin(uploads$).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
             next: () => this.handleSaveSuccess(),
             error: (err) => {
-              console.error('[DefectsComponent] Error subiendo evidencia de defecto:', err);
+              console.error('[DefectsComponent] Error subiendo evidencias de defecto:', err);
               this.handleSaveSuccess();
             }
           });
@@ -160,23 +164,23 @@ export class DefectsComponent implements OnInit {
     });
   }
 
-  getPriorityColor(priority: string): string {
+  getPriorityBadge(priority: string): BadgeVariant {
     switch(priority.toUpperCase()) {
-      case 'CRITICAL': return 'bg-red-100 text-red-800 border-red-200';
-      case 'HIGH': return 'bg-orange-100 text-orange-800 border-orange-200';
-      case 'MEDIUM': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'LOW': return 'bg-gray-100 text-gray-800 border-gray-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+      case 'CRITICAL': return 'danger';
+      case 'HIGH': return 'warning';
+      case 'MEDIUM': return 'primary';
+      case 'LOW': return 'gray';
+      default: return 'gray';
     }
   }
 
-  getStatusColor(status: string): string {
+  getStatusBadge(status: string): BadgeVariant {
     switch(status.toUpperCase()) {
-      case 'NEW': return 'bg-blue-50 text-blue-700 border-blue-100';
-      case 'IN_PROGRESS': return 'bg-purple-50 text-purple-700 border-purple-100';
-      case 'RESOLVED': return 'bg-green-50 text-green-700 border-green-100';
-      case 'CLOSED': return 'bg-gray-100 text-gray-600 border-gray-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+      case 'NEW': return 'info';
+      case 'IN_PROGRESS': return 'primary';
+      case 'RESOLVED': return 'success';
+      case 'CLOSED': return 'gray';
+      default: return 'gray';
     }
   }
 

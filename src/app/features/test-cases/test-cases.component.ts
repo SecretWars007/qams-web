@@ -13,6 +13,7 @@ import { ProjectsService } from '../../core/services/projects.service';
 import { UsersService } from '../../core/services/users.service';
 import { RequirementsService } from '../../core/services/requirements.service';
 import { Requirement } from '../../core/models/requirement.model';
+import { CatalogsService } from '../../core/services/catalogs.service';
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { HasPermissionDirective } from '../../shared/directives/has-permission.directive';
 
@@ -24,7 +25,7 @@ import { HasPermissionDirective } from '../../shared/directives/has-permission.d
   styleUrls: ['./test-cases.component.scss']
 })
 export class TestCasesComponent implements OnInit {
-  private destroyRef = inject(DestroyRef);
+  private readonly destroyRef = inject(DestroyRef);
   projects = signal<Project[]>([]);
   testCases = signal<TestCase[]>([]);
   loading = signal<boolean>(true);
@@ -35,12 +36,21 @@ export class TestCasesComponent implements OnInit {
   users = signal<User[]>([]);
   testSuites = signal<TestSuite[]>([]);
   requirements = signal<Requirement[]>([]);
+  priorities = signal<any[]>([]);
+  testTypes = signal<any[]>([]);
   showModal = signal<boolean>(false);
   isSubmitting = signal<boolean>(false);
   showStepsModal = signal<boolean>(false);
   selectedTestCaseSteps = signal<any[]>([]);
   selectedTestCaseTitle = signal<string>('');
   editingTestCaseId = signal<string | null>(null);
+  
+  // CSV Import / Export Signals
+  showImportModal = signal<boolean>(false);
+  importedRows = signal<any[]>([]);
+  isImporting = signal<boolean>(false);
+  importErrors = signal<string[]>([]);
+  
   testCaseForm!: FormGroup;
 
   activeTab: 'general' | 'execution' | 'steps' = 'general';
@@ -62,16 +72,18 @@ export class TestCasesComponent implements OnInit {
     return groups;
   });
 
-  private testCasesService = inject(TestCasesService);
-  private testSuitesService = inject(TestSuitesService);
-  private projectsService = inject(ProjectsService);
-  private usersService = inject(UsersService);
-  private requirementsService = inject(RequirementsService);
-  private route = inject(ActivatedRoute);
-  private router = inject(Router);
-  private fb = inject(FormBuilder);
+  private readonly testCasesService = inject(TestCasesService);
+  private readonly testSuitesService = inject(TestSuitesService);
+  private readonly projectsService = inject(ProjectsService);
+  private readonly usersService = inject(UsersService);
+  private readonly requirementsService = inject(RequirementsService);
+  private readonly catalogsService = inject(CatalogsService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly fb = inject(FormBuilder);
 
   ngOnInit(): void {
+    this.loadCatalogs();
     this.route.queryParams.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
       this.projectId.set(params['projectId'] || null);
       this.testSuiteId.set(params['testSuiteId'] || null);
@@ -172,6 +184,18 @@ export class TestCasesComponent implements OnInit {
     if (this.bddSteps.length > 1) {
       this.bddSteps.removeAt(index);
     }
+  }
+
+  loadCatalogs(): void {
+    this.catalogsService.getActiveByCatalog('TestCasePriority').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (data: any[]) => this.priorities.set(data || []),
+      error: (err: any) => console.error('Error loading priorities from catalog:', err)
+    });
+
+    this.catalogsService.getActiveByCatalog('TestType').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (data: any[]) => this.testTypes.set(data || []),
+      error: (err: any) => console.error('Error loading test types from catalog:', err)
+    });
   }
 
   loadProjectDetails(id: string) {
@@ -524,6 +548,192 @@ export class TestCasesComponent implements OnInit {
           }
         });
       }
+    });
+  }
+
+  // ================= EXPORT & IMPORT (EXCEL / CSV) =================
+  exportToCsv(): void {
+    const cases = this.testCases();
+    if (!cases || cases.length === 0) {
+      Swal.fire('Atención', 'No hay casos de prueba para exportar.', 'info');
+      return;
+    }
+
+    const headers = ['ID', 'Proyecto', 'Escenario_Suite', 'Titulo', 'Descripcion', 'Precondiciones', 'ResultadoEsperado', 'Prioridad', 'Estado'];
+    const rows = cases.map(tc => [
+      `"${tc.id}"`,
+      `"${(tc.projectName || '').replaceAll('"', '""')}"`,
+      `"${(tc.suite?.name || '').replaceAll('"', '""')}"`,
+      `"${(tc.title || '').replaceAll('"', '""')}"`,
+      `"${(tc.description || '').replaceAll('"', '""')}"`,
+      `"${(tc.preconditions || '').replaceAll('"', '""')}"`,
+      `"${(tc.expectedResult || '').replaceAll('"', '""')}"`,
+      `"${tc.priority?.name || 'Media'}"`,
+      `"${tc.isActive ? 'Activo' : 'Inactivo'}"`
+    ]);
+
+    const csvContent = '\uFEFF' + [headers.join(';'), ...rows.map(r => r.join(';'))].join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Casos_Prueba_${this.projectTitle() || 'QAMS'}_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  downloadTemplateCsv(): void {
+    const headers = ['Titulo', 'Descripcion', 'Precondiciones', 'ResultadoEsperado', 'Prioridad', 'Paso1_Accion', 'Paso1_ResultadoEsperado', 'Paso2_Accion', 'Paso2_ResultadoEsperado'];
+    const exampleRow = [
+      '"Iniciar sesión con credenciales válidas"',
+      '"Verificar que el usuario pueda autenticarse exitosamente en el portal"',
+      '"El usuario debe estar registrado y activo en el sistema"',
+      '"El usuario visualiza el dashboard principal"',
+      '"Alta"',
+      '"Ingresar usuario y contraseña en el formulario de login"',
+      '"Los campos se completan correctamente"',
+      '"Hacer clic en el botón Iniciar Sesión"',
+      '"El sistema redirecciona al Dashboard principal con mensaje de bienvenida"'
+    ];
+
+    const csvContent = '\uFEFF' + [headers.join(';'), exampleRow.join(';')].join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'Plantilla_Casos_Prueba_QAMS.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  openImportModal(): void {
+    this.importedRows.set([]);
+    this.importErrors.set([]);
+    this.showImportModal.set(true);
+  }
+
+  closeImportModal(): void {
+    this.showImportModal.set(false);
+    this.importedRows.set([]);
+    this.importErrors.set([]);
+  }
+
+  onCsvFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+
+    const file = input.files[0];
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      const text = e.target.result;
+      this.parseCsvContent(text);
+      input.value = '';
+    };
+    reader.readAsText(file, 'utf-8');
+  }
+
+  private parseCsvContent(content: string): void {
+    const lines = content.split(/\r?\n/).filter(line => line.trim().length > 0);
+    if (lines.length <= 1) {
+      this.importErrors.set(['El archivo no contiene filas de datos para importar.']);
+      return;
+    }
+
+    const delimiter = lines[0].includes(';') ? ';' : ',';
+    const rows: any[] = [];
+    const errors: string[] = [];
+
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i];
+      const cols = line.split(delimiter).map(c => c.replace(/^["']|["']$/g, '').trim());
+      if (cols.length < 1 || !cols[0]) continue;
+
+      const title = cols[0];
+      const description = cols[1] || '';
+      const preconditions = cols[2] || '';
+      const expectedResult = cols[3] || 'Comportamiento esperado verificado';
+      const priorityName = cols[4] || 'Media';
+
+      const steps: any[] = [];
+      if (cols[5] || cols[6]) {
+        steps.push({ action: cols[5] || '', expectedResult: cols[6] || '', stepOrder: 1 });
+      }
+      if (cols[7] || cols[8]) {
+        steps.push({ action: cols[7] || '', expectedResult: cols[8] || '', stepOrder: 2 });
+      }
+
+      rows.push({
+        title,
+        description,
+        preconditions,
+        expectedResult,
+        priorityName,
+        steps
+      });
+    }
+
+    this.importedRows.set(rows);
+    this.importErrors.set(errors);
+  }
+
+  confirmImport(): void {
+    const rows = this.importedRows();
+    const activeProjectId = this.projectId();
+    const activeSuiteId = this.testSuiteId() || (this.testSuites().length > 0 ? this.testSuites()[0].id : null);
+
+    if (!activeProjectId) {
+      Swal.fire('Error', 'Debes seleccionar un proyecto antes de importar casos.', 'error');
+      return;
+    }
+
+    if (!activeSuiteId) {
+      Swal.fire('Error', 'No se encontró un escenario o suite de pruebas para asignar los casos.', 'error');
+      return;
+    }
+
+    this.isImporting.set(true);
+
+    const requests = rows.map(r => {
+      const payload: any = {
+        title: r.title,
+        description: r.description,
+        preconditions: r.preconditions,
+        expectedResult: r.expectedResult || r.steps?.[0]?.expectedResult || 'Verificación exitosa',
+        projectId: activeProjectId,
+        testSuiteId: activeSuiteId,
+        priorityId: 2, // Medium
+        testTypeId: 1, // Functional
+        steps: r.steps
+      };
+      return this.testCasesService.createTestCase(payload);
+    });
+
+    let completed = 0;
+    requests.forEach(req$ => {
+      req$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+        next: () => {
+          completed++;
+          if (completed === requests.length) {
+            this.isImporting.set(false);
+            this.closeImportModal();
+            Swal.fire({
+              icon: 'success',
+              title: 'Importación Exitosa',
+              text: `Se importaron ${completed} caso(s) de prueba exitosamente.`,
+              confirmButtonColor: '#150fbd'
+            });
+            this.loadTestCases();
+          }
+        },
+        error: () => {
+          completed++;
+          if (completed === requests.length) {
+            this.isImporting.set(false);
+            this.closeImportModal();
+            this.loadTestCases();
+          }
+        }
+      });
     });
   }
 }

@@ -7,6 +7,7 @@ import { User } from '../../../core/models/user.model';
 import { TestCase } from '../../../core/models/test-case.model';
 import { UsersService } from '../../../core/services/users.service';
 import { TestCasesService } from '../../../core/services/test-cases.service';
+import { CatalogsService } from '../../../core/services/catalogs.service';
 import { ProjectContextService } from '../../../core/services/project-context.service';
 
 @Component({
@@ -21,6 +22,7 @@ export class DefectModalComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly usersService = inject(UsersService);
   private readonly testCasesService = inject(TestCasesService);
+  private readonly catalogsService = inject(CatalogsService);
   private readonly projectContextService = inject(ProjectContextService);
 
   @Input() defect: Defect | null = null;
@@ -30,37 +32,37 @@ export class DefectModalComponent implements OnInit {
   @Input() testExecutionId: string | null = null;
   @Input() testExecutionStepResultId: string | null = null;
   
-  @Output() close = new EventEmitter<void>();
-  @Output() save = new EventEmitter<{ defect: any; file: File | null }>();
+  @Output() closeModal = new EventEmitter<void>();
+  @Output() save = new EventEmitter<{ defect: any; files: File[] }>();
 
   form: FormGroup;
   users = signal<User[]>([]);
   testCases = signal<TestCase[]>([]);
   
-  selectedFile: File | null = null;
-  previewUrl = signal<string | null>(null);
+  selectedFiles = signal<File[]>([]);
+  previewList = signal<{ name: string; url: string; size: number }[]>([]);
   existingAttachmentUrl = signal<string | null>(null);
   
-  statuses = [
+  statuses = signal<any[]>([
     { id: 1, name: 'NEW', label: 'Nuevo / Abierto' },
     { id: 2, name: 'IN_PROGRESS', label: 'En Progreso' },
     { id: 3, name: 'RESOLVED', label: 'Resuelto' },
     { id: 4, name: 'CLOSED', label: 'Cerrado' }
-  ];
+  ]);
   
-  priorities = [
+  priorities = signal<any[]>([
     { id: 1, name: 'LOW', label: 'Baja' },
     { id: 2, name: 'MEDIUM', label: 'Media' },
     { id: 3, name: 'HIGH', label: 'Alta' },
     { id: 4, name: 'CRITICAL', label: 'Crítica' }
-  ];
+  ]);
   
-  severities = [
+  severities = signal<any[]>([
     { id: 1, name: 'MINOR', label: 'Menor' },
     { id: 2, name: 'MAJOR', label: 'Mayor' },
     { id: 3, name: 'CRITICAL', label: 'Crítica' },
     { id: 4, name: 'BLOCKER', label: 'Bloqueante' }
-  ];
+  ]);
 
   constructor() {
     this.form = this.fb.group({
@@ -81,6 +83,7 @@ export class DefectModalComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.loadCatalogs();
     this.loadUsers();
     const activeProject = this.projectId || this.projectContextService.activeProjectId();
     if (activeProject) {
@@ -124,6 +127,35 @@ export class DefectModalComponent implements OnInit {
     });
   }
 
+  loadCatalogs(): void {
+    this.catalogsService.getActiveByCatalog('DefectStatus').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (data: any[]) => {
+        if (data && data.length > 0) {
+          this.statuses.set(data.map((d: any) => ({ id: d.id, name: d.code, label: d.name })));
+        }
+      },
+      error: (err: any) => console.error('[DefectModal] Error cargando estados de defecto:', err)
+    });
+
+    this.catalogsService.getActiveByCatalog('DefectPriority').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (data: any[]) => {
+        if (data && data.length > 0) {
+          this.priorities.set(data.map((d: any) => ({ id: d.id, name: d.code, label: d.name })));
+        }
+      },
+      error: (err: any) => console.error('[DefectModal] Error cargando prioridades de defecto:', err)
+    });
+
+    this.catalogsService.getActiveByCatalog('FindingSeverity').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (data: any[]) => {
+        if (data && data.length > 0) {
+          this.severities.set(data.map((d: any) => ({ id: d.id, name: d.code, label: d.name })));
+        }
+      },
+      error: (err: any) => console.error('[DefectModal] Error cargando severidades:', err)
+    });
+  }
+
   loadTestCases(projectId: string): void {
     this.testCasesService.getTestCases(projectId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (cases) => this.testCases.set(cases),
@@ -131,10 +163,11 @@ export class DefectModalComponent implements OnInit {
     });
   }
 
-  onFileSelected(event: Event): void {
+  onFilesSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
-      this.setFile(input.files[0]);
+      Array.from(input.files).forEach(file => this.addFile(file));
+      input.value = ''; // Reset input to allow re-selection
     }
   }
 
@@ -146,25 +179,34 @@ export class DefectModalComponent implements OnInit {
       if (item.type.includes('image')) {
         const blob = item.getAsFile();
         if (blob) {
-          this.setFile(blob);
-          break;
+          this.addFile(blob);
         }
       }
     }
   }
 
-  private setFile(file: File): void {
-    this.selectedFile = file;
+  private addFile(file: File): void {
+    const currentFiles = [...this.selectedFiles(), file];
+    this.selectedFiles.set(currentFiles);
+
     const reader = new FileReader();
     reader.onload = (e: any) => {
-      this.previewUrl.set(e.target.result);
+      this.previewList.update(list => [
+        ...list,
+        { name: file.name || 'Captura Pegada.png', url: e.target.result, size: file.size }
+      ]);
     };
     reader.readAsDataURL(file);
   }
 
-  clearAttachment(): void {
-    this.selectedFile = null;
-    this.previewUrl.set(null);
+  removeFile(index: number): void {
+    this.selectedFiles.update(files => files.filter((_, i) => i !== index));
+    this.previewList.update(list => list.filter((_, i) => i !== index));
+  }
+
+  clearAllFiles(): void {
+    this.selectedFiles.set([]);
+    this.previewList.set([]);
     this.existingAttachmentUrl.set(null);
   }
 
@@ -192,7 +234,7 @@ export class DefectModalComponent implements OnInit {
 
       this.save.emit({
         defect: data,
-        file: this.selectedFile
+        files: this.selectedFiles()
       });
     }
   }

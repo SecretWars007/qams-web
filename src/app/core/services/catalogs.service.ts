@@ -23,6 +23,11 @@ export class CatalogsService {
         return this.http.get<any[]>(`${this.apiUrl}/${catalogName}/active`);
     }
 
+    /** Alias de compatibilidad para getActive */
+    getActiveByCatalog(catalogName: string): Observable<any[]> {
+        return this.getActive(catalogName);
+    }
+
     /**
      * Obtiene todos los ítems (activos e inactivos) de un catálogo.
      * @param catalogName - Nombre del catálogo

@@ -38,18 +38,21 @@ export class MainLayoutComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly cdr = inject(ChangeDetectorRef);
 
-  // ===== Menú Ejecuciones colapsable =====
+  // ===== Menús colapsables =====
+  planningMenuOpen = signal<boolean>(false);
+  testPlansMenuOpen = signal<boolean>(false);
   executionsMenuOpen = signal<boolean>(false);
 
   // ===== Flujo QA ISTQB Stepper =====
   qaFlowSteps = [
+    { label: 'Planificación', route: '/systems-under-test', active: false },
     { label: 'SUT (Sistema)', route: '/systems-under-test', active: false },
     { label: 'Proyecto', route: '/projects', active: false },
     { label: 'Requisitos', route: '/requirements', active: false },
-    { label: 'Plan de Pruebas', route: '/test-plans', active: false },
+    { label: 'Planes de Prueba', route: '/test-plans', active: false },
     { label: 'Escenarios', route: '/test-scenarios', active: false },
     { label: 'Casos de Prueba', route: '/test-cases', active: false },
-    { label: 'Ejecuciones', route: '/test-executions', active: false },
+    { label: 'Ejecución de Pruebas', route: '/test-executions', active: false },
     { label: 'Defectos', route: '/defects', active: false },
     { label: 'Reportes', route: '/reports', active: false },
   ];
@@ -60,16 +63,39 @@ export class MainLayoutComponent implements OnInit {
     ).subscribe((event: any) => {
       this.sidebarOpen.set(false);
       this.closeUserMenu();
+      const currentUrl = event.urlAfterRedirects ?? '';
+      
+      // Auto-expandir menús según la ruta activa
+      if (currentUrl.startsWith('/systems-under-test') || currentUrl.startsWith('/projects') || currentUrl.startsWith('/requirements')) {
+        this.planningMenuOpen.set(true);
+      }
+      if (currentUrl.startsWith('/test-plans') || currentUrl.startsWith('/test-scenarios') || currentUrl.startsWith('/test-cases')) {
+        this.testPlansMenuOpen.set(true);
+      }
+      if (currentUrl.startsWith('/test-executions') || currentUrl.startsWith('/evidences') || currentUrl.startsWith('/defects')) {
+        this.executionsMenuOpen.set(true);
+      }
+
       // Actualizar el paso activo del stepper
       this.qaFlowSteps = this.qaFlowSteps.map(step => ({
         ...step,
-        active: event.urlAfterRedirects?.startsWith(step.route) ?? false
+        active: currentUrl.startsWith(step.route)
       }));
     });
   }
 
   ngOnInit(): void {
     this.loadProjects();
+    const currentUrl = this.router.url;
+    if (currentUrl.startsWith('/systems-under-test') || currentUrl.startsWith('/projects') || currentUrl.startsWith('/requirements')) {
+      this.planningMenuOpen.set(true);
+    }
+    if (currentUrl.startsWith('/test-plans') || currentUrl.startsWith('/test-scenarios') || currentUrl.startsWith('/test-cases')) {
+      this.testPlansMenuOpen.set(true);
+    }
+    if (currentUrl.startsWith('/test-executions') || currentUrl.startsWith('/evidences') || currentUrl.startsWith('/defects')) {
+      this.executionsMenuOpen.set(true);
+    }
   }
 
   loadProjects(): void {
@@ -121,6 +147,20 @@ export class MainLayoutComponent implements OnInit {
   doLogout(): void {
     this.closeUserMenu();
     this.authService.logout();
+  }
+
+  /** Alterna visibilidad del submenú de Planificación */
+  togglePlanningMenu(event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.planningMenuOpen.update(v => !v);
+  }
+
+  /** Alterna visibilidad del submenú de Planes de Prueba */
+  toggleTestPlansMenu(event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.testPlansMenuOpen.update(v => !v);
   }
 
   /** Alterna visibilidad del submenú de Ejecuciones */

@@ -52,11 +52,14 @@ export interface Observation {
   response: string | null;
 }
 
+import { Defect } from './defect.model';
+
 export interface TestExecutionStepResult {
   id: string;
   stepId: string;
   stepOrder: number;
   action: string;
+  expectedResult?: string;
   description?: string;
   status: {
     id: number;
@@ -67,4 +70,5 @@ export interface TestExecutionStepResult {
   notes: string;
   evidences: Evidence[];
   observations: Observation[];
+  defects?: Defect[];
 }

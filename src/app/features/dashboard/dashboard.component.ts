@@ -1,4 +1,3 @@
-// src/app/features/dashboard/dashboard.component.ts
 import { Component, OnInit, signal, DestroyRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -16,6 +15,9 @@ import { ProjectContextService } from '../../core/services/project-context.servi
 import { AuthService } from '../../core/services/auth.service';
 import { SystemsUnderTestService } from '../../core/services/systems-under-test.service';
 import { UsersService } from '../../core/services/users.service';
+import { TestExecutionsService } from '../../core/services/test-executions.service';
+import { CatalogsService } from '../../core/services/catalogs.service';
+import { TestExecution } from '../../core/models/test-execution.model';
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 
 @Component({
@@ -26,7 +28,7 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
   styleUrls: ['./dashboard.component.scss']
 })
 export class DashboardComponent implements OnInit {
-    private destroyRef = inject(DestroyRef);
+  private readonly destroyRef = inject(DestroyRef);
   summary = signal<DashboardSummary | null>(null);
   projects = signal<Project[]>([]);
   selectedProjectId = signal<string | null>(null);
@@ -40,11 +42,82 @@ export class DashboardComponent implements OnInit {
   // Catálogos para los selects
   suts = signal<SystemUnderTest[]>([]);
   testers = signal<User[]>([]);
+  executionStatuses = signal<{ id: number; code: string; name: string }[]>([]);
+
+  // Mapa oficial de colores por código de catálogo de estado de ejecución
+  readonly statusColorMap: Record<string, string> = {
+    PASSED:      '#10B981', // Verde esmeralda (Aprobado)
+    FAILED:      '#F43F5E', // Rojo carmesí (Fallido)
+    IN_PROGRESS: '#6366F1', // Índigo (En Progreso)
+    BLOCKED:     '#475569', // Pizarra / Gris oscuro (Bloqueado)
+    PENDING:     '#F59E0B', // Ámbar (Pendiente)
+    SKIPPED:     '#94A3B8'  // Gris claro (Omitido)
+  };
+
+  // TestRail Activity Trend Signals
+  trendDaysRange = signal<number>(30); // 30 días por defecto para abarcar ejecuciones históricas
+  trendStatusSummaries = signal<{
+    code: string;
+    name: string;
+    color: string;
+    count: number;
+    percentage: number;
+  }[]>([]);
+  trendTotal = signal<number>(0);
 
   // Derivados del auth service
   private authServiceRef = inject(AuthService);
   readonly canUseAdvancedFilters = this.authServiceRef.canUseAdvancedFilters;
   readonly isTesterOnly = this.authServiceRef.isTesterOnly;
+
+  // Configuración del gráfico TestRail Line
+  activityLineData: ChartConfiguration<'line'>['data'] = {
+    labels: [],
+    datasets: []
+  };
+
+  activityLineOptions: ChartConfiguration<'line'>['options'] = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false
+      },
+      tooltip: {
+        backgroundColor: 'rgba(15, 23, 42, 0.95)',
+        titleFont: { family: 'Plus Jakarta Sans', weight: 700, size: 12 },
+        bodyFont: { family: 'Plus Jakarta Sans', size: 12 },
+        padding: 12,
+        cornerRadius: 10,
+        boxPadding: 6,
+        usePointStyle: true
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        suggestedMax: 3,
+        ticks: {
+          stepSize: 1,
+          precision: 0,
+          color: '#64748b',
+          font: { family: 'Plus Jakarta Sans', size: 11, weight: 600 }
+        },
+        grid: { color: 'rgba(226, 232, 240, 0.8)' }
+      },
+      x: {
+        ticks: {
+          color: '#64748b',
+          font: { family: 'Plus Jakarta Sans', size: 11, weight: 600 }
+        },
+        grid: { display: false }
+      }
+    },
+    interaction: {
+      mode: 'index',
+      intersect: false
+    }
+  };
 
   // Configuración del gráfico Doughnut
   doughnutData: ChartConfiguration<'doughnut'>['data'] = {
@@ -55,13 +128,32 @@ export class DashboardComponent implements OnInit {
   doughnutOptions: ChartConfiguration<'doughnut'>['options'] = {
     responsive: true,
     maintainAspectRatio: false,
-    plugins: { legend: { position: 'bottom' } },
+    cutout: '70%',
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          font: { family: 'Plus Jakarta Sans', size: 12, weight: 600 },
+          color: '#64748b',
+          padding: 16,
+          usePointStyle: true,
+          pointStyleWidth: 10,
+        }
+      },
+      tooltip: {
+        backgroundColor: 'rgba(15, 23, 42, 0.9)',
+        titleFont: { family: 'Plus Jakarta Sans', weight: 700 },
+        bodyFont:  { family: 'Plus Jakarta Sans' },
+        padding: 12,
+        cornerRadius: 10,
+      }
+    },
   };
 
   // Configuración del gráfico de Barras
   barData: ChartConfiguration<'bar'>['data'] = {
     labels: [],
-    datasets: [{ data: [], backgroundColor: '#3b82f6', label: 'Tareas' }],
+    datasets: [{ data: [], backgroundColor: '#4F46E5', label: 'Tareas' }],
   };
 
   barOptions: ChartConfiguration<'bar'>['options'] = {
@@ -70,19 +162,21 @@ export class DashboardComponent implements OnInit {
     plugins: {
       legend: { display: false },
       tooltip: {
-        backgroundColor: 'rgba(30, 27, 75, 0.9)',
+        backgroundColor: 'rgba(15, 23, 42, 0.9)',
+        titleFont: { family: 'Plus Jakarta Sans', weight: 700 },
+        bodyFont:  { family: 'Plus Jakarta Sans' },
         padding: 12,
-        cornerRadius: 8,
+        cornerRadius: 10,
       }
     },
     scales: {
       y: {
         beginAtZero: true,
-        ticks: { stepSize: 1, color: '#6b7280' },
-        grid: { color: 'rgba(229, 231, 235, 0.8)' }
+        ticks: { stepSize: 1, color: '#94a3b8', font: { family: 'Plus Jakarta Sans', size: 11 } },
+        grid: { color: 'rgba(226, 232, 240, 0.8)' }
       },
       x: {
-        ticks: { color: '#6b7280' },
+        ticks: { color: '#94a3b8', font: { family: 'Plus Jakarta Sans', size: 11 } },
         grid: { display: false }
       }
     },
@@ -94,23 +188,29 @@ export class DashboardComponent implements OnInit {
     }
   };
 
-
-
-
-
-
-
   constructor(
     private readonly dashboardService: DashboardService,
     private readonly projectsService: ProjectsService,
     private readonly projectContextService: ProjectContextService,
     private readonly authService: AuthService,
     private readonly sutService: SystemsUnderTestService,
-    private readonly usersService: UsersService
+    private readonly usersService: UsersService,
+    private readonly executionsService: TestExecutionsService,
+    private readonly catalogsService: CatalogsService
   ) { }
 
   ngOnInit(): void {
     this.loading.set(true);
+
+    // Cargar catálogo de estados de ejecución desde base de datos
+    this.catalogsService.getActive('ExecutionStatus').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (statuses: any[]) => {
+        if (statuses && statuses.length > 0) {
+          this.executionStatuses.set(statuses);
+        }
+      },
+      error: (err: any) => console.error('Error cargando catálogo ExecutionStatus:', err)
+    });
 
     if (this.canUseAdvancedFilters()) {
       this.sutService.getAll().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => this.suts.set(data));
@@ -124,6 +224,11 @@ export class DashboardComponent implements OnInit {
     }
 
     this.applyFilters();
+  }
+
+  getStatusColor(code: string): string {
+    const clean = (code || '').toUpperCase();
+    return this.statusColorMap[clean] || '#6366F1';
   }
 
   applyFilters(): void {
@@ -150,7 +255,6 @@ export class DashboardComponent implements OnInit {
           const firstProjectId = projects[0].id;
           if (!this.selectedProjectId() || !projects.find(p => p.id === this.selectedProjectId())) {
             this.selectedProjectId.set(firstProjectId);
-            this.loadProjectMetrics(firstProjectId);
           }
           this.projectContextService.initializeIfEmpty(firstProjectId);
         } else {
@@ -158,7 +262,10 @@ export class DashboardComponent implements OnInit {
         }
       }), takeUntilDestroyed(this.destroyRef)
     ).subscribe({
-      next: () => this.loading.set(false),
+      next: () => {
+        this.loading.set(false);
+        this.loadActivityTrend();
+      },
       error: (err) => {
         console.error('DashboardComponent: Error loading data:', err);
         this.loading.set(false);
@@ -176,10 +283,129 @@ export class DashboardComponent implements OnInit {
     this.applyFilters();
   }
 
+  setTrendDays(days: number): void {
+    this.trendDaysRange.set(days);
+    this.loadActivityTrend();
+  }
+
+  loadActivityTrend(): void {
+    const days = this.trendDaysRange();
+    const projectId = this.selectedProjectId() || undefined;
+
+    this.executionsService.getExecutions(undefined, projectId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (executions: TestExecution[]) => {
+          this.buildActivityTrend(executions || [], days);
+        },
+        error: (err: any) => console.error('Error cargando ejecuciones para tendencia:', err)
+      });
+  }
+
+  private buildActivityTrend(executions: TestExecution[], days: number): void {
+    const rawStatuses = this.executionStatuses();
+    const defaultStatuses = [
+      { id: 3, code: 'PASSED', name: 'Aprobado' },
+      { id: 4, code: 'FAILED', name: 'Fallido' },
+      { id: 2, code: 'IN_PROGRESS', name: 'En Progreso' },
+      { id: 5, code: 'BLOCKED', name: 'Bloqueado' },
+      { id: 1, code: 'PENDING', name: 'Pendiente' },
+      { id: 6, code: 'SKIPPED', name: 'Omitido' }
+    ];
+    const statuses = rawStatuses.length > 0 ? rawStatuses : defaultStatuses;
+
+    const labels: string[] = [];
+    const dateKeys: string[] = [];
+    const now = new Date();
+
+    const rangeDays = days > 0 ? days : 30;
+    for (let i = rangeDays - 1; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(now.getDate() - i);
+      const key = `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}-${d.getDate().toString().padStart(2, '0')}`;
+      dateKeys.push(key);
+      labels.push(`${d.getDate()}/${d.getMonth() + 1}`);
+    }
+
+    const statusCountsMap: Record<string, Record<string, number>> = {};
+    const statusTotalMap: Record<string, number> = {};
+
+    statuses.forEach(s => {
+      const code = s.code.toUpperCase();
+      statusCountsMap[code] = {};
+      statusTotalMap[code] = 0;
+      dateKeys.forEach(k => {
+        statusCountsMap[code][k] = 0;
+      });
+    });
+
+    let totalExecutions = 0;
+
+    executions.forEach(exec => {
+      if (!exec.executionDate) return;
+      const execDate = new Date(exec.executionDate);
+      const k = `${execDate.getFullYear()}-${(execDate.getMonth() + 1).toString().padStart(2, '0')}-${execDate.getDate().toString().padStart(2, '0')}`;
+
+      const code = (exec.status?.code || 'PENDING').toUpperCase();
+      if (statusCountsMap[code] && statusCountsMap[code][k] !== undefined) {
+        statusCountsMap[code][k]++;
+        statusTotalMap[code]++;
+        totalExecutions++;
+      }
+    });
+
+    // Si dentro del rango elegido no hay ejecuciones pero hay ejecuciones en el proyecto global, contamos el total histórico
+    if (totalExecutions === 0 && executions.length > 0) {
+      executions.forEach(exec => {
+        const code = (exec.status?.code || 'PENDING').toUpperCase();
+        if (statusTotalMap[code] !== undefined) {
+          statusTotalMap[code]++;
+          totalExecutions++;
+        }
+      });
+    }
+
+    const summaries = statuses.map(s => {
+      const code = s.code.toUpperCase();
+      const count = statusTotalMap[code] || 0;
+      const percentage = totalExecutions > 0 ? Math.round((count / totalExecutions) * 100) : 0;
+      return {
+        code,
+        name: s.name,
+        color: this.getStatusColor(code),
+        count,
+        percentage
+      };
+    });
+
+    this.trendStatusSummaries.set(summaries);
+    this.trendTotal.set(totalExecutions);
+
+    this.activityLineData = {
+      labels,
+      datasets: statuses.map(s => {
+        const code = s.code.toUpperCase();
+        const color = this.getStatusColor(code);
+        return {
+          data: dateKeys.map(k => statusCountsMap[code]?.[k] || 0),
+          label: s.name,
+          borderColor: color,
+          backgroundColor: `${color}15`,
+          pointBackgroundColor: '#ffffff',
+          pointBorderColor: color,
+          pointBorderWidth: 2,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          tension: 0.2,
+          fill: false
+        };
+      })
+    };
+  }
+
   /** Carga y renderiza los datos de todas las métricas del proyecto */
   private loadProjectMetrics(projectId: string): void {
-    // Se eliminaron las llamadas a timeline, burndown y drawdown para limpiar la consola
-    // y simplificar el dashboard según solicitud del usuario.
+    this.loadActivityTrend();
   }
 
   onProjectChange(projectId: string): void {
@@ -187,62 +413,50 @@ export class DashboardComponent implements OnInit {
     if (this.selectedProjectId()) {
        this.projectContextService.setActiveProject(this.selectedProjectId()!);
        this.loadProjectMetrics(this.selectedProjectId()!);
+    } else {
+       this.loadActivityTrend();
     }
   }
 
-
-
   private buildCharts(data: DashboardSummary): void {
-    const colorMap: Record<string, string> = {
-      PASSED: '#22c55e',
-      FAILED: '#ef4444',
-      PENDING: '#f59e0b',
-      IN_PROGRESS: '#3b82f6',
-      BLOCKED: '#8b5cf6',
-      SKIPPED: '#6b7280',
-    };
-
-    const columnColorMap: Record<string, string> = {
-      'Tareas Pendientes': '#94a3b8',
-      'Por Hacer': '#6b7280',
-      'En Progreso': '#3b82f6',
-      'En Revisión': '#8b5cf6',
-      'Completado': '#22c55e',
-      'Backlog': '#94a3b8',
-      'Done': '#22c55e',
-      'Review': '#8b5cf6',
-      'In Progress': '#3b82f6',
-    };
-
-    // Doughnut
     const statusData = data.executionsByStatus || [];
     this.doughnutData = {
-      labels: statusData.map((s) => s.statusName),
+      labels: statusData.map(s => s.statusName),
       datasets: [
         {
-          data: statusData.map((s) => s.count),
-          backgroundColor: statusData.map(
-            (s) => colorMap[s.statusCode] || '#6b7280',
-          ),
+          data: statusData.map(s => s.count),
+          backgroundColor: statusData.map(s => this.getStatusColor(s.statusCode)),
+          borderWidth: 3,
+          borderColor: '#ffffff',
+          hoverBorderWidth: 4,
         },
       ],
     };
 
-    // Barras
+    // Barras — gradiente por columna con colores QAMS
     const standardColumns = ['Tareas Pendientes', 'Por Hacer', 'En Progreso', 'En Revisión', 'Completado'];
+    const qamsColumnColors: Record<string, string> = {
+      'Tareas Pendientes': '#94a3b8',
+      'Por Hacer':         '#94a3b8',
+      'En Progreso':       '#4F46E5',  // Indigo
+      'En Revisión':       '#7C3AED',  // Violet
+      'Completado':        '#10B981',  // Emerald
+      'Backlog':           '#94a3b8',
+      'Done':              '#10B981',
+      'Review':            '#7C3AED',
+      'In Progress':       '#4F46E5',
+    };
     const progressData = data.taskProgress || [];
-
     const chartData = standardColumns.map(colName => {
       const found = progressData.find(t => t.columnName.toLowerCase() === colName.toLowerCase());
       return found ? found.count : 0;
     });
-
     this.barData = {
       labels: standardColumns,
       datasets: [
         {
           data: chartData,
-          backgroundColor: standardColumns.map(col => columnColorMap[col] || '#3b82f6'),
+          backgroundColor: standardColumns.map(col => qamsColumnColors[col] || '#4F46E5'),
           label: 'Tareas',
         },
       ],

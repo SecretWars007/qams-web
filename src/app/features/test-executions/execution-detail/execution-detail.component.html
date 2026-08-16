@@ -43,31 +43,31 @@
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div>
-          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Caso de Prueba</label>
+          <p class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Caso de Prueba</p>
           <div class="text-sm font-semibold text-slate-800 bg-slate-50 px-3 py-2 rounded-xl border border-slate-100">
             {{ execution()?.testCase?.title }}
           </div>
         </div>
         <div>
-          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Ejecutado Por</label>
+          <p class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Ejecutado Por</p>
           <div class="text-sm font-medium text-slate-700 bg-slate-50 px-3 py-2 rounded-xl border border-slate-100 flex items-center gap-2">
             <i class="fas fa-user text-slate-400"></i> {{ execution()?.tester?.name || 'No asignado' }}
           </div>
         </div>
         <div>
-          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Fecha de Ejecución</label>
+          <p class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Fecha de Ejecución</p>
           <div class="text-sm font-medium text-slate-700 bg-slate-50 px-3 py-2 rounded-xl border border-slate-100 flex items-center gap-2">
             <i class="fas fa-calendar-day text-slate-400"></i> {{ execution()?.executionDate | date:'medium' }}
           </div>
         </div>
         <div>
-          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Tiempo Actual (Horas)</label>
+          <p class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Tiempo Actual (Horas)</p>
           <div class="text-sm font-medium text-slate-700 bg-slate-50 px-3 py-2 rounded-xl border border-slate-100">
             {{ execution()?.actualTimeHours }} h
           </div>
         </div>
         <div class="md:col-span-2 lg:col-span-3">
-          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Notas de Ejecución</label>
+          <p class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Notas de Ejecución</p>
           <div class="text-sm font-medium text-slate-700 bg-slate-50 px-3 py-3 rounded-xl border border-slate-100 min-h-[60px]">
             {{ execution()?.notes || 'Sin notas adicionales.' }}
           </div>
@@ -104,7 +104,7 @@
 
             <div class="flex items-center gap-3 shrink-0">
               <button
-                *ngIf="step.status?.code === 'FAIL' || step.status?.code === 'FAILED' || step.status?.code === 'OBSERVED'"
+                *ngIf="step.status.code === 'FAIL' || step.status.code === 'FAILED' || step.status.code === 'OBSERVED'"
                 (click)="reportDefectForStep(step)"
                 class="px-2.5 py-1 text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-lg border border-rose-200 flex items-center gap-1.5 transition-all shadow-sm"
                 title="Reportar Bug/Defecto vinculado a este paso">
@@ -223,7 +223,6 @@
   [testCaseId]="execution()?.testCase?.id || null"
   [testExecutionId]="execution()?.id || null"
   [testExecutionStepResultId]="selectedStepId()"
-  (close)="showDefectModal.set(false)"
+  (closeModal)="showDefectModal.set(false)"
   (save)="onSaveDefect($event)">
 </app-defect-modal>
-

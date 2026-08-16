@@ -29,6 +29,27 @@
   // Brand color gradients
   --primary-gradient: linear-gradient(135deg, #135bec 0%, #13ecb6 100%);
   --accent-gradient: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+
+  // QAMS Design System Tokens
+  --qams-primary:   #4F46E5;
+  --qams-secondary: #10B981;
+  --qams-accent:    #F59E0B;
+  --qams-danger:    #F43F5E;
+  --qams-violet:    #7C3AED;
+  --qams-bg:        #F8FAFC;
+  --qams-surface:   #FFFFFF;
+  --qams-text:      #0F172A;
+  --qams-muted:     #64748B;
+
+  // QAMS Gradient shortcuts
+  --qams-hero-gradient:    linear-gradient(135deg, #4F46E5 0%, #10B981 100%);
+  --qams-primary-gradient: linear-gradient(135deg, #6366f1 0%, #4F46E5 100%);
+  --qams-success-gradient: linear-gradient(135deg, #10B981 0%, #059669 100%);
+
+  // Typography
+  --font-display: 'Plus Jakarta Sans', Inter, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+
 }
 
 // 5. Global Base Overrides
@@ -233,12 +254,16 @@
   }
 
   // Form Elements
-  .form-input {
-    @apply w-full px-4 py-2.5 bg-slate-50/50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all duration-200 text-sm placeholder:text-slate-400;
+  .form-input, .form-control {
+    @apply w-full block px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all duration-200 text-sm placeholder:text-slate-400;
+  }
+
+  .form-control-sm {
+    @apply px-3 py-1.5 text-xs rounded-lg;
   }
 
   .form-label {
-    @apply block text-sm font-semibold text-slate-600 mb-1.5 ml-0.5;
+    @apply block text-xs font-bold text-slate-600 mb-1.5 ml-0.5 uppercase tracking-wider;
   }
 
   // Custom Toggle Switch

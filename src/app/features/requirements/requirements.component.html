@@ -7,7 +7,8 @@
         
         <!-- Project Filter Dropdown -->
         <div class="relative ml-4">
-          <select [ngModel]="projectId()" (ngModelChange)="onProjectSelect($event)"
+          <label for="requirementProjectSelect" class="sr-only">Seleccionar proyecto</label>
+          <select id="requirementProjectSelect" [ngModel]="projectId()" (ngModelChange)="onProjectSelect($event)"
             class="pl-10 pr-8 py-2 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none shadow-sm min-w-[200px]">
             <option [value]="null" disabled>Selecciona un proyecto</option>
             @for (p of projects(); track p.id) {
@@ -33,11 +34,68 @@
         </p>
       }
     </div>
-    <div class="flex gap-2 w-full sm:w-auto">
+    <div class="flex items-center gap-2 w-full sm:w-auto flex-wrap">
+      <!-- View Mode Switcher -->
+      <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
+        <button (click)="viewMode.set('list')" [ngClass]="viewMode() === 'list' ? 'bg-white text-indigo-700 shadow-xs' : 'text-slate-500 hover:text-slate-800'" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5">
+          <i class="fas fa-th-large"></i>
+          <span>Requisitos</span>
+        </button>
+        <button (click)="viewMode.set('rtm')" [ngClass]="viewMode() === 'rtm' ? 'bg-white text-indigo-700 shadow-xs' : 'text-slate-500 hover:text-slate-800'" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5">
+          <i class="fas fa-project-diagram text-indigo-600"></i>
+          <span>Matriz RTM</span>
+        </button>
+      </div>
+
+      <button *ngIf="viewMode() === 'rtm'" (click)="exportRtmToCsv()" class="btn-secondary text-xs px-3 py-2" [disabled]="!projectId() || requirements().length === 0" title="Exportar Matriz RTM a CSV">
+        <i class="fas fa-file-export text-emerald-600"></i>
+        <span>Exportar RTM</span>
+      </button>
+
       <button (click)="openModal()" class="btn-primary w-full sm:w-auto" [disabled]="!projectId()">
         <i class="fas fa-plus-circle"></i>
         <span>Nuevo Requisito</span>
       </button>
+    </div>
+  </div>
+
+  <!-- RTM KPIs Header (Visible in RTM mode) -->
+  <div *ngIf="viewMode() === 'rtm' && !loading() && requirements().length > 0" class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6 animate-in fade-in duration-300">
+    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg">
+        <i class="fas fa-list-check"></i>
+      </div>
+      <div>
+        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Requisitos</div>
+        <div class="text-xl font-black text-slate-800">{{ requirements().length }}</div>
+      </div>
+    </div>
+    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">
+        <i class="fas fa-shield-halved"></i>
+      </div>
+      <div>
+        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Cobertura Total</div>
+        <div class="text-xl font-black text-emerald-600">{{ coveragePercent() }}%</div>
+      </div>
+    </div>
+    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-lg">
+        <i class="fas fa-flask"></i>
+      </div>
+      <div>
+        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Casos Vinculados</div>
+        <div class="text-xl font-black text-purple-600">{{ projectTestCases().length }}</div>
+      </div>
+    </div>
+    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-lg">
+        <i class="fas fa-bug"></i>
+      </div>
+      <div>
+        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Defectos Detectados</div>
+        <div class="text-xl font-black text-rose-600">{{ projectDefects().length }}</div>
+      </div>
     </div>
   </div>
 
@@ -63,8 +121,104 @@
         </button>
       </div>
     } @else {
-      <!-- Requirements Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- RTM TABLE VIEW -->
+      <div *ngIf="viewMode() === 'rtm'" class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm animate-in fade-in duration-300">
+        <div class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <i class="fas fa-table-cells text-indigo-600"></i>
+            <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Matriz de Trazabilidad Requisitos $\leftrightarrow$ Casos $\leftrightarrow$ Defectos</span>
+          </div>
+          <span class="text-xs font-bold text-slate-500">{{ rtmMatrix().length }} Requisitos trazados</span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs text-left">
+            <thead class="bg-slate-100/80 text-slate-600 uppercase text-[10px] font-bold border-b border-slate-200">
+              <tr>
+                <th class="p-4">Requisito</th>
+                <th class="p-4">Prioridad / Tipo</th>
+                <th class="p-4">Casos de Prueba</th>
+                <th class="p-4 text-center">Estado Ejecución</th>
+                <th class="p-4 text-center">Defectos</th>
+                <th class="p-4 text-center">Cobertura ISTQB</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <tr *ngFor="let row of rtmMatrix()" class="hover:bg-slate-50/80 transition-colors">
+                <!-- Requisito -->
+                <td class="p-4">
+                  <div class="flex items-center gap-2 mb-1">
+                    <span class="px-2 py-0.5 rounded-md bg-indigo-50 border border-indigo-200 text-indigo-700 font-mono font-bold text-[10px]">{{ row.requirement.code }}</span>
+                  </div>
+                  <div class="font-bold text-slate-900 text-xs">{{ row.requirement.title }}</div>
+                </td>
+
+                <!-- Prioridad / Tipo -->
+                <td class="p-4">
+                  <div class="space-y-1">
+                    <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">{{ row.requirement.requirementPriorityName }}</span>
+                    <div class="text-[10px] text-slate-400">{{ row.requirement.requirementTypeName }}</div>
+                  </div>
+                </td>
+
+                <!-- Casos de Prueba -->
+                <td class="p-4">
+                  <div *ngIf="row.testCases.length > 0" class="space-y-1">
+                    <div *ngFor="let tc of row.testCases" class="flex items-center gap-1.5 text-xs text-slate-800 font-medium">
+                      <i class="fas fa-flask text-indigo-500 text-[10px]"></i>
+                      <span class="truncate max-w-[200px]">{{ tc.title }}</span>
+                    </div>
+                  </div>
+                  <span *ngIf="row.testCases.length === 0" class="text-amber-600 text-[11px] font-semibold flex items-center gap-1">
+                    <i class="fas fa-triangle-exclamation"></i> Sin casos asociados
+                  </span>
+                </td>
+
+                <!-- Estado Ejecución -->
+                <td class="p-4 text-center">
+                  <div *ngIf="row.executions.length > 0" class="flex flex-col items-center gap-1">
+                    <span *ngFor="let exec of row.executions" class="px-2 py-0.5 rounded-full text-[9px] font-bold border uppercase"
+                      [ngClass]="{
+                        'bg-emerald-50 text-emerald-700 border-emerald-200': exec.status.code === 'PASSED',
+                        'bg-rose-50 text-rose-700 border-rose-200': exec.status.code === 'FAILED',
+                        'bg-amber-50 text-amber-700 border-amber-200': exec.status.code === 'BLOCKED',
+                        'bg-slate-100 text-slate-600 border-slate-200': exec.status.code === 'PENDING'
+                      }">
+                      {{ exec.status.code }}
+                    </span>
+                  </div>
+                  <span *ngIf="row.executions.length === 0" class="text-slate-400 text-[10px]">No ejecutado</span>
+                </td>
+
+                <!-- Defectos -->
+                <td class="p-4 text-center">
+                  <span *ngIf="row.defects.length > 0" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-rose-50 border border-rose-200 text-rose-700 font-bold text-[10px]">
+                    <i class="fas fa-bug"></i> {{ row.defects.length }} Defecto(s)
+                  </span>
+                  <span *ngIf="row.defects.length === 0" class="text-emerald-600 text-[11px] font-bold">
+                    <i class="fas fa-check"></i> Limpio
+                  </span>
+                </td>
+
+                <!-- Cobertura ISTQB -->
+                <td class="p-4 text-center">
+                  <span [ngClass]="{
+                    'bg-emerald-100 text-emerald-800 border-emerald-300': row.coverageStatus === 'PASSING',
+                    'bg-rose-100 text-rose-800 border-rose-300': row.coverageStatus === 'FAILING',
+                    'bg-amber-100 text-amber-800 border-amber-300': row.coverageStatus === 'PENDING',
+                    'bg-slate-100 text-slate-600 border-slate-200': row.coverageStatus === 'UNCOVERED'
+                  }" class="px-3 py-1 rounded-full text-[10px] font-black border uppercase tracking-wider">
+                    {{ row.coverageStatus === 'PASSING' ? 'Aprobado 100%' : (row.coverageStatus === 'FAILING' ? 'Con Fallas' : (row.coverageStatus === 'PENDING' ? 'En Progreso' : 'Sin Pruebas')) }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Requirements Grid (Cards View) -->
+      <div *ngIf="viewMode() === 'list'" class="grid grid-cols-1 md:grid-cols-2 gap-6">
         @for (req of requirements(); track req.id) {
           <div class="bg-white rounded-xl border border-gray-200 p-6 hover:border-indigo-300 transition-all hover:shadow-lg group relative overflow-hidden flex flex-col h-full">
             

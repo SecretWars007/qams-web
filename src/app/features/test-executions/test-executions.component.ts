@@ -1,11 +1,12 @@
 import Swal from 'sweetalert2';
-import { Component, OnInit, signal, inject, DestroyRef } from '@angular/core';
+import { Component, OnInit, signal, inject, DestroyRef, HostListener } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators, FormsModule } from '@angular/forms';
 import { TestExecutionsService } from '../../core/services/test-executions.service';
 import { TestExecution } from '../../core/models/test-execution.model';
 
 import { ActivatedRoute, RouterModule } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import { TestCasesService } from '../../core/services/test-cases.service';
 import { ProjectsService } from '../../core/services/projects.service';
 import { TestSuitesService } from '../../core/services/test-suites.service';
@@ -16,6 +17,9 @@ import { TestSuite } from '../../core/models/test-suite.model';
 import { TestCase } from '../../core/models/test-case.model';
 import { TestPlan } from '../../core/models/test-plan.model';
 import { SkeletonLoaderComponent } from '../shared/skeleton-loader/skeleton-loader.component';
+import { DefectModalComponent } from '../defects/defect-modal/defect-modal.component';
+import { DefectsService } from '../../core/services/defects.service';
+import { CatalogsService } from '../../core/services/catalogs.service';
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 
 /**
@@ -24,12 +28,12 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 @Component({
   selector: 'app-test-executions',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule, SkeletonLoaderComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule, SkeletonLoaderComponent, DefectModalComponent],
   templateUrl: './test-executions.component.html',
   styleUrls: ['./test-executions.component.scss']
 })
 export class TestExecutionsComponent implements OnInit {
-    private destroyRef = inject(DestroyRef);
+  private readonly destroyRef = inject(DestroyRef);
   executions = signal<TestExecution[]>([]);
   isEditing = signal<boolean>(false);
   editingExecutionId = signal<string | null>(null);
@@ -38,6 +42,10 @@ export class TestExecutionsComponent implements OnInit {
   isUploading = signal<boolean>(false);
   screenshotPreview = signal<string | null>(null);
   testCaseTitle = signal<string>('');
+
+  // Catalogs signals
+  stepResultStatuses = signal<any[]>([]);
+  executionStatuses = signal<any[]>([]);
 
   // Filter signals
   selectedProjectId = signal<string>('');
@@ -61,17 +69,37 @@ export class TestExecutionsComponent implements OnInit {
   observationText: string = '';
   isSubmitting = signal<boolean>(false);
 
+  // Defect Modal Signals
+  showDefectModal = signal<boolean>(false);
+  defectModalData = signal<any>(null);
+  selectedStepIdForDefect = signal<string | null>(null);
+
   executionForm!: FormGroup;
   uploadForm!: FormGroup;
-  selectedFile: File | null = null;
+  
+  // Multi-file Evidence Signals
+  selectedEvidenceFiles = signal<File[]>([]);
+  evidencePreviews = signal<{ name: string; url: string; size: number }[]>([]);
+
+  // Multi-file Incident / Observation Signals
+  selectedIncidentFiles = signal<File[]>([]);
+  incidentPreviews = signal<{ name: string; url: string; size: number }[]>([]);
+
+  // Execution Timer Signals (Elapsed Time Tracking)
+  elapsedSeconds = signal<number>(0);
+  isTimerRunning = signal<boolean>(false);
+  private timerInterval: any = null;
+  focusedStepIndex = signal<number>(0);
 
   private readonly fb = inject(FormBuilder);
   private readonly executionsService = inject(TestExecutionsService);
+  private readonly defectsService = inject(DefectsService);
   private readonly testCasesService = inject(TestCasesService);
   private readonly projectsService = inject(ProjectsService);
   private readonly scenariosService = inject(TestSuitesService);
   private readonly testPlansService = inject(TestPlansService);
   private readonly usersService = inject(UsersService);
+  private readonly catalogsService = inject(CatalogsService);
   private readonly route = inject(ActivatedRoute);
   private readonly location = inject(Location);
 
@@ -106,6 +134,7 @@ export class TestExecutionsComponent implements OnInit {
 
 
   ngOnInit(): void {
+    this.loadCatalogs();
     this.initForm();
     this.initUploadForm();
     this.loadProjects();
@@ -191,12 +220,17 @@ export class TestExecutionsComponent implements OnInit {
 
   addStepResult(step?: any) {
     this.stepResults.push(this.fb.group({
+      id: [step?.id || ''],
       testStepId: [step?.stepId || step?.testStepId || step?.id || ''],
-      stepOrder: [step?.stepOrder || 0],
-      action: [step?.action || ''],
+      stepOrder: [step?.stepOrder !== undefined ? step?.stepOrder : (step?.testStepOrder || 0)],
+      action: [step?.action || step?.testStepAction || step?.description || ''],
+      expectedResult: [step?.expectedResult || step?.testStepExpectedResult || ''],
       statusId: [step?.status?.id || step?.statusId || 1, Validators.required],
       actualResult: [step?.actualResult || '', Validators.required],
-      notes: [step?.notes || '']
+      notes: [step?.notes || ''],
+      evidences: [step?.evidences || []],
+      observations: [step?.observations || []],
+      defects: [step?.defects || []]
     }));
   }
 
@@ -218,7 +252,213 @@ export class TestExecutionsComponent implements OnInit {
       this.loadTestCaseSteps(defaultTcId);
       this.loadTestCaseTitle(defaultTcId);
     }
+    this.startTimer();
     this.showModal.set(true);
+  }
+
+  /**
+   * Dispara una nueva ejecución (nuevo ciclo) para el mismo caso de prueba.
+   */
+  executeNewCycle(execution: TestExecution, event?: Event) {
+    if (event) event.stopPropagation();
+
+    this.isEditing.set(false);
+    this.editingExecutionId.set(null);
+    this.stepResults.clear();
+
+    const tcId = execution.testCase.id;
+    this.testCaseTitle.set(execution.testCase.title);
+
+    this.executionForm.reset({
+      testCaseId: tcId,
+      testerId: null,
+      statusId: 1,
+      statusCode: 'PASSED',
+      testPlanId: execution.testPlan?.id || this.selectedTestPlanId() || null,
+      notes: `Re-ejecución del caso "${execution.testCase.title}" (Nuevo Ciclo)`,
+      actualTimeHours: null
+    }, { emitEvent: false });
+
+    this.loadTestCaseSteps(tcId);
+    this.resetTimer();
+    this.startTimer();
+    this.showModal.set(true);
+  }
+
+  /**
+   * Dispara un ciclo de re-test enfocado exclusivamente en los pasos fallidos / bloqueados.
+   */
+  executeRerunFailed(execution: TestExecution, event?: Event) {
+    if (event) event.stopPropagation();
+
+    this.loading.set(true);
+    this.isEditing.set(false);
+    this.editingExecutionId.set(null);
+    this.stepResults.clear();
+
+    this.executionsService.getExecutionById(execution.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (fullExec) => {
+        this.loading.set(false);
+        const tcId = fullExec.testCase.id;
+        this.testCaseTitle.set(fullExec.testCase.title);
+
+        const projectId = fullExec.project?.id || this.selectedProjectId();
+        if (projectId) {
+          this.selectedProjectId.set(projectId);
+          this.loadTestPlans(projectId);
+        }
+
+        this.executionForm.reset({
+          testCaseId: tcId,
+          testerId: null,
+          statusId: 2,
+          statusCode: 'FAILED',
+          testPlanId: fullExec.testPlan?.id || this.selectedTestPlanId() || null,
+          notes: `Re-ejecución de Pasos Fallidos / Bloqueados (Ciclo ${((fullExec.cycleNumber || 1) + 1)})`,
+          actualTimeHours: null
+        }, { emitEvent: false });
+
+        if (fullExec.stepResults && fullExec.stepResults.length > 0) {
+          fullExec.stepResults.forEach(sr => {
+            const isFailedOrBlocked = sr.status.id === 2 || sr.status.id === 3 || sr.status.code === 'FAILED' || sr.status.code === 'BLOCKED';
+            this.addStepResult({
+              ...sr,
+              status: isFailedOrBlocked ? { id: 2, name: 'FAILED', code: 'FAILED' } : sr.status,
+              actualResult: isFailedOrBlocked ? '' : sr.actualResult // Reset actualResult for failed steps to re-verify
+            });
+          });
+        } else {
+          this.loadTestCaseSteps(tcId);
+        }
+
+        this.resetTimer();
+        this.startTimer();
+        this.showModal.set(true);
+
+        Swal.fire({
+          icon: 'info',
+          title: 'Modo Retest Activado',
+          text: 'Se precargó un nuevo ciclo con los pasos fallidos/bloqueados en limpio para su re-verificación.',
+          confirmButtonColor: '#150fbd',
+          timer: 2500
+        });
+      },
+      error: () => {
+        this.loading.set(false);
+        this.executeNewCycle(execution, event);
+      }
+    });
+  }
+
+  // ================= TIMER METHODS =================
+  startTimer() {
+    this.isTimerRunning.set(true);
+    if (this.timerInterval) clearInterval(this.timerInterval);
+    this.timerInterval = setInterval(() => {
+      this.elapsedSeconds.update(s => s + 1);
+    }, 1000);
+  }
+
+  pauseTimer() {
+    this.isTimerRunning.set(false);
+    if (this.timerInterval) {
+      clearInterval(this.timerInterval);
+      this.timerInterval = null;
+    }
+  }
+
+  toggleTimer() {
+    if (this.isTimerRunning()) {
+      this.pauseTimer();
+    } else {
+      this.startTimer();
+    }
+  }
+
+  resetTimer() {
+    this.pauseTimer();
+    this.elapsedSeconds.set(0);
+  }
+
+  formattedElapsedTime(): string {
+    const total = this.elapsedSeconds();
+    const hrs = Math.floor(total / 3600);
+    const mins = Math.floor((total % 3600) / 60);
+    const secs = total % 60;
+    if (hrs > 0) {
+      return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  }
+
+  // ================= ATALJOS DE TECLADO (FAST-TRACK) =================
+  @HostListener('window:keydown', ['$event'])
+  handleKeyboardShortcuts(event: KeyboardEvent) {
+    if (!this.showModal()) return;
+
+    if (event.ctrlKey && event.key === 'Enter') {
+      event.preventDefault();
+      this.onSubmit();
+      return;
+    }
+
+    const target = event.target as HTMLElement;
+    if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')) return;
+
+    if (event.key === 'Escape') {
+      this.closeModal();
+      return;
+    }
+
+    this.processKeyAction(event);
+  }
+
+  private processKeyAction(event: KeyboardEvent) {
+    const key = event.key.toLowerCase();
+    const statusMap: Record<string, number> = { p: 1, '1': 1, f: 2, '2': 2, b: 3, '3': 3, s: 4, '4': 4 };
+
+    if (statusMap[key]) {
+      event.preventDefault();
+      this.setStepStatus(this.focusedStepIndex(), statusMap[key]);
+      return;
+    }
+
+    if (key === 'j' || key === 'arrowdown') {
+      event.preventDefault();
+      this.moveStepFocus(1);
+    } else if (key === 'k' || key === 'arrowup') {
+      event.preventDefault();
+      this.moveStepFocus(-1);
+    }
+  }
+
+  private moveStepFocus(delta: number) {
+    const newIdx = this.focusedStepIndex() + delta;
+    if (newIdx >= 0 && newIdx < this.stepResults.length) {
+      this.focusedStepIndex.set(newIdx);
+    }
+  }
+
+  setStepStatus(stepIndex: number, statusId: number) {
+    if (stepIndex >= 0 && stepIndex < this.stepResults.length) {
+      const group = this.stepResults.at(stepIndex) as FormGroup;
+      group.get('statusId')?.setValue(statusId);
+    }
+  }
+
+  hasTestCase(id?: string): boolean {
+    if (!id) return false;
+    return this.testCases().some(tc => tc.id === id);
+  }
+
+  hasTestPlan(id?: string): boolean {
+    if (!id) return false;
+    return this.testPlans().some(p => p.id === id);
+  }
+
+  hasTester(id?: string): boolean {
+    if (!id) return false;
+    return this.users().some(u => u.id === id);
   }
 
   editExecution(execution: TestExecution, event?: Event) {
@@ -228,30 +468,77 @@ export class TestExecutionsComponent implements OnInit {
     this.isEditing.set(true);
     this.editingExecutionId.set(execution.id);
 
-    // Fetch full execution details to ensure we have all steps
+    // Fetch full execution details to ensure we have all steps and data
     this.executionsService.getExecutionById(execution.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (fullExecution) => {
+        this.selectedExecution.set(fullExecution);
         this.loadTestCaseTitle(fullExecution.testCase.id);
+
+        const projectId = fullExecution.project?.id || this.selectedProjectId();
+        if (projectId) {
+          this.selectedProjectId.set(projectId);
+          this.loadTestPlans(projectId);
+          this.testCasesService.getTestCases(projectId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(tcs => {
+            if (tcs) this.testCases.set(tcs);
+          });
+        }
 
         this.executionForm.patchValue({
           testCaseId: fullExecution.testCase.id,
           testerId: fullExecution.tester?.id || null,
-          notes: fullExecution.notes,
-          actualTimeHours: fullExecution.actualTimeHours,
-          statusId: fullExecution.status.id,
+          notes: fullExecution.notes || '',
+          actualTimeHours: fullExecution.actualTimeHours || 0,
+          statusId: Number(fullExecution.status.id),
           statusCode: fullExecution.status.code,
           testPlanId: fullExecution.testPlan?.id || null
         }, { emitEvent: false });
 
-        this.stepResults.clear();
-        if (fullExecution.stepResults && fullExecution.stepResults.length > 0) {
-          fullExecution.stepResults.forEach(sr => this.addStepResult(sr));
+        if (projectId) {
+          this.defectsService.getByProject(projectId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+            next: (defects) => {
+              this.stepResults.clear();
+              if (fullExecution.stepResults && fullExecution.stepResults.length > 0) {
+                fullExecution.stepResults.forEach(sr => {
+                  if (defects) {
+                    sr.defects = defects.filter(d => d.testExecutionStepResultId === sr.id);
+                  }
+                  this.addStepResult(sr);
+                });
+              }
+              this.showModal.set(true);
+              this.loading.set(false);
+            },
+            error: () => {
+              this.stepResults.clear();
+              if (fullExecution.stepResults && fullExecution.stepResults.length > 0) {
+                fullExecution.stepResults.forEach(sr => this.addStepResult(sr));
+              }
+              this.showModal.set(true);
+              this.loading.set(false);
+            }
+          });
+        } else {
+          this.stepResults.clear();
+          if (fullExecution.stepResults && fullExecution.stepResults.length > 0) {
+            fullExecution.stepResults.forEach(sr => this.addStepResult(sr));
+          }
+          this.showModal.set(true);
+          this.loading.set(false);
         }
-
-        this.showModal.set(true);
-        this.loading.set(false);
       },
       error: () => this.loading.set(false)
+    });
+  }
+
+  loadCatalogs(): void {
+    this.catalogsService.getActiveByCatalog('StepResultStatus').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (data: any[]) => this.stepResultStatuses.set(data || []),
+      error: (err: any) => console.error('Error cargando estados de paso desde catálogo:', err)
+    });
+
+    this.catalogsService.getActiveByCatalog('ExecutionStatus').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (data: any[]) => this.executionStatuses.set(data || []),
+      error: (err: any) => console.error('Error cargando estados de ejecución desde catálogo:', err)
     });
   }
 
@@ -269,6 +556,7 @@ export class TestExecutionsComponent implements OnInit {
   }
 
   closeModal() {
+    this.pauseTimer();
     this.showModal.set(false);
   }
 
@@ -430,6 +718,21 @@ export class TestExecutionsComponent implements OnInit {
         this.selectedExecution.set(fullExecution);
         this.showDetailsModal.set(true);
         this.loading.set(false);
+
+        const projectId = fullExecution.project?.id || this.selectedProjectId();
+        if (projectId) {
+          this.defectsService.getByProject(projectId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+            next: (defects) => {
+              if (defects && fullExecution.stepResults) {
+                fullExecution.stepResults.forEach(step => {
+                  step.defects = defects.filter(d => d.testExecutionStepResultId === step.id);
+                });
+                this.selectedExecution.set({ ...fullExecution });
+              }
+            },
+            error: (err) => console.error('[TestExecutionsComponent] Error correlacionando defectos:', err)
+          });
+        }
       },
       error: () => this.loading.set(false)
     });
@@ -447,12 +750,20 @@ export class TestExecutionsComponent implements OnInit {
       description: '',
       stepResultId: stepResultId || ''
     });
-    this.selectedFile = null;
-    this.screenshotPreview.set(null);
+    this.selectedEvidenceFiles.set([]);
+    this.evidencePreviews.set([]);
     this.showUploadModal.set(true);
   }
 
-  onPaste(event: ClipboardEvent) {
+  onEvidenceFilesSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      Array.from(input.files).forEach(file => this.addEvidenceFile(file));
+      input.value = '';
+    }
+  }
+
+  onEvidencePaste(event: ClipboardEvent) {
     const items = event.clipboardData?.items;
     if (!items) return;
 
@@ -460,63 +771,75 @@ export class TestExecutionsComponent implements OnInit {
       if (item.type.includes('image')) {
         const blob = item.getAsFile();
         if (blob) {
-          this.selectedFile = blob;
-          const reader = new FileReader();
-          reader.onload = (e: any) => {
-            this.screenshotPreview.set(e.target.result);
-          };
-          reader.readAsDataURL(blob);
-          break;
+          this.addEvidenceFile(blob);
         }
       }
     }
   }
 
-  clearScreenshot() {
-    this.selectedFile = null;
-    this.screenshotPreview.set(null);
+  private addEvidenceFile(file: File) {
+    this.selectedEvidenceFiles.update(files => [...files, file]);
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      this.evidencePreviews.update(list => [
+        ...list,
+        { name: file.name || 'Captura Pegada.png', url: e.target.result, size: file.size }
+      ]);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  removeEvidenceFile(index: number) {
+    this.selectedEvidenceFiles.update(files => files.filter((_, i) => i !== index));
+    this.evidencePreviews.update(list => list.filter((_, i) => i !== index));
+  }
+
+  clearEvidenceFiles() {
+    this.selectedEvidenceFiles.set([]);
+    this.evidencePreviews.set([]);
   }
 
   closeUploadModal() {
     this.showUploadModal.set(false);
   }
 
-  onFileSelected(event: Event) {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      this.selectedFile = input.files[0];
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        this.screenshotPreview.set(e.target.result);
-      };
-      reader.readAsDataURL(this.selectedFile);
-    }
-  }
-
   onUploadSubmit() {
-    if (!this.selectedFile || !this.selectedExecution()) return;
+    const files = this.selectedEvidenceFiles();
+    if (files.length === 0 || !this.selectedExecution()) return;
 
     this.isUploading.set(true);
     const executionId = this.selectedExecution()!.id;
     const { description, stepResultId } = this.uploadForm.value;
 
-    this.executionsService.uploadEvidence(
-            executionId,
-            this.selectedFile,
-            description,
-            stepResultId
-          ).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    const uploads$ = files.map(file => 
+      this.executionsService.uploadEvidence(executionId, file, description, stepResultId)
+    );
+
+    forkJoin(uploads$).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.isUploading.set(false);
         this.showUploadModal.set(false);
-        this.loadExecutions(); // Reload main list
-
-        // REFRESH DETAILS: Si estamos en el modal de detalles, refrescar la ejecución seleccionada
+        Swal.fire({
+          icon: 'success',
+          title: 'Evidencias Registradas',
+          text: `Se registraron ${files.length} evidencia(s) exitosamente.`,
+          confirmButtonColor: '#150fbd'
+        });
+        this.loadExecutions();
         if (this.showDetailsModal() && this.selectedExecution()) {
           this.openDetailsModal(this.selectedExecution()!);
         }
       },
-      error: () => this.isUploading.set(false)
+      error: (err) => {
+        console.error('[TestExecutionsComponent] Error subiendo evidencias:', err);
+        this.isUploading.set(false);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Error al registrar algunas de las evidencias.',
+          confirmButtonColor: '#150fbd'
+        });
+      }
     });
   }
 
@@ -524,12 +847,55 @@ export class TestExecutionsComponent implements OnInit {
     if (event) event.stopPropagation();
     this.selectedStepResultId.set(stepResultId);
     this.observationText = '';
+    this.selectedIncidentFiles.set([]);
+    this.incidentPreviews.set([]);
     this.showObservationModal.set(true);
+  }
+
+  onIncidentFilesSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      Array.from(input.files).forEach(file => this.addIncidentFile(file));
+      input.value = '';
+    }
+  }
+
+  onIncidentPaste(event: ClipboardEvent) {
+    const items = event.clipboardData?.items;
+    if (!items) return;
+
+    for (const item of Array.from(items)) {
+      if (item.type.includes('image')) {
+        const blob = item.getAsFile();
+        if (blob) {
+          this.addIncidentFile(blob);
+        }
+      }
+    }
+  }
+
+  private addIncidentFile(file: File) {
+    this.selectedIncidentFiles.update(files => [...files, file]);
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      this.incidentPreviews.update(list => [
+        ...list,
+        { name: file.name || 'Captura Incidente.png', url: e.target.result, size: file.size }
+      ]);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  removeIncidentFile(index: number) {
+    this.selectedIncidentFiles.update(files => files.filter((_, i) => i !== index));
+    this.incidentPreviews.update(list => list.filter((_, i) => i !== index));
   }
 
   closeObservationModal() {
     this.showObservationModal.set(false);
     this.selectedStepResultId.set(null);
+    this.selectedIncidentFiles.set([]);
+    this.incidentPreviews.set([]);
   }
 
   onAddObservation() {
@@ -540,29 +906,47 @@ export class TestExecutionsComponent implements OnInit {
     this.isSubmitting.set(true);
     this.executionsService.addObservation(stepResultId, text).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
-        this.isSubmitting.set(false);
-        this.closeObservationModal();
-        Swal.fire({
-      icon: 'success',
-      title: 'Éxito',
-      text: 'Observación agregada exitosamente.',
-      confirmButtonColor: '#150fbd'
-    });
-        if (this.selectedExecution()) {
-          this.openDetailsModal(this.selectedExecution()!);
+        const incidentFiles = this.selectedIncidentFiles();
+        const execId = this.selectedExecution()?.id || this.editingExecutionId();
+
+        if (incidentFiles.length > 0 && execId) {
+          const uploads$ = incidentFiles.map(file =>
+            this.executionsService.uploadEvidence(execId, file, `Evidencia de Incidente: ${text.substring(0, 40)}`, stepResultId)
+          );
+
+          forkJoin(uploads$).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+            next: () => this.handleObservationSuccess(),
+            error: () => this.handleObservationSuccess()
+          });
+        } else {
+          this.handleObservationSuccess();
         }
       },
       error: (err: any) => {
         console.error('[TestExecutionsComponent] Error adding observation:', err);
         this.isSubmitting.set(false);
         Swal.fire({
-      icon: 'error',
-      title: 'Error',
-      text: 'Error al agregar la observación.',
-      confirmButtonColor: '#150fbd'
-    });
+          icon: 'error',
+          title: 'Error',
+          text: 'Error al agregar el incidente.',
+          confirmButtonColor: '#150fbd'
+        });
       }
     });
+  }
+
+  private handleObservationSuccess() {
+    this.isSubmitting.set(false);
+    this.closeObservationModal();
+    Swal.fire({
+      icon: 'success',
+      title: 'Éxito',
+      text: 'Incidente y sus evidencias registrados exitosamente.',
+      confirmButtonColor: '#150fbd'
+    });
+    if (this.selectedExecution()) {
+      this.openDetailsModal(this.selectedExecution()!);
+    }
   }
 
   onRespondObservation(observationId: string, response: string) {
@@ -594,10 +978,130 @@ export class TestExecutionsComponent implements OnInit {
   calculateProgress(execution: TestExecution): number {
     if (!execution.stepResults || execution.stepResults.length === 0) {
       // If there are no steps, we define progress based on global status
-      return execution.status.id === 1 ? 100 : execution.status.id === 5 ? 0 : 50; 
+      if (execution.status.id === 1) {
+        return 100;
+      }
+      if (execution.status.id === 5) {
+        return 0;
+      }
+      return 50; 
     }
     const total = execution.stepResults.length;
     const completed = execution.stepResults.filter(s => s.status.id === 1 || s.status.id === 2 || s.status.id === 3).length;
     return Math.round((completed / total) * 100);
+  }
+
+  /**
+   * Abre el modal de defecto pre-llenado con los datos del paso actual fallido.
+   */
+  reportDefectForStep(step: any, event?: Event): void {
+    if (event) event.stopPropagation();
+
+    const stepId = step?.id || step?.stepId || step?.testStepId || null;
+    const exec = this.selectedExecution() || this.executions().find(e => e.id === this.editingExecutionId());
+    const testCaseId = exec?.testCase?.id || this.executionForm.get('testCaseId')?.value || null;
+    const executionId = exec?.id || this.editingExecutionId() || null;
+
+    const stepOrder = step?.stepOrder || (step?.get ? step.get('stepOrder')?.value : '');
+    const action = step?.action || (step?.get ? step.get('action')?.value : '') || '';
+    const actualResult = step?.actualResult || (step?.get ? step.get('actualResult')?.value : '') || '';
+    const expectedResult = step?.expectedResult || (step?.get ? step.get('expectedResult')?.value : '') || '';
+
+    this.selectedStepIdForDefect.set(stepId);
+    this.defectModalData.set({
+      title: `Fallo en paso ${stepOrder ? '#' + stepOrder + ': ' : ''}${action}`.trim(),
+      description: `Defecto reportado durante la ejecución${executionId ? ' #' + executionId.substring(0, 8) : ''} del caso "${exec?.testCase?.title || this.testCaseTitle()}".`,
+      stepsToReproduce: `1. Acción: ${action || '-'}\n2. Resultado Esperado: ${expectedResult || '-'}\n3. Resultado Obtenido: ${actualResult || '-'}`,
+      expectedResult: expectedResult,
+      actualResult: actualResult,
+      priorityId: 2,
+      severityId: 2,
+      statusId: 1,
+      testCaseId: testCaseId,
+      testExecutionId: executionId,
+      testExecutionStepResultId: stepId
+    });
+    this.showDefectModal.set(true);
+  }
+
+  /**
+   * Guarda el defecto reportado y asocia opcionalmente las evidencias o archivos adjuntos.
+   */
+  onSaveDefect(eventData: { defect: any; files: File[] }): void {
+    const exec = this.selectedExecution() || this.executions().find(e => e.id === this.editingExecutionId());
+    const projectId = exec?.project?.id || this.selectedProjectId();
+
+    if (!projectId) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'No se pudo identificar el proyecto asociado para registrar el defecto.',
+        confirmButtonColor: '#150fbd'
+      });
+      return;
+    }
+
+    const { defect, files } = eventData;
+    defect.projectId = projectId;
+    if (!defect.testExecutionStepResultId && this.selectedStepIdForDefect()) {
+      defect.testExecutionStepResultId = this.selectedStepIdForDefect();
+    }
+
+    this.defectsService.create(projectId, defect).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (savedDefect) => {
+        if (files && files.length > 0 && savedDefect?.id) {
+          const uploads$ = files.map(file => 
+            this.defectsService.uploadAttachment(projectId, savedDefect.id, file)
+          );
+          forkJoin(uploads$).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+            next: () => {
+              this.showDefectModal.set(false);
+              Swal.fire({
+                icon: 'success',
+                title: 'Defecto Creado',
+                text: `El defecto y sus ${files.length} evidencia(s) fueron registrados exitosamente.`,
+                confirmButtonColor: '#150fbd'
+              });
+              this.loadExecutions();
+              if (this.showDetailsModal() && this.selectedExecution()) {
+                this.openDetailsModal(this.selectedExecution()!);
+              }
+            },
+            error: (err) => {
+              console.error('[TestExecutionsComponent] Error subiendo adjuntos del defecto:', err);
+              this.showDefectModal.set(false);
+              Swal.fire({
+                icon: 'success',
+                title: 'Defecto Creado',
+                text: 'El defecto fue creado exitosamente.',
+                confirmButtonColor: '#150fbd'
+              });
+              this.loadExecutions();
+            }
+          });
+        } else {
+          this.showDefectModal.set(false);
+          Swal.fire({
+            icon: 'success',
+            title: 'Defecto Creado',
+            text: 'El defecto fue registrado exitosamente.',
+            confirmButtonColor: '#150fbd'
+          });
+          this.loadExecutions();
+          if (this.showDetailsModal() && this.selectedExecution()) {
+            this.openDetailsModal(this.selectedExecution()!);
+          }
+        }
+      },
+      error: (err) => {
+        console.error('[TestExecutionsComponent] Error creando defecto:', err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudo crear el defecto.',
+          confirmButtonColor: '#150fbd'
+        });
+      }
+    });
   }
 }

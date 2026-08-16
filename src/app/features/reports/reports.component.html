@@ -38,6 +38,104 @@
                 [class]="activeTab() === 'burndown' ? 'px-5 py-2.5 rounded-xl bg-indigo-600 text-white font-bold text-xs shadow-lg' : 'px-5 py-2.5 rounded-xl bg-gray-900 text-gray-400 font-medium text-xs hover:text-white transition-colors'">
             <i class="fas fa-fire-alt mr-2"></i> Burndown & Métricas DDP
         </button>
+        <button (click)="onCyclesTabSelect()" 
+                [class]="activeTab() === 'cycles' ? 'px-5 py-2.5 rounded-xl bg-indigo-600 text-white font-bold text-xs shadow-lg' : 'px-5 py-2.5 rounded-xl bg-gray-900 text-gray-400 font-medium text-xs hover:text-white transition-colors'">
+            <i class="fas fa-repeat mr-2"></i> Comparativa de Ciclos
+        </button>
+    </div>
+
+    <!-- TAB 5: Comparativa de Ciclos (TestRail Benchmark) -->
+    <div *ngIf="activeTab() === 'cycles'" class="animate-in fade-in duration-300 space-y-6">
+        <div class="bg-gray-900/60 p-6 rounded-[2rem] border border-white/5 backdrop-blur-md flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center text-lg border border-indigo-500/20">
+                    <i class="fas fa-chart-line-up"></i>
+                </div>
+                <div>
+                    <h2 class="text-lg font-bold text-white">Evolución y Comparativa entre Ciclos de Prueba</h2>
+                    <p class="text-xs text-gray-400">Análisis comparativo de tasa de éxito, re-tests y mitigación de defectos por ciclo ISTQB.</p>
+                </div>
+            </div>
+            <button (click)="onCyclesTabSelect()" class="btn-secondary text-xs px-3 py-1.5 bg-white/5 hover:bg-white/10 text-white border-white/10">
+                <i class="fas fa-sync-alt mr-1"></i> Actualizar
+            </button>
+        </div>
+
+        <div *ngIf="loadingCycles()" class="flex justify-center py-16">
+            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-500"></div>
+        </div>
+
+        <div *ngIf="!loadingCycles() && cyclesData().length === 0" class="text-center py-16 bg-gray-900/30 rounded-[2rem] border border-dashed border-white/5 p-8">
+            <i class="fas fa-repeat text-gray-600 text-4xl mb-3"></i>
+            <h3 class="text-white font-bold text-base">No hay suficientes datos de ciclos registrados</h3>
+            <p class="text-gray-500 text-xs mt-1">Ejecuta pruebas en el módulo de Ejecución de Pruebas para ver la comparativa histórica.</p>
+        </div>
+
+        <div *ngIf="!loadingCycles() && cyclesData().length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div *ngFor="let cycle of cyclesData(); let i = index" class="bg-gray-900/60 border border-white/5 rounded-[2rem] p-6 backdrop-blur-md relative overflow-hidden flex flex-col justify-between hover:border-indigo-500/30 transition-all">
+                <div>
+                    <!-- Header -->
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-2">
+                            <span class="px-3 py-1 rounded-xl bg-indigo-500/10 text-indigo-400 font-mono font-bold text-xs border border-indigo-500/20">
+                                Ciclo {{ cycle.cycleNumber }}
+                            </span>
+                        </div>
+                        <span [ngClass]="{
+                            'bg-emerald-500/10 text-emerald-400 border-emerald-500/20': cycle.passRate === 100,
+                            'bg-rose-500/10 text-rose-400 border-rose-500/20': cycle.failedCount > 0,
+                            'bg-amber-500/10 text-amber-400 border-amber-500/20': cycle.blockedCount > 0 && cycle.failedCount === 0
+                        }" class="px-3 py-1 rounded-xl text-[10px] font-bold border uppercase tracking-wider">
+                            {{ cycle.statusSummary }}
+                        </span>
+                    </div>
+
+                    <!-- Pass Rate Progress -->
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center text-xs font-bold mb-2">
+                            <span class="text-gray-400">Tasa de Aprobación</span>
+                            <span class="text-white text-base">{{ cycle.passRate }}%</span>
+                        </div>
+                        <div class="w-full h-3 bg-gray-950 rounded-full overflow-hidden p-0.5 border border-white/5">
+                            <div class="h-full rounded-full transition-all duration-500"
+                                [style.width]="cycle.passRate + '%'"
+                                [ngClass]="cycle.passRate === 100 ? 'bg-emerald-500' : (cycle.passRate > 50 ? 'bg-indigo-500' : 'bg-rose-500')">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Metrics Grid -->
+                    <div class="grid grid-cols-2 gap-3 text-xs mb-4">
+                        <div class="bg-gray-950/60 p-3 rounded-xl border border-white/5">
+                            <div class="text-gray-500 text-[10px] font-bold">Total Pruebas</div>
+                            <div class="text-white font-black text-sm">{{ cycle.totalExecutions }}</div>
+                        </div>
+                        <div class="bg-gray-950/60 p-3 rounded-xl border border-white/5">
+                            <div class="text-emerald-400 text-[10px] font-bold">Exitosos</div>
+                            <div class="text-emerald-400 font-black text-sm">{{ cycle.passedCount }}</div>
+                        </div>
+                        <div class="bg-gray-950/60 p-3 rounded-xl border border-white/5">
+                            <div class="text-rose-400 text-[10px] font-bold">Fallidos</div>
+                            <div class="text-rose-400 font-black text-sm">{{ cycle.failedCount }}</div>
+                        </div>
+                        <div class="bg-gray-950/60 p-3 rounded-xl border border-white/5">
+                            <div class="text-amber-400 text-[10px] font-bold">Defectos Vinculados</div>
+                            <div class="text-amber-400 font-black text-sm">{{ cycle.defectsCount }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer trend -->
+                <div class="pt-3 border-t border-white/5 flex items-center justify-between text-[11px] text-gray-400">
+                    <span class="flex items-center gap-1">
+                        <i class="fas fa-clock text-gray-500"></i> {{ cycle.durationHours }}h invertidas
+                    </span>
+                    <span *ngIf="i > 0" class="text-emerald-400 font-bold flex items-center gap-1">
+                        <i class="fas fa-arrow-trend-up"></i> Retest
+                    </span>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- TAB 2: Matriz RTM -->

@@ -14,9 +14,13 @@
       </div>
     </div>
     <div class="flex items-center gap-3">
-      <button (click)="exportCsv()" [disabled]="!projectId()" class="btn-secondary" title="Exportar casos a archivo CSV">
-        <i class="fas fa-file-csv text-emerald-500"></i>
+      <button (click)="exportToCsv()" [disabled]="testCases().length === 0" class="btn-secondary" title="Exportar casos a archivo CSV / Excel">
+        <i class="fas fa-file-export text-emerald-600"></i>
         Exportar CSV
+      </button>
+      <button (click)="openImportModal()" [disabled]="!projectId()" class="btn-secondary" title="Importar casos desde archivo CSV">
+        <i class="fas fa-file-import text-indigo-600"></i>
+        Importar CSV
       </button>
       <button (click)="openModal()" [disabled]="!projectId()" class="btn-primary">
         <i class="fas fa-plus-circle"></i>
@@ -258,21 +262,27 @@
                 <label for="modalPriorityId" class="block font-medium text-gray-600 mb-1.5">Prioridad <span class="text-rose-500">*</span></label>
                 <select id="modalPriorityId" formControlName="priorityId"
                   class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all text-xs appearance-none">
-                  <option value="1">Baja</option>
-                  <option value="2">Media</option>
-                  <option value="3">Alta</option>
-                  <option value="4">Crítica</option>
+                  <option *ngFor="let p of priorities()" [value]="p.id">{{ p.name }}</option>
+                  <ng-container *ngIf="priorities().length === 0">
+                    <option value="1">Baja</option>
+                    <option value="2">Media</option>
+                    <option value="3">Alta</option>
+                    <option value="4">Crítica</option>
+                  </ng-container>
                 </select>
               </div>
               <div>
                 <label for="modalTestTypeId" class="block font-medium text-gray-600 mb-1.5">Tipo de prueba <span class="text-rose-500">*</span></label>
                 <select id="modalTestTypeId" formControlName="testTypeId"
                   class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all text-xs appearance-none">
-                  <option value="1">Funcional Manual</option>
-                  <option value="2">Funcional Automatizada</option>
-                  <option value="3">No Funcional</option>
-                  <option value="4">Regresión</option>
-                  <option value="5">Smoke Test</option>
+                  <option *ngFor="let t of testTypes()" [value]="t.id">{{ t.name }}</option>
+                  <ng-container *ngIf="testTypes().length === 0">
+                    <option value="1">Funcional Manual</option>
+                    <option value="2">Funcional Automatizada</option>
+                    <option value="3">No Funcional</option>
+                    <option value="4">Regresión</option>
+                    <option value="5">Smoke Test</option>
+                  </ng-container>
                 </select>
               </div>
               <div>
@@ -380,7 +390,8 @@
                 <div *ngFor="let step of bddSteps.controls; let i = index" [formGroupName]="i"
                   class="flex gap-2 items-start bg-gray-50 rounded-lg p-2 border border-gray-100">
                   <div class="w-1/4">
-                    <select formControlName="keyword" class="w-full bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-indigo-700 font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-xs appearance-none">
+                    <label [for]="'keyword-' + i" class="sr-only">Palabra clave</label>
+                    <select [id]="'keyword-' + i" formControlName="keyword" class="w-full bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-indigo-700 font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-xs appearance-none">
                       <option value="Dado">Dado</option>
                       <option value="Cuando">Cuando</option>
                       <option value="Entonces">Entonces</option>
@@ -389,7 +400,8 @@
                     </select>
                   </div>
                   <div class="w-3/4 flex gap-2">
-                    <input type="text" formControlName="text" placeholder="Ej: el usuario está autenticado"
+                    <label [for]="'text-' + i" class="sr-only">Texto del paso</label>
+                    <input [id]="'text-' + i" type="text" formControlName="text" placeholder="Ej: el usuario está autenticado"
                       class="w-full bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-xs">
                     <button type="button" (click)="removeBddStep(i)" *ngIf="bddSteps.length > 1" class="text-rose-400 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-50 transition-colors">
                       <i class="fas fa-trash-can"></i>
@@ -419,9 +431,11 @@
                     </button>
                   </div>
                   <div class="space-y-2">
-                    <input type="text" formControlName="action" placeholder="Acción (Ej: Hacer clic en 'Login')"
+                    <label [for]="'action-' + i" class="sr-only">Acción</label>
+                    <input [id]="'action-' + i" type="text" formControlName="action" placeholder="Acción (Ej: Hacer clic en 'Login')"
                       class="w-full bg-white border border-gray-200 rounded-lg px-3 py-1.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-xs">
-                    <input type="text" formControlName="expectedResult" placeholder="Resultado esperado para este paso..."
+                    <label [for]="'expectedResult-' + i" class="sr-only">Resultado esperado</label>
+                    <input [id]="'expectedResult-' + i" type="text" formControlName="expectedResult" placeholder="Resultado esperado para este paso..."
                       class="w-full bg-white border border-gray-200 rounded-lg px-3 py-1.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-xs">
                   </div>
                 </div>
@@ -501,6 +515,104 @@
             Cerrar visualizador
           </button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Importación Masiva desde CSV -->
+  <div *ngIf="showImportModal()" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200 overflow-y-auto">
+    <div class="bg-white rounded-2xl w-full max-w-3xl max-h-[90vh] shadow-2xl flex flex-col overflow-hidden border border-slate-100 animate-in zoom-in-95 duration-200 my-auto">
+      <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+        <div>
+          <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+            <i class="fas fa-file-import text-indigo-600"></i>
+            Importación Masiva de Casos de Prueba
+          </h2>
+          <p class="text-gray-500 text-xs font-medium mt-1">Sube un archivo CSV con tus casos de prueba y pasos.</p>
+        </div>
+        <button (click)="closeImportModal()" class="text-gray-400 hover:text-gray-600 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100">
+          <i class="fas fa-times text-lg"></i>
+        </button>
+      </div>
+
+      <div class="p-6 flex-1 overflow-y-auto space-y-6">
+        <!-- Banner de ayuda y descarga de plantilla -->
+        <div class="bg-indigo-50/60 border border-indigo-100 rounded-xl p-4 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <i class="fas fa-info-circle text-indigo-600 text-xl"></i>
+            <div class="text-xs text-indigo-950">
+              <p class="font-bold">Formato compatible con TestRail y Excel (separado por comas o punto y coma)</p>
+              <p class="text-indigo-700 mt-0.5">Columnas: Titulo, Descripcion, Precondiciones, Prioridad, Severidad, Tipo, Pasos...</p>
+            </div>
+          </div>
+          <button (click)="downloadTemplateCsv()" class="btn-secondary text-xs px-3 py-1.5 whitespace-nowrap bg-white hover:bg-indigo-50 text-indigo-700 border-indigo-200">
+            <i class="fas fa-download text-xs mr-1"></i> Plantilla CSV
+          </button>
+        </div>
+
+        <!-- Dropzone de archivo CSV -->
+        <div class="border-2 border-dashed border-slate-200 hover:border-indigo-400 rounded-2xl p-6 text-center transition-colors bg-slate-50/50">
+          <label for="csvFileInput" class="cursor-pointer flex flex-col items-center">
+            <div class="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-xl mb-3 shadow-xs">
+              <i class="fas fa-cloud-arrow-up"></i>
+            </div>
+            <span class="text-sm font-bold text-slate-800">Haz clic para seleccionar tu archivo CSV</span>
+            <span class="text-xs text-slate-400 mt-1">Archivos soportados: .csv</span>
+            <input id="csvFileInput" type="file" accept=".csv" (change)="onCsvFileSelected($event)" class="hidden">
+          </label>
+        </div>
+
+        <!-- Errores de importación -->
+        <div *ngIf="importErrors().length > 0" class="bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-xl p-4">
+          <p class="font-bold mb-1">Se encontraron problemas:</p>
+          <ul class="list-disc pl-4 space-y-0.5">
+            <li *ngFor="let err of importErrors()">{{ err }}</li>
+          </ul>
+        </div>
+
+        <!-- Previsualización de filas a importar -->
+        <div *ngIf="importedRows().length > 0" class="space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider">
+              Casos listos para importar ({{ importedRows().length }})
+            </h3>
+            <span class="text-xs text-emerald-600 font-bold flex items-center gap-1">
+              <i class="fas fa-check-circle"></i> Archivo validado
+            </span>
+          </div>
+
+          <div class="max-h-60 overflow-y-auto border border-slate-200 rounded-xl">
+            <table class="w-full text-xs text-left">
+              <thead class="bg-slate-100 text-slate-600 uppercase text-[10px] font-bold sticky top-0">
+                <tr>
+                  <th class="p-3">#</th>
+                  <th class="p-3">Título</th>
+                  <th class="p-3">Prioridad</th>
+                  <th class="p-3">Tipo</th>
+                  <th class="p-3 text-center">Pasos</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                <tr *ngFor="let row of importedRows(); let i = index" class="hover:bg-slate-50">
+                  <td class="p-3 font-mono text-slate-400">{{ i + 1 }}</td>
+                  <td class="p-3 font-semibold text-slate-800">{{ row.title }}</td>
+                  <td class="p-3"><span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-[10px] font-bold">{{ row.priorityName }}</span></td>
+                  <td class="p-3"><span class="px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 text-[10px] font-bold">{{ row.typeName }}</span></td>
+                  <td class="p-3 text-center font-bold text-indigo-600">{{ row.steps.length }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer Modal -->
+      <div class="p-6 border-t border-gray-100 bg-gray-50 flex justify-end gap-3 rounded-b-2xl">
+        <button type="button" (click)="closeImportModal()" class="btn-secondary" [disabled]="isImporting()">Cancelar</button>
+        <button type="button" (click)="confirmImport()" class="btn-primary min-w-[140px]" [disabled]="importedRows().length === 0 || isImporting()">
+          <i class="fas fa-spinner fa-spin mr-1" *ngIf="isImporting()"></i>
+          <span>{{ isImporting() ? 'Importando...' : 'Confirmar Importación' }}</span>
+        </button>
       </div>
     </div>
   </div>

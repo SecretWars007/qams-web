@@ -1,5 +1,5 @@
 // src/app/core/mappers/test-execution.mapper.ts
-import { TestExecutionDto, TestExecutionStepResultDto, EvidenceDto, ObservationDto } from '../dto/test-execution.dto';
+import { TestExecutionDto, EvidenceDto, ObservationDto } from '../dto/test-execution.dto';
 import { TestExecution, TestExecutionStepResult, Evidence, Observation } from '../models/test-execution.model';
 
 export class TestExecutionMapper {
@@ -20,22 +20,23 @@ export class TestExecutionMapper {
     );
   }
 
-  static fromStepResultDto(dto: TestExecutionStepResultDto): TestExecutionStepResult {
+  static fromStepResultDto(dto: any): TestExecutionStepResult {
     return {
       id: dto.id,
-      stepId: dto.testStepId,
-      stepOrder: dto.testStepOrder || 0,
-      action: dto.testStepAction || '',
-      description: dto.testStepDescription,
+      stepId: dto.testStepId || dto.stepId,
+      stepOrder: dto.stepOrder !== undefined ? dto.stepOrder : (dto.testStepOrder || 0),
+      action: dto.action || dto.testStepAction || '',
+      description: dto.description || dto.testStepDescription,
+      expectedResult: dto.expectedResult || dto.testStepExpectedResult || '',
       status: {
         id: dto.statusId,
         name: dto.statusName,
         code: dto.statusCode
       },
-      actualResult: dto.actualResult,
-      notes: dto.notes,
-      evidences: dto.evidences?.map(ev => this.fromEvidenceDto(ev)) || [],
-      observations: dto.observations?.map(ob => this.fromObservationDto(ob)) || []
+      actualResult: dto.actualResult || '',
+      notes: dto.notes || '',
+      evidences: dto.evidences?.map((ev: any) => this.fromEvidenceDto(ev)) || [],
+      observations: dto.observations?.map((ob: any) => this.fromObservationDto(ob)) || []
     };
   }
 
