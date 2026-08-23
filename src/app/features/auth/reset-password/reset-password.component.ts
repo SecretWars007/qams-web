@@ -48,7 +48,7 @@ export class ResetPasswordComponent implements OnInit {
       icon: 'warning',
       title: 'Atención',
       text: 'Por favor complete todos los campos.',
-      confirmButtonColor: '#150fbd'
+      confirmButtonColor: '#10B981'
     });
       return;
     }
@@ -58,7 +58,7 @@ export class ResetPasswordComponent implements OnInit {
       icon: 'warning',
       title: 'Atención',
       text: 'Las contraseñas no coinciden.',
-      confirmButtonColor: '#150fbd'
+      confirmButtonColor: '#10B981'
     });
       return;
     }
@@ -68,7 +68,7 @@ export class ResetPasswordComponent implements OnInit {
       icon: 'warning',
       title: 'Atención',
       text: 'La contraseña debe tener al menos 6 caracteres.',
-      confirmButtonColor: '#150fbd'
+      confirmButtonColor: '#10B981'
     });
       return;
     }
@@ -81,7 +81,7 @@ export class ResetPasswordComponent implements OnInit {
       icon: 'success',
       title: 'Éxito',
       text: 'Su contraseña ha sido restablecida exitosamente.',
-      confirmButtonColor: '#150fbd'
+      confirmButtonColor: '#10B981'
     });
         this.loading.set(false);
         this.router.navigate(['/auth/login']);
@@ -92,7 +92,7 @@ export class ResetPasswordComponent implements OnInit {
       icon: 'error',
       title: 'Error',
       text: err.error?.title || 'Error al restablecer la contraseña. El token puede ser inválido o haber expirado.',
-      confirmButtonColor: '#150fbd'
+      confirmButtonColor: '#10B981'
     });
         this.loading.set(false);
       }

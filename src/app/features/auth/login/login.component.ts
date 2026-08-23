@@ -53,7 +53,7 @@ export class LoginComponent {
         icon: 'warning',
         title: 'Atención',
         text: 'Todos los campos son obligatorios.',
-        confirmButtonColor: '#150fbd'
+        confirmButtonColor: '#10B981'
       });
       return;
     }
@@ -87,7 +87,7 @@ export class LoginComponent {
           icon: 'error',
           title: 'Error de Acceso',
           text: 'Credenciales inválidas o error de conexión.',
-          confirmButtonColor: '#150fbd'
+          confirmButtonColor: '#10B981'
         });
         this.loading.set(false);
       },

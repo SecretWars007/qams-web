@@ -38,7 +38,7 @@ export class ChangePasswordComponent {
       icon: 'warning',
       title: 'Atención',
       text: 'Por favor complete todos los campos.',
-      confirmButtonColor: '#150fbd'
+      confirmButtonColor: '#10B981'
     });
       return;
     }
@@ -48,7 +48,7 @@ export class ChangePasswordComponent {
       icon: 'warning',
       title: 'Atención',
       text: 'Las contraseñas no coinciden.',
-      confirmButtonColor: '#150fbd'
+      confirmButtonColor: '#10B981'
     });
       return;
     }
@@ -58,7 +58,7 @@ export class ChangePasswordComponent {
       icon: 'warning',
       title: 'Atención',
       text: 'La contraseña nueva debe tener al menos 6 caracteres.',
-      confirmButtonColor: '#150fbd'
+      confirmButtonColor: '#10B981'
     });
       return;
     }
@@ -69,7 +69,7 @@ export class ChangePasswordComponent {
       icon: 'error',
       title: 'Error',
       text: 'No se pudo identificar al usuario actual.',
-      confirmButtonColor: '#150fbd'
+      confirmButtonColor: '#10B981'
     });
       return;
     }
@@ -82,7 +82,7 @@ export class ChangePasswordComponent {
       icon: 'success',
       title: 'Éxito',
       text: 'Su contraseña ha sido cambiada exitosamente.',
-      confirmButtonColor: '#150fbd'
+      confirmButtonColor: '#10B981'
     });
         this.loading.set(false);
         // Opcional: Cerrar sesión después de cambiar la contraseña o redirigir al dashboard
@@ -94,7 +94,7 @@ export class ChangePasswordComponent {
       icon: 'error',
       title: 'Error',
       text: err.error?.title || 'Error al cambiar la contraseña. Verifique su contraseña actual.',
-      confirmButtonColor: '#150fbd'
+      confirmButtonColor: '#10B981'
     });
         this.loading.set(false);
       }

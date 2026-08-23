@@ -115,7 +115,7 @@ export class ExecutionDetailComponent implements OnInit {
       icon: 'success',
       title: 'Defecto Registrado',
       text: `Se ha registrado el defecto "${defect.title}" exitosamente vinculado a este paso.`,
-      confirmButtonColor: '#150fbd'
+      confirmButtonColor: '#10B981'
     });
   }
 
@@ -123,16 +123,18 @@ export class ExecutionDetailComponent implements OnInit {
     switch (statusCode?.toUpperCase()) {
       case 'PASSED':
       case 'PASS':
-        return 'bg-emerald-100 text-emerald-700 border border-emerald-200';
+        return 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30';
       case 'FAILED':
       case 'FAIL':
-        return 'bg-rose-100 text-rose-700 border border-rose-200';
+        return 'bg-rose-500/15 text-rose-300 border border-rose-500/30';
       case 'BLOCKED':
-        return 'bg-amber-100 text-amber-700 border border-amber-200';
+        return 'bg-amber-500/15 text-amber-300 border border-amber-500/30';
       case 'SKIPPED':
-        return 'bg-slate-100 text-slate-700 border border-slate-200';
+        return 'bg-slate-700/50 text-slate-400 border border-slate-600/40';
+      case 'IN_PROGRESS':
+        return 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
       default:
-        return 'bg-blue-100 text-blue-700 border border-blue-200';
+        return 'bg-blue-500/15 text-blue-300 border border-blue-500/30';
     }
   }
 

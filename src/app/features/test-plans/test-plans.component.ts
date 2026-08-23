@@ -204,7 +204,7 @@ export class TestPlansComponent implements OnInit {
           icon: 'success',
           title: 'Éxito',
           text: `Plan de pruebas ${this.isEdit() ? 'actualizado' : 'creado'} correctamente`,
-          confirmButtonColor: '#150fbd'
+          confirmButtonColor: '#10B981'
         });
         this.closeModal();
         this.loadPlans();
@@ -277,7 +277,7 @@ export class TestPlansComponent implements OnInit {
       focusConfirm: false,
       showCancelButton: true,
       confirmButtonText: 'Firmar Digitalmente',
-      confirmButtonColor: '#150fbd',
+      confirmButtonColor: '#10B981',
       cancelButtonText: 'Cancelar',
       preConfirm: () => {
         const verdict = (document.getElementById('swal-verdict') as HTMLSelectElement).value;
@@ -310,7 +310,7 @@ export class TestPlansComponent implements OnInit {
       case 'EN REVISIÓN': 
       case 'IN_REVIEW': return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
       case 'APROBADO': 
-      case 'APPROVED': return 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20';
+      case 'APPROVED': return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
       case 'ACTIVO': 
       case 'ACTIVE': return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
       case 'CERRADO': 

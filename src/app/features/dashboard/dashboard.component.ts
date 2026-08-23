@@ -33,7 +33,7 @@ export class DashboardComponent implements OnInit {
   projects = signal<Project[]>([]);
   selectedProjectId = signal<string | null>(null);
   loading = signal<boolean>(false);
-  today = new Date();
+  readonly today = new Date();
 
   // Filtros activos
   selectedSutId = signal<string | null>(null);
@@ -48,7 +48,7 @@ export class DashboardComponent implements OnInit {
   readonly statusColorMap: Record<string, string> = {
     PASSED:      '#10B981', // Verde esmeralda (Aprobado)
     FAILED:      '#F43F5E', // Rojo carmesí (Fallido)
-    IN_PROGRESS: '#6366F1', // Índigo (En Progreso)
+    IN_PROGRESS: '#34D399', // Verde menta tecnológico (En Progreso)
     BLOCKED:     '#475569', // Pizarra / Gris oscuro (Bloqueado)
     PENDING:     '#F59E0B', // Ámbar (Pendiente)
     SKIPPED:     '#94A3B8'  // Gris claro (Omitido)
@@ -66,7 +66,7 @@ export class DashboardComponent implements OnInit {
   trendTotal = signal<number>(0);
 
   // Derivados del auth service
-  private authServiceRef = inject(AuthService);
+  private readonly authServiceRef = inject(AuthService);
   readonly canUseAdvancedFilters = this.authServiceRef.canUseAdvancedFilters;
   readonly isTesterOnly = this.authServiceRef.isTesterOnly;
 
@@ -100,14 +100,14 @@ export class DashboardComponent implements OnInit {
         ticks: {
           stepSize: 1,
           precision: 0,
-          color: '#64748b',
+          color: '#94a3b8',
           font: { family: 'Plus Jakarta Sans', size: 11, weight: 600 }
         },
-        grid: { color: 'rgba(226, 232, 240, 0.8)' }
+        grid: { color: 'rgba(16, 185, 129, 0.08)' }
       },
       x: {
         ticks: {
-          color: '#64748b',
+          color: '#94a3b8',
           font: { family: 'Plus Jakarta Sans', size: 11, weight: 600 }
         },
         grid: { display: false }
@@ -134,14 +134,14 @@ export class DashboardComponent implements OnInit {
         position: 'bottom',
         labels: {
           font: { family: 'Plus Jakarta Sans', size: 12, weight: 600 },
-          color: '#64748b',
+          color: '#94a3b8',
           padding: 16,
           usePointStyle: true,
           pointStyleWidth: 10,
         }
       },
       tooltip: {
-        backgroundColor: 'rgba(15, 23, 42, 0.9)',
+        backgroundColor: 'rgba(15, 23, 42, 0.95)',
         titleFont: { family: 'Plus Jakarta Sans', weight: 700 },
         bodyFont:  { family: 'Plus Jakarta Sans' },
         padding: 12,
@@ -153,7 +153,7 @@ export class DashboardComponent implements OnInit {
   // Configuración del gráfico de Barras
   barData: ChartConfiguration<'bar'>['data'] = {
     labels: [],
-    datasets: [{ data: [], backgroundColor: '#4F46E5', label: 'Tareas' }],
+    datasets: [{ data: [], backgroundColor: '#10B981', label: 'Tareas' }],
   };
 
   barOptions: ChartConfiguration<'bar'>['options'] = {
@@ -162,7 +162,7 @@ export class DashboardComponent implements OnInit {
     plugins: {
       legend: { display: false },
       tooltip: {
-        backgroundColor: 'rgba(15, 23, 42, 0.9)',
+        backgroundColor: 'rgba(15, 23, 42, 0.95)',
         titleFont: { family: 'Plus Jakarta Sans', weight: 700 },
         bodyFont:  { family: 'Plus Jakarta Sans' },
         padding: 12,
@@ -173,7 +173,7 @@ export class DashboardComponent implements OnInit {
       y: {
         beginAtZero: true,
         ticks: { stepSize: 1, color: '#94a3b8', font: { family: 'Plus Jakarta Sans', size: 11 } },
-        grid: { color: 'rgba(226, 232, 240, 0.8)' }
+        grid: { color: 'rgba(16, 185, 129, 0.08)' }
       },
       x: {
         ticks: { color: '#94a3b8', font: { family: 'Plus Jakarta Sans', size: 11 } },
@@ -218,7 +218,7 @@ export class DashboardComponent implements OnInit {
         // Filtrar solo usuarios con rol Tester
         this.testers.set(users.filter(u => {
           const roles = Array.isArray(u.roles) ? u.roles : [u.roles];
-          return roles.some(r => r && r.toLowerCase() === 'tester');
+          return roles.some(r => r?.toLowerCase() === 'tester');
         }));
       });
     }
@@ -253,7 +253,7 @@ export class DashboardComponent implements OnInit {
 
         if (projects.length > 0) {
           const firstProjectId = projects[0].id;
-          if (!this.selectedProjectId() || !projects.find(p => p.id === this.selectedProjectId())) {
+          if (!this.selectedProjectId() || !projects.some(p => p.id === this.selectedProjectId())) {
             this.selectedProjectId.set(firstProjectId);
           }
           this.projectContextService.initializeIfEmpty(firstProjectId);
@@ -347,7 +347,7 @@ export class DashboardComponent implements OnInit {
       const k = `${execDate.getFullYear()}-${(execDate.getMonth() + 1).toString().padStart(2, '0')}-${execDate.getDate().toString().padStart(2, '0')}`;
 
       const code = (exec.status?.code || 'PENDING').toUpperCase();
-      if (statusCountsMap[code] && statusCountsMap[code][k] !== undefined) {
+      if (statusCountsMap[code]?.[k] !== undefined) {
         statusCountsMap[code][k]++;
         statusTotalMap[code]++;
         totalExecutions++;
@@ -433,18 +433,18 @@ export class DashboardComponent implements OnInit {
       ],
     };
 
-    // Barras — gradiente por columna con colores QAMS
+    // Barras — gradiente por columna con paleta unificada de verdes QAMS
     const standardColumns = ['Tareas Pendientes', 'Por Hacer', 'En Progreso', 'En Revisión', 'Completado'];
     const qamsColumnColors: Record<string, string> = {
-      'Tareas Pendientes': '#94a3b8',
-      'Por Hacer':         '#94a3b8',
-      'En Progreso':       '#4F46E5',  // Indigo
-      'En Revisión':       '#7C3AED',  // Violet
-      'Completado':        '#10B981',  // Emerald
-      'Backlog':           '#94a3b8',
-      'Done':              '#10B981',
-      'Review':            '#7C3AED',
-      'In Progress':       '#4F46E5',
+      'Tareas Pendientes': '#64748B', // Slate
+      'Por Hacer':         '#64748B', // Slate
+      'En Progreso':       '#34D399', // Mint
+      'En Revisión':       '#10B981', // Emerald
+      'Completado':        '#059669', // Deep Emerald
+      'Backlog':           '#64748B',
+      'Done':              '#059669',
+      'Review':            '#10B981',
+      'In Progress':       '#34D399',
     };
     const progressData = data.taskProgress || [];
     const chartData = standardColumns.map(colName => {
@@ -456,7 +456,7 @@ export class DashboardComponent implements OnInit {
       datasets: [
         {
           data: chartData,
-          backgroundColor: standardColumns.map(col => qamsColumnColors[col] || '#4F46E5'),
+          backgroundColor: standardColumns.map(col => qamsColumnColors[col] || '#10B981'),
           label: 'Tareas',
         },
       ],

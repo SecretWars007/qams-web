@@ -273,7 +273,7 @@ export class EvidencesComponent implements OnInit {
           icon: 'success',
           title: 'Evidencia Subida',
           text: 'La evidencia se ha cargado correctamente y está vinculada a la ejecución.',
-          confirmButtonColor: '#150fbd'
+          confirmButtonColor: '#10B981'
         });
         this.loadExecutions();
       },

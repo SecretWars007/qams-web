@@ -1,6 +1,4 @@
 // src/app/features/admin/catalogs/catalogs.component.scss
-// TailwindCSS-only component styles via @apply
-
 :host {
   @apply block;
 }
@@ -15,39 +13,39 @@
 }
 
 .catalogs-sidebar {
-  @apply p-10 flex flex-col gap-8;
+  @apply p-6 flex flex-col gap-6 rounded-2xl;
 
   .sidebar-header {
-    @apply flex flex-col gap-6;
+    @apply flex flex-col gap-4;
   }
 
   .catalog-nav {
-    @apply flex flex-col gap-3;
+    @apply flex flex-col gap-2;
 
     .nav-item {
-      @apply flex items-center justify-between px-5 py-4 rounded-2xl 
-             bg-transparent text-slate-500 font-semibold 
+      @apply flex items-center justify-between px-4 py-3 rounded-xl 
+             bg-transparent text-slate-400 font-semibold 
              transition-all duration-300 cursor-pointer 
              border border-transparent;
 
       .nav-icon {
-        @apply text-xl text-slate-400 transition-all duration-300;
+        @apply text-lg text-emerald-400/70 transition-all duration-300;
       }
 
       .arrow-icon {
-        @apply opacity-0 -translate-x-2.5 transition-all duration-300;
+        @apply opacity-0 -translate-x-2.5 transition-all duration-300 text-emerald-400;
       }
 
       &:hover {
-        @apply bg-white text-indigo-600;
-        .nav-icon { @apply text-indigo-600; }
+        @apply bg-emerald-500/10 text-emerald-300 border-emerald-500/20;
+        .nav-icon { @apply text-emerald-400; }
       }
 
       &.active {
-        @apply bg-white text-indigo-600 border-indigo-600/20 
-               shadow-[0_10px_20px_rgba(99,102,241,0.05)];
+        @apply bg-emerald-500/15 text-emerald-300 border-emerald-500/30 
+               shadow-[0_4px_20px_rgba(16,185,129,0.1)];
 
-        .nav-icon { @apply text-indigo-600; }
+        .nav-icon { @apply text-emerald-400; }
         .arrow-icon { @apply opacity-100 translate-x-0; }
       }
     }
@@ -55,13 +53,13 @@
 }
 
 .catalogs-main {
-  @apply flex flex-col gap-10;
+  @apply flex flex-col gap-6;
 
   .main-header {
     @apply flex justify-between items-end;
 
     @media (max-width: 768px) {
-      @apply flex-col items-start gap-8;
+      @apply flex-col items-start gap-6;
     }
   }
 }

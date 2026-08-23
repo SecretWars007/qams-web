@@ -90,7 +90,7 @@ export class KpiCardComponent {
   @Input() sparklinePoints: string = '0,28 20,20 40,24 60,10 80,16 100,5 120,8';
 
   private colorMap: Record<KpiVariant, { bg: string; iconColor: string; valueColor: string; stroke: string }> = {
-    indigo:  { bg: 'bg-indigo-100',  iconColor: 'text-indigo-600',  valueColor: 'text-indigo-700',  stroke: '#4F46E5' },
+    indigo:  { bg: 'bg-emerald-500/20',  iconColor: 'text-emerald-400',  valueColor: 'text-emerald-300',  stroke: '#4F46E5' },
     emerald: { bg: 'bg-emerald-100', iconColor: 'text-emerald-600', valueColor: 'text-emerald-700', stroke: '#10B981' },
     amber:   { bg: 'bg-amber-100',   iconColor: 'text-amber-600',   valueColor: 'text-amber-700',   stroke: '#F59E0B' },
     rose:    { bg: 'bg-rose-100',    iconColor: 'text-rose-600',    valueColor: 'text-rose-700',    stroke: '#F43F5E' },

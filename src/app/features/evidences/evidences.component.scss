@@ -1,6 +1,6 @@
 /* SCSS styles for EvidencesComponent */
 .btn-primary {
-  @apply bg-[#150fbd] hover:bg-[#110c9c] text-white font-bold py-2.5 px-5 rounded-xl shadow-md transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none;
+  @apply bg-[#10B981] hover:bg-[#110c9c] text-white font-bold py-2.5 px-5 rounded-xl shadow-md transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none;
 }
 .btn-secondary {
   @apply bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 px-5 rounded-xl transition-all active:scale-95 disabled:opacity-50 disabled:pointer-events-none;

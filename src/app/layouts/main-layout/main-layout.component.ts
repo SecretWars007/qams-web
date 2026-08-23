@@ -1,5 +1,5 @@
-import { Component, signal, inject, ChangeDetectorRef, ViewChild, OnInit } from '@angular/core';
-import { RouterOutlet, RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
+import { Component, signal, inject, ChangeDetectorRef, ViewChild, OnInit, HostListener } from '@angular/core';
+import { RouterOutlet, RouterLink, RouterLinkActive, Router, NavigationEnd, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
@@ -9,6 +9,39 @@ import { ProfileModalComponent } from '../../features/profile/profile-modal.comp
 import { ProjectsService } from '../../core/services/projects.service';
 import { ProjectContextService } from '../../core/services/project-context.service';
 import { Project } from '../../core/models/project.model';
+
+import { ThemeService } from '../../core/services/theme.service';
+
+export interface BreadcrumbItem {
+  label: string;
+  route?: string;
+}
+
+/** Mapa de rutas a etiquetas de breadcrumb */
+const ROUTE_LABELS: Record<string, string> = {
+  'dashboard': 'Dashboard',
+  'projects': 'Proyectos',
+  'requirements': 'Requisitos',
+  'test-plans': 'Planes de Prueba',
+  'test-scenarios': 'Escenarios de Prueba',
+  'test-cases': 'Casos de Prueba',
+  'test-executions': 'Ejecuciones de Prueba',
+  'evidences': 'Evidencias',
+  'defects': 'Defectos',
+  'reports': 'Reportes',
+  'kanban': 'Tablero Kanban',
+  'systems-under-test': 'Sistemas Bajo Prueba',
+  'test-environments': 'Entornos de Prueba',
+  'exploratory': 'Pruebas Exploratorias',
+  'reviews': 'Revisiones Estáticas',
+  'admin': 'Administración',
+  'users': 'Usuarios',
+  'roles': 'Roles y Permisos',
+  'catalogs': 'Catálogos',
+  'api-keys': 'API Keys',
+  'change-password': 'Cambiar Contraseña',
+  'profile': 'Mi Perfil',
+};
 
 @Component({
   selector: 'app-main-layout',
@@ -29,13 +62,21 @@ export class MainLayoutComponent implements OnInit {
   @ViewChild('profileModal') profileModal!: ProfileModalComponent;
   userMenuOpen: boolean = false;
   sidebarOpen = signal(false);
+  /** Modo icon-rail para tablet (solo iconos, sin texto) */
+  sidebarCollapsed = signal(false);
+  /** Búsqueda global visible */
+  globalSearchOpen = signal(false);
+  /** Breadcrumbs dinámicos */
+  breadcrumbs = signal<BreadcrumbItem[]>([{ label: 'QAMS' }]);
 
   projects = signal<Project[]>([]);
   private readonly projectsService = inject(ProjectsService);
   private readonly projectContext = inject(ProjectContextService);
+  readonly themeService = inject(ThemeService);
   readonly activeProjectId = this.projectContext.activeProjectId;
 
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly cdr = inject(ChangeDetectorRef);
 
   // ===== Menús colapsables =====
@@ -43,16 +84,25 @@ export class MainLayoutComponent implements OnInit {
   testPlansMenuOpen = signal<boolean>(false);
   executionsMenuOpen = signal<boolean>(false);
 
+  /** Ctrl+K / Cmd+K → abrir búsqueda global */
+  @HostListener('document:keydown', ['$event'])
+  onDocumentKeyDown(event: KeyboardEvent) {
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+      event.preventDefault();
+      this.globalSearchOpen.update(v => !v);
+    }
+  }
+
   // ===== Flujo QA ISTQB Stepper =====
   qaFlowSteps = [
     { label: 'Planificación', route: '/systems-under-test', active: false },
     { label: 'SUT (Sistema)', route: '/systems-under-test', active: false },
     { label: 'Proyecto', route: '/projects', active: false },
     { label: 'Requisitos', route: '/requirements', active: false },
-    { label: 'Planes de Prueba', route: '/test-plans', active: false },
+    { label: 'Gestión', route: '/test-plans', active: false },
     { label: 'Escenarios', route: '/test-scenarios', active: false },
     { label: 'Casos de Prueba', route: '/test-cases', active: false },
-    { label: 'Ejecución de Pruebas', route: '/test-executions', active: false },
+    { label: 'Ejecución', route: '/test-executions', active: false },
     { label: 'Defectos', route: '/defects', active: false },
     { label: 'Reportes', route: '/reports', active: false },
   ];
@@ -81,7 +131,33 @@ export class MainLayoutComponent implements OnInit {
         ...step,
         active: currentUrl.startsWith(step.route)
       }));
+
+      // Actualizar breadcrumbs dinámicos
+      this.breadcrumbs.set(this.buildBreadcrumbs(currentUrl));
     });
+  }
+
+  /** Construye breadcrumbs a partir de la URL */
+  buildBreadcrumbs(url: string): BreadcrumbItem[] {
+    const crumbs: BreadcrumbItem[] = [{ label: 'QAMS' }];
+    const segments = url.split('/').filter(s => s && s !== '#');
+    let accumulated = '';
+    for (const segment of segments) {
+      accumulated += '/' + segment;
+      const label = ROUTE_LABELS[segment];
+      if (label) {
+        crumbs.push({ label, route: accumulated });
+      } else if (/^\d+$/.test(segment)) {
+        // segmento numérico = ID de detalle
+        crumbs.push({ label: `#${segment}` });
+      }
+    }
+    return crumbs;
+  }
+
+  /** Colapsa/expande el sidebar en modo icon-rail */
+  toggleSidebarCollapse(): void {
+    this.sidebarCollapsed.update(v => !v);
   }
 
   ngOnInit(): void {
@@ -96,6 +172,8 @@ export class MainLayoutComponent implements OnInit {
     if (currentUrl.startsWith('/test-executions') || currentUrl.startsWith('/evidences') || currentUrl.startsWith('/defects')) {
       this.executionsMenuOpen.set(true);
     }
+    // Breadcrumbs iniciales
+    this.breadcrumbs.set(this.buildBreadcrumbs(currentUrl));
   }
 
   loadProjects(): void {

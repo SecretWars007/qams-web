@@ -67,7 +67,7 @@ export class RegisterComponent {
         icon: 'warning',
         title: 'Atención',
         text: 'Por favor, revise los campos marcados en rojo y asegúrese de cumplir con los formatos requeridos.',
-        confirmButtonColor: '#150fbd'
+        confirmButtonColor: '#10B981'
       });
       return;
     }
@@ -89,7 +89,7 @@ export class RegisterComponent {
         icon: 'warning',
         title: 'Edad no permitida',
         text: 'El registro solo está permitido para personas entre 18 y 80 años.',
-        confirmButtonColor: '#150fbd'
+        confirmButtonColor: '#10B981'
       });
       return;
     }
@@ -102,7 +102,7 @@ export class RegisterComponent {
           icon: 'success',
           title: '¡Bienvenido!',
           text: 'Tu cuenta ha sido creada exitosamente. Ya puedes iniciar sesión.',
-          confirmButtonColor: '#150fbd'
+          confirmButtonColor: '#10B981'
         });
         this.router.navigate(['/auth/login']);
       },
@@ -112,7 +112,7 @@ export class RegisterComponent {
           icon: 'error',
           title: 'Error de Registro',
           text: 'No se pudo completar el registro. Verifique que el usuario o correo no existan.',
-          confirmButtonColor: '#150fbd'
+          confirmButtonColor: '#10B981'
         });
         this.loading.set(false);
       },

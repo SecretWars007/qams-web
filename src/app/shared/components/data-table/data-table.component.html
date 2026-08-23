@@ -1,0 +1,141 @@
+<div class="bg-[#111E30] rounded-2xl shadow-sm border border-emerald-500/15 overflow-hidden">
+  <div *ngIf="showToolbar" class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 px-6 py-4 border-b border-emerald-500/10">
+    <div class="relative flex-1 max-w-xs">
+      <i class="ri-search-line absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
+      <label for="tableSearchInput" class="sr-only">{{ searchPlaceholder }}</label>
+      <input
+        id="tableSearchInput"
+        type="text"
+        [placeholder]="searchPlaceholder"
+        [ngModel]="searchTerm()"
+        (ngModelChange)="onSearch($event)"
+        class="form-input pl-9 text-sm py-2 bg-slate-900/80 border border-emerald-500/20 text-slate-100 placeholder-slate-500"
+        aria-label="Buscar en la tabla"
+      />
+    </div>
+    <div *ngIf="selectedCount() > 0" class="flex items-center gap-2 bg-emerald-500/15 border border-emerald-500/30 rounded-xl px-4 py-2">
+      <span class="text-xs font-bold text-emerald-300">{{ selectedCount() }} seleccionado(s)</span>
+      <button type="button" (click)="clearSelection()" class="text-emerald-400 hover:text-emerald-200 transition-colors" aria-label="Limpiar selección">
+        <i class="fas fa-times text-xs"></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="premium-table" aria-label="Tabla de datos">
+      <thead>
+        <tr>
+          <th *ngIf="selectable" class="w-12" scope="col">
+            <input type="checkbox"
+                   class="w-4 h-4 rounded accent-emerald-500 cursor-pointer"
+                   [checked]="allSelected()"
+                   (change)="toggleAll($event)"
+                   aria-label="Seleccionar todos" />
+          </th>
+          <th *ngFor="let col of columns" scope="col"
+              [style.min-width]="col.minWidth"
+              [class.cursor-pointer]="col.sortable"
+              [class.hover:text-emerald-300]="col.sortable"
+              (click)="onColumnHeaderClick(col)"
+              (keydown.enter)="onColumnHeaderClick(col)"
+              (keydown.space)="onColumnHeaderClick(col)"
+              [attr.tabindex]="col.sortable ? 0 : null"
+              [attr.aria-sort]="sortColumn() === col.key ? (sortDir() === 'asc' ? 'ascending' : 'descending') : null"
+              class="select-none">
+            <div class="flex items-center gap-1.5">
+              <span>{{ col.label }}</span>
+              <span *ngIf="col.sortable">
+                <i class="fas fa-sort text-slate-500 text-[10px]" *ngIf="sortColumn() !== col.key"></i>
+                <i class="fas fa-sort-up text-emerald-400 text-[10px]" *ngIf="sortColumn() === col.key && sortDir() === 'asc'"></i>
+                <i class="fas fa-sort-down text-emerald-400 text-[10px]" *ngIf="sortColumn() === col.key && sortDir() === 'desc'"></i>
+              </span>
+            </div>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let i of skeletonRows" [class.hidden]="!loading" class="animate-pulse">
+          <td *ngIf="selectable"><div class="w-4 h-4 bg-slate-800 rounded"></div></td>
+          <td *ngFor="let col of columns"><div class="h-4 bg-slate-800/80 rounded-full w-3/4"></div></td>
+        </tr>
+        <tr *ngFor="let row of pagedData()"
+            [class.hidden]="loading"
+            class="hover:bg-emerald-500/[0.04] transition-colors group cursor-default"
+            [ngClass]="{ 'bg-emerald-500/10': isSelected(row) }">
+          <td *ngIf="selectable">
+            <input type="checkbox"
+                   class="w-4 h-4 rounded accent-emerald-500 cursor-pointer"
+                   [checked]="isSelected(row)"
+                   (change)="toggleRow(row)"
+                   aria-label="Seleccionar fila" />
+          </td>
+          <td *ngFor="let col of columns">
+            <div *ngIf="col.type === 'avatar'" class="flex items-center gap-2">
+              <div class="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-bold flex items-center justify-center shrink-0 border border-emerald-500/30">
+                {{ getInitials(getCellValue(row, col)) }}
+              </div>
+              <span class="text-sm font-medium text-slate-200">{{ getCellValue(row, col) }}</span>
+            </div>
+            <span *ngIf="col.type === 'date'" class="text-sm text-slate-400 font-mono">
+              {{ getCellValue(row, col) | date:'dd/MM/yyyy' }}
+            </span>
+            <span *ngIf="col.type !== 'avatar' && col.type !== 'date'" class="text-sm text-slate-200">
+              {{ getDisplayValue(row, col) }}
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div *ngIf="!loading && pagedData().length === 0">
+    <app-empty-state
+      [icon]="emptyIcon"
+      [title]="emptyTitle"
+      [message]="emptyMessage"
+      [actionLabel]="emptyActionLabel"
+      [onAction]="emptyAction"
+    ></app-empty-state>
+  </div>
+
+  <div *ngIf="!loading && totalCount > 0"
+       class="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 border-t border-emerald-500/10 bg-slate-950/40">
+    <div class="flex items-center gap-3 text-xs text-slate-400">
+      <label for="pageSizeSelect" class="cursor-pointer">Filas por página:</label>
+      <select id="pageSizeSelect"
+              [ngModel]="pageSize()" (ngModelChange)="onPageSizeChange($event)"
+              class="border border-emerald-500/20 rounded-lg px-2 py-1 text-xs bg-slate-900 text-slate-200 focus:outline-none focus:border-emerald-400">
+        <option *ngFor="let s of pageSizeOptions" [value]="s">{{ s }}</option>
+      </select>
+      <span class="hidden sm:inline">
+        {{ (currentPage() - 1) * pageSize() + 1 }}–{{ Math.min(currentPage() * pageSize(), totalCount) }}
+        de {{ totalCount }}
+      </span>
+    </div>
+    <div class="flex items-center gap-1">
+      <button type="button" (click)="goToPage(1)" [disabled]="currentPage() === 1"
+              class="btn-icon btn-icon-primary w-8 h-8 text-xs disabled:opacity-30"
+              aria-label="Primera página">
+        <i class="fas fa-angle-double-left text-xs"></i>
+      </button>
+      <button type="button" (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 1"
+              class="btn-icon btn-icon-primary w-8 h-8 text-xs disabled:opacity-30"
+              aria-label="Página anterior">
+        <i class="fas fa-angle-left text-xs"></i>
+      </button>
+      <span class="px-3 py-1 text-xs font-bold text-emerald-300 bg-slate-900 rounded-lg border border-emerald-500/30 min-w-[3rem] text-center">
+        {{ currentPage() }} / {{ totalPages() }}
+      </span>
+      <button type="button" (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() === totalPages()"
+              class="btn-icon btn-icon-primary w-8 h-8 text-xs disabled:opacity-30"
+              aria-label="Página siguiente">
+        <i class="fas fa-angle-right text-xs"></i>
+      </button>
+      <button type="button" (click)="goToPage(totalPages())" [disabled]="currentPage() === totalPages()"
+              class="btn-icon btn-icon-primary w-8 h-8 text-xs disabled:opacity-30"
+              aria-label="Última página">
+        <i class="fas fa-angle-double-right text-xs"></i>
+      </button>
+    </div>
+  </div>
+</div>

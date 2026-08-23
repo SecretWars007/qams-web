@@ -16,7 +16,7 @@ import {
 })
 export class ReviewService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = `${environment.apiUrl}/api/review`;
+  private readonly apiUrl = `${environment.apiUrl}/review`;
 
   getById(id: string): Observable<ReviewSession> {
     return this.http.get<ReviewSession>(`${this.apiUrl}/${id}`);

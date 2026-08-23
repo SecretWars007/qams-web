@@ -78,7 +78,7 @@ export class RtmMatrixComponent {
             icon: 'success',
             title: 'Exportación Exitosa',
             text: 'La Matriz de Trazabilidad RTM se ha descargado correctamente.',
-            confirmButtonColor: '#150fbd'
+            confirmButtonColor: '#10B981'
           });
         },
         error: (err) => {

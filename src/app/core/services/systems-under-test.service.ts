@@ -25,19 +25,7 @@ export class SystemsUnderTestService {
   }
 
   getPlatformTypes(): Observable<PlatformType[]> {
-    // Para simplificar mientras no exista en el backend, retornamos un mock en catchError.
-    return this.http.get<PlatformType[]>(`${environment.apiUrl}/PlatformTypes`).pipe(
-      catchError(err => {
-        console.warn(this.LOG_TAG, 'Backend no expone PlatformTypes, retornando mock.');
-        return of([
-          { id: 1, name: 'Web Application', code: 'WEB', isActive: true },
-          { id: 2, name: 'Mobile Android', code: 'ANDROID', isActive: true },
-          { id: 3, name: 'Mobile iOS', code: 'IOS', isActive: true },
-          { id: 4, name: 'API REST', code: 'API', isActive: true },
-          { id: 5, name: 'Desktop App', code: 'DESKTOP', isActive: true }
-        ]);
-      })
-    );
+    return this.http.get<PlatformType[]>(`${environment.apiUrl}/PlatformTypes`);
   }
 
   getById(id: string): Observable<SystemUnderTest> {

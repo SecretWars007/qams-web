@@ -1,39 +1,100 @@
 /* src/app/features/kanban/kanban.component.scss */
 
-/* ── Colores de columna según estado (Light Theme) ── */
-.col-pending    { @apply bg-amber-50 border-amber-200; }
-.col-inprogress { @apply bg-blue-50 border-blue-200; }
-.col-review     { @apply bg-purple-50 border-purple-200; }
-.col-done       { @apply bg-emerald-50 border-emerald-200; }
-.col-default    { @apply bg-gray-50 border-gray-200; }
+/* ── Estilos por Columna Estándar (Dark Emerald Sentinel Theme) ── */
+.col-backlog {
+  background-color: rgba(17, 30, 48, 0.5);
+  border-color: rgba(134, 148, 138, 0.25);
 
-/* ── Iconos de columna ── */
-.col-pending    .col-icon { @apply text-amber-500; }
-.col-inprogress .col-icon { @apply text-blue-500; }
-.col-review     .col-icon { @apply text-purple-500; }
-.col-done       .col-icon { @apply text-emerald-500; }
-.col-default    .col-icon { @apply text-gray-400; }
+  .col-icon {
+    color: #86948a;
+  }
+  .col-badge {
+    background-color: #17202d;
+    color: #f1f5f9;
+    border: 1px solid rgba(134, 148, 138, 0.4);
+  }
+}
 
-/* ── Badges de columna ── */
-.col-pending    .col-badge { @apply bg-amber-100 text-amber-700 border border-amber-200; }
-.col-inprogress .col-badge { @apply bg-blue-100 text-blue-700 border border-blue-200; }
-.col-review     .col-badge { @apply bg-purple-100 text-purple-700 border border-purple-200; }
-.col-done       .col-badge { @apply bg-emerald-100 text-emerald-700 border border-emerald-200; }
-.col-default    .col-badge { @apply bg-gray-100 text-gray-600 border border-gray-200; }
+.col-todo {
+  background-color: rgba(17, 30, 48, 0.6);
+  border-color: rgba(245, 158, 11, 0.3);
 
-/* ── Scrollbar personalizada ── */
-.custom-scrollbar::-webkit-scrollbar       { width: 4px; }
-.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.2); border-radius: 2px; }
-.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(99,102,241,0.4); }
+  .col-icon {
+    color: #f59e0b;
+  }
+  .col-badge {
+    background-color: #291e0a;
+    color: #fef08a;
+    border: 1px solid rgba(245, 158, 11, 0.5);
+  }
+}
 
-/* ── CDK Drag ghost ── */
+.col-in-progress {
+  background-color: rgba(17, 30, 48, 0.85);
+  border-color: rgba(16, 185, 129, 0.5);
+  box-shadow: 0 0 25px rgba(16, 185, 129, 0.08);
+
+  .col-icon {
+    color: #10b981;
+  }
+  .col-badge {
+    background-color: #06281e;
+    color: #a7f3d0;
+    border: 1px solid rgba(16, 185, 129, 0.6);
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.3);
+  }
+}
+
+.col-done {
+  background-color: rgba(17, 30, 48, 0.5);
+  border-color: rgba(16, 185, 129, 0.25);
+
+  .col-icon {
+    color: #34d399;
+  }
+  .col-badge {
+    background-color: #06281e;
+    color: #6ee7b7;
+    border: 1px solid rgba(16, 185, 129, 0.4);
+  }
+}
+
+/* ── Scrollbars personalizadas ── */
+.kanban-scroll::-webkit-scrollbar {
+  width: 5px;
+  height: 6px;
+}
+.kanban-scroll::-webkit-scrollbar-track {
+  background: rgba(11, 20, 33, 0.6);
+  border-radius: 4px;
+}
+.kanban-scroll::-webkit-scrollbar-thumb {
+  background: rgba(16, 185, 129, 0.25);
+  border-radius: 4px;
+}
+.kanban-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(16, 185, 129, 0.55);
+}
+
+/* ── Animación de pulso activo ── */
+@keyframes pulse-glow {
+  0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+  70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+.pulse-indicator {
+  animation: pulse-glow 2s infinite;
+}
+
+/* ── CDK Drag & Drop preview ── */
 .cdk-drag-preview {
   border-radius: 12px;
-  box-shadow: 0 16px 48px rgba(99,102,241,0.25), 0 4px 16px rgba(0,0,0,0.5);
-  border: 1px solid rgba(99,102,241,0.3);
-  opacity: 0.95;
-  transform: rotate(1.5deg) scale(1.02);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.75), 0 0 25px rgba(16, 185, 129, 0.3);
+  border: 1px solid rgba(16, 185, 129, 0.6);
+  background-color: #111e30;
+  opacity: 0.96;
+  transform: rotate(1.2deg) scale(1.02);
+  color: #dae3f6;
 }
 
 .cdk-drag-animating {

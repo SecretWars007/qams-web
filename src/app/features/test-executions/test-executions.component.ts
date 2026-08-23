@@ -339,7 +339,7 @@ export class TestExecutionsComponent implements OnInit {
           icon: 'info',
           title: 'Modo Retest Activado',
           text: 'Se precargó un nuevo ciclo con los pasos fallidos/bloqueados en limpio para su re-verificación.',
-          confirmButtonColor: '#150fbd',
+          confirmButtonColor: '#10B981',
           timer: 2500
         });
       },
@@ -591,7 +591,7 @@ export class TestExecutionsComponent implements OnInit {
       icon: 'success',
       title: 'Éxito',
       text: 'Ejecución guardada exitosamente.',
-      confirmButtonColor: '#150fbd'
+      confirmButtonColor: '#10B981'
     });
         this.loadExecutions();
       },
@@ -602,7 +602,7 @@ export class TestExecutionsComponent implements OnInit {
       icon: 'error',
       title: 'Error',
       text: 'Error al guardar la ejecución.',
-      confirmButtonColor: '#150fbd'
+      confirmButtonColor: '#10B981'
     });
       }
     });
@@ -823,7 +823,7 @@ export class TestExecutionsComponent implements OnInit {
           icon: 'success',
           title: 'Evidencias Registradas',
           text: `Se registraron ${files.length} evidencia(s) exitosamente.`,
-          confirmButtonColor: '#150fbd'
+          confirmButtonColor: '#10B981'
         });
         this.loadExecutions();
         if (this.showDetailsModal() && this.selectedExecution()) {
@@ -837,7 +837,7 @@ export class TestExecutionsComponent implements OnInit {
           icon: 'error',
           title: 'Error',
           text: 'Error al registrar algunas de las evidencias.',
-          confirmButtonColor: '#150fbd'
+          confirmButtonColor: '#10B981'
         });
       }
     });
@@ -929,7 +929,7 @@ export class TestExecutionsComponent implements OnInit {
           icon: 'error',
           title: 'Error',
           text: 'Error al agregar el incidente.',
-          confirmButtonColor: '#150fbd'
+          confirmButtonColor: '#10B981'
         });
       }
     });
@@ -942,7 +942,7 @@ export class TestExecutionsComponent implements OnInit {
       icon: 'success',
       title: 'Éxito',
       text: 'Incidente y sus evidencias registrados exitosamente.',
-      confirmButtonColor: '#150fbd'
+      confirmButtonColor: '#10B981'
     });
     if (this.selectedExecution()) {
       this.openDetailsModal(this.selectedExecution()!);
@@ -957,7 +957,7 @@ export class TestExecutionsComponent implements OnInit {
       icon: 'success',
       title: 'Éxito',
       text: 'Respuesta guardada exitosamente.',
-      confirmButtonColor: '#150fbd'
+      confirmButtonColor: '#10B981'
     });
         if (this.selectedExecution()) {
           this.openDetailsModal(this.selectedExecution()!);
@@ -969,7 +969,7 @@ export class TestExecutionsComponent implements OnInit {
       icon: 'error',
       title: 'Error',
       text: 'Error al guardar la respuesta.',
-      confirmButtonColor: '#150fbd'
+      confirmButtonColor: '#10B981'
     });
       }
     });
@@ -1036,7 +1036,7 @@ export class TestExecutionsComponent implements OnInit {
         icon: 'error',
         title: 'Error',
         text: 'No se pudo identificar el proyecto asociado para registrar el defecto.',
-        confirmButtonColor: '#150fbd'
+        confirmButtonColor: '#10B981'
       });
       return;
     }
@@ -1060,7 +1060,7 @@ export class TestExecutionsComponent implements OnInit {
                 icon: 'success',
                 title: 'Defecto Creado',
                 text: `El defecto y sus ${files.length} evidencia(s) fueron registrados exitosamente.`,
-                confirmButtonColor: '#150fbd'
+                confirmButtonColor: '#10B981'
               });
               this.loadExecutions();
               if (this.showDetailsModal() && this.selectedExecution()) {
@@ -1074,7 +1074,7 @@ export class TestExecutionsComponent implements OnInit {
                 icon: 'success',
                 title: 'Defecto Creado',
                 text: 'El defecto fue creado exitosamente.',
-                confirmButtonColor: '#150fbd'
+                confirmButtonColor: '#10B981'
               });
               this.loadExecutions();
             }
@@ -1085,7 +1085,7 @@ export class TestExecutionsComponent implements OnInit {
             icon: 'success',
             title: 'Defecto Creado',
             text: 'El defecto fue registrado exitosamente.',
-            confirmButtonColor: '#150fbd'
+            confirmButtonColor: '#10B981'
           });
           this.loadExecutions();
           if (this.showDetailsModal() && this.selectedExecution()) {
@@ -1099,7 +1099,7 @@ export class TestExecutionsComponent implements OnInit {
           icon: 'error',
           title: 'Error',
           text: 'No se pudo crear el defecto.',
-          confirmButtonColor: '#150fbd'
+          confirmButtonColor: '#10B981'
         });
       }
     });

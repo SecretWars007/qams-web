@@ -1,30 +1,27 @@
-# Stage 1: Build
-FROM node:20-alpine AS builder
-
-WORKDIR /app
-
-# Instalar dependencias primero para aprovechar el cache
-COPY package*.json ./
-RUN npm install
-
-# Copiar código fuente y compilar
-COPY . .
-RUN CI=true npx ng build --configuration production
-
-# Stage 2: Servir con Nginx
+# Servidor web Nginx con soporte HTTPS
 FROM nginx:alpine
 
-# Copiar configuración de Nginx
+# Generar certificados SSL/TLS autofirmados para localhost/desarrollo
+RUN apk add --no-cache openssl && \
+    mkdir -p /etc/nginx/ssl && \
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+    -keyout /etc/nginx/ssl/qams.key \
+    -out /etc/nginx/ssl/qams.crt \
+    -subj "/C=ES/ST=State/L=City/O=QAMS/OU=QA/CN=localhost" && \
+    chmod 600 /etc/nginx/ssl/qams.key && \
+    chmod 644 /etc/nginx/ssl/qams.crt
+
+# Copiar configuración de Nginx con SSL/TLS habilitado
 COPY nginx.conf /etc/nginx/nginx.conf
 
-# Eliminar archivos por defecto de nginx
+# Limpiar archivos por defecto
 RUN rm -rf /usr/share/nginx/html/*
 
-# Copiar archivos compilados desde el builder
-COPY --from=builder /app/dist/qams-web/browser /usr/share/nginx/html
+# Copiar archivos compilados de Angular
+COPY dist/qams-web/browser /usr/share/nginx/html
 
-# Exponer puerto HTTP
-EXPOSE 80
+# Exponer puertos HTTP (80) y HTTPS (443)
+EXPOSE 80 443
 
-# Comando de inicio
+# Iniciar Nginx en primer plano
 CMD ["nginx", "-g", "daemon off;"]

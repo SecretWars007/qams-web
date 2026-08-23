@@ -58,7 +58,7 @@ export class CatalogsComponent implements OnInit {
       moduleId: 'design',
       moduleName: 'Diseño y Planes de Prueba',
       icon: 'ri-flask-line',
-      badgeColor: 'bg-indigo-50 text-indigo-700 border-indigo-200',
+      badgeColor: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30',
       catalogs: [
         { name: 'TestPlanStatus', displayName: 'Estados de Plan de Prueba', icon: 'ri-draft-line', description: 'Borrador, En Revisión, Aprobado' },
         { name: 'TestPlanType', displayName: 'Tipos de Plan de Prueba', icon: 'ri-folder-shield-line', description: 'Master, Sprint, Regresión' },
@@ -178,7 +178,7 @@ export class CatalogsComponent implements OnInit {
             icon: 'error',
             title: 'Error',
             text: 'Error al cargar elementos del catálogo desde el servidor.',
-            confirmButtonColor: '#150fbd'
+            confirmButtonColor: '#10B981'
           });
         }
       });
@@ -225,7 +225,7 @@ export class CatalogsComponent implements OnInit {
             icon: 'success',
             title: 'Éxito',
             text: `Elemento ${this.isEdit() ? 'actualizado' : 'creado'} correctamente en la base de datos.`,
-            confirmButtonColor: '#150fbd'
+            confirmButtonColor: '#10B981'
           });
           this.loadCatalogItems();
           this.closeModal();
@@ -236,7 +236,7 @@ export class CatalogsComponent implements OnInit {
             icon: 'error',
             title: 'Error',
             text: serverMsg || 'Error al guardar el elemento en el catálogo. Verifica que el código no esté duplicado y cuentes con los permisos necesarios.',
-            confirmButtonColor: '#150fbd'
+            confirmButtonColor: '#10B981'
           });
         }
       });
@@ -252,7 +252,7 @@ export class CatalogsComponent implements OnInit {
             icon: 'success',
             title: 'Éxito',
             text: 'Estado actualizado',
-            confirmButtonColor: '#150fbd'
+            confirmButtonColor: '#10B981'
           });
           this.loadCatalogItems();
         },
@@ -261,7 +261,7 @@ export class CatalogsComponent implements OnInit {
             icon: 'error',
             title: 'Error',
             text: 'Error al actualizar estado en la base de datos.',
-            confirmButtonColor: '#150fbd'
+            confirmButtonColor: '#10B981'
           });
         }
       });

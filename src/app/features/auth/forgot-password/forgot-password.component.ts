@@ -29,7 +29,7 @@ export class ForgotPasswordComponent {
       icon: 'warning',
       title: 'Atención',
       text: 'Por favor ingrese su correo electrónico.',
-      confirmButtonColor: '#150fbd'
+      confirmButtonColor: '#10B981'
     });
       return;
     }
@@ -42,7 +42,7 @@ export class ForgotPasswordComponent {
           icon: 'success',
           title: 'Solicitud Enviada',
           text: 'Si el correo ingresado es correcto, recibirá un mensaje con las instrucciones para restablecer su contraseña en unos instantes.',
-          confirmButtonColor: '#150fbd'
+          confirmButtonColor: '#10B981'
         });
         this.loading.set(false);
         this.router.navigate(['/auth/login']);
@@ -54,7 +54,7 @@ export class ForgotPasswordComponent {
       icon: 'error',
       title: 'Error',
       text: 'Error al procesar la solicitud. Intente nuevamente.',
-      confirmButtonColor: '#150fbd'
+      confirmButtonColor: '#10B981'
     });
         this.loading.set(false);
       }

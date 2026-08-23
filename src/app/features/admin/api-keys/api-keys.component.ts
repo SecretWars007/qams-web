@@ -50,7 +50,7 @@ export class ApiKeysComponent implements OnInit {
           icon: 'error',
           title: 'Error',
           text: 'Error al cargar las API Keys',
-          confirmButtonColor: '#150fbd'
+          confirmButtonColor: '#10B981'
         });
       }
     });
@@ -83,7 +83,7 @@ export class ApiKeysComponent implements OnInit {
           icon: 'success',
           title: 'API Key Generada',
           text: 'Por favor, copia la API Key ahora. No se volverá a mostrar.',
-          confirmButtonColor: '#150fbd'
+          confirmButtonColor: '#10B981'
         });
         this.loadApiKeys();
       },
@@ -92,7 +92,7 @@ export class ApiKeysComponent implements OnInit {
           icon: 'error',
           title: 'Error',
           text: 'Error al generar la API Key',
-          confirmButtonColor: '#150fbd'
+          confirmButtonColor: '#10B981'
         });
       }
     });

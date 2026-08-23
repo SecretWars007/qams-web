@@ -1,112 +1,148 @@
-<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-fade-in">
-  <div class="bg-white border border-gray-200 rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[92vh]">
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-sm p-4 animate-in fade-in duration-300">
+  <div class="bg-[#0E1A2B] border border-emerald-500/20 rounded-2xl shadow-2xl shadow-emerald-950/50 w-full max-w-4xl overflow-hidden flex flex-col max-h-[90vh] text-slate-100">
 
     <!-- Header -->
-    <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+    <div class="px-6 py-4 border-b border-emerald-500/15 flex justify-between items-center bg-slate-900/60">
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
+        <div class="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
           <i class="ri-file-list-3-line text-xl"></i>
         </div>
         <div>
-          <h2 class="text-lg font-bold text-gray-900 tracking-tight">
+          <h2 class="text-base font-bold text-slate-100 tracking-tight">
             {{ isEdit ? 'Editar Plan de Pruebas (ISTQB)' : 'Nuevo Plan de Pruebas (ISTQB / ISO 29119)' }}
           </h2>
-          <p class="text-xs text-gray-500">Planificación de pruebas, estrategia y criterios de calidad</p>
+          <p class="text-xs text-slate-400">Planificación de pruebas, estrategia y criterios de calidad</p>
         </div>
       </div>
-      <button type="button" (click)="closeModal.emit()" class="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-lg hover:bg-gray-100">
-        <i class="ri-close-line text-xl"></i>
+      <button type="button" (click)="closeModal.emit()" class="w-8 h-8 flex items-center justify-center hover:bg-slate-800 rounded-lg transition-colors text-slate-400 hover:text-slate-100">
+        <i class="ri-close-line text-lg"></i>
       </button>
     </div>
 
     <!-- Navigation Tabs -->
-    <div class="px-6 pt-3 border-b border-gray-100 flex gap-4 bg-gray-50 text-xs font-semibold">
+    <div class="px-6 pt-3 border-b border-emerald-500/15 flex gap-4 bg-slate-900/40 text-xs font-semibold">
       <button type="button" (click)="activeTab = 'general'"
-              [class]="activeTab === 'general' ? 'border-b-2 border-indigo-500 text-indigo-600 pb-2.5' : 'text-gray-500 hover:text-gray-700 pb-2.5'">
+              [class]="activeTab === 'general' ? 'border-b-2 border-emerald-400 text-emerald-400 pb-2.5 font-bold' : 'text-slate-400 hover:text-slate-200 pb-2.5'">
         <i class="ri-information-line mr-1.5"></i> 1. Información General
       </button>
       <button type="button" (click)="activeTab = 'strategy'"
-              [class]="activeTab === 'strategy' ? 'border-b-2 border-indigo-500 text-indigo-600 pb-2.5' : 'text-gray-500 hover:text-gray-700 pb-2.5'">
+              [class]="activeTab === 'strategy' ? 'border-b-2 border-emerald-400 text-emerald-400 pb-2.5 font-bold' : 'text-slate-400 hover:text-slate-200 pb-2.5'">
         <i class="ri-compass-3-line mr-1.5"></i> 2. Alcance y Estrategia
       </button>
       <button type="button" (click)="activeTab = 'criteria'"
-              [class]="activeTab === 'criteria' ? 'border-b-2 border-indigo-500 text-indigo-600 pb-2.5' : 'text-gray-500 hover:text-gray-700 pb-2.5'">
+              [class]="activeTab === 'criteria' ? 'border-b-2 border-emerald-400 text-emerald-400 pb-2.5 font-bold' : 'text-slate-400 hover:text-slate-200 pb-2.5'">
         <i class="ri-checkbox-multiple-line mr-1.5"></i> 3. Criterios de Entrada / Salida
-        <span class="ml-1.5 px-1.5 py-0.5 rounded-full text-[10px] bg-indigo-100 text-indigo-700 border border-indigo-200">
+        <span class="ml-1.5 px-2 py-0.5 rounded-full text-[10px] bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
           {{ criteriaList.length }}
         </span>
       </button>
     </div>
 
     <!-- Body -->
-    <div class="p-6 overflow-y-auto flex-1 text-xs">
+    <div class="p-6 overflow-y-auto custom-scrollbar flex-1 text-xs bg-[#0E1A2B]">
       <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6" id="test-plan-form">
 
         <!-- TAB 1: GENERAL -->
         <div *ngIf="activeTab === 'general'" class="space-y-5">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <!-- Project -->
-            <div class="md:col-span-3 space-y-1">
-              <label class="font-medium text-gray-600" for="projectId">Proyecto <span class="text-rose-500">*</span></label>
-              <select id="projectId" formControlName="projectId" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-gray-800 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none">
-                <option value="">Seleccione un proyecto</option>
-                <option *ngFor="let p of projects" [value]="p.id">{{ p.name }}</option>
-              </select>
-              <div *ngIf="form.get('projectId')?.invalid && form.get('projectId')?.touched" class="text-rose-500 text-[10px]">
+            <div class="md:col-span-3 space-y-1.5">
+              <label class="block text-xs font-semibold text-emerald-400 uppercase tracking-wider" for="projectId">
+                Proyecto <span class="text-red-400">*</span>
+              </label>
+              <div class="relative">
+                <select id="projectId" formControlName="projectId" 
+                  class="w-full bg-slate-900/60 border border-emerald-500/20 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/50 focus:outline-none appearance-none cursor-pointer pr-8 font-medium">
+                  <option value="" class="bg-slate-900">Seleccione un proyecto</option>
+                  <option *ngFor="let p of projects" [value]="p.id" class="bg-slate-900">{{ p.name }}</option>
+                </select>
+                <i class="ri-arrow-down-s-line absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-base"></i>
+              </div>
+              <div *ngIf="form.get('projectId')?.invalid && form.get('projectId')?.touched" class="text-red-400 text-xs mt-1">
                 El proyecto es requerido.
               </div>
             </div>
 
             <!-- Name -->
-            <div class="md:col-span-2 space-y-1">
-              <label class="font-medium text-gray-600" for="name">Nombre del Plan <span class="text-rose-500">*</span></label>
-              <input type="text" id="name" formControlName="name" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-gray-800 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none" placeholder="Ej: Master Test Plan Sprint 4">
-              <div *ngIf="form.get('name')?.invalid && form.get('name')?.touched" class="text-rose-500 text-[10px]">
+            <div class="md:col-span-2 space-y-1.5">
+              <label class="block text-xs font-semibold text-emerald-400 uppercase tracking-wider" for="name">
+                Nombre del Plan <span class="text-red-400">*</span>
+              </label>
+              <input type="text" id="name" formControlName="name" 
+                class="w-full bg-slate-900/60 border border-emerald-500/20 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/50 focus:outline-none font-medium" 
+                placeholder="Ej: Master Test Plan Sprint 4">
+              <div *ngIf="form.get('name')?.invalid && form.get('name')?.touched" class="text-red-400 text-xs mt-1">
                 Nombre requerido (mínimo 5 caracteres).
               </div>
             </div>
 
             <!-- Test Manager -->
-            <div class="space-y-1">
-              <label class="font-medium text-gray-600" for="testManagerId">Test Manager (ISTQB)</label>
-              <select id="testManagerId" formControlName="testManagerId" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-gray-800 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none">
-                <option [ngValue]="null">Seleccione Test Manager...</option>
-                <option *ngFor="let u of testManagers" [ngValue]="u.id">{{ u.fullName }}</option>
-              </select>
+            <div class="space-y-1.5">
+              <label class="block text-xs font-semibold text-emerald-400 uppercase tracking-wider" for="testManagerId">
+                Test Manager (ISTQB)
+              </label>
+              <div class="relative">
+                <select id="testManagerId" formControlName="testManagerId" 
+                  class="w-full bg-slate-900/60 border border-emerald-500/20 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/50 focus:outline-none appearance-none cursor-pointer pr-8 font-medium">
+                  <option [ngValue]="null" class="bg-slate-900">Seleccione Test Manager...</option>
+                  <option *ngFor="let u of testManagers" [ngValue]="u.id" class="bg-slate-900">{{ u.fullName }}</option>
+                </select>
+                <i class="ri-arrow-down-s-line absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-base"></i>
+              </div>
             </div>
 
             <!-- Status -->
-            <div class="space-y-1">
-              <label class="font-medium text-gray-600" for="statusId">Estado del Plan</label>
-              <select id="statusId" formControlName="statusId" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-gray-800 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none">
-                <option *ngFor="let s of statuses" [value]="s.id">{{ s.name }}</option>
-              </select>
+            <div class="space-y-1.5">
+              <label class="block text-xs font-semibold text-emerald-400 uppercase tracking-wider" for="statusId">
+                Estado del Plan
+              </label>
+              <div class="relative">
+                <select id="statusId" formControlName="statusId" 
+                  class="w-full bg-slate-900/60 border border-emerald-500/20 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/50 focus:outline-none appearance-none cursor-pointer pr-8 font-medium">
+                  <option *ngFor="let s of statuses" [value]="s.id" class="bg-slate-900">{{ s.name }}</option>
+                </select>
+                <i class="ri-arrow-down-s-line absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-base"></i>
+              </div>
             </div>
           </div>
 
           <!-- Objectives -->
-          <div class="space-y-1">
-            <label class="font-medium text-gray-600" for="objectives">Objetivos del Plan (ISTQB Test Objectives)</label>
-            <textarea id="objectives" formControlName="objectives" rows="3" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-gray-800 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none" placeholder="Describa el objetivo principal de este plan de pruebas..."></textarea>
+          <div class="space-y-1.5">
+            <label class="block text-xs font-semibold text-emerald-400 uppercase tracking-wider" for="objectives">
+              Objetivos del Plan (ISTQB Test Objectives)
+            </label>
+            <textarea id="objectives" formControlName="objectives" rows="3" 
+              class="w-full bg-slate-900/60 border border-emerald-500/20 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/50 focus:outline-none resize-none font-medium" 
+              placeholder="Describa el objetivo principal de este plan de pruebas..."></textarea>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <!-- Start Date -->
-            <div class="space-y-1">
-              <label class="font-medium text-gray-600" for="startDate">Fecha de Inicio <span class="text-rose-500">*</span></label>
-              <input type="date" id="startDate" formControlName="startDate" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-gray-800 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none">
+            <div class="space-y-1.5">
+              <label class="block text-xs font-semibold text-emerald-400 uppercase tracking-wider" for="startDate">
+                Fecha de Inicio <span class="text-red-400">*</span>
+              </label>
+              <input type="date" id="startDate" formControlName="startDate" 
+                class="w-full bg-slate-900/60 border border-emerald-500/20 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/50 focus:outline-none font-medium">
             </div>
 
             <!-- End Date -->
-            <div class="space-y-1">
-              <label class="font-medium text-gray-600" for="endDate">Fecha Fin Estimada <span class="text-rose-500">*</span></label>
-              <input type="date" id="endDate" formControlName="endDate" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-gray-800 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none">
+            <div class="space-y-1.5">
+              <label class="block text-xs font-semibold text-emerald-400 uppercase tracking-wider" for="endDate">
+                Fecha Fin Estimada <span class="text-red-400">*</span>
+              </label>
+              <input type="date" id="endDate" formControlName="endDate" 
+                class="w-full bg-slate-900/60 border border-emerald-500/20 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/50 focus:outline-none font-medium">
             </div>
 
             <!-- Effort Hours -->
-            <div class="space-y-1">
-              <label class="font-medium text-gray-600" for="estimatedEffortHours">Esfuerzo Estimado (Horas)</label>
-              <input type="number" id="estimatedEffortHours" formControlName="estimatedEffortHours" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-gray-800 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none" placeholder="0">
+            <div class="space-y-1.5">
+              <label class="block text-xs font-semibold text-emerald-400 uppercase tracking-wider" for="estimatedEffortHours">
+                Esfuerzo Estimado (Horas)
+              </label>
+              <input type="number" id="estimatedEffortHours" formControlName="estimatedEffortHours" 
+                class="w-full bg-slate-900/60 border border-emerald-500/20 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/50 focus:outline-none font-medium" 
+                placeholder="0">
             </div>
           </div>
         </div>
@@ -115,158 +151,197 @@
         <div *ngIf="activeTab === 'strategy'" class="space-y-5">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- Scope -->
-            <div class="space-y-1">
-              <label class="font-medium text-gray-600" for="scope">Alcance de Pruebas (In-Scope)</label>
-              <textarea id="scope" formControlName="scope" rows="3" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-gray-800 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none" placeholder="Módulos, funcionalidades y componentes a probar..."></textarea>
+            <div class="space-y-1.5">
+              <label class="block text-xs font-semibold text-emerald-400 uppercase tracking-wider" for="scope">
+                Alcance de Pruebas (In-Scope)
+              </label>
+              <textarea id="scope" formControlName="scope" rows="3" 
+                class="w-full bg-slate-900/60 border border-emerald-500/20 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/50 focus:outline-none resize-none font-medium" 
+                placeholder="Módulos, funcionalidades y componentes a probar..."></textarea>
             </div>
 
             <!-- Out of Scope -->
-            <div class="space-y-1">
-              <label class="font-medium text-gray-600" for="outOfScope">Fuera de Alcance (Out-of-Scope)</label>
-              <textarea id="outOfScope" formControlName="outOfScope" rows="3" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-gray-800 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none" placeholder="Funcionalidades excluidas explícitamente de esta iteración..."></textarea>
+            <div class="space-y-1.5">
+              <label class="block text-xs font-semibold text-emerald-400 uppercase tracking-wider" for="outOfScope">
+                Fuera de Alcance (Out-of-Scope)
+              </label>
+              <textarea id="outOfScope" formControlName="outOfScope" rows="3" 
+                class="w-full bg-slate-900/60 border border-emerald-500/20 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/50 focus:outline-none resize-none font-medium" 
+                placeholder="Funcionalidades excluidas explícitamente de esta iteración..."></textarea>
             </div>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- Strategy -->
-            <div class="space-y-1">
-              <label class="font-medium text-gray-600" for="testStrategyId">Estrategia de Prueba (Test Approach / Strategy)</label>
-              <select id="testStrategyId" formControlName="testStrategyId" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-gray-800 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none">
-                <option [ngValue]="null">Seleccione una estrategia...</option>
-                <option *ngFor="let s of testStrategies" [ngValue]="s.id">{{ s.name }}</option>
-              </select>
+            <div class="space-y-1.5">
+              <label class="block text-xs font-semibold text-emerald-400 uppercase tracking-wider" for="testStrategyId">
+                Estrategia de Prueba (Test Approach / Strategy)
+              </label>
+              <div class="relative">
+                <select id="testStrategyId" formControlName="testStrategyId" 
+                  class="w-full bg-slate-900/60 border border-emerald-500/20 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/50 focus:outline-none appearance-none cursor-pointer pr-8 font-medium">
+                  <option [ngValue]="null" class="bg-slate-900">Seleccione una estrategia...</option>
+                  <option *ngFor="let s of testStrategies" [ngValue]="s.id" class="bg-slate-900">{{ s.name }}</option>
+                </select>
+                <i class="ri-arrow-down-s-line absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-base"></i>
+              </div>
             </div>
 
             <!-- Test Plan Type -->
-            <div class="space-y-1">
-              <label class="font-medium text-gray-600" for="testPlanTypeId">Tipo de Plan de Pruebas (ISTQB)</label>
-              <select id="testPlanTypeId" formControlName="testPlanTypeId" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-gray-800 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none">
-                <option [ngValue]="null">Seleccione tipo de plan...</option>
-                <option *ngFor="let t of testPlanTypes" [ngValue]="t.id">{{ t.name }}</option>
-              </select>
+            <div class="space-y-1.5">
+              <label class="block text-xs font-semibold text-emerald-400 uppercase tracking-wider" for="testPlanTypeId">
+                Tipo de Plan de Pruebas (ISTQB)
+              </label>
+              <div class="relative">
+                <select id="testPlanTypeId" formControlName="testPlanTypeId" 
+                  class="w-full bg-slate-900/60 border border-emerald-500/20 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/50 focus:outline-none appearance-none cursor-pointer pr-8 font-medium">
+                  <option [ngValue]="null" class="bg-slate-900">Seleccione tipo de plan...</option>
+                  <option *ngFor="let t of testPlanTypes" [ngValue]="t.id" class="bg-slate-900">{{ t.name }}</option>
+                </select>
+                <i class="ri-arrow-down-s-line absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-base"></i>
+              </div>
             </div>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- Test Level -->
-            <div class="space-y-1">
-              <label class="font-medium text-gray-600" for="testLevelId">Nivel de Pruebas (ISTQB Test Level)</label>
-              <select id="testLevelId" formControlName="testLevelId" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-gray-800 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none">
-                <option [ngValue]="null">Seleccione nivel...</option>
-                <option *ngFor="let l of testLevels" [ngValue]="l.id">{{ l.name }}</option>
-              </select>
+            <div class="space-y-1.5">
+              <label class="block text-xs font-semibold text-emerald-400 uppercase tracking-wider" for="testLevelId">
+                Nivel de Pruebas (ISTQB Test Level)
+              </label>
+              <div class="relative">
+                <select id="testLevelId" formControlName="testLevelId" 
+                  class="w-full bg-slate-900/60 border border-emerald-500/20 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/50 focus:outline-none appearance-none cursor-pointer pr-8 font-medium">
+                  <option [ngValue]="null" class="bg-slate-900">Seleccione nivel...</option>
+                  <option *ngFor="let l of testLevels" [ngValue]="l.id" class="bg-slate-900">{{ l.name }}</option>
+                </select>
+                <i class="ri-arrow-down-s-line absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-base"></i>
+              </div>
             </div>
 
             <!-- Environment -->
-            <div class="space-y-1">
-              <label class="font-medium text-gray-600" for="testEnvironmentId">Requisitos de Ambiente (Test Environment)</label>
-              <select id="testEnvironmentId" formControlName="testEnvironmentId" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-gray-800 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none">
-                <option [ngValue]="null">Seleccione el entorno...</option>
-                <option *ngFor="let e of environments" [ngValue]="e.id">{{ e.name }}</option>
-              </select>
+            <div class="space-y-1.5">
+              <label class="block text-xs font-semibold text-emerald-400 uppercase tracking-wider" for="testEnvironmentId">
+                Requisitos de Ambiente (Test Environment)
+              </label>
+              <div class="relative">
+                <select id="testEnvironmentId" formControlName="testEnvironmentId" 
+                  class="w-full bg-slate-900/60 border border-emerald-500/20 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/50 focus:outline-none appearance-none cursor-pointer pr-8 font-medium">
+                  <option [ngValue]="null" class="bg-slate-900">Seleccione el entorno...</option>
+                  <option *ngFor="let e of environments" [ngValue]="e.id" class="bg-slate-900">{{ e.name }}</option>
+                </select>
+                <i class="ri-arrow-down-s-line absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-base"></i>
+              </div>
             </div>
           </div>
 
-          <!-- Milestones Section (replaces textarea testSchedule) -->
-          <div class="space-y-3 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-            <h3 class="font-bold text-gray-800 flex items-center gap-2">
-              <i class="ri-calendar-event-line text-indigo-500"></i> Hitos y Cronograma (Test Schedule)
+          <!-- Milestones Section -->
+          <div class="space-y-3 bg-slate-900/60 p-4 rounded-2xl border border-emerald-500/15 shadow-sm">
+            <h3 class="font-bold text-slate-100 flex items-center gap-2 text-sm">
+              <i class="ri-calendar-event-line text-emerald-400"></i> Hitos y Cronograma (Test Schedule)
             </h3>
             <div class="flex flex-col sm:flex-row gap-2">
-              <input type="text" [(ngModel)]="newMilestoneName" [ngModelOptions]="{standalone: true}" placeholder="Nombre del Hito..." class="flex-1 min-w-0 bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 focus:border-indigo-500 focus:outline-none">
-              <input type="date" [(ngModel)]="newMilestoneTargetDate" [ngModelOptions]="{standalone: true}" class="w-full sm:w-40 flex-shrink-0 bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 focus:border-indigo-500 focus:outline-none">
-              <input type="text" [(ngModel)]="newMilestoneDescription" [ngModelOptions]="{standalone: true}" placeholder="Descripción (Opcional)" class="flex-1 min-w-0 bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 focus:border-indigo-500 focus:outline-none">
-              <button type="button" (click)="addMilestone()" class="flex-shrink-0 px-3 py-1.5 bg-indigo-100 text-indigo-600 hover:bg-indigo-200 rounded-lg font-medium transition-colors">
+              <input type="text" [(ngModel)]="newMilestoneName" [ngModelOptions]="{standalone: true}" placeholder="Nombre del Hito..." 
+                class="flex-1 min-w-0 bg-slate-900/80 border border-emerald-500/20 rounded-xl px-3 py-2 text-slate-100 placeholder-slate-500 focus:border-emerald-400 focus:outline-none">
+              <input type="date" [(ngModel)]="newMilestoneTargetDate" [ngModelOptions]="{standalone: true}" 
+                class="w-full sm:w-40 flex-shrink-0 bg-slate-900/80 border border-emerald-500/20 rounded-xl px-3 py-2 text-slate-100 focus:border-emerald-400 focus:outline-none">
+              <input type="text" [(ngModel)]="newMilestoneDescription" [ngModelOptions]="{standalone: true}" placeholder="Descripción (Opcional)" 
+                class="flex-1 min-w-0 bg-slate-900/80 border border-emerald-500/20 rounded-xl px-3 py-2 text-slate-100 placeholder-slate-500 focus:border-emerald-400 focus:outline-none">
+              <button type="button" (click)="addMilestone()" class="btn-primary flex-shrink-0 px-3 py-2">
                 <i class="ri-add-line"></i> Agregar
               </button>
             </div>
             
             <div class="space-y-2 mt-3">
-              <div *ngFor="let milestone of milestoneList" class="flex flex-col sm:flex-row justify-between sm:items-center p-2.5 bg-gray-50 border border-gray-100 rounded-lg gap-3 sm:gap-0">
+              <div *ngFor="let milestone of milestoneList" class="flex flex-col sm:flex-row justify-between sm:items-center p-3 bg-slate-900/80 border border-emerald-500/10 rounded-xl gap-3 sm:gap-0">
                 <div class="flex items-start sm:items-center gap-3 flex-1 min-w-0">
                   <button type="button" (click)="toggleMilestoneCompleted(milestone)"
-                          [class]="milestone.isCompleted ? 'bg-emerald-100 text-emerald-700 border-emerald-300' : 'bg-white text-gray-400 border-gray-200'"
-                          class="w-6 h-6 flex-shrink-0 rounded flex items-center justify-center border mt-0.5 sm:mt-0">
+                          [class]="milestone.isCompleted ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' : 'bg-slate-800 text-slate-400 border-slate-700'"
+                          class="w-6 h-6 flex-shrink-0 rounded-lg flex items-center justify-center border mt-0.5 sm:mt-0">
                     <i class="ri-check-line" *ngIf="milestone.isCompleted"></i>
                   </button>
                   <div class="min-w-0 flex-1">
-                    <div class="font-medium truncate" [class.line-through]="milestone.isCompleted" [class.text-gray-500]="milestone.isCompleted">{{ milestone.name }}</div>
-                    <div class="text-[10px] text-gray-500 truncate" *ngIf="milestone.description">{{ milestone.description }}</div>
+                    <div class="font-medium text-slate-200 truncate" [class.line-through]="milestone.isCompleted" [class.text-slate-500]="milestone.isCompleted">{{ milestone.name }}</div>
+                    <div class="text-[10px] text-slate-400 truncate" *ngIf="milestone.description">{{ milestone.description }}</div>
                   </div>
                 </div>
-                <div class="flex items-center gap-4 flex-shrink-0 sm:ml-4 self-end sm:self-auto">
-                  <div class="text-[10px] bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-md border border-indigo-100 whitespace-nowrap">
+                <div class="flex items-center gap-3 flex-shrink-0 sm:ml-4 self-end sm:self-auto">
+                  <div class="text-[10px] bg-emerald-500/10 text-emerald-300 px-2 py-0.5 rounded-md border border-emerald-500/30 whitespace-nowrap">
                     <i class="ri-calendar-line mr-1"></i>{{ milestone.targetDate | date:'mediumDate' }}
                   </div>
-                  <button type="button" (click)="removeMilestone(milestone)" class="text-rose-400 hover:text-rose-600 p-1 flex-shrink-0">
+                  <button type="button" (click)="removeMilestone(milestone)" class="btn-icon btn-icon-danger">
                     <i class="ri-delete-bin-line"></i>
                   </button>
                 </div>
               </div>
-              <div *ngIf="milestoneList.length === 0" class="text-center py-4 text-gray-400 border border-dashed border-gray-200 rounded-lg">
+              <div *ngIf="milestoneList.length === 0" class="text-center py-4 text-slate-500 border border-dashed border-emerald-500/15 rounded-xl">
                 No hay hitos definidos
               </div>
             </div>
           </div>
 
-          <!-- Risks Section (replaces Risk Level Select) -->
-          <div class="space-y-3 bg-white p-4 rounded-xl border border-gray-200 shadow-sm mt-4">
-            <h3 class="font-bold text-gray-800 flex items-center gap-2">
-              <i class="ri-alert-line text-rose-500"></i> Análisis de Riesgos (Product / Quality Risks)
+          <!-- Risks Section -->
+          <div class="space-y-3 bg-slate-900/60 p-4 rounded-2xl border border-emerald-500/15 shadow-sm mt-4">
+            <h3 class="font-bold text-slate-100 flex items-center gap-2 text-sm">
+              <i class="ri-alert-line text-red-400"></i> Análisis de Riesgos (Product / Quality Risks)
             </h3>
             <div class="grid grid-cols-1 md:grid-cols-12 gap-2">
-              <input type="text" [(ngModel)]="newRiskDescription" [ngModelOptions]="{standalone: true}" placeholder="Descripción del Riesgo..." class="md:col-span-4 min-w-0 bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 focus:border-indigo-500 focus:outline-none">
+              <input type="text" [(ngModel)]="newRiskDescription" [ngModelOptions]="{standalone: true}" placeholder="Descripción del Riesgo..." 
+                class="md:col-span-4 min-w-0 bg-slate-900/80 border border-emerald-500/20 rounded-xl px-3 py-2 text-slate-100 placeholder-slate-500 focus:border-emerald-400 focus:outline-none">
               
-              <select [(ngModel)]="newRiskLikelihood" [ngModelOptions]="{standalone: true}" class="md:col-span-2 min-w-0 bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 focus:border-indigo-500 focus:outline-none">
+              <select [(ngModel)]="newRiskLikelihood" [ngModelOptions]="{standalone: true}" 
+                class="md:col-span-2 min-w-0 bg-slate-900/80 border border-emerald-500/20 rounded-xl px-3 py-2 text-slate-100 focus:border-emerald-400 focus:outline-none">
                 <option value="HIGH">Alta Prob.</option>
                 <option value="MEDIUM">Med. Prob.</option>
                 <option value="LOW">Baja Prob.</option>
               </select>
               
-              <select [(ngModel)]="newRiskImpact" [ngModelOptions]="{standalone: true}" class="md:col-span-2 min-w-0 bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 focus:border-indigo-500 focus:outline-none">
+              <select [(ngModel)]="newRiskImpact" [ngModelOptions]="{standalone: true}" 
+                class="md:col-span-2 min-w-0 bg-slate-900/80 border border-emerald-500/20 rounded-xl px-3 py-2 text-slate-100 focus:border-emerald-400 focus:outline-none">
                 <option value="HIGH">Alto Impacto</option>
                 <option value="MEDIUM">Med. Impacto</option>
                 <option value="LOW">Bajo Impacto</option>
               </select>
               
-              <input type="text" [(ngModel)]="newRiskMitigation" [ngModelOptions]="{standalone: true}" placeholder="Estrategia de Mitigación..." class="md:col-span-3 min-w-0 bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 focus:border-indigo-500 focus:outline-none">
+              <input type="text" [(ngModel)]="newRiskMitigation" [ngModelOptions]="{standalone: true}" placeholder="Estrategia de Mitigación..." 
+                class="md:col-span-3 min-w-0 bg-slate-900/80 border border-emerald-500/20 rounded-xl px-3 py-2 text-slate-100 placeholder-slate-500 focus:border-emerald-400 focus:outline-none">
               
-              <button type="button" (click)="addRisk()" class="md:col-span-1 px-3 py-1.5 bg-rose-100 text-rose-600 hover:bg-rose-200 rounded-lg font-medium transition-colors flex items-center justify-center">
+              <button type="button" (click)="addRisk()" class="md:col-span-1 px-3 py-2 bg-red-500/15 text-red-400 hover:bg-red-500/30 border border-red-500/30 rounded-xl font-medium transition-colors flex items-center justify-center">
                 <i class="ri-add-line"></i>
               </button>
             </div>
             
             <div class="space-y-2 mt-3">
-              <div *ngFor="let risk of riskList" class="flex flex-col sm:flex-row justify-between sm:items-center p-2.5 bg-gray-50 border border-gray-100 rounded-lg gap-3 sm:gap-4">
+              <div *ngFor="let risk of riskList" class="flex flex-col sm:flex-row justify-between sm:items-center p-3 bg-slate-900/80 border border-emerald-500/10 rounded-xl gap-3 sm:gap-4">
                 <div class="flex-1 min-w-0">
-                  <div class="font-medium text-gray-800 truncate">{{ risk.description }}</div>
-                  <div class="text-[10px] text-gray-500 mt-0.5 truncate" *ngIf="risk.mitigationStrategy">
-                    <span class="font-semibold">Mitigación:</span> {{ risk.mitigationStrategy }}
+                  <div class="font-medium text-slate-200 truncate">{{ risk.description }}</div>
+                  <div class="text-[10px] text-slate-400 mt-0.5 truncate" *ngIf="risk.mitigationStrategy">
+                    <span class="font-semibold text-emerald-400">Mitigación:</span> {{ risk.mitigationStrategy }}
                   </div>
                 </div>
                 <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap flex-shrink-0 self-end sm:self-auto">
-                  <span class="text-[10px] px-2 py-0.5 rounded-full font-semibold border whitespace-nowrap"
+                  <span class="text-[10px] px-2.5 py-0.5 rounded-full font-semibold border whitespace-nowrap"
                         [ngClass]="{
-                          'bg-rose-50 text-rose-700 border-rose-200': risk.impact === 'HIGH',
-                          'bg-amber-50 text-amber-700 border-amber-200': risk.impact === 'MEDIUM',
-                          'bg-emerald-50 text-emerald-700 border-emerald-200': risk.impact === 'LOW'
+                          'bg-red-500/15 text-red-400 border-red-500/30': risk.impact === 'HIGH',
+                          'bg-amber-500/15 text-amber-300 border-amber-500/30': risk.impact === 'MEDIUM',
+                          'bg-emerald-500/15 text-emerald-300 border-emerald-500/30': risk.impact === 'LOW'
                         }">
                     Impacto: {{ risk.impact }}
                   </span>
-                  <span class="text-[10px] px-2 py-0.5 rounded-full font-semibold border whitespace-nowrap"
+                  <span class="text-[10px] px-2.5 py-0.5 rounded-full font-semibold border whitespace-nowrap"
                         [ngClass]="{
-                          'bg-rose-50 text-rose-700 border-rose-200': risk.likelihood === 'HIGH',
-                          'bg-amber-50 text-amber-700 border-amber-200': risk.likelihood === 'MEDIUM',
-                          'bg-emerald-50 text-emerald-700 border-emerald-200': risk.likelihood === 'LOW'
+                          'bg-red-500/15 text-red-400 border-red-500/30': risk.likelihood === 'HIGH',
+                          'bg-amber-500/15 text-amber-300 border-amber-500/30': risk.likelihood === 'MEDIUM',
+                          'bg-emerald-500/15 text-emerald-300 border-emerald-500/30': risk.likelihood === 'LOW'
                         }">
                     Prob: {{ risk.likelihood }}
                   </span>
-                  <button type="button" (click)="removeRisk(risk)" class="text-rose-400 hover:text-rose-600 p-1 ml-1 flex-shrink-0">
+                  <button type="button" (click)="removeRisk(risk)" class="btn-icon btn-icon-danger ml-1">
                     <i class="ri-delete-bin-line"></i>
                   </button>
                 </div>
               </div>
-              <div *ngIf="riskList.length === 0" class="text-center py-4 text-gray-400 border border-dashed border-gray-200 rounded-lg">
+              <div *ngIf="riskList.length === 0" class="text-center py-4 text-slate-500 border border-dashed border-emerald-500/15 rounded-xl">
                 No hay riesgos identificados
               </div>
             </div>
@@ -277,13 +352,13 @@
         <div *ngIf="activeTab === 'criteria'" class="space-y-6">
 
           <!-- Section: ENTRY CRITERIA -->
-          <div class="bg-amber-50 p-4 rounded-xl border border-amber-200 space-y-3">
+          <div class="bg-amber-500/10 p-5 rounded-2xl border border-amber-500/30 space-y-4">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
-                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-700 border border-amber-200">CRITERIOS DE ENTRADA</span>
-                <h3 class="font-bold text-gray-800">Criterios de Entrada (Premisas para Iniciar Pruebas)</h3>
+                <span class="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">CRITERIOS DE ENTRADA</span>
+                <h3 class="font-bold text-slate-100">Criterios de Entrada (Premisas para Iniciar Pruebas)</h3>
               </div>
-              <span class="text-[10px] text-gray-500 font-mono">
+              <span class="text-[10px] text-slate-400 font-mono">
                 {{ entryCriteria.length }} criterio(s)
               </span>
             </div>
@@ -294,70 +369,72 @@
                      (keyup.enter)="addEntryCriteria()"
                      aria-label="Nuevo criterio de entrada"
                      placeholder="Agregar nuevo criterio de entrada..."
-                     class="flex-1 min-w-0 bg-white border border-amber-200 rounded-lg px-3 py-1.5 text-gray-800 focus:outline-none focus:border-amber-400">
+                     class="flex-1 min-w-0 bg-slate-900/80 border border-amber-500/30 rounded-xl px-3 py-2 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-400">
                      
-              <select [(ngModel)]="newEntryPriority" [ngModelOptions]="{standalone: true}" class="w-full sm:w-28 flex-shrink-0 bg-white border border-amber-200 rounded-lg px-2 py-1.5 text-gray-800 focus:outline-none focus:border-amber-400">
+              <select [(ngModel)]="newEntryPriority" [ngModelOptions]="{standalone: true}" 
+                class="w-full sm:w-28 flex-shrink-0 bg-slate-900/80 border border-amber-500/30 rounded-xl px-2 py-2 text-slate-100 focus:outline-none focus:border-amber-400">
                 <option value="CRITICAL">Crítico</option>
                 <option value="HIGH">Alto</option>
                 <option value="MEDIUM">Medio</option>
                 <option value="LOW">Bajo</option>
               </select>
               
-              <select [(ngModel)]="newEntryCategory" [ngModelOptions]="{standalone: true}" class="w-full sm:w-32 flex-shrink-0 bg-white border border-amber-200 rounded-lg px-2 py-1.5 text-gray-800 focus:outline-none focus:border-amber-400">
+              <select [(ngModel)]="newEntryCategory" [ngModelOptions]="{standalone: true}" 
+                class="w-full sm:w-32 flex-shrink-0 bg-slate-900/80 border border-amber-500/30 rounded-xl px-2 py-2 text-slate-100 focus:outline-none focus:border-amber-400">
                 <option value="ENVIRONMENT">Entorno</option>
                 <option value="REQUIREMENTS">Requisitos</option>
                 <option value="RESOURCES">Recursos</option>
                 <option value="GENERAL">General</option>
               </select>
 
-              <button type="button" (click)="addEntryCriteria()" class="flex-shrink-0 px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-medium transition-colors">
+              <button type="button" (click)="addEntryCriteria()" class="flex-shrink-0 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-xl transition-colors">
                 + Agregar
               </button>
             </div>
 
             <!-- Entry Criteria List -->
             <div class="space-y-2">
-              <div *ngFor="let item of entryCriteria" class="flex flex-col sm:flex-row sm:items-center justify-between p-2.5 bg-white rounded-lg border border-amber-100 gap-3 sm:gap-4">
+              <div *ngFor="let item of entryCriteria" class="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-slate-900/80 rounded-xl border border-amber-500/20 gap-3 sm:gap-4">
                 <div class="flex items-start sm:items-center gap-3 flex-1 min-w-0">
                   <button type="button" (click)="toggleCriteriaMet(item)"
-                          [class]="item.isMet ? 'bg-emerald-100 text-emerald-700 border-emerald-300' : 'bg-gray-50 text-gray-500 border-gray-200'"
-                          class="px-2 py-1 rounded text-[10px] font-mono border font-bold flex-shrink-0 mt-0.5 sm:mt-0">
+                          [class]="item.isMet ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' : 'bg-slate-800 text-slate-400 border-slate-700'"
+                          class="px-2.5 py-1 rounded-lg text-[10px] font-mono border font-bold flex-shrink-0 mt-0.5 sm:mt-0">
                     {{ item.isMet ? '✓ CUMPLIDO' : '○ PENDIENTE' }}
                   </button>
-                  <span class="truncate" [class]="item.isMet ? 'line-through text-gray-400' : 'text-gray-700'">{{ item.description }}</span>
+                  <span class="truncate text-slate-200" [class.line-through]="item.isMet" [class.text-slate-500]="item.isMet">{{ item.description }}</span>
                 </div>
                 <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap flex-shrink-0 self-end sm:self-auto">
-                  <span class="text-[10px] px-2 py-0.5 rounded bg-gray-100 text-gray-600 font-medium whitespace-nowrap" *ngIf="item.category">{{ item.category }}</span>
-                  <span class="text-[10px] px-2 py-0.5 rounded font-bold border whitespace-nowrap"
+                  <span class="text-[10px] px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 font-medium whitespace-nowrap border border-slate-700" *ngIf="item.category">{{ item.category }}</span>
+                  <span class="text-[10px] px-2 py-0.5 rounded-md font-bold border whitespace-nowrap"
                         [ngClass]="{
-                          'bg-rose-50 text-rose-700 border-rose-200': item.priority === 'CRITICAL' || item.priority === 'HIGH',
-                          'bg-blue-50 text-blue-700 border-blue-200': item.priority === 'MEDIUM' || item.priority === 'LOW'
+                          'bg-red-500/15 text-red-400 border-red-500/30': item.priority === 'CRITICAL' || item.priority === 'HIGH',
+                          'bg-sky-500/15 text-sky-300 border-sky-500/30': item.priority === 'MEDIUM' || item.priority === 'LOW'
                         }"
                         *ngIf="item.priority">{{ item.priority }}</span>
-                  <button type="button" (click)="removeCriteria(item)" class="text-rose-400 hover:text-rose-600 p-1 flex-shrink-0">
+                  <button type="button" (click)="removeCriteria(item)" class="btn-icon btn-icon-danger">
                     <i class="ri-delete-bin-line text-sm"></i>
                   </button>
                 </div>
               </div>
-              <div *ngIf="entryCriteria.length === 0" class="text-center py-3 text-amber-500/50 text-[11px] italic">
+              <div *ngIf="entryCriteria.length === 0" class="text-center py-3 text-amber-400/50 text-[11px] italic">
                 No hay criterios de entrada definidos
               </div>
             </div>
           </div>
 
           <!-- Section: EXIT CRITERIA -->
-          <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-200 space-y-3">
+          <div class="bg-emerald-500/10 p-5 rounded-2xl border border-emerald-500/30 space-y-4">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
-                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-700 border border-indigo-200">CRITERIOS DE SALIDA</span>
-                <h3 class="font-bold text-gray-800">Criterios de Salida (Criterios ISTQB)</h3>
+                <span class="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">CRITERIOS DE SALIDA</span>
+                <h3 class="font-bold text-slate-100">Criterios de Salida (Criterios ISTQB)</h3>
               </div>
-              <span class="text-[10px] text-gray-500 font-mono">
+              <span class="text-[10px] text-slate-400 font-mono">
                 {{ exitCriteria.length }} criterio(s)
               </span>
             </div>
 
-            <p class="text-[10px] text-gray-500 italic">
+            <p class="text-[11px] text-slate-400 italic">
               * Regla ISTQB: El plan de pruebas no podrá cerrarse (Estado CERRADO) a menos que el 100% de los criterios de salida estén en estado CUMPLIDO.
             </p>
 
@@ -367,52 +444,54 @@
                      (keyup.enter)="addExitCriteria()"
                      aria-label="Nuevo criterio de salida"
                      placeholder="Agregar nuevo criterio de salida..."
-                     class="flex-1 min-w-0 bg-white border border-indigo-200 rounded-lg px-3 py-1.5 text-gray-800 focus:outline-none focus:border-indigo-500">
+                     class="flex-1 min-w-0 bg-slate-900/80 border border-emerald-500/30 rounded-xl px-3 py-2 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-400">
                      
-              <select [(ngModel)]="newExitPriority" [ngModelOptions]="{standalone: true}" class="w-full sm:w-28 flex-shrink-0 bg-white border border-indigo-200 rounded-lg px-2 py-1.5 text-gray-800 focus:outline-none focus:border-indigo-500">
+              <select [(ngModel)]="newExitPriority" [ngModelOptions]="{standalone: true}" 
+                class="w-full sm:w-28 flex-shrink-0 bg-slate-900/80 border border-emerald-500/30 rounded-xl px-2 py-2 text-slate-100 focus:outline-none focus:border-emerald-400">
                 <option value="CRITICAL">Crítico</option>
                 <option value="HIGH">Alto</option>
                 <option value="MEDIUM">Medio</option>
                 <option value="LOW">Bajo</option>
               </select>
               
-              <select [(ngModel)]="newExitCategory" [ngModelOptions]="{standalone: true}" class="w-full sm:w-32 flex-shrink-0 bg-white border border-indigo-200 rounded-lg px-2 py-1.5 text-gray-800 focus:outline-none focus:border-indigo-500">
+              <select [(ngModel)]="newExitCategory" [ngModelOptions]="{standalone: true}" 
+                class="w-full sm:w-32 flex-shrink-0 bg-slate-900/80 border border-emerald-500/30 rounded-xl px-2 py-2 text-slate-100 focus:outline-none focus:border-emerald-400">
                 <option value="COMPLETION">Completitud</option>
                 <option value="DEFECTS">Defectos</option>
                 <option value="QUALITY">Calidad</option>
                 <option value="GENERAL">General</option>
               </select>
 
-              <button type="button" (click)="addExitCriteria()" class="flex-shrink-0 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-medium transition-colors">
+              <button type="button" (click)="addExitCriteria()" class="btn-primary flex-shrink-0 px-4 py-2">
                 + Agregar
               </button>
             </div>
 
             <!-- Exit Criteria List -->
             <div class="space-y-2">
-              <div *ngFor="let item of exitCriteria" class="flex flex-col sm:flex-row sm:items-center justify-between p-2.5 bg-white rounded-lg border border-indigo-100 gap-3 sm:gap-4">
+              <div *ngFor="let item of exitCriteria" class="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-slate-900/80 rounded-xl border border-emerald-500/20 gap-3 sm:gap-4">
                 <div class="flex items-start sm:items-center gap-3 flex-1 min-w-0">
                   <button type="button" (click)="toggleCriteriaMet(item)"
-                          [class]="item.isMet ? 'bg-emerald-100 text-emerald-700 border-emerald-300' : 'bg-gray-50 text-gray-500 border-gray-200'"
-                          class="px-2 py-1 rounded text-[10px] font-mono border font-bold flex-shrink-0 mt-0.5 sm:mt-0">
+                          [class]="item.isMet ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' : 'bg-slate-800 text-slate-400 border-slate-700'"
+                          class="px-2.5 py-1 rounded-lg text-[10px] font-mono border font-bold flex-shrink-0 mt-0.5 sm:mt-0">
                     {{ item.isMet ? '✓ CUMPLIDO' : '○ PENDIENTE' }}
                   </button>
-                  <span class="truncate" [class]="item.isMet ? 'line-through text-gray-400' : 'text-gray-700'">{{ item.description }}</span>
+                  <span class="truncate text-slate-200" [class.line-through]="item.isMet" [class.text-slate-500]="item.isMet">{{ item.description }}</span>
                 </div>
                 <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap flex-shrink-0 self-end sm:self-auto">
-                  <span class="text-[10px] px-2 py-0.5 rounded bg-gray-100 text-gray-600 font-medium whitespace-nowrap" *ngIf="item.category">{{ item.category }}</span>
-                  <span class="text-[10px] px-2 py-0.5 rounded font-bold border whitespace-nowrap"
+                  <span class="text-[10px] px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 font-medium whitespace-nowrap border border-slate-700" *ngIf="item.category">{{ item.category }}</span>
+                  <span class="text-[10px] px-2 py-0.5 rounded-md font-bold border whitespace-nowrap"
                         [ngClass]="{
-                          'bg-rose-50 text-rose-700 border-rose-200': item.priority === 'CRITICAL' || item.priority === 'HIGH',
-                          'bg-blue-50 text-blue-700 border-blue-200': item.priority === 'MEDIUM' || item.priority === 'LOW'
+                          'bg-red-500/15 text-red-400 border-red-500/30': item.priority === 'CRITICAL' || item.priority === 'HIGH',
+                          'bg-sky-500/15 text-sky-300 border-sky-500/30': item.priority === 'MEDIUM' || item.priority === 'LOW'
                         }"
                         *ngIf="item.priority">{{ item.priority }}</span>
-                  <button type="button" (click)="removeCriteria(item)" class="text-rose-400 hover:text-rose-600 p-1 flex-shrink-0">
+                  <button type="button" (click)="removeCriteria(item)" class="btn-icon btn-icon-danger">
                     <i class="ri-delete-bin-line text-sm"></i>
                   </button>
                 </div>
               </div>
-              <div *ngIf="exitCriteria.length === 0" class="text-center py-3 text-indigo-500/50 text-[11px] italic">
+              <div *ngIf="exitCriteria.length === 0" class="text-center py-3 text-emerald-400/50 text-[11px] italic">
                 No hay criterios de salida definidos
               </div>
             </div>
@@ -424,15 +503,15 @@
     </div>
 
     <!-- Footer -->
-    <div class="px-6 py-4 border-t border-gray-100 bg-gray-50 flex justify-between items-center">
-      <div class="text-[10px] text-gray-400 font-mono">
+    <div class="px-6 py-4 border-t border-emerald-500/15 bg-slate-900/60 flex justify-between items-center">
+      <div class="text-[10px] text-slate-400 font-mono">
         ISTQB ISO/IEC/IEEE 29119-3 Standard Compliant
       </div>
       <div class="flex gap-3">
-        <button type="button" (click)="closeModal.emit()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl transition-colors font-medium text-xs">
+        <button type="button" (click)="closeModal.emit()" class="btn-secondary">
           Cancelar
         </button>
-        <button type="submit" form="test-plan-form" [disabled]="form.invalid" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white rounded-xl transition-colors font-medium text-xs shadow-lg shadow-indigo-500/25">
+        <button type="submit" form="test-plan-form" [disabled]="form.invalid" class="btn-primary">
           {{ isEdit ? 'Guardar Cambios' : 'Crear Plan de Pruebas' }}
         </button>
       </div>

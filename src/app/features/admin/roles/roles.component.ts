@@ -58,7 +58,7 @@ export class RolesComponent implements OnInit {
       icon: 'error',
       title: 'Error',
       text: 'Error al cargar la lista de roles',
-      confirmButtonColor: '#150fbd'
+      confirmButtonColor: '#10B981'
     });
         }
       });
@@ -119,7 +119,7 @@ export class RolesComponent implements OnInit {
           icon: 'success',
           title: 'Éxito',
           text: `Rol ${this.isEdit() ? 'actualizado' : 'creado'} correctamente`,
-          confirmButtonColor: '#150fbd'
+          confirmButtonColor: '#10B981'
         });
         this.closeModels();
         this.loadRoles();
@@ -130,7 +130,7 @@ export class RolesComponent implements OnInit {
       icon: 'error',
       title: 'Error',
       text: 'Error al guardar el rol',
-      confirmButtonColor: '#150fbd'
+      confirmButtonColor: '#10B981'
     });
       }
     });
@@ -143,7 +143,7 @@ export class RolesComponent implements OnInit {
       icon: 'warning',
       title: 'Atención',
       text: 'El rol principal de administrador no se puede desactivar.',
-      confirmButtonColor: '#150fbd'
+      confirmButtonColor: '#10B981'
     });
          return;
     }
@@ -153,7 +153,7 @@ export class RolesComponent implements OnInit {
       icon: 'success',
       title: 'Éxito',
       text: `Rol ${role.isActive ? 'desactivado' : 'activado'} correctamente`,
-      confirmButtonColor: '#150fbd'
+      confirmButtonColor: '#10B981'
     });
         this.loadRoles();
       },
@@ -163,7 +163,7 @@ export class RolesComponent implements OnInit {
       icon: 'error',
       title: 'Error',
       text: 'Error al cambiar el estado del rol',
-      confirmButtonColor: '#150fbd'
+      confirmButtonColor: '#10B981'
     });
       }
     });
@@ -178,7 +178,7 @@ export class RolesComponent implements OnInit {
       icon: 'success',
       title: 'Éxito',
       text: 'Rol duplicado correctamente',
-      confirmButtonColor: '#150fbd'
+      confirmButtonColor: '#10B981'
     });
           this.loadRoles();
         },
@@ -188,7 +188,7 @@ export class RolesComponent implements OnInit {
       icon: 'error',
       title: 'Error',
       text: 'Error al duplicar el rol',
-      confirmButtonColor: '#150fbd'
+      confirmButtonColor: '#10B981'
     });
         }
       });
@@ -204,7 +204,7 @@ export class RolesComponent implements OnInit {
       icon: 'success',
       title: 'Éxito',
       text: 'Rol eliminado correctamente',
-      confirmButtonColor: '#150fbd'
+      confirmButtonColor: '#10B981'
     });
           this.loadRoles();
         },
@@ -214,7 +214,7 @@ export class RolesComponent implements OnInit {
       icon: 'error',
       title: 'Error',
       text: 'Error al eliminar el rol',
-      confirmButtonColor: '#150fbd'
+      confirmButtonColor: '#10B981'
     });
         }
       });
@@ -277,7 +277,7 @@ export class RolesComponent implements OnInit {
       icon: 'success',
       title: 'Éxito',
       text: `Permiso ${isChecked ? 'añadido' : 'removido'} correctamente`,
-      confirmButtonColor: '#150fbd'
+      confirmButtonColor: '#10B981'
     });
       },
       error: (err) => {
@@ -288,7 +288,7 @@ export class RolesComponent implements OnInit {
       icon: 'error',
       title: 'Error',
       text: 'Error al actualizar permiso',
-      confirmButtonColor: '#150fbd'
+      confirmButtonColor: '#10B981'
     });
       }
     });

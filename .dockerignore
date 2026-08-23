@@ -1,27 +1,26 @@
 # Dependencies
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+node_modules
+**/node_modules
 
-# Build output
-dist/
+# Build output (permitir dist para docker build rápido)
 /bazel-out
 /out-tsc
 /tmp
 
 # IDEs and editors
-.idea/
+.idea
 .project
 .classpath
-.c9/
+.c9
 *.launch
-.settings/
+.settings
 *.sublime-workspace
-.vscode/
+.vscode
+.agents
+.features-gen
 
 # Angular specific
-.angular/
+.angular
 
 # Docker
 Dockerfile
@@ -34,17 +33,19 @@ docker-compose.*
 .env
 .env.*
 
-# Logs and temporary files
+# Large files, docs, reports & logs
 *.log
-backend_run_log.txt
-build_error*.txt
-final_verification*.txt
+*.txt
+*.docx
+playwright-report
+test-results
+docs
 
 # Miscellaneous
-.git/
-.github/
+.git
+.github
 .gitlab-ci.yml
-.trunk/
+.trunk
 .editorconfig
 .stylelintrc.json
 README.md

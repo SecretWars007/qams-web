@@ -108,7 +108,7 @@ export class UsersComponent implements OnInit {
         title: 'Rol ya asignado',
         text: `El usuario ya cuenta con el rol "${roleObj.name}".`,
         icon: 'info',
-        confirmButtonColor: '#150fbd',
+        confirmButtonColor: '#10B981',
         confirmButtonText: 'Entendido',
         background: '#ffffff'
       });
@@ -157,7 +157,7 @@ export class UsersComponent implements OnInit {
       text: `¿Desea remover el rol "${roleName}" de este usuario?`,
       icon: 'question',
       showCancelButton: true,
-      confirmButtonColor: '#150fbd',
+      confirmButtonColor: '#10B981',
       cancelButtonColor: '#ff0033',
       confirmButtonText: 'Sí, quitar',
       cancelButtonText: 'Mantener',
@@ -183,7 +183,7 @@ export class UsersComponent implements OnInit {
           title: '¡Rol removido!',
           text: 'El rol ha sido quitado satisfactoriamente.',
           icon: 'success',
-          confirmButtonColor: '#150fbd',
+          confirmButtonColor: '#10B981',
           timer: 1500,
           showConfirmButton: false
         });
@@ -201,7 +201,7 @@ export class UsersComponent implements OnInit {
         title: 'Acceso denegado',
         text: 'No se puede eliminar un usuario que tiene roles asignados. Por favor, retira todos los roles antes de intentar eliminarlo.',
         icon: 'error',
-        confirmButtonColor: '#150fbd',
+        confirmButtonColor: '#10B981',
         confirmButtonText: 'Entendido',
         background: '#ffffff'
       });
@@ -213,7 +213,7 @@ export class UsersComponent implements OnInit {
       text: 'Esta acción no se puede deshacer.',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#150fbd',
+      confirmButtonColor: '#10B981',
       cancelButtonColor: '#ff0033',
       confirmButtonText: 'Sí, eliminar',
       cancelButtonText: 'Cancelar',
@@ -230,7 +230,7 @@ export class UsersComponent implements OnInit {
               title: '¡Eliminado!',
               text: 'El usuario ha sido eliminado correctamente.',
               icon: 'success',
-              confirmButtonColor: '#150fbd',
+              confirmButtonColor: '#10B981',
               timer: 2000,
               showConfirmButton: false
             });
@@ -243,7 +243,7 @@ export class UsersComponent implements OnInit {
               title: 'Error',
               text: 'No se pudo eliminar el usuario. Verifique sus permisos.',
               icon: 'error',
-              confirmButtonColor: '#150fbd'
+              confirmButtonColor: '#10B981'
             });
           }
         });
@@ -259,7 +259,7 @@ export class UsersComponent implements OnInit {
         title: 'Acceso denegado',
         text: 'No se puede inactivar al usuario si tiene roles asignados. Por favor, retira todos los roles antes de inactivarlo.',
         icon: 'error',
-        confirmButtonColor: '#150fbd',
+        confirmButtonColor: '#10B981',
         confirmButtonText: 'Entendido',
         background: '#ffffff'
       });
@@ -273,7 +273,7 @@ export class UsersComponent implements OnInit {
       text: `El usuario será marcado como ${newStatus ? 'activo' : 'inactivo'}.`,
       icon: 'question',
       showCancelButton: true,
-      confirmButtonColor: '#150fbd',
+      confirmButtonColor: '#10B981',
       cancelButtonColor: '#ff4444',
       confirmButtonText: 'Sí, confirmar',
       cancelButtonText: 'Cancelar',
@@ -357,7 +357,7 @@ export class UsersComponent implements OnInit {
         icon: 'warning',
         title: 'Edad no permitida',
         text: 'La edad del usuario debe estar entre 18 y 80 años.',
-        confirmButtonColor: '#150fbd'
+        confirmButtonColor: '#10B981'
       });
       return;
     }
@@ -398,7 +398,7 @@ export class UsersComponent implements OnInit {
           title: 'Error de actualización',
           text: errorMsg,
           icon: 'error',
-          confirmButtonColor: '#150fbd'
+          confirmButtonColor: '#10B981'
         });
       }
     });
@@ -432,7 +432,7 @@ export class UsersComponent implements OnInit {
         icon: 'warning',
         title: 'Edad no permitida',
         text: 'El usuario debe tener entre 18 y 80 años para ser actualizado.',
-        confirmButtonColor: '#150fbd'
+        confirmButtonColor: '#10B981'
       });
       return;
     }
@@ -468,7 +468,7 @@ export class UsersComponent implements OnInit {
           title: 'Error',
           text: 'No se pudo registrar el usuario. Verifique los datos.',
           icon: 'error',
-          confirmButtonColor: '#150fbd'
+          confirmButtonColor: '#10B981'
         });
       }
     });

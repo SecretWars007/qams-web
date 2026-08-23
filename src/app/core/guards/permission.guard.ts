@@ -38,7 +38,7 @@ export const permissionGuard: CanActivateFn = (
       icon: 'error',
       title: 'Acceso Restringido',
       text: 'No cuenta con los permisos necesarios para acceder a esta sección.',
-      confirmButtonColor: '#150fbd'
+      confirmButtonColor: '#10B981'
     });
   router.navigate(['/auth/login']);
   return false;

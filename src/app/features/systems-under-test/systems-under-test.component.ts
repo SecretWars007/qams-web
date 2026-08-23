@@ -83,7 +83,7 @@ export class SystemsUnderTestComponent implements OnInit {
           icon: 'error',
           title: 'Error',
           text: 'Error al cargar los Sistemas Bajo Prueba',
-          confirmButtonColor: '#150fbd'
+          confirmButtonColor: '#10B981'
         });
       }
     });
@@ -120,7 +120,7 @@ export class SystemsUnderTestComponent implements OnInit {
         icon: 'warning',
         title: 'Nombre duplicado',
         text: `Ya existe un sistema bajo prueba con el nombre "${sutData.name}" en este proyecto.`,
-        confirmButtonColor: '#150fbd'
+        confirmButtonColor: '#10B981'
       });
       return;
     }
@@ -135,7 +135,7 @@ export class SystemsUnderTestComponent implements OnInit {
           icon: 'success',
           title: 'Éxito',
           text: `SUT ${this.isEdit() ? 'actualizado' : 'creado'} correctamente`,
-          confirmButtonColor: '#150fbd'
+          confirmButtonColor: '#10B981'
         });
         this.closeModal();
         this.loadSuts();
@@ -147,7 +147,7 @@ export class SystemsUnderTestComponent implements OnInit {
           icon: err.status === 409 ? 'warning' : 'error',
           title: err.status === 409 ? 'Nombre duplicado' : (err.status === 403 ? 'Acceso denegado' : 'Error'),
           text: mensaje,
-          confirmButtonColor: '#150fbd'
+          confirmButtonColor: '#10B981'
         });
       }
     });

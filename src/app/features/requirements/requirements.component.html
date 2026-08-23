@@ -1,100 +1,106 @@
-<div class="p-4 sm:p-6 max-w-7xl mx-auto animate-in fade-in duration-500">
+<div class="space-y-6 text-slate-100 animate-in fade-in duration-500">
   <!-- Header -->
-  <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white/50 p-6 rounded-2xl border border-white/20 backdrop-blur-md shadow-sm mb-6">
+  <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[#111E30] p-6 rounded-2xl border border-emerald-500/15 backdrop-blur-md shadow-sm">
     <div>
-      <div class="flex items-center gap-2 mb-2">
-        <h1 class="text-3xl font-black text-slate-900 tracking-tight">Requisitos</h1>
+      <div class="flex items-center gap-3 mb-2">
+        <h1 class="text-2xl font-bold text-slate-100 tracking-tight flex items-center gap-2">
+          <i class="ri-list-check-2 text-emerald-400"></i> Requisitos
+        </h1>
         
         <!-- Project Filter Dropdown -->
-        <div class="relative ml-4">
+        <div class="relative ml-2">
           <label for="requirementProjectSelect" class="sr-only">Seleccionar proyecto</label>
           <select id="requirementProjectSelect" [ngModel]="projectId()" (ngModelChange)="onProjectSelect($event)"
-            class="pl-10 pr-8 py-2 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none shadow-sm min-w-[200px]">
-            <option [value]="null" disabled>Selecciona un proyecto</option>
+            class="pl-10 pr-8 py-2 bg-slate-900/60 border border-emerald-500/20 rounded-xl text-xs font-semibold text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-400 appearance-none shadow-sm min-w-[200px] cursor-pointer">
+            <option [value]="null" disabled class="bg-slate-900">Selecciona un proyecto</option>
             @for (p of projects(); track p.id) {
-              <option [value]="p.id">{{ p.name }}</option>
+              <option [value]="p.id" class="bg-slate-900">{{ p.name }}</option>
             }
           </select>
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-indigo-500">
-            <i class="fas fa-project-diagram"></i>
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-emerald-400 text-sm">
+            <i class="ri-folder-shared-line"></i>
           </div>
-          <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400">
-            <i class="fas fa-chevron-down text-xs"></i>
+          <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400 text-base">
+            <i class="ri-arrow-down-s-line"></i>
           </div>
         </div>
       </div>
       
       @if (project()) {
-        <p class="text-slate-500 text-sm mt-1">
-          Gestionando el alcance para <span class="text-indigo-600 font-bold">{{ project()?.name }}</span>.
+        <p class="text-slate-400 text-sm mt-1">
+          Gestionando el alcance para <span class="text-emerald-400 font-bold">{{ project()?.name }}</span>.
         </p>
       } @else {
-        <p class="text-slate-500 text-sm mt-1">
+        <p class="text-slate-400 text-sm mt-1">
           Selecciona un proyecto para gestionar sus requisitos.
         </p>
       }
     </div>
     <div class="flex items-center gap-2 w-full sm:w-auto flex-wrap">
       <!-- View Mode Switcher -->
-      <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
-        <button (click)="viewMode.set('list')" [ngClass]="viewMode() === 'list' ? 'bg-white text-indigo-700 shadow-xs' : 'text-slate-500 hover:text-slate-800'" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5">
-          <i class="fas fa-th-large"></i>
+      <div class="flex items-center bg-slate-900/60 p-1 rounded-xl border border-emerald-500/20">
+        <button (click)="viewMode.set('list')" 
+          [ngClass]="viewMode() === 'list' ? 'bg-emerald-500 text-slate-950 font-bold shadow-xs' : 'text-slate-400 hover:text-slate-200 font-medium'" 
+          class="px-3 py-1.5 rounded-lg text-xs transition-all flex items-center gap-1.5">
+          <i class="ri-layout-grid-line"></i>
           <span>Requisitos</span>
         </button>
-        <button (click)="viewMode.set('rtm')" [ngClass]="viewMode() === 'rtm' ? 'bg-white text-indigo-700 shadow-xs' : 'text-slate-500 hover:text-slate-800'" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5">
-          <i class="fas fa-project-diagram text-indigo-600"></i>
+        <button (click)="viewMode.set('rtm')" 
+          [ngClass]="viewMode() === 'rtm' ? 'bg-emerald-500 text-slate-950 font-bold shadow-xs' : 'text-slate-400 hover:text-slate-200 font-medium'" 
+          class="px-3 py-1.5 rounded-lg text-xs transition-all flex items-center gap-1.5">
+          <i class="ri-node-tree"></i>
           <span>Matriz RTM</span>
         </button>
       </div>
 
-      <button *ngIf="viewMode() === 'rtm'" (click)="exportRtmToCsv()" class="btn-secondary text-xs px-3 py-2" [disabled]="!projectId() || requirements().length === 0" title="Exportar Matriz RTM a CSV">
-        <i class="fas fa-file-export text-emerald-600"></i>
+      <button *ngIf="viewMode() === 'rtm'" (click)="exportRtmToCsv()" class="btn-secondary text-xs px-3 py-2 flex items-center gap-1.5" [disabled]="!projectId() || requirements().length === 0" title="Exportar Matriz RTM a CSV">
+        <i class="ri-file-download-line text-emerald-400"></i>
         <span>Exportar RTM</span>
       </button>
 
-      <button (click)="openModal()" class="btn-primary w-full sm:w-auto" [disabled]="!projectId()">
-        <i class="fas fa-plus-circle"></i>
+      <button (click)="openModal()" class="btn-primary w-full sm:w-auto flex items-center justify-center gap-2" [disabled]="!projectId()">
+        <i class="ri-add-circle-line"></i>
         <span>Nuevo Requisito</span>
       </button>
     </div>
   </div>
 
   <!-- RTM KPIs Header (Visible in RTM mode) -->
-  <div *ngIf="viewMode() === 'rtm' && !loading() && requirements().length > 0" class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6 animate-in fade-in duration-300">
-    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3">
-      <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg">
-        <i class="fas fa-list-check"></i>
+  <div *ngIf="viewMode() === 'rtm' && !loading() && requirements().length > 0" class="grid grid-cols-2 sm:grid-cols-4 gap-4 animate-in fade-in duration-300">
+    <div class="bg-[#111E30] p-4 rounded-2xl border border-emerald-500/15 shadow-xs flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center text-lg">
+        <i class="ri-list-check-2"></i>
       </div>
       <div>
         <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Requisitos</div>
-        <div class="text-xl font-black text-slate-800">{{ requirements().length }}</div>
+        <div class="text-xl font-bold text-slate-100">{{ requirements().length }}</div>
       </div>
     </div>
-    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3">
-      <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">
-        <i class="fas fa-shield-halved"></i>
+    <div class="bg-[#111E30] p-4 rounded-2xl border border-emerald-500/15 shadow-xs flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center text-lg">
+        <i class="ri-shield-check-line"></i>
       </div>
       <div>
         <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Cobertura Total</div>
-        <div class="text-xl font-black text-emerald-600">{{ coveragePercent() }}%</div>
+        <div class="text-xl font-bold text-emerald-400">{{ coveragePercent() }}%</div>
       </div>
     </div>
-    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3">
-      <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-lg">
-        <i class="fas fa-flask"></i>
+    <div class="bg-[#111E30] p-4 rounded-2xl border border-emerald-500/15 shadow-xs flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-violet-500/15 border border-violet-500/30 text-violet-400 flex items-center justify-center text-lg">
+        <i class="ri-test-tube-line"></i>
       </div>
       <div>
         <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Casos Vinculados</div>
-        <div class="text-xl font-black text-purple-600">{{ projectTestCases().length }}</div>
+        <div class="text-xl font-bold text-violet-400">{{ projectTestCases().length }}</div>
       </div>
     </div>
-    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center gap-3">
-      <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-lg">
-        <i class="fas fa-bug"></i>
+    <div class="bg-[#111E30] p-4 rounded-2xl border border-emerald-500/15 shadow-xs flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-red-500/15 border border-red-500/30 text-red-400 flex items-center justify-center text-lg">
+        <i class="ri-bug-line"></i>
       </div>
       <div>
         <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Defectos Detectados</div>
-        <div class="text-xl font-black text-rose-600">{{ projectDefects().length }}</div>
+        <div class="text-xl font-bold text-red-400">{{ projectDefects().length }}</div>
       </div>
     </div>
   </div>
@@ -103,37 +109,37 @@
   @if (loading()) {
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 animate-pulse">
       @for (i of [1,2,3,4]; track i) {
-        <div class="h-48 bg-white rounded-xl border border-gray-200 shadow-sm"></div>
+        <div class="h-48 bg-[#111E30] rounded-2xl border border-emerald-500/15 shadow-sm"></div>
       }
     </div>
   } @else {
     <!-- Empty State -->
     @if (requirements().length === 0) {
-      <div class="flex flex-col items-center justify-center py-20 bg-white/80 rounded-2xl border border-white/20 shadow-sm backdrop-blur-md">
-        <div class="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center mb-6 border border-indigo-100 shadow-sm text-indigo-500">
-          <i class="fas fa-list-check text-3xl"></i>
+      <div class="flex flex-col items-center justify-center py-16 bg-[#111E30] rounded-2xl border border-emerald-500/15 shadow-sm backdrop-blur-md text-center p-6">
+        <div class="w-16 h-16 bg-emerald-500/15 rounded-2xl flex items-center justify-center mb-4 border border-emerald-500/30 text-emerald-400">
+          <i class="ri-list-check-2 text-3xl"></i>
         </div>
-        <h2 class="text-xl font-bold text-slate-900 mb-2">No hay requisitos definidos</h2>
-        <p class="text-gray-500 mb-8 max-w-xs text-center">Comienza definiendo los requisitos funcionales y técnicos del proyecto.</p>
-        <button (click)="openModal()" class="btn-secondary mt-4">
-          <i class="fas fa-plus-circle"></i>
-          Crear requisito ahora
+        <h3 class="text-lg font-bold text-slate-100 mb-1">No hay requisitos definidos</h3>
+        <p class="text-slate-400 text-sm mb-6 max-w-sm">Comienza definiendo los requisitos funcionales y técnicos del proyecto.</p>
+        <button (click)="openModal()" class="btn-primary inline-flex items-center gap-2" [disabled]="!projectId()">
+          <i class="ri-add-circle-line"></i>
+          <span>Crear requisito ahora</span>
         </button>
       </div>
     } @else {
       <!-- RTM TABLE VIEW -->
-      <div *ngIf="viewMode() === 'rtm'" class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm animate-in fade-in duration-300">
-        <div class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+      <div *ngIf="viewMode() === 'rtm'" class="bg-[#111E30] rounded-2xl border border-emerald-500/15 overflow-hidden shadow-sm animate-in fade-in duration-300">
+        <div class="p-4 bg-slate-900/60 border-b border-emerald-500/15 flex items-center justify-between">
           <div class="flex items-center gap-2">
-            <i class="fas fa-table-cells text-indigo-600"></i>
-            <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Matriz de Trazabilidad Requisitos $\leftrightarrow$ Casos $\leftrightarrow$ Defectos</span>
+            <i class="ri-table-line text-emerald-400"></i>
+            <span class="text-xs font-bold text-slate-200 uppercase tracking-wider">Matriz de Trazabilidad Requisitos ↔ Casos ↔ Defectos</span>
           </div>
-          <span class="text-xs font-bold text-slate-500">{{ rtmMatrix().length }} Requisitos trazados</span>
+          <span class="text-xs font-semibold text-emerald-400">{{ rtmMatrix().length }} Requisitos trazados</span>
         </div>
 
         <div class="overflow-x-auto">
           <table class="w-full text-xs text-left">
-            <thead class="bg-slate-100/80 text-slate-600 uppercase text-[10px] font-bold border-b border-slate-200">
+            <thead class="bg-slate-900/80 text-slate-400 uppercase text-[10px] font-bold border-b border-emerald-500/15">
               <tr>
                 <th class="p-4">Requisito</th>
                 <th class="p-4">Prioridad / Tipo</th>
@@ -143,20 +149,20 @@
                 <th class="p-4 text-center">Cobertura ISTQB</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100">
-              <tr *ngFor="let row of rtmMatrix()" class="hover:bg-slate-50/80 transition-colors">
+            <tbody class="divide-y divide-emerald-500/10">
+              <tr *ngFor="let row of rtmMatrix()" class="hover:bg-emerald-500/[0.04] transition-colors">
                 <!-- Requisito -->
                 <td class="p-4">
                   <div class="flex items-center gap-2 mb-1">
-                    <span class="px-2 py-0.5 rounded-md bg-indigo-50 border border-indigo-200 text-indigo-700 font-mono font-bold text-[10px]">{{ row.requirement.code }}</span>
+                    <span class="px-2 py-0.5 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-mono font-bold text-[10px]">{{ row.requirement.code }}</span>
                   </div>
-                  <div class="font-bold text-slate-900 text-xs">{{ row.requirement.title }}</div>
+                  <div class="font-bold text-slate-100 text-xs">{{ row.requirement.title }}</div>
                 </td>
 
                 <!-- Prioridad / Tipo -->
                 <td class="p-4">
                   <div class="space-y-1">
-                    <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">{{ row.requirement.requirementPriorityName }}</span>
+                    <span class="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700">{{ row.requirement.requirementPriorityName }}</span>
                     <div class="text-[10px] text-slate-400">{{ row.requirement.requirementTypeName }}</div>
                   </div>
                 </td>
@@ -164,13 +170,13 @@
                 <!-- Casos de Prueba -->
                 <td class="p-4">
                   <div *ngIf="row.testCases.length > 0" class="space-y-1">
-                    <div *ngFor="let tc of row.testCases" class="flex items-center gap-1.5 text-xs text-slate-800 font-medium">
-                      <i class="fas fa-flask text-indigo-500 text-[10px]"></i>
+                    <div *ngFor="let tc of row.testCases" class="flex items-center gap-1.5 text-xs text-slate-200 font-medium">
+                      <i class="ri-flask-line text-emerald-400 text-[11px]"></i>
                       <span class="truncate max-w-[200px]">{{ tc.title }}</span>
                     </div>
                   </div>
-                  <span *ngIf="row.testCases.length === 0" class="text-amber-600 text-[11px] font-semibold flex items-center gap-1">
-                    <i class="fas fa-triangle-exclamation"></i> Sin casos asociados
+                  <span *ngIf="row.testCases.length === 0" class="text-amber-400 text-[11px] font-semibold flex items-center gap-1">
+                    <i class="ri-alert-line"></i> Sin casos asociados
                   </span>
                 </td>
 
@@ -179,35 +185,35 @@
                   <div *ngIf="row.executions.length > 0" class="flex flex-col items-center gap-1">
                     <span *ngFor="let exec of row.executions" class="px-2 py-0.5 rounded-full text-[9px] font-bold border uppercase"
                       [ngClass]="{
-                        'bg-emerald-50 text-emerald-700 border-emerald-200': exec.status.code === 'PASSED',
-                        'bg-rose-50 text-rose-700 border-rose-200': exec.status.code === 'FAILED',
-                        'bg-amber-50 text-amber-700 border-amber-200': exec.status.code === 'BLOCKED',
-                        'bg-slate-100 text-slate-600 border-slate-200': exec.status.code === 'PENDING'
+                        'bg-emerald-500/15 text-emerald-300 border-emerald-500/30': exec.status.code === 'PASSED',
+                        'bg-red-500/15 text-red-400 border-red-500/30': exec.status.code === 'FAILED',
+                        'bg-amber-500/15 text-amber-300 border-amber-500/30': exec.status.code === 'BLOCKED',
+                        'bg-slate-800 text-slate-400 border-slate-700': exec.status.code === 'PENDING'
                       }">
                       {{ exec.status.code }}
                     </span>
                   </div>
-                  <span *ngIf="row.executions.length === 0" class="text-slate-400 text-[10px]">No ejecutado</span>
+                  <span *ngIf="row.executions.length === 0" class="text-slate-500 text-[10px]">No ejecutado</span>
                 </td>
 
                 <!-- Defectos -->
                 <td class="p-4 text-center">
-                  <span *ngIf="row.defects.length > 0" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-rose-50 border border-rose-200 text-rose-700 font-bold text-[10px]">
-                    <i class="fas fa-bug"></i> {{ row.defects.length }} Defecto(s)
+                  <span *ngIf="row.defects.length > 0" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-red-500/15 border border-red-500/30 text-red-400 font-bold text-[10px]">
+                    <i class="ri-bug-line"></i> {{ row.defects.length }} Defecto(s)
                   </span>
-                  <span *ngIf="row.defects.length === 0" class="text-emerald-600 text-[11px] font-bold">
-                    <i class="fas fa-check"></i> Limpio
+                  <span *ngIf="row.defects.length === 0" class="text-emerald-400 text-[11px] font-bold flex items-center justify-center gap-1">
+                    <i class="ri-checkbox-circle-line"></i> Limpio
                   </span>
                 </td>
 
                 <!-- Cobertura ISTQB -->
                 <td class="p-4 text-center">
                   <span [ngClass]="{
-                    'bg-emerald-100 text-emerald-800 border-emerald-300': row.coverageStatus === 'PASSING',
-                    'bg-rose-100 text-rose-800 border-rose-300': row.coverageStatus === 'FAILING',
-                    'bg-amber-100 text-amber-800 border-amber-300': row.coverageStatus === 'PENDING',
-                    'bg-slate-100 text-slate-600 border-slate-200': row.coverageStatus === 'UNCOVERED'
-                  }" class="px-3 py-1 rounded-full text-[10px] font-black border uppercase tracking-wider">
+                    'bg-emerald-500/15 text-emerald-300 border-emerald-500/30': row.coverageStatus === 'PASSING',
+                    'bg-red-500/15 text-red-400 border-red-500/30': row.coverageStatus === 'FAILING',
+                    'bg-amber-500/15 text-amber-300 border-amber-500/30': row.coverageStatus === 'PENDING',
+                    'bg-slate-800 text-slate-400 border-slate-700': row.coverageStatus === 'UNCOVERED'
+                  }" class="px-3 py-1 rounded-full text-[10px] font-bold border uppercase tracking-wider">
                     {{ row.coverageStatus === 'PASSING' ? 'Aprobado 100%' : (row.coverageStatus === 'FAILING' ? 'Con Fallas' : (row.coverageStatus === 'PENDING' ? 'En Progreso' : 'Sin Pruebas')) }}
                   </span>
                 </td>
@@ -220,70 +226,70 @@
       <!-- Requirements Grid (Cards View) -->
       <div *ngIf="viewMode() === 'list'" class="grid grid-cols-1 md:grid-cols-2 gap-6">
         @for (req of requirements(); track req.id) {
-          <div class="bg-white rounded-xl border border-gray-200 p-6 hover:border-indigo-300 transition-all hover:shadow-lg group relative overflow-hidden flex flex-col h-full">
+          <div class="bg-[#111E30] rounded-2xl border border-emerald-500/15 p-6 hover:border-emerald-400/40 hover:shadow-lg hover:shadow-emerald-900/20 transition-all duration-300 group relative overflow-hidden flex flex-col h-full">
             
             <!-- Top Badges -->
             <div class="flex justify-between items-start mb-4">
               <div class="flex items-center gap-2">
-                <span class="px-3 py-1 bg-slate-100 text-slate-600 text-[10px] font-black tracking-widest rounded-lg border border-slate-200">
+                <span class="px-2.5 py-1 bg-slate-800 text-slate-300 text-[10px] font-mono font-bold tracking-wider rounded-lg border border-slate-700">
                   {{ req.code }}
                 </span>
                 @if (!projectId() && req.projectId) {
-                  <span class="px-3 py-1 bg-indigo-50 text-indigo-600 text-[10px] font-bold tracking-wide rounded-lg border border-indigo-200">
-                    <i class="fas fa-project-diagram mr-1"></i>{{ getProjectName(req.projectId) }}
+                  <span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-300 text-[10px] font-bold tracking-wide rounded-lg border border-emerald-500/30">
+                    <i class="ri-folder-shared-line mr-1"></i>{{ getProjectName(req.projectId) }}
                   </span>
                 }
               </div>
               <div class="flex gap-2">
                 <span [ngClass]="{
-                  'bg-emerald-100 text-emerald-600 border-emerald-200': req.requirementStatusId === 3,
-                  'bg-amber-100 text-amber-600 border-amber-200': req.requirementStatusId === 2,
-                  'bg-slate-100 text-slate-600 border-slate-200': req.requirementStatusId === 1,
-                  'bg-rose-100 text-rose-600 border-rose-200': req.requirementStatusId === 4
-                }" class="px-3 py-1 text-[10px] font-black tracking-widest rounded-lg border">
+                  'bg-emerald-500/15 text-emerald-300 border-emerald-500/30': req.requirementStatusId === 3,
+                  'bg-amber-500/15 text-amber-300 border-amber-500/30': req.requirementStatusId === 2,
+                  'bg-slate-800 text-slate-300 border-slate-700': req.requirementStatusId === 1,
+                  'bg-red-500/15 text-red-400 border-red-500/30': req.requirementStatusId === 4
+                }" class="px-2.5 py-1 text-[10px] font-bold tracking-wider rounded-lg border">
                   {{ req.requirementStatusName | titlecase }}
                 </span>
               </div>
             </div>
 
             <!-- Title & Content -->
-            <h3 class="text-lg font-bold text-slate-900 mb-2 leading-tight group-hover:text-indigo-600 transition-colors">
+            <h3 class="text-base font-bold text-slate-100 mb-2 leading-tight group-hover:text-emerald-300 transition-colors">
               {{ req.title }}
             </h3>
-            <p class="text-slate-500 text-sm mb-6 line-clamp-3 leading-relaxed flex-1">
+            <p class="text-slate-400 text-sm mb-6 line-clamp-3 leading-relaxed flex-1">
               {{ req.description || 'Sin descripción detallada.' }}
             </p>
 
             <!-- Meta Grid -->
             <div class="grid grid-cols-3 gap-2 mb-6">
-              <div class="bg-slate-50 rounded-2xl p-2 border border-slate-100 flex flex-col items-center">
-                <span class="text-[8px] font-black text-slate-400 tracking-widest">Prioridad</span>
-                <span class="text-[10px] font-bold text-slate-700" [ngClass]="{'text-rose-500': req.requirementPriorityId === 3 || req.requirementPriorityId === 4}">
+              <div class="bg-slate-900/40 rounded-xl p-2.5 border border-emerald-500/10 flex flex-col items-center">
+                <span class="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Prioridad</span>
+                <span class="text-xs font-bold text-slate-200" [ngClass]="{'text-red-400': req.requirementPriorityId === 3 || req.requirementPriorityId === 4}">
                   {{ req.requirementPriorityName }}
                 </span>
               </div>
-              <div class="bg-slate-50 rounded-2xl p-2 border border-slate-100 flex flex-col items-center">
-                <span class="text-[8px] font-black text-slate-400 tracking-widest">Tipo</span>
-                <span class="text-[10px] font-bold text-slate-700">{{ req.requirementTypeName }}</span>
+              <div class="bg-slate-900/40 rounded-xl p-2.5 border border-emerald-500/10 flex flex-col items-center">
+                <span class="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Tipo</span>
+                <span class="text-xs font-bold text-slate-200">{{ req.requirementTypeName }}</span>
               </div>
-              <div class="bg-slate-50 rounded-2xl p-2 border border-slate-100 flex flex-col items-center">
-                <span class="text-[8px] font-black text-slate-400 tracking-widest">Complejidad</span>
-                <span class="text-[10px] font-bold text-slate-700">{{ req.requirementComplexityName }}</span>
+              <div class="bg-slate-900/40 rounded-xl p-2.5 border border-emerald-500/10 flex flex-col items-center">
+                <span class="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Complejidad</span>
+                <span class="text-xs font-bold text-slate-200">{{ req.requirementComplexityName }}</span>
               </div>
             </div>
 
             <!-- Footer Actions -->
-            <div class="pt-4 border-t border-slate-100 flex justify-between items-center mt-auto">
-              <div class="flex items-center gap-2 text-[10px] font-bold text-slate-400 tracking-widest">
-                 <i class="fas fa-clock text-slate-300"></i>
+            <div class="pt-4 border-t border-emerald-500/10 flex justify-between items-center mt-auto">
+              <div class="flex items-center gap-2 text-[10px] font-medium text-slate-400">
+                 <i class="ri-time-line text-emerald-400"></i>
                  <span>{{ req.createdAt | date:'shortDate' }}</span>
               </div>
               <div class="flex gap-2">
-                <button (click)="openModal(req)" class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center hover:bg-indigo-600 hover:text-white transition-all">
-                  <i class="fas fa-edit text-xs"></i>
+                <button (click)="openModal(req)" class="btn-icon btn-icon-success" title="Editar">
+                  <i class="ri-pencil-line text-xs"></i>
                 </button>
-                <button (click)="deleteRequirement(req.id)" class="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center hover:bg-rose-600 hover:text-white transition-all">
-                  <i class="fas fa-trash-can text-xs"></i>
+                <button (click)="deleteRequirement(req.id)" class="btn-icon btn-icon-danger" title="Eliminar">
+                  <i class="ri-delete-bin-line text-xs"></i>
                 </button>
               </div>
             </div>

@@ -34,7 +34,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
               icon: 'error',
               title: 'Sesión Expirada',
               text: 'Su sesión ha expirado por inactividad. Por favor, inicie sesión nuevamente.',
-              confirmButtonColor: '#150fbd'
+              confirmButtonColor: '#10B981'
             });
             return throwError(() => refreshError);
           }),
@@ -49,7 +49,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
             icon: 'warning',
             title: 'Petición Inválida',
             text: message,
-            confirmButtonColor: '#150fbd'
+            confirmButtonColor: '#10B981'
           });
           break;
         }
@@ -58,7 +58,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
             icon: 'error',
             title: 'Acceso Restringido',
             text: 'No cuenta con los privilegios necesarios para realizar esta acción.',
-            confirmButtonColor: '#150fbd'
+            confirmButtonColor: '#10B981'
           });
           break;
         case 404:
@@ -66,7 +66,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
             icon: 'warning',
             title: 'Recurso No Encontrado',
             text: 'El recurso no está disponible o ha sido eliminado.',
-            confirmButtonColor: '#150fbd'
+            confirmButtonColor: '#10B981'
           });
           break;
         case 500:
@@ -76,7 +76,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
               icon: 'error',
               title: 'Error del Sistema',
               text: 'Se ha producido un error interno. Intente nuevamente más tarde o contacte a soporte.',
-              confirmButtonColor: '#150fbd'
+              confirmButtonColor: '#10B981'
             });
           }
           break;
@@ -88,7 +88,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
             icon: 'error',
             title: 'Error de Conexión',
             text: 'Ha ocurrido un error inesperado de comunicación.',
-            confirmButtonColor: '#150fbd'
+            confirmButtonColor: '#10B981'
           });
       }
 

@@ -256,7 +256,7 @@ export class RequirementsComponent implements OnInit {
       text: 'El requisito se eliminará lógicamente del sistema.',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#150fbd',
+      confirmButtonColor: '#10B981',
       cancelButtonColor: '#f43f5e',
       confirmButtonText: 'Sí, eliminar',
       cancelButtonText: 'Cancelar'

@@ -1,178 +1,162 @@
-<div class="p-6">
-  <div class="flex justify-between items-center mb-6">
-    <div class="flex flex-col">
-      <h1 class="text-2xl font-bold text-slate-900">Casos de prueba</h1>
-      <div *ngIf="projectTitle()" class="flex items-center gap-2 mt-2">
-        <i class="fas fa-folder-open text-[#150fbd]"></i>
-        <span class="text-[#150fbd] text-sm font-medium">{{ projectTitle() }}</span>
-        <span *ngIf="projectStatus()" [ngClass]="{
-            'bg-emerald-100 text-emerald-700 border-emerald-200': projectStatus() === 'Activo',
-            'bg-rose-100 text-rose-700 border-rose-200': projectStatus() === 'Inactivo'
-          }" class="px-2 py-0.5 rounded-full border text-[10px] font-bold tracking-wider">
-          {{ projectStatus() }}
-        </span>
+<div class="space-y-6 text-slate-100 animate-in fade-in duration-500">
+  <!-- Page Header con Breadcrumbs y Acciones -->
+  <app-page-header
+    title="Casos de Prueba"
+    subtitle="Diseño, especificación y trazabilidad de pruebas (ISTQB / BDD)"
+    [breadcrumbs]="breadcrumbs"
+    iconClass="fas fa-vial"
+  >
+    <ng-template #actions>
+      <!-- Project Filter Dropdown in Header -->
+      <div class="relative">
+        <label for="casesProjectSelect" class="sr-only">Seleccionar proyecto</label>
+        <select id="casesProjectSelect" [ngModel]="projectId()" (ngModelChange)="onProjectSelect($event)"
+          class="pl-9 pr-8 py-2 bg-slate-900/60 border border-emerald-500/20 rounded-xl text-xs font-semibold text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-400 appearance-none shadow-sm min-w-[200px] cursor-pointer">
+          <option [value]="null" class="bg-slate-900">Todos los proyectos</option>
+          @for (p of projects(); track p.id) {
+            <option [value]="p.id" class="bg-slate-900">{{ p.name }}</option>
+          }
+        </select>
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-emerald-400 text-sm">
+          <i class="ri-folder-shared-line"></i>
+        </div>
+        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400 text-base">
+          <i class="ri-arrow-down-s-line"></i>
+        </div>
       </div>
-    </div>
-    <div class="flex items-center gap-3">
-      <button (click)="exportToCsv()" [disabled]="testCases().length === 0" class="btn-secondary" title="Exportar casos a archivo CSV / Excel">
-        <i class="fas fa-file-export text-emerald-600"></i>
-        Exportar CSV
-      </button>
-      <button (click)="openImportModal()" [disabled]="!projectId()" class="btn-secondary" title="Importar casos desde archivo CSV">
-        <i class="fas fa-file-import text-indigo-600"></i>
-        Importar CSV
-      </button>
-      <button (click)="openModal()" [disabled]="!projectId()" class="btn-primary">
-        <i class="fas fa-plus-circle"></i>
-        Nuevo caso de prueba
-      </button>
-    </div>
-  </div>
 
-  <!-- Project & Suite Selection -->
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 bg-white/50 p-6 rounded-2xl border border-white/20 backdrop-blur-md shadow-sm">
-    <div>
-      <label for="projectSelect"
-        class="block text-sm text-gray-600 mb-2 font-medium text-[11px]">Proyecto</label>
-      <select id="projectSelect" (change)="onProjectChange($event)" [value]="projectId() || ''"
-        class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all shadow-sm font-medium text-xs appearance-none cursor-pointer">
-        <option value="">Todos los proyectos</option>
-        <option *ngFor="let project of projects()" [value]="project.id">{{ project.name }}</option>
-      </select>
-    </div>
-    <div>
-      <label for="suiteSelect"
-        class="block text-sm text-gray-600 mb-2 font-medium text-[11px]">Escenario
-        (suite)</label>
-      <select id="suiteSelect" (change)="onSuiteChange($event)" [value]="testSuiteId() || ''" [disabled]="!projectId()"
-        class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-sm font-medium text-xs appearance-none cursor-pointer">
-        <option value="">Todos los escenarios</option>
-        <option *ngFor="let suite of testSuites()" [value]="suite.id">{{ suite.name }}</option>
-      </select>
-    </div>
-  </div>
+      <button (click)="exportToCsv()" [disabled]="testCases().length === 0" class="btn-secondary flex items-center gap-1.5" title="Exportar casos a archivo CSV / Excel">
+        <i class="ri-file-download-line text-emerald-400"></i>
+        <span>Exportar CSV</span>
+      </button>
+      <button (click)="openImportModal()" class="btn-secondary flex items-center gap-1.5" title="Importar casos desde archivo CSV">
+        <i class="ri-file-upload-line text-emerald-400"></i>
+        <span>Importar CSV</span>
+      </button>
+      <button (click)="openModal()" class="btn-primary flex items-center gap-2">
+        <i class="ri-add-circle-line"></i>
+        <span>Nuevo caso de prueba</span>
+      </button>
+    </ng-template>
+  </app-page-header>
+
+  <!-- Advanced Filter Panel -->
+  <app-filter-panel
+    [fields]="filterFields"
+    [values]="filterValues()"
+    (valuesChange)="filterValues.set($event)"
+  ></app-filter-panel>
 
   <div *ngIf="loading()" class="flex justify-center items-center h-64">
-    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[#150fbd]"></div>
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-400"></div>
   </div>
 
   <div *ngIf="!loading()" class="space-y-6">
-    <div *ngFor="let group of groupedTestCases()" class="bg-white/80 border border-white/20 rounded-2xl overflow-hidden shadow-sm backdrop-blur-md mb-8">
-      <div class="bg-indigo-50/50 px-6 py-5 border-b border-indigo-100 flex items-center justify-between">
+    <div *ngFor="let group of groupedTestCases()" class="bg-[#111E30] border border-emerald-500/15 rounded-2xl overflow-hidden shadow-sm backdrop-blur-md mb-8">
+      <div class="bg-slate-900/60 px-6 py-4 border-b border-emerald-500/10 flex items-center justify-between">
         <div class="flex items-center min-w-0">
-          <div class="w-8 h-8 rounded-lg bg-[#150fbd]/10 text-[#150fbd] flex items-center justify-center mr-3 shrink-0">
-            <i class="fas fa-folder text-sm"></i>
+          <div class="w-8 h-8 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center mr-3 shrink-0 border border-emerald-500/30">
+            <i class="ri-folder-3-line text-base"></i>
           </div>
-          <h2 class="text-xs sm:text-[11px] font-bold text-gray-800 tracking-wide truncate">
-            {{ group.projectName || 'Sin proyecto' }} <span class="text-gray-400 mx-2">/</span> <span
-              class="text-indigo-600">{{ group.testSuiteName || 'Sin escenario' }}</span>
+          <h2 class="text-xs sm:text-[11px] font-bold text-slate-100 tracking-wide truncate">
+            {{ group.projectName || 'Sin proyecto' }} <span class="text-slate-500 mx-2">/</span> <span
+              class="text-emerald-400">{{ group.testSuiteName || 'Sin escenario' }}</span>
           </h2>
         </div>
-        <span class="ml-2 px-3 py-1 rounded-lg bg-indigo-50 text-indigo-700 text-[9px] font-bold tracking-wide whitespace-nowrap border border-indigo-200">{{ group.items.length }} casos</span>
+        <span class="ml-2 px-3 py-1 rounded-lg bg-emerald-500/15 text-emerald-300 text-[10px] font-bold tracking-wide whitespace-nowrap border border-emerald-500/30">{{ group.items.length }} casos</span>
       </div>
 
-      <div class="grid grid-cols-1 gap-4 p-4 sm:hidden bg-slate-50/30">
+      <!-- Mobile List -->
+      <div class="grid grid-cols-1 gap-4 p-4 sm:hidden bg-slate-900/30">
         <button type="button" *ngFor="let testCase of group.items" (click)="viewExecutions(testCase.id, $event)"
-          class="bg-white border border-slate-200 rounded-2xl p-5 active:scale-[0.98] transition-all shadow-sm text-left w-full outline-none focus:ring-2 focus:ring-indigo-500/50">
+          class="bg-[#111E30] border border-emerald-500/15 rounded-2xl p-5 active:scale-[0.98] transition-all shadow-sm text-left w-full outline-none focus:ring-2 focus:ring-emerald-500/30">
           <div class="flex justify-between items-start mb-3">
             <div class="flex items-center gap-2">
-              <span class="text-[10px] font-bold text-slate-400 font-mono">#{{ testCase.id }}</span>
-              <span *ngIf="testCase.lastCycleNumber" class="px-2 py-0.5 rounded-full text-[8px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 tracking-wider">
+              <span class="text-xs font-mono font-bold text-slate-400">#{{ testCase.id }}</span>
+              <span *ngIf="testCase.lastCycleNumber" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 tracking-wider">
                 Ciclo {{ testCase.lastCycleNumber }}
               </span>
             </div>
-            <span [ngClass]="{
-              'bg-emerald-100 text-emerald-700': testCase.isActive,
-              'bg-slate-100 text-slate-500': !testCase.isActive
-            }" class="px-2 py-0.5 rounded-md text-[8px] font-bold tracking-wide">
-              {{ testCase.isActive ? 'Activo' : 'Inactivo' }}
-            </span>
+            <app-status-badge [label]="testCase.priority.name || 'Media'" [type]="getPriorityBadgeType(testCase.priority.name || 'Media')"></app-status-badge>
           </div>
-          
-          <h3 class="text-slate-900 font-bold text-sm mb-4 leading-snug line-clamp-2">{{ testCase.title }}</h3>
-          
-          <div class="flex items-center justify-between pt-4 border-t border-slate-50">
-            <span [ngClass]="{
-              'bg-rose-100 text-rose-800': testCase.priority.code === 'P0',
-              'bg-orange-100 text-orange-800': testCase.priority.code === 'P1',
-              'bg-amber-100 text-amber-800': testCase.priority.code === 'P2'
-            }" class="px-2 py-0.5 rounded-md text-[8px] font-bold tracking-wide">
-              {{ testCase.priority.name | titlecase }}
-            </span>
-            <div class="flex gap-1">
-              <button (click)="viewSteps(testCase.id, testCase.title, $event)" class="btn-icon btn-icon-primary" title="Ver pasos de ejecución">
-                <i class="fas fa-tasks"></i>
+          <h3 class="font-bold text-slate-100 text-sm mb-2 leading-tight">{{ testCase.title }}</h3>
+          <p class="text-xs text-slate-400 line-clamp-2 mb-4 leading-relaxed">{{ testCase.description || 'Sin descripción detallada' }}</p>
+          <div class="flex justify-between items-center text-xs text-slate-400 pt-3 border-t border-emerald-500/10">
+            <div class="flex items-center gap-2">
+              <i class="ri-user-line text-emerald-400"></i>
+              <span>{{ testCase.createdBy || 'Sistema' }}</span>
+            </div>
+            <div class="flex gap-2">
+              <button type="button" (click)="viewSteps(testCase.id, testCase.title, $event)" class="btn-icon btn-icon-secondary" title="Ver pasos">
+                <i class="ri-list-check-2"></i>
               </button>
-              <button (click)="editTestCase(testCase, $event)" class="btn-icon btn-icon-warning" title="Editar caso de prueba">
-                <i class="fas fa-pen-to-square"></i>
+              <button type="button" (click)="editTestCase(testCase, $event)" class="btn-icon btn-icon-success" title="Editar">
+                <i class="ri-pencil-line"></i>
               </button>
-              <button *hasPermission="'TEST_CASES_DELETE'" (click)="deleteTestCase(testCase, $event)" class="btn-icon btn-icon-danger" title="Eliminar caso de prueba">
-                <i class="fas fa-trash-can"></i>
+              <button type="button" (click)="deleteTestCase(testCase, $event)" class="btn-icon btn-icon-danger" title="Eliminar">
+                <i class="ri-delete-bin-line"></i>
               </button>
             </div>
           </div>
         </button>
       </div>
 
-      <!-- Desktop Table View (Premium Dark -> Premium Light) -->
+      <!-- Desktop Table -->
       <div class="hidden sm:block overflow-x-auto">
         <table class="w-full text-left border-collapse">
           <thead>
-            <tr class="bg-gray-50 border-b border-gray-100">
-              <th class="px-6 py-5 text-[10px] font-bold tracking-wide text-gray-500 w-20">ID</th>
-              <th class="px-6 py-5 text-[10px] font-bold tracking-wide text-gray-500">Título</th>
-              <th class="px-6 py-5 text-[10px] font-bold tracking-wide text-gray-500 text-center w-32">Prioridad</th>
-              <th class="px-6 py-5 text-[10px] font-bold tracking-wide text-gray-500 text-center w-36">Riesgo (RBT)</th>
-              <th class="px-6 py-5 text-[10px] font-bold tracking-wide text-gray-500 text-center w-32">Estado</th>
-              <th class="px-6 py-5 text-[10px] font-bold tracking-wide text-gray-500 w-32">Creación</th>
-              <th class="px-6 py-5 text-[10px] font-bold tracking-wide text-gray-500 text-right w-32">Acciones</th>
+            <tr class="bg-slate-900/80 border-b border-emerald-500/15 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+              <th class="px-6 py-3.5">ID / Caso de Prueba</th>
+              <th class="px-4 py-3.5 text-center">Tipo / Prioridad</th>
+              <th class="px-4 py-3.5 text-center">Riesgo (RBT)</th>
+              <th class="px-4 py-3.5 text-center">Creado por</th>
+              <th class="px-4 py-3.5 text-center">Último Ciclo</th>
+              <th class="px-6 py-3.5 text-right">Acciones</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-gray-100">
-            <tr *ngFor="let testCase of group.items" (click)="viewExecutions(testCase.id, $event)" (keydown.enter)="viewExecutions(testCase.id, $event)" tabindex="0"
-              class="bg-transparent hover:bg-indigo-50/50 transition-colors cursor-pointer group outline-none focus:bg-indigo-50">
-              <td class="px-6 py-5 text-gray-500 font-mono text-[10px] font-bold w-20">#{{ testCase.id }}</td>
-              <td class="px-6 py-5 font-bold text-sm text-gray-800 group-hover:text-indigo-600 transition-colors tracking-tight">
-                <div class="flex items-center gap-2">
-                  <span>{{ testCase.title }}</span>
-                  <span *ngIf="testCase.lastCycleNumber" class="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 tracking-wider">
-                    Ciclo {{ testCase.lastCycleNumber }}
-                  </span>
+          <tbody class="divide-y divide-emerald-500/10 text-xs">
+            <tr *ngFor="let testCase of group.items" (click)="viewExecutions(testCase.id, $event)" tabindex="0" (keydown.enter)="viewExecutions(testCase.id, $event)" (keydown.space)="viewExecutions(testCase.id, $event); $event.preventDefault()"
+              class="hover:bg-emerald-500/[0.04] transition-colors cursor-pointer group/row">
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-3">
+                  <span class="font-mono text-slate-500 text-[10px] font-bold">#{{ testCase.id }}</span>
+                  <div class="min-w-0">
+                    <p class="font-bold text-slate-100 group-hover/row:text-emerald-300 transition-colors leading-snug">{{ testCase.title }}</p>
+                    <p class="text-slate-400 text-[11px] line-clamp-1 mt-0.5">{{ testCase.description || 'Sin descripción' }}</p>
+                  </div>
                 </div>
               </td>
-              <td class="px-6 py-5 text-center">
-                <span [ngClass]="{
-                  'bg-rose-50 text-rose-700 border-rose-200': testCase.priority.code === 'P0',
-                  'bg-orange-50 text-orange-700 border-orange-200': testCase.priority.code === 'P1',
-                  'bg-amber-50 text-amber-700 border-amber-200': testCase.priority.code === 'P2'
-                }" class="inline-flex items-center px-2 py-0.5 rounded-lg text-[9px] font-bold tracking-wide border transition-all">
-                  {{ testCase.priority.name | titlecase }}
+              <td class="px-4 py-4 text-center">
+                <div class="flex flex-col items-center gap-1">
+                  <span class="text-[10px] font-bold text-slate-300">{{ testCase.priority.name || 'Funcional' }}</span>
+                  <app-status-badge [label]="testCase.priority.name || 'Media'" [type]="getPriorityBadgeType(testCase.priority.name || 'Media')"></app-status-badge>
+                </div>
+              </td>
+              <td class="px-4 py-4 text-center">
+                <span class="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold border font-mono uppercase tracking-wider"
+                  [ngClass]="getRiskBadgeClass(testCase)">
+                  {{ getRiskLevelName(testCase) }}
                 </span>
               </td>
-              <td class="px-6 py-5 text-center">
-                <span [ngClass]="getRiskBadgeClass(testCase)" class="inline-flex items-center px-2.5 py-1 rounded-lg text-[9px] font-bold tracking-wide border transition-all">
-                  <i class="fas fa-shield-halved mr-1"></i> {{ getRiskLevelName(testCase) }}
+              <td class="px-4 py-4 text-center">
+                <span class="text-slate-300 font-medium">{{ testCase.createdBy || 'Sistema' }}</span>
+              </td>
+              <td class="px-4 py-4 text-center">
+                <span *ngIf="testCase.lastCycleNumber" class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                  Ciclo {{ testCase.lastCycleNumber }}
                 </span>
+                <span *ngIf="!testCase.lastCycleNumber" class="text-slate-500 text-[10px]">Sin ciclo</span>
               </td>
-              <td class="px-6 py-5 text-center">
-                <span class="inline-flex items-center gap-2 text-[10px] font-bold tracking-wide" [class]="testCase.isActive ? 'text-emerald-600' : 'text-gray-500'">
-                  <span class="w-1.5 h-1.5 rounded-full"
-                    [class]="testCase.isActive ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-gray-300'"></span>
-                  {{ testCase.isActive ? 'Activo' : 'Inactivo' }}
-                </span>
-              </td>
-              <td class="px-6 py-5 text-gray-500 text-[10px] font-bold tracking-wide">{{ testCase.createdAt | date:'MMM d, YY' }}
-              </td>
-              <td class="px-6 py-5 text-right w-32">
-                <div class="flex items-center justify-end gap-2 text-[10px] font-bold tracking-wide">
-                  <button (click)="viewSteps(testCase.id, testCase.title, $event)" class="btn-icon btn-icon-primary" title="Ver pasos de ejecución">
-                    <i class="fas fa-tasks"></i>
+              <td class="px-6 py-4 text-right">
+                <div class="flex items-center justify-end gap-1.5" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+                  <button (click)="viewSteps(testCase.id, testCase.title, $event)" class="btn-icon btn-icon-secondary" title="Ver pasos">
+                    <i class="ri-list-check-2 text-xs"></i>
                   </button>
-                  <button (click)="editTestCase(testCase, $event)" class="btn-icon btn-icon-warning" title="Editar caso de prueba">
-                    <i class="fas fa-pen-to-square"></i>
+                  <button (click)="editTestCase(testCase, $event)" class="btn-icon btn-icon-success" title="Editar">
+                    <i class="ri-pencil-line text-xs"></i>
                   </button>
-                  <button *hasPermission="'TEST_CASES_DELETE'" (click)="deleteTestCase(testCase, $event)" class="btn-icon btn-icon-danger" title="Eliminar caso de prueba">
-                    <i class="fas fa-trash-can"></i>
+                  <button (click)="deleteTestCase(testCase, $event)" class="btn-icon btn-icon-danger" title="Eliminar">
+                    <i class="ri-delete-bin-line text-xs"></i>
                   </button>
                 </div>
               </td>
@@ -181,150 +165,196 @@
         </table>
       </div>
     </div>
+
+    <!-- Empty State -->
+    <div *ngIf="testCases().length === 0" class="bg-[#111E30] rounded-2xl border border-emerald-500/15 p-12 text-center shadow-sm backdrop-blur-md">
+      <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 mb-4">
+        <i class="ri-flask-line text-3xl"></i>
+      </div>
+      <h3 class="text-lg font-bold text-slate-100 mb-1">No hay casos de prueba registrados</h3>
+      <p class="text-slate-400 text-sm max-w-sm mx-auto mb-4">Crea casos de prueba para validar el comportamiento esperado del sistema.</p>
+      <button (click)="openModal()" class="btn-primary inline-flex items-center gap-2">
+        <i class="ri-add-circle-line"></i>
+        <span>Crear primer caso de prueba</span>
+      </button>
+    </div>
   </div>
 
-  <!-- Registration Modal - Centered with tabs and max height -->
-  <div *ngIf="showModal()" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-fade-in">
-    <div class="bg-white border border-gray-200 rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[92vh]">
-      
-      <!-- Header -->
-      <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
+  <!-- Create / Edit Modal -->
+  <div *ngIf="showModal()"
+    class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-300 overflow-hidden">
+    <div class="bg-[#0E1A2B] border border-emerald-500/20 rounded-2xl w-full max-w-3xl max-h-[88vh] shadow-2xl shadow-emerald-950/50 flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 text-slate-100">
+
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-emerald-500/15 flex justify-between items-center bg-slate-900/60 shrink-0">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
-            <i class="fas fa-vial text-xl"></i>
+          <div class="w-9 h-9 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center border border-emerald-500/30 text-base">
+            <i [ngClass]="editingTestCaseId() ? 'ri-pencil-line' : 'ri-flask-line'"></i>
           </div>
           <div>
-            <h2 class="text-lg font-bold text-gray-900 tracking-tight">
+            <h2 class="text-base font-bold text-slate-100 tracking-tight">
               {{ editingTestCaseId() ? 'Editar Caso de Prueba' : 'Nuevo Caso de Prueba' }}
             </h2>
-            <p class="text-xs text-gray-500">Diseño y especificación del caso (ISTQB / BDD)</p>
+            <p class="text-xs text-slate-400">Especificación técnica ISTQB / BDD</p>
           </div>
         </div>
-        <button type="button" (click)="closeModal()" class="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-lg hover:bg-gray-100">
-          <i class="fas fa-times text-xl"></i>
+        <button (click)="closeModal()" class="w-8 h-8 rounded-lg bg-slate-800/80 border border-slate-700 text-slate-400 hover:text-slate-100 hover:bg-slate-700 transition-all flex items-center justify-center text-sm">
+          <i class="ri-close-line"></i>
         </button>
       </div>
 
       <!-- Navigation Tabs -->
-      <div class="px-6 pt-3 border-b border-gray-100 flex gap-4 bg-gray-50 text-xs font-semibold shrink-0">
+      <div class="px-6 pt-3 border-b border-emerald-500/15 flex gap-4 bg-slate-900/40 text-xs font-semibold shrink-0">
         <button type="button" (click)="activeTab = 'general'"
-                [class]="activeTab === 'general' ? 'border-b-2 border-indigo-500 text-indigo-600 pb-2.5' : 'text-gray-500 hover:text-gray-700 pb-2.5'">
-          <i class="fas fa-info-circle mr-1.5"></i> 1. Información General
+                [class]="activeTab === 'general' ? 'border-b-2 border-emerald-400 text-emerald-400 pb-2.5 font-bold' : 'text-slate-400 hover:text-slate-200 pb-2.5'">
+          <i class="ri-information-line mr-1"></i> 1. General
         </button>
         <button type="button" (click)="activeTab = 'execution'"
-                [class]="activeTab === 'execution' ? 'border-b-2 border-indigo-500 text-indigo-600 pb-2.5' : 'text-gray-500 hover:text-gray-700 pb-2.5'">
-          <i class="fas fa-shield-halved mr-1.5"></i> 2. Riesgo (RBT) y Criterios
+                [class]="activeTab === 'execution' ? 'border-b-2 border-emerald-400 text-emerald-400 pb-2.5 font-bold' : 'text-slate-400 hover:text-slate-200 pb-2.5'">
+          <i class="ri-shield-check-line mr-1"></i> 2. Criterios y Riesgos
         </button>
         <button type="button" (click)="activeTab = 'steps'"
-                [class]="activeTab === 'steps' ? 'border-b-2 border-indigo-500 text-indigo-600 pb-2.5' : 'text-gray-500 hover:text-gray-700 pb-2.5'">
-          <i class="fas fa-list-ol mr-1.5"></i> 3. Pasos de Prueba
+                [class]="activeTab === 'steps' ? 'border-b-2 border-emerald-400 text-emerald-400 pb-2.5 font-bold' : 'text-slate-400 hover:text-slate-200 pb-2.5'">
+          <i class="ri-list-check-2 mr-1"></i> 3. Pasos de Prueba
         </button>
       </div>
 
-      <!-- Body -->
-      <div class="p-6 overflow-y-auto flex-1 text-xs custom-scrollbar">
-        <form id="testCaseFormId" [formGroup]="testCaseForm" (ngSubmit)="onSubmit()" class="space-y-6">
-          <input type="hidden" formControlName="projectId">
+      <!-- Form Body -->
+      <div class="flex-1 overflow-y-auto custom-scrollbar px-6 py-5 bg-[#0E1A2B]">
+        <form id="testCaseFormId" [formGroup]="testCaseForm" (ngSubmit)="onSubmit()" class="space-y-4">
 
           <!-- TAB 1: GENERAL -->
-          <div *ngIf="activeTab === 'general'" class="space-y-5 animate-in fade-in duration-200">
+          <div *ngIf="activeTab === 'general'" class="space-y-4">
+            <!-- Project Selection -->
+            <div>
+              <label for="modalProjectId" class="block text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-1.5">
+                Proyecto <span class="text-red-400">*</span>
+              </label>
+              <div class="relative">
+                <select id="modalProjectId" formControlName="projectId"
+                  class="w-full bg-slate-900/60 border border-emerald-500/20 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-400 transition-all appearance-none cursor-pointer pr-8 font-medium">
+                  <option value="" class="bg-slate-900">Selecciona un proyecto...</option>
+                  <option *ngFor="let p of projects()" [value]="p.id" class="bg-slate-900">{{ p.name }}</option>
+                </select>
+                <i class="ri-arrow-down-s-line absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-base"></i>
+              </div>
+            </div>
+
             <!-- Title -->
             <div>
-              <label for="modalTitle" class="block font-medium text-gray-600 mb-1.5">Título <span class="text-rose-500">*</span></label>
+              <label for="modalTitle" class="block text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-1.5">
+                Título <span class="text-red-400">*</span>
+              </label>
               <input id="modalTitle" type="text" formControlName="title" placeholder="Ej: Verificar login con credenciales válidas"
-                class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all text-xs"
-                [class.border-rose-500]="testCaseForm.get('title')?.touched && testCaseForm.get('title')?.invalid">
-              <div *ngIf="testCaseForm.get('title')?.touched && testCaseForm.get('title')?.invalid"
-                class="text-rose-500 text-[10px] mt-1 font-medium">
-                El título es requerido (mínimo 3 caracteres).
-              </div>
+                class="w-full bg-slate-900/60 border border-emerald-500/20 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-400 transition-all font-medium"
+                [class.border-red-500]="testCaseForm.get('title')?.touched && testCaseForm.get('title')?.invalid">
             </div>
 
             <!-- Description -->
             <div>
-              <label for="modalDescription" class="block font-medium text-gray-600 mb-1.5">Descripción</label>
+              <label for="modalDescription" class="block text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-1.5">Descripción</label>
               <textarea id="modalDescription" formControlName="description" rows="2" placeholder="Describe el objetivo del caso de prueba..."
-                class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all resize-none text-xs custom-scrollbar"></textarea>
+                class="w-full bg-slate-900/60 border border-emerald-500/20 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-400 transition-all resize-none font-medium"></textarea>
             </div>
 
-            <!-- Basic Properties -->
+            <!-- Basic Properties Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label for="modalSuiteId" class="block font-medium text-gray-600 mb-1.5">Escenario (test suite) <span class="text-rose-500">*</span></label>
-                <select id="modalSuiteId" formControlName="testSuiteId"
-                  class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all text-xs appearance-none"
-                  [class.border-rose-500]="testCaseForm.get('testSuiteId')?.touched && testCaseForm.get('testSuiteId')?.invalid">
-                  <option value="">Selecciona un escenario...</option>
-                  <option *ngFor="let suite of testSuites()" [value]="suite.id">{{ suite.name }}</option>
-                </select>
+                <label for="modalSuiteId" class="block text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-1.5">
+                  Escenario (Test Suite) <span class="text-red-400">*</span>
+                </label>
+                <div class="relative">
+                  <select id="modalSuiteId" formControlName="testSuiteId"
+                    class="w-full bg-slate-900/60 border border-emerald-500/20 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-400 transition-all appearance-none cursor-pointer pr-7">
+                    <option value="" class="bg-slate-900">Selecciona un escenario...</option>
+                    <option *ngFor="let suite of testSuites()" [value]="suite.id" class="bg-slate-900">{{ suite.name }}</option>
+                  </select>
+                  <i class="ri-arrow-down-s-line absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-sm"></i>
+                </div>
               </div>
               <div>
-                <label for="modalPriorityId" class="block font-medium text-gray-600 mb-1.5">Prioridad <span class="text-rose-500">*</span></label>
-                <select id="modalPriorityId" formControlName="priorityId"
-                  class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all text-xs appearance-none">
-                  <option *ngFor="let p of priorities()" [value]="p.id">{{ p.name }}</option>
-                  <ng-container *ngIf="priorities().length === 0">
-                    <option value="1">Baja</option>
-                    <option value="2">Media</option>
-                    <option value="3">Alta</option>
-                    <option value="4">Crítica</option>
-                  </ng-container>
-                </select>
+                <label for="modalPriorityId" class="block text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-1.5">
+                  Prioridad <span class="text-red-400">*</span>
+                </label>
+                <div class="relative">
+                  <select id="modalPriorityId" formControlName="priorityId"
+                    class="w-full bg-slate-900/60 border border-emerald-500/20 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-400 transition-all appearance-none cursor-pointer pr-7">
+                    <option *ngFor="let p of priorities()" [value]="p.id" class="bg-slate-900">{{ p.name }}</option>
+                    <ng-container *ngIf="priorities().length === 0">
+                      <option value="1" class="bg-slate-900">Baja</option>
+                      <option value="2" class="bg-slate-900">Media</option>
+                      <option value="3" class="bg-slate-900">Alta</option>
+                      <option value="4" class="bg-slate-900">Crítica</option>
+                    </ng-container>
+                  </select>
+                  <i class="ri-arrow-down-s-line absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-sm"></i>
+                </div>
               </div>
               <div>
-                <label for="modalTestTypeId" class="block font-medium text-gray-600 mb-1.5">Tipo de prueba <span class="text-rose-500">*</span></label>
-                <select id="modalTestTypeId" formControlName="testTypeId"
-                  class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all text-xs appearance-none">
-                  <option *ngFor="let t of testTypes()" [value]="t.id">{{ t.name }}</option>
-                  <ng-container *ngIf="testTypes().length === 0">
-                    <option value="1">Funcional Manual</option>
-                    <option value="2">Funcional Automatizada</option>
-                    <option value="3">No Funcional</option>
-                    <option value="4">Regresión</option>
-                    <option value="5">Smoke Test</option>
-                  </ng-container>
-                </select>
+                <label for="modalTestTypeId" class="block text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-1.5">
+                  Tipo de prueba <span class="text-red-400">*</span>
+                </label>
+                <div class="relative">
+                  <select id="modalTestTypeId" formControlName="testTypeId"
+                    class="w-full bg-slate-900/60 border border-emerald-500/20 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-400 transition-all appearance-none cursor-pointer pr-7">
+                    <option *ngFor="let t of testTypes()" [value]="t.id" class="bg-slate-900">{{ t.name }}</option>
+                    <ng-container *ngIf="testTypes().length === 0">
+                      <option value="1" class="bg-slate-900">Funcional Manual</option>
+                      <option value="2" class="bg-slate-900">Funcional Automatizada</option>
+                      <option value="3" class="bg-slate-900">No Funcional</option>
+                      <option value="4" class="bg-slate-900">Regresión</option>
+                      <option value="5" class="bg-slate-900">Smoke Test</option>
+                    </ng-container>
+                  </select>
+                  <i class="ri-arrow-down-s-line absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-sm"></i>
+                </div>
               </div>
               <div>
-                <label for="modalEstimatedTime" class="block font-medium text-gray-600 mb-1.5">Tiempo estimado (hrs) <span class="text-rose-500">*</span></label>
+                <label for="modalEstimatedTime" class="block text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-1.5">
+                  Tiempo estimado (hrs) <span class="text-red-400">*</span>
+                </label>
                 <input id="modalEstimatedTime" type="number" formControlName="estimatedTimeHours" min="0" placeholder="Ej: 2"
-                  class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all text-xs">
+                  class="w-full bg-slate-900/60 border border-emerald-500/20 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-400 transition-all font-medium">
               </div>
             </div>
           </div>
 
           <!-- TAB 2: EXECUTION & CRITERIA -->
-          <div *ngIf="activeTab === 'execution'" class="space-y-5 animate-in fade-in duration-200">
+          <div *ngIf="activeTab === 'execution'" class="space-y-4">
             <!-- Expected Result -->
             <div>
-              <label for="modalExpectedResult" class="block font-medium text-gray-600 mb-1.5">Resultado esperado <span class="text-rose-500">*</span></label>
+              <label for="modalExpectedResult" class="block text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-1.5">
+                Resultado esperado <span class="text-red-400">*</span>
+              </label>
               <textarea id="modalExpectedResult" formControlName="expectedResult" rows="2" placeholder="Describe el resultado esperado..."
-                class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all resize-none text-xs custom-scrollbar"
-                [class.border-rose-500]="testCaseForm.get('expectedResult')?.touched && testCaseForm.get('expectedResult')?.invalid"></textarea>
+                class="w-full bg-slate-900/60 border border-emerald-500/20 rounded-xl px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-400 transition-all resize-none font-medium"
+                [class.border-red-500]="testCaseForm.get('expectedResult')?.touched && testCaseForm.get('expectedResult')?.invalid"></textarea>
             </div>
 
             <!-- Pre & Post conditions -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label for="modalPreconditions" class="block font-medium text-gray-600 mb-1.5">Precondiciones</label>
+                <label for="modalPreconditions" class="block text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-1.5">Precondiciones</label>
                 <textarea id="modalPreconditions" formControlName="preconditions" rows="2" placeholder="Condiciones previas necesarias..."
-                  class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all resize-none text-xs custom-scrollbar"></textarea>
+                  class="w-full bg-slate-900/60 border border-emerald-500/20 rounded-xl px-3 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-400 transition-all resize-none font-medium"></textarea>
               </div>
               <div>
-                <label for="modalPostconditions" class="block font-medium text-gray-600 mb-1.5">Postcondiciones (ISTQB)</label>
+                <label for="modalPostconditions" class="block text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-1.5">Postcondiciones (ISTQB)</label>
                 <textarea id="modalPostconditions" formControlName="postconditions" rows="2" placeholder="Estado final esperado del sistema..."
-                  class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all resize-none text-xs custom-scrollbar"></textarea>
+                  class="w-full bg-slate-900/60 border border-emerald-500/20 rounded-xl px-3 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-400 transition-all resize-none font-medium"></textarea>
               </div>
             </div>
 
             <!-- RBT Risk Assessment (ISTQB) -->
-            <div class="bg-indigo-50/50 p-4 rounded-xl border border-indigo-100">
-              <h4 class="font-bold text-indigo-800 mb-3 text-[11px] uppercase tracking-wider">Evaluación de Riesgos (RBT)</h4>
+            <div class="bg-emerald-500/10 p-4 rounded-2xl border border-emerald-500/20">
+              <h4 class="font-bold text-emerald-300 mb-3 text-xs uppercase tracking-wider flex items-center gap-1.5">
+                <i class="ri-shield-check-line"></i> Evaluación de Riesgos (RBT)
+              </h4>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label for="modalImpact" class="block font-medium text-indigo-700 mb-1.5">Impacto del Fallo <span class="text-rose-500">*</span></label>
+                  <label for="modalImpact" class="block text-[10px] font-semibold text-emerald-400 uppercase mb-1">Impacto del Fallo <span class="text-red-400">*</span></label>
                   <select id="modalImpact" formControlName="impactLevel"
-                    class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-gray-800 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/50">
+                    class="w-full bg-slate-900/80 border border-emerald-500/20 rounded-xl px-3 py-2 text-slate-100 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500/50">
                     <option value="1">1 - Insignificante</option>
                     <option value="2">2 - Menor</option>
                     <option value="3">3 - Moderado</option>
@@ -333,9 +363,9 @@
                   </select>
                 </div>
                 <div>
-                  <label for="modalLikelihood" class="block font-medium text-indigo-700 mb-1.5">Probabilidad de Ocurrencia <span class="text-rose-500">*</span></label>
+                  <label for="modalLikelihood" class="block text-[10px] font-semibold text-emerald-400 uppercase mb-1">Probabilidad de Ocurrencia <span class="text-red-400">*</span></label>
                   <select id="modalLikelihood" formControlName="likelihoodLevel"
-                    class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-gray-800 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/50">
+                    class="w-full bg-slate-900/80 border border-emerald-500/20 rounded-xl px-3 py-2 text-slate-100 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500/50">
                     <option value="1">1 - Muy Rara</option>
                     <option value="2">2 - Poco Probable</option>
                     <option value="3">3 - Probable</option>
@@ -348,30 +378,30 @@
 
             <!-- Requirements (M:N) -->
             <div>
-              <label for="modalRequirementIds" class="block font-medium text-gray-600 mb-1.5">Requisitos Cubiertos</label>
+              <label for="modalRequirementIds" class="block text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-1.5">Requisitos Cubiertos</label>
               <select id="modalRequirementIds" formControlName="requirementIds" multiple
-                class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all h-24 custom-scrollbar text-xs">
-                <option *ngFor="let req of requirements()" [value]="req.id" class="p-1.5">[{{ req.code }}] {{ req.title }}</option>
+                class="w-full bg-slate-900/60 border border-emerald-500/20 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all h-20 custom-scrollbar text-xs">
+                <option *ngFor="let req of requirements()" [value]="req.id" class="p-1 bg-slate-900">[{{ req.code }}] {{ req.title }}</option>
               </select>
-              <p class="text-[10px] text-gray-500 mt-1"><i class="fas fa-info-circle mr-1"></i> Ctrl+Click para selecciones múltiples.</p>
+              <p class="text-[10px] text-slate-500 mt-1"><i class="ri-information-line mr-1"></i> Ctrl+Click para selecciones múltiples.</p>
             </div>
           </div>
 
           <!-- TAB 3: STEPS -->
-          <div *ngIf="activeTab === 'steps'" class="space-y-5 animate-in fade-in duration-200">
+          <div *ngIf="activeTab === 'steps'" class="space-y-4">
             <!-- BDD Toggle -->
-            <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
+            <div class="bg-slate-900/60 p-4 rounded-2xl border border-emerald-500/15">
               <label class="flex items-center gap-3 cursor-pointer group">
                 <div class="relative">
                   <input type="checkbox" formControlName="isBdd" class="sr-only">
-                  <div class="block bg-gray-200 w-10 h-6 rounded-full transition-colors group-hover:bg-gray-300"
-                    [class.bg-indigo-500]="testCaseForm.get('isBdd')?.value"></div>
+                  <div class="block bg-slate-800 w-10 h-6 rounded-full transition-colors group-hover:bg-slate-700"
+                    [class.bg-emerald-500]="testCaseForm.get('isBdd')?.value"></div>
                   <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform"
                     [class.translate-x-4]="testCaseForm.get('isBdd')?.value"></div>
                 </div>
                 <div>
-                  <span class="font-bold text-gray-800 block">Formato BDD (Gherkin)</span>
-                  <span class="text-[10px] text-gray-500">Usar sintaxis Dado/Cuando/Entonces</span>
+                  <span class="font-bold text-slate-100 block">Formato BDD (Gherkin)</span>
+                  <span class="text-[10px] text-slate-400">Usar sintaxis Dado/Cuando/Entonces</span>
                 </div>
               </label>
             </div>
@@ -379,19 +409,18 @@
             <!-- BDD Steps Section -->
             <div *ngIf="testCaseForm.get('isBdd')?.value">
               <div class="flex justify-between items-center mb-3">
-                <h3 class="font-bold text-gray-800">Escenario Gherkin</h3>
-                <button type="button" (click)="addBddStep()"
-                  class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-lg font-medium transition-all flex items-center gap-1.5">
-                  <i class="fas fa-plus text-[10px]"></i> Agregar Paso
+                <h3 class="font-bold text-slate-100 text-xs uppercase tracking-wider">Escenario Gherkin</h3>
+                <button type="button" (click)="addBddStep()" class="btn-primary text-xs py-1 px-3 flex items-center gap-1">
+                  <i class="ri-add-line"></i> Agregar Paso
                 </button>
               </div>
               
               <div formArrayName="bddSteps" class="space-y-2">
                 <div *ngFor="let step of bddSteps.controls; let i = index" [formGroupName]="i"
-                  class="flex gap-2 items-start bg-gray-50 rounded-lg p-2 border border-gray-100">
+                  class="flex gap-2 items-start bg-slate-900/60 rounded-xl p-2.5 border border-emerald-500/15">
                   <div class="w-1/4">
                     <label [for]="'keyword-' + i" class="sr-only">Palabra clave</label>
-                    <select [id]="'keyword-' + i" formControlName="keyword" class="w-full bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-indigo-700 font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-xs appearance-none">
+                    <select [id]="'keyword-' + i" formControlName="keyword" class="w-full bg-slate-900 border border-emerald-500/20 rounded-lg px-2 py-1.5 text-emerald-300 font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/50 text-xs">
                       <option value="Dado">Dado</option>
                       <option value="Cuando">Cuando</option>
                       <option value="Entonces">Entonces</option>
@@ -402,9 +431,9 @@
                   <div class="w-3/4 flex gap-2">
                     <label [for]="'text-' + i" class="sr-only">Texto del paso</label>
                     <input [id]="'text-' + i" type="text" formControlName="text" placeholder="Ej: el usuario está autenticado"
-                      class="w-full bg-white border border-gray-200 rounded-lg px-2 py-1.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-xs">
-                    <button type="button" (click)="removeBddStep(i)" *ngIf="bddSteps.length > 1" class="text-rose-400 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-50 transition-colors">
-                      <i class="fas fa-trash-can"></i>
+                      class="w-full bg-slate-900 border border-emerald-500/20 rounded-lg px-2.5 py-1.5 text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 text-xs">
+                    <button type="button" (click)="removeBddStep(i)" *ngIf="bddSteps.length > 1" class="btn-icon btn-icon-danger">
+                      <i class="ri-delete-bin-line"></i>
                     </button>
                   </div>
                 </div>
@@ -414,29 +443,28 @@
             <!-- Traditional Steps Section -->
             <div *ngIf="!testCaseForm.get('isBdd')?.value">
               <div class="flex justify-between items-center mb-3">
-                <h3 class="font-bold text-gray-800">Pasos de ejecución manual</h3>
-                <button type="button" (click)="addStep()"
-                  class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-lg font-medium transition-all flex items-center gap-1.5">
-                  <i class="fas fa-plus text-[10px]"></i> Agregar Paso
+                <h3 class="font-bold text-slate-100 text-xs uppercase tracking-wider">Pasos de ejecución manual</h3>
+                <button type="button" (click)="addStep()" class="btn-primary text-xs py-1 px-3 flex items-center gap-1">
+                  <i class="ri-add-line"></i> Agregar Paso
                 </button>
               </div>
               
               <div formArrayName="steps" class="space-y-2">
                 <div *ngFor="let step of steps.controls; let i = index" [formGroupName]="i"
-                  class="bg-gray-50 rounded-lg p-3 border border-gray-100">
+                  class="bg-slate-900/60 rounded-xl p-3 border border-emerald-500/15">
                   <div class="flex justify-between items-center mb-2">
-                    <span class="font-bold text-gray-500">Paso {{ i + 1 }}</span>
-                    <button type="button" (click)="removeStep(i)" *ngIf="steps.length > 1" class="text-rose-400 hover:text-rose-600 transition-colors">
-                      <i class="fas fa-times"></i>
+                    <span class="font-bold text-emerald-400 text-xs">Paso {{ i + 1 }}</span>
+                    <button type="button" (click)="removeStep(i)" *ngIf="steps.length > 1" class="btn-icon btn-icon-danger">
+                      <i class="ri-close-line"></i>
                     </button>
                   </div>
                   <div class="space-y-2">
                     <label [for]="'action-' + i" class="sr-only">Acción</label>
                     <input [id]="'action-' + i" type="text" formControlName="action" placeholder="Acción (Ej: Hacer clic en 'Login')"
-                      class="w-full bg-white border border-gray-200 rounded-lg px-3 py-1.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-xs">
+                      class="w-full bg-slate-900 border border-emerald-500/20 rounded-lg px-3 py-1.5 text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 text-xs">
                     <label [for]="'expectedResult-' + i" class="sr-only">Resultado esperado</label>
                     <input [id]="'expectedResult-' + i" type="text" formControlName="expectedResult" placeholder="Resultado esperado para este paso..."
-                      class="w-full bg-white border border-gray-200 rounded-lg px-3 py-1.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 text-xs">
+                      class="w-full bg-slate-900 border border-emerald-500/20 rounded-lg px-3 py-1.5 text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 text-xs">
                   </div>
                 </div>
               </div>
@@ -446,14 +474,13 @@
       </div>
 
       <!-- Footer Actions -->
-      <div class="px-6 py-4 border-t border-gray-100 bg-gray-50 shrink-0 flex justify-end gap-3">
-        <button type="button" (click)="closeModal()" class="px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg text-xs font-semibold transition-colors">
+      <div class="px-6 py-4 border-t border-emerald-500/15 bg-slate-900/60 shrink-0 flex justify-end gap-3">
+        <button type="button" (click)="closeModal()" class="btn-secondary">
           Cancelar
         </button>
-        <button type="submit" form="testCaseFormId" [disabled]="testCaseForm.invalid || isSubmitting()" 
-          class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold shadow-sm shadow-indigo-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
-          <span *ngIf="isSubmitting()" class="w-3.5 h-3.5 border-2 border-white/20 border-t-white rounded-full animate-spin"></span>
-          <i *ngIf="!isSubmitting()" class="fas fa-check"></i>
+        <button type="submit" form="testCaseFormId" [disabled]="testCaseForm.invalid || isSubmitting()" class="btn-primary flex items-center gap-2">
+          <span *ngIf="isSubmitting()" class="w-4 h-4 border-2 border-slate-950/20 border-t-slate-950 rounded-full animate-spin"></span>
+          <i *ngIf="!isSubmitting()" class="ri-save-line text-sm"></i>
           {{ isSubmitting() ? (editingTestCaseId() ? 'Actualizando...' : 'Guardando...') : (editingTestCaseId() ? 'Guardar Cambios' : 'Crear Caso de Prueba') }}
         </button>
       </div>
@@ -463,55 +490,55 @@
 
   <!-- Steps Viewer Modal - Responsive -->
   <div *ngIf="showStepsModal()"
-    class="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4 bg-black/40 backdrop-blur-sm animate-in zoom-in-95 duration-200">
-    <div class="bg-white border border-gray-200 rounded-none sm:rounded-[2rem] w-full max-w-3xl h-full sm:h-auto overflow-hidden shadow-2xl flex flex-col">
+    class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/80 backdrop-blur-md animate-in zoom-in-95 duration-200">
+    <div class="bg-[#0E1A2B] border border-emerald-500/20 rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden shadow-2xl shadow-emerald-950/50 flex flex-col text-slate-100">
       <div class="p-6 sm:p-8 overflow-y-auto custom-scrollbar flex-1">
-        <div class="flex justify-between items-start mb-8 pb-4 border-b border-gray-100 shrink-0">
+        <div class="flex justify-between items-start mb-6 pb-4 border-b border-emerald-500/15 shrink-0">
           <div>
-            <h2 class="text-xl sm:text-2xl font-black text-gray-900 tracking-tight">Pasos de ejecución</h2>
-            <p class="text-[10px] font-black tracking-widest text-gray-500 mt-2 line-clamp-1">{{ selectedTestCaseTitle() }}</p>
+            <h2 class="text-lg sm:text-xl font-bold text-slate-100 tracking-tight flex items-center gap-2">
+              <i class="ri-list-check-2 text-emerald-400"></i> Pasos de ejecución
+            </h2>
+            <p class="text-xs text-slate-400 mt-1 line-clamp-1">{{ selectedTestCaseTitle() }}</p>
           </div>
-          <button (click)="closeStepsModal()" class="w-10 h-10 rounded-xl bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-all flex items-center justify-center shrink-0">
-            <i class="fas fa-times text-xl"></i>
+          <button (click)="closeStepsModal()" class="w-8 h-8 rounded-lg bg-slate-800/80 border border-slate-700 text-slate-400 hover:text-slate-100 hover:bg-slate-700 transition-all flex items-center justify-center text-sm">
+            <i class="ri-close-line"></i>
           </button>
         </div>
 
         <!-- Steps List -->
-        <div class="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+        <div class="space-y-3 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
           <div *ngFor="let step of selectedTestCaseSteps(); let i = index"
-            class="bg-gray-50 rounded-2xl p-6 border border-gray-100 hover:border-indigo-300 transition-all">
+            class="bg-slate-900/60 rounded-2xl p-5 border border-emerald-500/15 hover:border-emerald-400/40 transition-all">
             <div class="flex items-start gap-4">
               <!-- Step Number Badge -->
-              <div
-                class="flex-shrink-0 w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shadow-inner">
-                <span class="text-indigo-400 font-black text-sm">{{ step.stepOrder || i + 1 }}</span>
+              <div class="flex-shrink-0 w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold text-sm">
+                <span>{{ step.stepOrder || i + 1 }}</span>
               </div>
 
               <!-- Step Content -->
-              <div class="flex-1 space-y-4 pt-1">
+              <div class="flex-1 space-y-3 pt-0.5">
                 <div>
-                  <span class="block text-[10px] font-black text-gray-500 tracking-widest mb-1.5">Acción</span>
-                  <p class="text-gray-800 font-semibold text-sm leading-relaxed">{{ step.action }}</p>
+                  <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Acción</span>
+                  <p class="text-slate-100 font-medium text-sm leading-relaxed">{{ step.action }}</p>
                 </div>
                 <div>
-                  <span class="block text-[10px] font-black text-indigo-600 tracking-widest mb-1.5">Resultado esperado</span>
-                  <p class="text-gray-600 text-sm leading-relaxed font-medium">{{ step.expectedResult }}</p>
+                  <span class="block text-[10px] font-bold text-emerald-400 uppercase tracking-wider mb-1">Resultado esperado</span>
+                  <p class="text-slate-300 text-xs leading-relaxed font-medium">{{ step.expectedResult }}</p>
                 </div>
               </div>
             </div>
           </div>
 
           <!-- Empty State -->
-          <div *ngIf="selectedTestCaseSteps().length === 0" class="text-center py-12 bg-gray-50 rounded-2xl border border-gray-200 border-dashed">
-            <i class="fas fa-clipboard-list text-4xl mb-3 text-gray-400"></i>
-            <p class="text-sm font-semibold text-gray-500">No hay pasos definidos para este caso de prueba.</p>
+          <div *ngIf="selectedTestCaseSteps().length === 0" class="text-center py-12 bg-slate-900/40 rounded-2xl border border-emerald-500/15 border-dashed">
+            <i class="ri-list-check-2 text-3xl mb-2 text-slate-500"></i>
+            <p class="text-xs text-slate-400">No hay pasos definidos para este caso de prueba.</p>
           </div>
         </div>
 
         <!-- Close Button -->
-        <div class="mt-8 pt-4">
-          <button (click)="closeStepsModal()" class="btn-secondary w-full">
-            <i class="fas fa-xmark"></i>
+        <div class="mt-6 pt-4 border-t border-emerald-500/15 flex justify-end">
+          <button (click)="closeStepsModal()" class="btn-secondary">
             Cerrar visualizador
           </button>
         </div>
@@ -520,100 +547,63 @@
   </div>
 
   <!-- Modal de Importación Masiva desde CSV -->
-  <div *ngIf="showImportModal()" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200 overflow-y-auto">
-    <div class="bg-white rounded-2xl w-full max-w-3xl max-h-[90vh] shadow-2xl flex flex-col overflow-hidden border border-slate-100 animate-in zoom-in-95 duration-200 my-auto">
-      <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+  <div *ngIf="showImportModal()" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200 overflow-y-auto">
+    <div class="bg-[#0E1A2B] rounded-2xl w-full max-w-3xl max-h-[90vh] shadow-2xl shadow-emerald-950/50 flex flex-col overflow-hidden border border-emerald-500/20 animate-in zoom-in-95 duration-200 text-slate-100">
+      <div class="p-6 border-b border-emerald-500/15 flex justify-between items-center bg-slate-900/60">
         <div>
-          <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
-            <i class="fas fa-file-import text-indigo-600"></i>
-            Importación Masiva de Casos de Prueba
+          <h2 class="text-base font-bold text-slate-100 flex items-center gap-2">
+            <i class="ri-file-upload-line text-emerald-400"></i> Importar Casos de Prueba (CSV)
           </h2>
-          <p class="text-gray-500 text-xs font-medium mt-1">Sube un archivo CSV con tus casos de prueba y pasos.</p>
+          <p class="text-xs text-slate-400 mt-0.5">Carga masiva desde archivo separado por comas.</p>
         </div>
-        <button (click)="closeImportModal()" class="text-gray-400 hover:text-gray-600 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100">
-          <i class="fas fa-times text-lg"></i>
+        <button (click)="showImportModal.set(false)" class="w-8 h-8 rounded-lg bg-slate-800/80 border border-slate-700 text-slate-400 hover:text-slate-100 hover:bg-slate-700 transition-all flex items-center justify-center text-sm">
+          <i class="ri-close-line"></i>
         </button>
       </div>
 
-      <div class="p-6 flex-1 overflow-y-auto space-y-6">
-        <!-- Banner de ayuda y descarga de plantilla -->
-        <div class="bg-indigo-50/60 border border-indigo-100 rounded-xl p-4 flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <i class="fas fa-info-circle text-indigo-600 text-xl"></i>
-            <div class="text-xs text-indigo-950">
-              <p class="font-bold">Formato compatible con TestRail y Excel (separado por comas o punto y coma)</p>
-              <p class="text-indigo-700 mt-0.5">Columnas: Titulo, Descripcion, Precondiciones, Prioridad, Severidad, Tipo, Pasos...</p>
-            </div>
-          </div>
-          <button (click)="downloadTemplateCsv()" class="btn-secondary text-xs px-3 py-1.5 whitespace-nowrap bg-white hover:bg-indigo-50 text-indigo-700 border-indigo-200">
-            <i class="fas fa-download text-xs mr-1"></i> Plantilla CSV
-          </button>
-        </div>
-
-        <!-- Dropzone de archivo CSV -->
-        <div class="border-2 border-dashed border-slate-200 hover:border-indigo-400 rounded-2xl p-6 text-center transition-colors bg-slate-50/50">
+      <div class="p-6 space-y-4 overflow-y-auto custom-scrollbar flex-1">
+        <div class="p-5 border-2 border-dashed border-emerald-500/30 rounded-2xl bg-slate-900/40 text-center">
+          <input type="file" (change)="onCsvFileSelected($event)" accept=".csv" class="hidden" id="csvFileInput">
           <label for="csvFileInput" class="cursor-pointer flex flex-col items-center">
-            <div class="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-xl mb-3 shadow-xs">
-              <i class="fas fa-cloud-arrow-up"></i>
-            </div>
-            <span class="text-sm font-bold text-slate-800">Haz clic para seleccionar tu archivo CSV</span>
-            <span class="text-xs text-slate-400 mt-1">Archivos soportados: .csv</span>
-            <input id="csvFileInput" type="file" accept=".csv" (change)="onCsvFileSelected($event)" class="hidden">
+            <i class="ri-file-text-line text-4xl text-emerald-400 mb-2"></i>
+            <span class="text-sm font-bold text-slate-100">Haz clic para seleccionar o arrastra un archivo CSV</span>
+            <span class="text-xs text-slate-500 mt-1">Formato: Título, Descripción, Escenario, Prioridad, Tipo, Resultado Esperado</span>
           </label>
         </div>
 
-        <!-- Errores de importación -->
-        <div *ngIf="importErrors().length > 0" class="bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-xl p-4">
-          <p class="font-bold mb-1">Se encontraron problemas:</p>
-          <ul class="list-disc pl-4 space-y-0.5">
-            <li *ngFor="let err of importErrors()">{{ err }}</li>
-          </ul>
-        </div>
-
-        <!-- Previsualización de filas a importar -->
-        <div *ngIf="importedRows().length > 0" class="space-y-3">
-          <div class="flex items-center justify-between">
-            <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider">
-              Casos listos para importar ({{ importedRows().length }})
-            </h3>
-            <span class="text-xs text-emerald-600 font-bold flex items-center gap-1">
-              <i class="fas fa-check-circle"></i> Archivo validado
-            </span>
+        <div *ngIf="importedRows().length > 0" class="space-y-2">
+          <div class="flex justify-between items-center">
+            <span class="text-xs font-bold text-emerald-400">{{ importedRows().length }} casos detectados para importar</span>
           </div>
-
-          <div class="max-h-60 overflow-y-auto border border-slate-200 rounded-xl">
-            <table class="w-full text-xs text-left">
-              <thead class="bg-slate-100 text-slate-600 uppercase text-[10px] font-bold sticky top-0">
-                <tr>
-                  <th class="p-3">#</th>
-                  <th class="p-3">Título</th>
-                  <th class="p-3">Prioridad</th>
-                  <th class="p-3">Tipo</th>
-                  <th class="p-3 text-center">Pasos</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-slate-100">
-                <tr *ngFor="let row of importedRows(); let i = index" class="hover:bg-slate-50">
-                  <td class="p-3 font-mono text-slate-400">{{ i + 1 }}</td>
-                  <td class="p-3 font-semibold text-slate-800">{{ row.title }}</td>
-                  <td class="p-3"><span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-[10px] font-bold">{{ row.priorityName }}</span></td>
-                  <td class="p-3"><span class="px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 text-[10px] font-bold">{{ row.typeName }}</span></td>
-                  <td class="p-3 text-center font-bold text-indigo-600">{{ row.steps.length }}</td>
-                </tr>
-              </tbody>
-            </table>
+          <div class="max-h-48 overflow-y-auto custom-scrollbar bg-slate-900/60 rounded-xl border border-emerald-500/15 p-3 text-xs divide-y divide-emerald-500/10">
+            <div *ngFor="let row of importedRows()" class="py-1.5 flex justify-between">
+              <span class="font-medium text-slate-200">{{ row.title }}</span>
+              <span class="text-slate-500 text-[10px]">{{ row.suiteName || 'General' }}</span>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Footer Modal -->
-      <div class="p-6 border-t border-gray-100 bg-gray-50 flex justify-end gap-3 rounded-b-2xl">
-        <button type="button" (click)="closeImportModal()" class="btn-secondary" [disabled]="isImporting()">Cancelar</button>
-        <button type="button" (click)="confirmImport()" class="btn-primary min-w-[140px]" [disabled]="importedRows().length === 0 || isImporting()">
-          <i class="fas fa-spinner fa-spin mr-1" *ngIf="isImporting()"></i>
-          <span>{{ isImporting() ? 'Importando...' : 'Confirmar Importación' }}</span>
+      <div class="p-6 border-t border-emerald-500/15 bg-slate-900/60 flex justify-end gap-3">
+        <button (click)="showImportModal.set(false)" class="btn-secondary">
+          Cancelar
+        </button>
+        <button (click)="confirmImport()" [disabled]="importedRows().length === 0 || isImporting()" class="btn-primary flex items-center gap-2">
+          <span *ngIf="isImporting()" class="w-4 h-4 border-2 border-slate-950/20 border-t-slate-950 rounded-full animate-spin"></span>
+          <i *ngIf="!isImporting()" class="ri-upload-cloud-line"></i>
+          {{ isImporting() ? 'Importando...' : 'Confirmar Importación' }}
         </button>
       </div>
     </div>
   </div>
+
+  <!-- Dialogo de Confirmación de Eliminación -->
+  <app-confirm-dialog
+    #confirmDelete
+    title="Eliminar Caso de Prueba"
+    message="¿Estás seguro de que deseas eliminar este caso de prueba? Esta acción no se puede deshacer."
+    confirmLabel="Eliminar"
+    type="danger"
+    (confirmed)="onDeleteConfirmed()">
+  </app-confirm-dialog>
 </div>

@@ -34,7 +34,7 @@ export class BadgeComponent {
       info:    'bg-sky-100 text-sky-700 border border-sky-200',
       violet:  'bg-violet-100 text-violet-700 border border-violet-200',
       gray:    'bg-slate-100 text-slate-600 border border-slate-200',
-      primary: 'bg-indigo-100 text-indigo-700 border border-indigo-200',
+      primary: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30',
     };
     return [sizeMap[this.size], variantMap[this.variant]];
   }

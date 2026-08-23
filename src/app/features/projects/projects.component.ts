@@ -15,13 +15,12 @@ import { User } from '../../core/models/user.model';
 import { Project } from '../../core/models/project.model';
 import { SystemUnderTest } from '../../core/models/system-under-test.model';
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { EmptyStateComponent } from '../shared/empty-state/empty-state.component';
 import { AvatarGroupComponent } from '../shared/avatar-group/avatar-group.component';
 
 @Component({
   selector: 'app-projects',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, EmptyStateComponent, AvatarGroupComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, AvatarGroupComponent],
   templateUrl: './projects.component.html',
   styleUrls: ['./projects.component.scss']
 })
@@ -473,7 +472,7 @@ export class ProjectsComponent implements OnInit {
       icon: 'error',
       title: 'Error de operación',
       text: message,
-      confirmButtonColor: '#150fbd'
+      confirmButtonColor: '#10B981'
     });
   }
 
@@ -510,7 +509,7 @@ export class ProjectsComponent implements OnInit {
               icon: 'error',
               title: 'Error de eliminación',
               text: 'No se pudo eliminar el proyecto. Verifique sus permisos e intente nuevamente.',
-              confirmButtonColor: '#150fbd'
+              confirmButtonColor: '#10B981'
             });
           }
         });
@@ -565,7 +564,7 @@ export class ProjectsComponent implements OnInit {
           icon: 'error',
           title: 'Error de registro',
           text: 'No se pudo registrar la devolución.',
-          confirmButtonColor: '#150fbd'
+          confirmButtonColor: '#10B981'
         });
       }
     });

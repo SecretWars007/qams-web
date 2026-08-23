@@ -2,7 +2,7 @@
 // Servicio para gestión de roles y permisos del sistema.
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
+import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Role, CreateRole } from '../models/role.model';
 
@@ -78,7 +78,6 @@ export class RolesService {
 
     /**
      * Obtiene todos los permisos disponibles del sistema.
-     * En modo mock, retorna una lista estática.
      */
     getAllPermissions(): Observable<any[]> {
         console.log(this.LOG_TAG, 'Obteniendo permisos del sistema');

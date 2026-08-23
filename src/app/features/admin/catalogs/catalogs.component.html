@@ -1,12 +1,12 @@
-<div class="catalogs-container animate-in fade-in slide-in-from-right-6 duration-700">
+<div class="catalogs-container animate-in fade-in slide-in-from-right-6 duration-700 text-slate-100">
   <!-- Sidebar de Selección de Catálogos por Módulo -->
-  <aside class="catalogs-sidebar glass-card">
+  <aside class="catalogs-sidebar glass-card bg-[#111E30] border border-emerald-500/15">
     <div class="sidebar-header space-y-3">
-      <div class="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center border border-indigo-100 shadow-sm">
-        <i class="ri-settings-5-line text-2xl text-indigo-600"></i>
+      <div class="w-12 h-12 rounded-2xl bg-emerald-500/15 flex items-center justify-center border border-emerald-500/30 shadow-sm">
+        <i class="ri-settings-5-line text-2xl text-emerald-400"></i>
       </div>
       <div>
-        <h2 class="text-lg font-black text-slate-800 tracking-tight">Catálogos del Sistema</h2>
+        <h2 class="text-lg font-black text-slate-100 tracking-tight">Catálogos del Sistema</h2>
         <p class="text-xs font-semibold text-slate-400">Configuración estructurada por módulo</p>
       </div>
     </div>
@@ -14,59 +14,54 @@
     <!-- Buscador de Catálogos -->
     <div class="mt-4 relative">
       <label for="catalogSearchInput" class="sr-only">Buscar catálogo</label>
-      <i class="ri-search-2-line absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+      <i class="ri-search-2-line absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
       <input id="catalogSearchInput" type="text" [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event)"
              placeholder="Buscar catálogo..."
-             class="w-full pl-8 pr-3 py-2 bg-slate-50/80 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
+             class="w-full pl-8 pr-3 py-2 bg-slate-900/80 border border-emerald-500/20 rounded-xl text-xs font-medium text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 placeholder-slate-500">
     </div>
 
     <!-- Selector de Módulos (Tabs) -->
     <div class="mt-5 space-y-1">
-      <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider px-2 mb-2">Módulos Funcionales</p>
+      <p class="text-[10px] font-black text-emerald-400/80 uppercase tracking-wider px-2 mb-2">Módulos Funcionales</p>
       <div class="grid grid-cols-1 gap-1">
-        <button *ngFor="let g of moduleGroups"
-                type="button"
-                (click)="selectModule(g.moduleId)"
-                [class.bg-indigo-600]="selectedModuleId() === g.moduleId && !searchTerm()"
-                [class.text-white]="selectedModuleId() === g.moduleId && !searchTerm()"
-                [class.shadow-md]="selectedModuleId() === g.moduleId && !searchTerm()"
-                [class.bg-slate-50]="selectedModuleId() !== g.moduleId || !!searchTerm()"
-                [class.text-slate-700]="selectedModuleId() !== g.moduleId || !!searchTerm()"
-                class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all hover:bg-indigo-50 hover:text-indigo-700 text-left">
-          <div class="flex items-center gap-2.5 truncate">
-            <i [class]="g.icon" class="text-sm"></i>
-            <span class="truncate">{{ g.moduleName }}</span>
-          </div>
-          <span class="px-1.5 py-0.5 rounded-full text-[10px] font-black"
-                [class.bg-white]="selectedModuleId() === g.moduleId && !searchTerm()"
-                [class.text-indigo-700]="selectedModuleId() === g.moduleId && !searchTerm()"
-                [class.bg-slate-200]="selectedModuleId() !== g.moduleId || !!searchTerm()"
-                [class.text-slate-600]="selectedModuleId() !== g.moduleId || !!searchTerm()">
-            {{ g.catalogs.length }}
-          </span>
-        </button>
+        @for (g of moduleGroups; track g.moduleId) {
+          <button type="button"
+                  (click)="selectModule(g.moduleId)"
+                  [ngClass]="selectedModuleId() === g.moduleId && !searchTerm() ? 'bg-emerald-500 text-slate-950 shadow-md font-black' : 'bg-slate-900/60 text-slate-300'"
+                  class="flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all hover:bg-emerald-500/20 hover:text-emerald-300 text-left border border-emerald-500/10">
+            <div class="flex items-center gap-2.5 truncate">
+              <i [class]="g.icon" class="text-sm"></i>
+              <span class="truncate">{{ g.moduleName }}</span>
+            </div>
+            <span class="px-1.5 py-0.5 rounded-full text-[10px] font-black"
+                  [ngClass]="selectedModuleId() === g.moduleId && !searchTerm() ? 'bg-slate-950 text-emerald-400' : 'bg-slate-800 text-slate-400'">
+              {{ g.catalogs.length }}
+            </span>
+          </button>
+        }
       </div>
     </div>
 
     <!-- Lista de Catálogos Filtrados -->
     <nav class="catalog-nav mt-5 space-y-1">
-      <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider px-2 mb-1">
+      <p class="text-[10px] font-black text-emerald-400/80 uppercase tracking-wider px-2 mb-1">
         {{ searchTerm() ? 'Resultados (' + filteredCatalogs().length + ')' : 'Tablas Catálogo' }}
       </p>
-      <button *ngFor="let cat of filteredCatalogs()" 
-              (click)="selectCatalog(cat)"
-              type="button"
-              [class.active]="selectedCatalog().name === cat.name"
-              class="nav-item group w-full text-left">
-        <div class="flex items-center gap-3 truncate">
-            <i [class]="cat.icon" class="nav-icon text-base group-hover:scale-110 transition-transform shrink-0"></i>
-            <div class="truncate">
-              <span class="text-xs font-bold text-slate-800 block truncate">{{ cat.displayName }}</span>
-              <span class="text-[10px] text-slate-400 font-mono block truncate">{{ cat.name }}</span>
-            </div>
-        </div>
-        <i class="ri-arrow-right-s-line arrow-icon shrink-0"></i>
-      </button>
+      @for (cat of filteredCatalogs(); track cat.name) {
+        <button (click)="selectCatalog(cat)"
+                type="button"
+                [class.active]="selectedCatalog().name === cat.name"
+                class="nav-item group w-full text-left">
+          <div class="flex items-center gap-3 truncate">
+              <i [class]="cat.icon" class="nav-icon text-base group-hover:scale-110 transition-transform shrink-0"></i>
+              <div class="truncate">
+                <span class="text-xs font-bold text-slate-200 block truncate">{{ cat.displayName }}</span>
+                <span class="text-[10px] text-emerald-400/70 font-mono block truncate">{{ cat.name }}</span>
+              </div>
+          </div>
+          <i class="ri-arrow-right-s-line arrow-icon shrink-0"></i>
+        </button>
+      }
     </nav>
   </aside>
 
@@ -74,24 +69,24 @@
   <main class="catalogs-main space-y-6">
     <header class="main-header flex flex-col md:flex-row md:items-center justify-between gap-4">
       <div class="title-section space-y-2">
-        <div class="inline-flex items-center gap-2 px-3 py-1 bg-indigo-50 border border-indigo-100 rounded-full">
-          <i class="ri-database-2-line text-xs text-indigo-600"></i>
-          <span class="text-[10px] font-black text-indigo-600 tracking-wider uppercase">PostgreSQL · Base de Datos</span>
+        <div class="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/15 border border-emerald-500/30 rounded-full">
+          <i class="ri-database-2-line text-xs text-emerald-400"></i>
+          <span class="text-[10px] font-black text-emerald-300 tracking-wider uppercase">PostgreSQL · Base de Datos</span>
         </div>
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-200">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500 text-slate-950 flex items-center justify-center shadow-md shadow-emerald-500/20 font-bold">
             <i [class]="selectedCatalog().icon" class="text-lg"></i>
           </div>
           <div>
-            <h1 class="text-2xl md:text-3xl font-black text-slate-900 tracking-tight leading-tight">{{ selectedCatalog().displayName }}</h1>
-            <p class="text-xs text-slate-500 font-medium">{{ selectedCatalog().description }} &bull; Tabla: <code class="bg-slate-100 px-1.5 py-0.5 rounded text-indigo-600 font-bold font-mono">{{ selectedCatalog().name }}</code></p>
+            <h1 class="text-2xl md:text-3xl font-black text-slate-100 tracking-tight leading-tight">{{ selectedCatalog().displayName }}</h1>
+            <p class="text-xs text-slate-400 font-medium">{{ selectedCatalog().description }} &bull; Tabla: <code class="bg-slate-900 border border-emerald-500/20 px-1.5 py-0.5 rounded text-emerald-400 font-bold font-mono">{{ selectedCatalog().name }}</code></p>
           </div>
         </div>
       </div>
 
       <div class="action-section flex items-center gap-3">
-        <div class="px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 shadow-sm">
-          Total: <span class="text-indigo-600 font-black">{{ items().length }}</span> ítems
+        <div class="px-3 py-1.5 bg-slate-900 border border-emerald-500/20 rounded-xl text-xs font-bold text-slate-300 shadow-sm">
+          Total: <span class="text-emerald-400 font-black">{{ items().length }}</span> ítems
         </div>
         <button (click)="openAddModal()" type="button" class="btn-primary flex items-center gap-2">
           <i class="fa-solid fa-plus-circle"></i>
@@ -101,14 +96,16 @@
     </header>
 
     <!-- Tabla de Ítems -->
-    <div class="table-container glass-card overflow-hidden shadow-sm border border-slate-200/80">
-      <div *ngIf="loading()" class="loader-overlay">
-        <div class="w-12 h-12 border-4 border-indigo-50 border-t-indigo-600 rounded-full animate-spin"></div>
-      </div>
+    <div class="table-container glass-card overflow-hidden shadow-sm border border-emerald-500/15 bg-[#111E30]">
+      @if (loading()) {
+        <div class="loader-overlay">
+          <div class="w-12 h-12 border-4 border-emerald-500/20 border-t-emerald-400 rounded-full animate-spin"></div>
+        </div>
+      }
 
       <table class="premium-table w-full">
         <thead>
-          <tr class="bg-slate-50/70 border-b border-slate-200">
+          <tr class="bg-slate-900/60 border-b border-emerald-500/15">
             <th class="!pl-6 w-16">ID</th>
             <th class="w-48">CÓDIGO INTERNO</th>
             <th>NOMBRE VISUAL</th>
@@ -119,110 +116,116 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let item of items()" [class.inactive]="!item.isActive" class="hover:bg-slate-50/80 transition-colors border-b border-slate-100 last:border-none">
-            <td class="id-col !pl-6 text-xs font-mono font-bold text-slate-400">#{{ item.id }}</td>
-            <td class="py-3 font-mono font-black text-xs text-indigo-600 tracking-tight">
-              {{ item.code }}
-            </td>
-            <td class="text-sm font-bold text-slate-800">
-              {{ item.name }}
-            </td>
-            <td class="desc-col text-xs text-slate-500 font-medium max-w-xs truncate">
-              {{ item.description || 'Sin descripción' }}
-            </td>
-            <td class="text-center font-mono text-xs font-bold text-slate-600">
-              {{ item.sortOrder || 0 }}
-            </td>
-            <td class="status-col text-center">
-              <button [class]="item.isActive ? 'badge-success' : 'badge-danger'" 
-                      (click)="toggleActive(item)"
-                      type="button"
-                      class="badge clickable cursor-pointer hover:scale-105 transition-transform border-none outline-none text-xs font-bold py-1 px-2.5">
-                {{ item.isActive ? 'Activo' : 'Inactivo' }}
-              </button>
-            </td>
-            <td class="actions-col !pr-6">
-              <div class="flex justify-end gap-1.5">
-                <button (click)="openEditModal(item)" type="button" class="btn-icon btn-icon-warning" title="Editar registro">
-                  <i class="fa-solid fa-pen-to-square text-xs"></i>
+          @for (item of items(); track item.id) {
+            <tr [class.inactive]="!item.isActive" class="hover:bg-emerald-500/[0.04] transition-colors border-b border-emerald-500/10 last:border-none">
+              <td class="id-col !pl-6 text-xs font-mono font-bold text-slate-500">#{{ item.id }}</td>
+              <td class="py-3 font-mono font-black text-xs text-emerald-400 tracking-tight">
+                {{ item.code }}
+              </td>
+              <td class="text-sm font-bold text-slate-200">
+                {{ item.name }}
+              </td>
+              <td class="desc-col text-xs text-slate-400 font-medium max-w-xs truncate">
+                {{ item.description || 'Sin descripción' }}
+              </td>
+              <td class="text-center font-mono text-xs font-bold text-slate-300">
+                {{ item.sortOrder || 0 }}
+              </td>
+              <td class="status-col text-center">
+                <button [class]="item.isActive ? 'badge-success' : 'badge-danger'" 
+                        (click)="toggleActive(item)"
+                        type="button"
+                        class="badge clickable cursor-pointer hover:scale-105 transition-transform border-none outline-none text-xs font-bold py-1 px-2.5">
+                  {{ item.isActive ? 'Activo' : 'Inactivo' }}
                 </button>
-              </div>
-            </td>
-          </tr>
-          <tr *ngIf="items().length === 0 && !loading()">
-            <td colspan="7" class="py-16 text-center">
-              <div class="flex flex-col items-center gap-3 text-slate-300">
-                  <i class="ri-inbox-archive-line text-5xl text-slate-300"></i>
-                  <p class="text-sm font-bold text-slate-500">No hay registros disponibles en este catálogo.</p>
-                  <button (click)="openAddModal()" type="button" class="btn-secondary text-xs mt-1">
-                    <i class="fas fa-plus mr-1.5"></i> Crear el primer elemento
+              </td>
+              <td class="actions-col !pr-6">
+                <div class="flex justify-end gap-1.5">
+                  <button (click)="openEditModal(item)" type="button" class="btn-icon btn-icon-warning" title="Editar registro">
+                    <i class="fa-solid fa-pen-to-square text-xs"></i>
                   </button>
-              </div>
-            </td>
-          </tr>
+                </div>
+              </td>
+            </tr>
+          }
+          @if (items().length === 0 && !loading()) {
+            <tr>
+              <td colspan="7" class="py-16 text-center">
+                <div class="flex flex-col items-center gap-3 text-slate-500">
+                    <i class="ri-inbox-archive-line text-5xl text-slate-600"></i>
+                    <p class="text-sm font-bold text-slate-400">No hay registros disponibles en este catálogo.</p>
+                    <button (click)="openAddModal()" type="button" class="btn-secondary text-xs mt-1">
+                      <i class="fas fa-plus mr-1.5 text-emerald-400"></i> Crear el primer elemento
+                    </button>
+                </div>
+              </td>
+            </tr>
+          }
         </tbody>
       </table>
     </div>
   </main>
 
   <!-- Modal de Edición/Creación -->
-  <div *ngIf="showModal()" class="modal-backdrop animate-in fade-in duration-300">
-    <div class="modal-card !max-w-xl !rounded-3xl !p-0 overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-10 duration-500 shadow-2xl">
-      <div class="bg-gradient-to-r from-indigo-600 to-blue-600 p-8 text-white relative">
-        <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-3xl"></div>
-        <h3 class="text-2xl font-black tracking-tight relative z-10">{{ isEdit() ? 'Editar Registro' : 'Nuevo Registro de Catálogo' }}</h3>
-        <p class="text-indigo-100 text-xs font-medium mt-1 relative z-10">Catálogo: {{ selectedCatalog().displayName }} ({{ selectedCatalog().name }})</p>
-        
-        <button (click)="closeModal()" type="button" class="absolute top-6 right-6 w-9 h-9 rounded-full bg-black/10 hover:bg-black/20 flex items-center justify-center transition-colors">
-          <i class="ri-close-line text-xl"></i>
-        </button>
-      </div>
-
-      <form [formGroup]="itemForm" (ngSubmit)="saveItem()" class="p-8 space-y-6 bg-white">
-        <div class="grid grid-cols-2 gap-4">
-          <div class="space-y-1.5">
-            <label for="catalogItemCode" class="form-label text-xs font-bold text-slate-700">Código Interno <span class="text-rose-500">*</span></label>
-            <input id="catalogItemCode" type="text" formControlName="code" placeholder="p.ej. ALTA" [readonly]="isEdit()" class="form-input text-xs">
-          </div>
-          <div class="space-y-1.5">
-            <label for="catalogItemName" class="form-label text-xs font-bold text-slate-700">Nombre Visual <span class="text-rose-500">*</span></label>
-            <input id="catalogItemName" type="text" formControlName="name" placeholder="p.ej. Prioridad Alta" class="form-input text-xs">
-          </div>
+  @if (showModal()) {
+    <div class="modal-backdrop animate-in fade-in duration-300">
+      <div class="modal-card !max-w-xl !rounded-3xl !p-0 overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-10 duration-500 shadow-2xl bg-[#111E30] border border-emerald-500/20">
+        <div class="bg-gradient-to-r from-emerald-600 to-emerald-800 p-8 text-white relative">
+          <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-3xl"></div>
+          <h3 class="text-2xl font-black tracking-tight relative z-10">{{ isEdit() ? 'Editar Registro' : 'Nuevo Registro de Catálogo' }}</h3>
+          <p class="text-emerald-100 text-xs font-medium mt-1 relative z-10">Catálogo: {{ selectedCatalog().displayName }} ({{ selectedCatalog().name }})</p>
+          
+          <button (click)="closeModal()" type="button" class="absolute top-6 right-6 w-9 h-9 rounded-full bg-black/20 hover:bg-black/40 flex items-center justify-center transition-colors">
+            <i class="ri-close-line text-xl"></i>
+          </button>
         </div>
 
-        <div class="grid grid-cols-2 gap-4">
-          <div class="space-y-1.5">
-            <label for="catalogItemSortOrder" class="form-label text-xs font-bold text-slate-700">Orden de Visualización</label>
-            <input id="catalogItemSortOrder" type="number" formControlName="sortOrder" placeholder="0" class="form-input text-xs">
-          </div>
-          <div class="space-y-1.5">
-            <label for="catalogStatusToggle" class="form-label text-xs font-bold text-slate-700">Estado Activo</label>
-            <div class="flex items-center h-10 px-3 bg-slate-50 rounded-xl border border-slate-200">
-              <label for="catalogStatusToggle" class="toggle flex items-center gap-2 cursor-pointer w-full">
-                <input id="catalogStatusToggle" type="checkbox" formControlName="isActive" class="sr-only">
-                <span class="slider round"></span>
-                <span class="text-xs font-bold text-slate-700 ml-2">{{ itemForm.get('isActive')?.value ? 'Activo en el Sistema' : 'Inactivo' }}</span>
-              </label>
+        <form [formGroup]="itemForm" (ngSubmit)="saveItem()" class="p-8 space-y-6 bg-[#111E30]">
+          <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-1.5">
+              <label for="catalogItemCode" class="form-label text-xs font-bold text-emerald-400/90">Código Interno <span class="text-rose-400">*</span></label>
+              <input id="catalogItemCode" type="text" formControlName="code" placeholder="p.ej. ALTA" [readonly]="isEdit()" class="form-input text-xs">
+            </div>
+            <div class="space-y-1.5">
+              <label for="catalogItemName" class="form-label text-xs font-bold text-emerald-400/90">Nombre Visual <span class="text-rose-400">*</span></label>
+              <input id="catalogItemName" type="text" formControlName="name" placeholder="p.ej. Prioridad Alta" class="form-input text-xs">
             </div>
           </div>
-        </div>
 
-        <div class="space-y-1.5">
-          <label for="catalogItemDesc" class="form-label text-xs font-bold text-slate-700">Descripción / Propósito</label>
-          <textarea id="catalogItemDesc" formControlName="description" rows="3" placeholder="Describe brevemente el propósito de este valor..." class="form-input text-xs resize-none"></textarea>
-        </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-1.5">
+              <label for="catalogItemSortOrder" class="form-label text-xs font-bold text-emerald-400/90">Orden de Visualización</label>
+              <input id="catalogItemSortOrder" type="number" formControlName="sortOrder" placeholder="0" class="form-input text-xs">
+            </div>
+            <div class="space-y-1.5">
+              <label for="catalogStatusToggle" class="form-label text-xs font-bold text-emerald-400/90">Estado Activo</label>
+              <div class="flex items-center h-10 px-3 bg-slate-900/80 rounded-xl border border-emerald-500/20">
+                <label for="catalogStatusToggle" class="toggle flex items-center gap-2 cursor-pointer w-full">
+                  <input id="catalogStatusToggle" type="checkbox" formControlName="isActive" class="sr-only">
+                  <span class="slider round"></span>
+                  <span class="text-xs font-bold text-slate-200 ml-2">{{ itemForm.get('isActive')?.value ? 'Activo en el Sistema' : 'Inactivo' }}</span>
+                </label>
+              </div>
+            </div>
+          </div>
 
-        <div class="flex justify-end gap-3 pt-4 border-t border-slate-100">
-          <button type="button" (click)="closeModal()" class="btn-secondary text-xs">
-            <i class="fas fa-xmark mr-1"></i> Descartar
-          </button>
-          <button type="submit" [disabled]="itemForm.invalid || loading()" class="btn-primary min-w-[150px] text-xs">
-            <span *ngIf="loading()" class="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin mr-2"></span>
-            <i *ngIf="!loading()" class="fa-solid fa-check-circle mr-1"></i>
-            {{ loading() ? 'Sincronizando...' : 'Guardar en Base de Datos' }}
-          </button>
-        </div>
-      </form>
+          <div class="space-y-1.5">
+            <label for="catalogItemDesc" class="form-label text-xs font-bold text-emerald-400/90">Descripción / Propósito</label>
+            <textarea id="catalogItemDesc" formControlName="description" rows="3" placeholder="Describe brevemente el propósito de este valor..." class="form-input text-xs resize-none"></textarea>
+          </div>
+
+          <div class="flex justify-end gap-3 pt-4 border-t border-emerald-500/10">
+            <button type="button" (click)="closeModal()" class="btn-secondary text-xs">
+              <i class="fas fa-xmark mr-1"></i> Descartar
+            </button>
+            <button type="submit" [disabled]="itemForm.invalid || loading()" class="btn-primary min-w-[150px] text-xs">
+              <span *ngIf="loading()" class="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin mr-2"></span>
+              <i *ngIf="!loading()" class="fa-solid fa-check-circle mr-1"></i>
+              {{ loading() ? 'Sincronizando...' : 'Guardar en Base de Datos' }}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
-  </div>
+  }
 </div>

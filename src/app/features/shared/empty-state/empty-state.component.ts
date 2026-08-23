@@ -34,7 +34,7 @@ export class EmptyStateComponent {
 
   get iconBgClass(): string {
     const map: Record<string, string> = {
-      indigo:  'bg-indigo-50 text-indigo-400 border border-indigo-100',
+      indigo:  'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
       emerald: 'bg-emerald-50 text-emerald-400 border border-emerald-100',
       amber:   'bg-amber-50 text-amber-400 border border-amber-100',
       rose:    'bg-rose-50 text-rose-400 border border-rose-100',

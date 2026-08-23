@@ -374,13 +374,13 @@ export class TestScenariosComponent implements OnInit {
             }
             this.closeModal();
             this.isSubmitting.set(false);
-            Swal.fire({ icon: 'success', title: 'Éxito', text: 'Escenario actualizado correctamente.', confirmButtonColor: '#150fbd' });
+            Swal.fire({ icon: 'success', title: 'Éxito', text: 'Escenario actualizado correctamente.', confirmButtonColor: '#10B981' });
           },
           error: (err) => {
             console.error('[TestScenarios] Error actualizando test suite', err);
             this.isSubmitting.set(false);
             const errorMsg = err.error?.error || err.error?.message || err.message || 'Error al actualizar el escenario.';
-            Swal.fire({ icon: 'error', title: 'Error', text: errorMsg, confirmButtonColor: '#150fbd' });
+            Swal.fire({ icon: 'error', title: 'Error', text: errorMsg, confirmButtonColor: '#10B981' });
           }
         });
       } else {
@@ -393,13 +393,13 @@ export class TestScenariosComponent implements OnInit {
             }
             this.closeModal();
             this.isSubmitting.set(false);
-            Swal.fire({ icon: 'success', title: 'Éxito', text: 'Escenario creado correctamente.', confirmButtonColor: '#150fbd' });
+            Swal.fire({ icon: 'success', title: 'Éxito', text: 'Escenario creado correctamente.', confirmButtonColor: '#10B981' });
           },
           error: (err) => {
             console.error('[TestScenarios] Error creando test suite', err);
             this.isSubmitting.set(false);
             const errorMsg = err.error?.error || err.error?.message || err.message || 'Error al crear el escenario.';
-            Swal.fire({ icon: 'error', title: 'Error', text: errorMsg, confirmButtonColor: '#150fbd' });
+            Swal.fire({ icon: 'error', title: 'Error', text: errorMsg, confirmButtonColor: '#10B981' });
           }
         });
       }

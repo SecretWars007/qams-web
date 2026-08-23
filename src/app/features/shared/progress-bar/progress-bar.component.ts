@@ -41,7 +41,7 @@ export class ProgressBarComponent {
 
   get fillClass(): string {
     const variantMap: Record<ProgressVariant, string> = {
-      primary:  'bg-indigo-500',
+      primary:  'bg-emerald-500',
       success:  'bg-emerald-500',
       warning:  'bg-amber-400',
       danger:   'bg-rose-500',
@@ -52,11 +52,11 @@ export class ProgressBarComponent {
 
   get textColorClass(): string {
     const colorMap: Record<ProgressVariant, string> = {
-      primary:  'text-indigo-600',
+      primary:  'text-emerald-400',
       success:  'text-emerald-600',
       warning:  'text-amber-600',
       danger:   'text-rose-600',
-      gradient: 'text-indigo-600',
+      gradient: 'text-emerald-400',
     };
     return colorMap[this.variant];
   }

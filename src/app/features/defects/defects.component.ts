@@ -131,7 +131,7 @@ export class DefectsComponent implements OnInit {
       icon: 'success',
       title: 'Éxito',
       text: `Defecto ${this.isEdit() ? 'actualizado' : 'creado'} correctamente`,
-      confirmButtonColor: '#150fbd'
+      confirmButtonColor: '#10B981'
     });
     this.closeModal();
     this.loadDefects();

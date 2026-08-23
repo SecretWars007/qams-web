@@ -5,12 +5,12 @@
     <div class="flex items-center gap-4">
       <button
         (click)="goBack()"
-        class="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-500 hover:text-indigo-600 hover:border-indigo-200 hover:bg-indigo-50/50 transition-all shadow-sm"
+        class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-800 border border-slate-700/50 text-slate-400 hover:text-emerald-400 hover:border-emerald-500/30 hover:bg-emerald-500/10 transition-all shadow-sm"
         title="Volver a Ejecuciones">
         <i class="fas fa-arrow-left"></i>
       </button>
       <div>
-        <h1 class="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+        <h1 class="text-2xl font-black text-slate-100 tracking-tight flex items-center gap-3">
           Detalle de Ejecución
           <span
             *ngIf="execution()"
@@ -20,7 +20,7 @@
           </span>
         </h1>
         <p class="text-sm text-slate-500 font-medium flex items-center gap-2 mt-1">
-          <i class="fas fa-project-diagram text-slate-400"></i>
+          <i class="fas fa-project-diagram text-slate-600"></i>
           {{ execution()?.project?.name || 'Cargando proyecto...' }}
         </p>
       </div>
@@ -29,46 +29,46 @@
 
   <!-- Spinner de carga -->
   <div *ngIf="loading()" class="flex justify-center items-center h-64">
-    <div class="animate-spin rounded-full h-12 w-12 border-4 border-indigo-200 border-t-indigo-600"></div>
+    <div class="animate-spin rounded-full h-12 w-12 border-4 border-emerald-500/20 border-t-emerald-400"></div>
   </div>
 
   <!-- Contenido principal -->
   <div *ngIf="!loading() && execution()" class="flex-1 overflow-y-auto custom-scrollbar pb-10 space-y-6">
 
     <!-- Información General -->
-    <div class="bg-white rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100">
-      <h2 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2 border-b border-slate-100 pb-3">
-        <i class="fas fa-info-circle text-indigo-500"></i> Información General
+    <div class="bg-[#111E30] rounded-3xl p-6 border border-emerald-500/15 shadow-lg">
+      <h2 class="text-lg font-bold text-slate-100 mb-4 flex items-center gap-2 border-b border-emerald-500/10 pb-3">
+        <i class="fas fa-info-circle text-emerald-400"></i> Información General
       </h2>
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div>
-          <p class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Caso de Prueba</p>
-          <div class="text-sm font-semibold text-slate-800 bg-slate-50 px-3 py-2 rounded-xl border border-slate-100">
+          <p class="block text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-1">Caso de Prueba</p>
+          <div class="text-sm font-semibold text-slate-200 bg-slate-900/60 px-3 py-2 rounded-xl border border-emerald-500/15">
             {{ execution()?.testCase?.title }}
           </div>
         </div>
         <div>
-          <p class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Ejecutado Por</p>
-          <div class="text-sm font-medium text-slate-700 bg-slate-50 px-3 py-2 rounded-xl border border-slate-100 flex items-center gap-2">
-            <i class="fas fa-user text-slate-400"></i> {{ execution()?.tester?.name || 'No asignado' }}
+          <p class="block text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-1">Ejecutado Por</p>
+          <div class="text-sm font-medium text-slate-300 bg-slate-900/60 px-3 py-2 rounded-xl border border-emerald-500/15 flex items-center gap-2">
+            <i class="fas fa-user text-slate-500"></i> {{ execution()?.tester?.name || 'No asignado' }}
           </div>
         </div>
         <div>
-          <p class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Fecha de Ejecución</p>
-          <div class="text-sm font-medium text-slate-700 bg-slate-50 px-3 py-2 rounded-xl border border-slate-100 flex items-center gap-2">
-            <i class="fas fa-calendar-day text-slate-400"></i> {{ execution()?.executionDate | date:'medium' }}
+          <p class="block text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-1">Fecha de Ejecución</p>
+          <div class="text-sm font-medium text-slate-300 bg-slate-900/60 px-3 py-2 rounded-xl border border-emerald-500/15 flex items-center gap-2">
+            <i class="fas fa-calendar-day text-slate-500"></i> {{ execution()?.executionDate | date:'medium' }}
           </div>
         </div>
         <div>
-          <p class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Tiempo Actual (Horas)</p>
-          <div class="text-sm font-medium text-slate-700 bg-slate-50 px-3 py-2 rounded-xl border border-slate-100">
+          <p class="block text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-1">Tiempo Actual (Horas)</p>
+          <div class="text-sm font-medium text-slate-300 bg-slate-900/60 px-3 py-2 rounded-xl border border-emerald-500/15">
             {{ execution()?.actualTimeHours }} h
           </div>
         </div>
         <div class="md:col-span-2 lg:col-span-3">
-          <p class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Notas de Ejecución</p>
-          <div class="text-sm font-medium text-slate-700 bg-slate-50 px-3 py-3 rounded-xl border border-slate-100 min-h-[60px]">
+          <p class="block text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-1">Notas de Ejecución</p>
+          <div class="text-sm font-medium text-slate-400 bg-slate-900/60 px-3 py-3 rounded-xl border border-emerald-500/15 min-h-[60px]">
             {{ execution()?.notes || 'Sin notas adicionales.' }}
           </div>
         </div>
@@ -76,153 +76,133 @@
     </div>
 
     <!-- Resultados de los Pasos -->
-    <div class="bg-white rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100">
-      <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
-        <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-          <i class="fas fa-list-ol text-indigo-500"></i> Pasos de la Prueba
+    <div class="bg-[#111E30] rounded-3xl p-6 border border-emerald-500/15 shadow-lg">
+      <div class="flex items-center justify-between mb-4 border-b border-emerald-500/10 pb-3">
+        <h2 class="text-lg font-bold text-slate-100 flex items-center gap-2">
+          <i class="fas fa-list-ol text-emerald-400"></i> Pasos de la Prueba
         </h2>
-        <span class="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+        <span class="text-xs font-bold text-slate-500 bg-slate-800 px-3 py-1 rounded-full border border-slate-700/50">
           {{ execution()?.stepResults?.length || 0 }} pasos
         </span>
       </div>
 
       <div class="space-y-4">
         <div *ngFor="let step of execution()?.stepResults; let i = index"
-             class="border border-slate-100 rounded-2xl overflow-hidden shadow-sm transition-all hover:shadow-md hover:border-indigo-100">
+             class="border border-emerald-500/10 rounded-2xl overflow-hidden transition-all hover:border-emerald-500/25">
 
           <!-- Cabecera del Paso -->
-          <div class="bg-slate-50/50 p-4 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="bg-slate-900/50 p-4 border-b border-emerald-500/[0.08] flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div class="flex items-start gap-3 flex-1">
-              <div class="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center text-sm font-bold text-slate-600 shadow-sm shrink-0">
+              <div class="w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center text-sm font-bold text-emerald-300 shadow-sm shrink-0">
                 {{ step.stepOrder || (i + 1) }}
               </div>
               <div>
-                <h3 class="text-sm font-bold text-slate-900">{{ step.action }}</h3>
-                <p class="text-xs text-slate-500 mt-1 line-clamp-2" *ngIf="step.description">{{ step.description }}</p>
+                <h3 class="text-sm font-bold text-slate-200">{{ step.action }}</h3>
+                <p *ngIf="step.expectedResult" class="text-xs text-slate-500 mt-0.5">
+                  <span class="font-semibold text-slate-400">Esperado:</span> {{ step.expectedResult }}
+                </p>
               </div>
             </div>
-
-            <div class="flex items-center gap-3 shrink-0">
-              <button
-                *ngIf="step.status.code === 'FAIL' || step.status.code === 'FAILED' || step.status.code === 'OBSERVED'"
-                (click)="reportDefectForStep(step)"
-                class="px-2.5 py-1 text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-lg border border-rose-200 flex items-center gap-1.5 transition-all shadow-sm"
-                title="Reportar Bug/Defecto vinculado a este paso">
-                <i class="fas fa-bug"></i> Reportar Defecto
-              </button>
-              <span class="text-[10px] uppercase font-bold tracking-wider px-3 py-1 rounded-full"
-                    [ngClass]="getStatusBadgeClasses(step.status.code)">
-                {{ step.status.name }}
-              </span>
-            </div>
+            <span class="shrink-0 px-3 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider border"
+              [ngClass]="getStatusBadgeClasses(step.status.code)">
+              {{ step.status.name || step.status.code }}
+            </span>
           </div>
 
-          <!-- Detalles del Paso -->
-          <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-4 bg-white">
-            <div>
-              <p class="text-xs font-bold text-slate-400 uppercase mb-1"><i class="fas fa-bullseye mr-1"></i> Resultado Actual</p>
-              <div class="text-sm text-slate-700 bg-slate-50 p-2 rounded-lg min-h-[40px] whitespace-pre-wrap">
-                {{ step.actualResult || '-' }}
-              </div>
+          <!-- Cuerpo del Paso -->
+          <div class="p-4 bg-[#0b1421]/40 space-y-3">
+            <!-- Resultado Actual -->
+            <div *ngIf="step.actualResult">
+              <p class="text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-1">Resultado Actual</p>
+              <p class="text-sm text-slate-300">{{ step.actualResult }}</p>
             </div>
-            <div>
-              <p class="text-xs font-bold text-slate-400 uppercase mb-1"><i class="fas fa-sticky-note mr-1"></i> Notas del Paso</p>
-              <div class="text-sm text-slate-700 bg-slate-50 p-2 rounded-lg min-h-[40px] whitespace-pre-wrap">
-                {{ step.notes || '-' }}
-              </div>
+
+            <!-- Notas del Paso -->
+            <div *ngIf="step.notes">
+              <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Notas</p>
+              <p class="text-xs text-slate-500">{{ step.notes }}</p>
             </div>
 
             <!-- Evidencias del Paso -->
-            <div class="md:col-span-2" *ngIf="step.evidences && step.evidences.length > 0">
-              <p class="text-xs font-bold text-slate-400 uppercase mb-2"><i class="fas fa-paperclip mr-1"></i> Evidencias Adicionales</p>
-              <div class="flex flex-wrap gap-3">
+            <div *ngIf="step.evidences && step.evidences.length > 0">
+              <p class="text-xs font-semibold text-emerald-400/70 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <i class="ri-image-line"></i> Evidencias del Paso ({{ step.evidences.length }})
+              </p>
+              <div class="flex flex-wrap gap-2">
                 <a *ngFor="let ev of step.evidences" [href]="ev.fileUrl" target="_blank"
-                   class="flex items-center gap-2 bg-indigo-50 text-indigo-700 px-3 py-2 rounded-xl text-xs font-medium hover:bg-indigo-100 transition-colors border border-indigo-100">
-                  <i class="fas fa-image"></i>
-                  <span class="truncate max-w-[150px]">{{ ev.fileName }}</span>
+                   class="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-800 border border-slate-700/50 rounded-lg text-xs hover:bg-emerald-500/10 hover:border-emerald-500/25 transition-colors group">
+                  <i class="ri-image-line text-slate-500 group-hover:text-emerald-400 transition-colors"></i>
+                  <span class="font-medium text-slate-400 group-hover:text-slate-300 max-w-[150px] truncate">{{ ev.description || ev.fileName }}</span>
                 </a>
               </div>
             </div>
 
+            <!-- Defectos del Paso -->
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <p class="text-xs font-semibold text-rose-400/70 uppercase tracking-wider flex items-center gap-1.5">
+                  <i class="ri-bug-line"></i> Defectos ({{ step.defects?.length || 0 }})
+                </p>
+                <button (click)="reportDefectForStep(step)" class="text-rose-400 hover:text-rose-300 text-xs font-bold flex items-center gap-1 transition-colors">
+                  <i class="ri-bug-line"></i> Reportar Defecto
+                </button>
+              </div>
+              <div *ngIf="step.defects && step.defects.length > 0" class="space-y-2">
+                <div *ngFor="let def of step.defects" class="flex items-center gap-2 px-3 py-2 bg-rose-500/[0.06] border border-rose-500/15 rounded-lg text-xs">
+                  <i class="ri-bug-line text-rose-400 shrink-0"></i>
+                  <span class="font-semibold text-rose-200 truncate">{{ def.title }}</span>
+                  <span *ngIf="def.severityName" class="ml-auto px-2 py-0.5 rounded bg-rose-500/10 text-rose-300 font-bold uppercase text-[10px] border border-rose-500/20 shrink-0">{{ def.severityName }}</span>
+                </div>
+              </div>
+            </div>
+
             <!-- Observaciones del Paso -->
-            <div class="md:col-span-2" *ngIf="step.observations && step.observations.length > 0">
-              <p class="text-xs font-bold text-slate-400 uppercase mb-2"><i class="fas fa-comments mr-1"></i> Observaciones</p>
-              <div class="space-y-3">
-                <div *ngFor="let obs of step.observations" class="bg-amber-50 border border-amber-100 p-3 rounded-xl">
-                  <div class="flex items-center justify-between mb-1">
-                    <span class="text-[10px] font-bold text-amber-600 uppercase">{{ obs.createdBy }}</span>
-                    <span class="text-[10px] text-amber-500 font-medium">{{ obs.createdAt | date:'short' }}</span>
-                  </div>
-                  <p class="text-xs text-amber-900 font-medium">{{ obs.observation }}</p>
-                  <div *ngIf="obs.response" class="mt-2 pl-3 ml-2 border-l-2 border-amber-200">
-                    <p class="text-[10px] font-bold text-slate-500 uppercase mb-0.5">Respuesta</p>
-                    <p class="text-xs text-slate-700">{{ obs.response }}</p>
-                  </div>
+            <div *ngIf="step.observations && step.observations.length > 0">
+              <p class="text-xs font-semibold text-amber-400/70 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <i class="ri-chat-1-line"></i> Incidentes QA ({{ step.observations.length }})
+              </p>
+              <div class="space-y-2">
+                <div *ngFor="let obs of step.observations" class="px-3 py-2 bg-amber-500/[0.06] border border-amber-500/15 rounded-lg text-xs">
+                  <p class="font-medium text-amber-300">{{ obs.observation }}</p>
+                  <p *ngIf="obs.createdBy" class="text-amber-500/70 mt-1">— {{ obs.createdBy }}</p>
                 </div>
               </div>
             </div>
           </div>
-
         </div>
-      </div>
-    </div>
 
-    <!-- Evidencias Generales -->
-    <div class="bg-white rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100"
-         *ngIf="execution()?.evidences?.length">
-      <h2 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2 border-b border-slate-100 pb-3">
-        <i class="fas fa-photo-video text-indigo-500"></i> Evidencias Globales
-      </h2>
-      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-        <div *ngFor="let ev of execution()?.evidences"
-             class="relative group rounded-xl overflow-hidden border border-slate-200 aspect-video bg-slate-50 flex items-center justify-center">
-          <ng-container *ngIf="isImage(ev.fileTypeName); else notImage">
-            <img [src]="ev.fileUrl" [alt]="ev.fileName" class="w-full h-full object-cover transition-transform group-hover:scale-105" />
-          </ng-container>
-          <ng-template #notImage>
-            <div class="text-center">
-              <i class="fas fa-file-alt text-3xl text-slate-300 mb-2"></i>
-              <p class="text-[10px] text-slate-400 font-medium truncate px-2 w-full">{{ ev.fileName }}</p>
-            </div>
-          </ng-template>
-
-          <!-- Hover Overlay -->
-          <div class="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 backdrop-blur-[2px]">
-            <p class="text-white text-xs font-medium px-2 truncate w-full text-center" *ngIf="ev.description">{{ ev.description }}</p>
-            <a [href]="ev.fileUrl" target="_blank"
-               class="w-8 h-8 bg-white/20 hover:bg-white text-white hover:text-indigo-600 rounded-full flex items-center justify-center transition-colors">
-              <i class="fas fa-external-link-alt text-sm"></i>
-            </a>
-          </div>
+        <!-- Empty state pasos -->
+        <div *ngIf="!execution()?.stepResults?.length" class="text-center py-10 text-slate-600">
+          <i class="ri-list-check text-3xl mb-2 block text-slate-700"></i>
+          Esta ejecución no tiene pasos registrados.
         </div>
       </div>
     </div>
 
   </div>
 
-  <!-- Estado vacío -->
-  <div *ngIf="!loading() && !execution()" class="flex-1 flex flex-col items-center justify-center text-center">
-    <div class="w-20 h-20 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center text-3xl mb-4 shadow-sm border border-rose-100">
-      <i class="fas fa-exclamation-triangle"></i>
+  <!-- Empty state global -->
+  <div *ngIf="!loading() && !execution()" class="flex-1 flex items-center justify-center">
+    <div class="text-center py-16 px-4">
+      <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-800 text-slate-600 mb-4 border border-slate-700">
+        <i class="ri-alert-line text-2xl"></i>
+      </div>
+      <h3 class="text-lg font-medium text-slate-400 mb-1">No se encontró la ejecución</h3>
+      <p class="text-slate-600 text-sm">Verifica el ID o vuelve a la lista de ejecuciones.</p>
     </div>
-    <h2 class="text-xl font-bold text-slate-800">Ejecución no encontrada</h2>
-    <p class="text-slate-500 mt-2">No se pudo cargar la información de esta ejecución.</p>
-    <button (click)="goBack()" class="mt-6 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-6 rounded-xl shadow-md transition-all">
-      Volver al Listado
-    </button>
   </div>
+
+  <!-- Modal de Defecto Integrado -->
+  <app-defect-modal
+    *ngIf="showDefectModal()"
+    [defect]="defectModalData()"
+    [isEdit]="false"
+    [projectId]="execution()?.project?.id || null"
+    [testCaseId]="execution()?.testCase?.id || null"
+    [testExecutionId]="execution()?.id || null"
+    [testExecutionStepResultId]="selectedStepId()"
+    (closeModal)="showDefectModal.set(false)"
+    (save)="onSaveDefect($event)">
+  </app-defect-modal>
 
 </div>
-
-<!-- Defect Modal for Reporting Step Failures -->
-<app-defect-modal
-  *ngIf="showDefectModal()"
-  [defect]="defectModalData()"
-  [isEdit]="false"
-  [projectId]="execution()?.project?.id || null"
-  [testCaseId]="execution()?.testCase?.id || null"
-  [testExecutionId]="execution()?.id || null"
-  [testExecutionStepResultId]="selectedStepId()"
-  (closeModal)="showDefectModal.set(false)"
-  (save)="onSaveDefect($event)">
-</app-defect-modal>

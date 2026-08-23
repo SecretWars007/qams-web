@@ -18,7 +18,7 @@
             <span class="font-medium">Manager:</span> {{ plan.testManagerName || 'Sin asignar' }}
           </p>
         </div>
-        <button type="button" (click)="closeDetail.emit()" class="rounded-lg p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <button type="button" (click)="closeDetail.emit()" class="rounded-lg p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500">
           <span class="sr-only">Cerrar</span>
           <i class="fas fa-times text-xl"></i>
         </button>
@@ -27,16 +27,16 @@
       <!-- Navigation Tabs -->
       <div class="border-b border-gray-200 px-6 pt-4 bg-gray-50/50">
         <nav class="-mb-px flex space-x-8">
-          <button (click)="activeTab = 'overview'" [class.border-indigo-500]="activeTab === 'overview'" [class.text-indigo-600]="activeTab === 'overview'" [class.border-transparent]="activeTab !== 'overview'" [class.text-gray-500]="activeTab !== 'overview'" class="whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm hover:text-indigo-700 transition-colors">
+          <button (click)="activeTab = 'overview'" [class.border-emerald-500]="activeTab === 'overview'" [class.text-emerald-400]="activeTab === 'overview'" [class.border-transparent]="activeTab !== 'overview'" [class.text-gray-500]="activeTab !== 'overview'" class="whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm hover:text-emerald-300 transition-colors">
             Resumen & Criterios
           </button>
-          <button (click)="activeTab = 'milestones'" [class.border-indigo-500]="activeTab === 'milestones'" [class.text-indigo-600]="activeTab === 'milestones'" [class.border-transparent]="activeTab !== 'milestones'" [class.text-gray-500]="activeTab !== 'milestones'" class="whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm hover:text-indigo-700 transition-colors">
+          <button (click)="activeTab = 'milestones'" [class.border-emerald-500]="activeTab === 'milestones'" [class.text-emerald-400]="activeTab === 'milestones'" [class.border-transparent]="activeTab !== 'milestones'" [class.text-gray-500]="activeTab !== 'milestones'" class="whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm hover:text-emerald-300 transition-colors">
             Hitos
           </button>
-          <button (click)="activeTab = 'risks'" [class.border-indigo-500]="activeTab === 'risks'" [class.text-indigo-600]="activeTab === 'risks'" [class.border-transparent]="activeTab !== 'risks'" [class.text-gray-500]="activeTab !== 'risks'" class="whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm hover:text-indigo-700 transition-colors">
+          <button (click)="activeTab = 'risks'" [class.border-emerald-500]="activeTab === 'risks'" [class.text-emerald-400]="activeTab === 'risks'" [class.border-transparent]="activeTab !== 'risks'" [class.text-gray-500]="activeTab !== 'risks'" class="whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm hover:text-emerald-300 transition-colors">
             Análisis de Riesgos
           </button>
-          <button (click)="activeTab = 'approvals'" [class.border-indigo-500]="activeTab === 'approvals'" [class.text-indigo-600]="activeTab === 'approvals'" [class.border-transparent]="activeTab !== 'approvals'" [class.text-gray-500]="activeTab !== 'approvals'" class="whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm hover:text-indigo-700 transition-colors">
+          <button (click)="activeTab = 'approvals'" [class.border-emerald-500]="activeTab === 'approvals'" [class.text-emerald-400]="activeTab === 'approvals'" [class.border-transparent]="activeTab !== 'approvals'" [class.text-gray-500]="activeTab !== 'approvals'" class="whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm hover:text-emerald-300 transition-colors">
             Log de Aprobaciones
           </button>
         </nav>
@@ -77,7 +77,7 @@
             <!-- Exit Criteria Progress -->
             <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
               <div class="flex items-center justify-between mb-4">
-                <h4 class="text-sm font-bold text-gray-800"><i class="fas fa-sign-out-alt text-indigo-500 mr-2"></i>Exit Criteria</h4>
+                <h4 class="text-sm font-bold text-gray-800"><i class="fas fa-sign-out-alt text-emerald-400 mr-2"></i>Exit Criteria</h4>
                 <span class="text-xs font-bold px-2 py-1 bg-gray-100 rounded-full">{{ exitMet }}/{{ exitCriteria.length }} Completados</span>
               </div>
               <ul class="space-y-2">

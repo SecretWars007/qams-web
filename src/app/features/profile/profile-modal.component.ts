@@ -115,7 +115,7 @@ export class ProfileModalComponent {
           title: 'Error',
           text: 'No se pudo actualizar tu perfil.',
           icon: 'error',
-          confirmButtonColor: '#150fbd'
+          confirmButtonColor: '#10B981'
         });
       }
     });

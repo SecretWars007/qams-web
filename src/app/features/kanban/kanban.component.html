@@ -1,298 +1,484 @@
 <!-- src/app/features/kanban/kanban.component.html -->
-<div class="flex flex-col h-full bg-white/60 rounded-3xl border border-white/20 overflow-hidden shadow-sm backdrop-blur-md">
+<div class="flex flex-col h-full bg-[#0b1421] text-[#dae3f6] rounded-2xl border border-emerald-500/20 overflow-hidden shadow-2xl animate-in fade-in duration-300">
 
-  <!-- ══════════════════════ HEADER ══════════════════════ -->
-  <div class="px-6 py-4 bg-white/80 border-b border-gray-100 backdrop-blur-md">
-    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-
-      <!-- Título e ícono -->
-      <div class="flex items-center gap-3">
-        <div class="p-2.5 bg-indigo-50 rounded-xl border border-indigo-100 text-indigo-600">
-          <i class="ri-kanban-view text-xl"></i>
+  <!-- ══════════════════════ HEADER & BENTO SUMMARY STRIP ══════════════════════ -->
+  <div class="px-6 py-5 bg-[#060e1b]/80 border-b border-emerald-500/20 backdrop-blur-md shrink-0 space-y-4">
+    
+    <!-- Title & Main Action Row -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div>
+        <div class="flex items-center gap-2 text-emerald-400/90 text-xs font-mono tracking-wider uppercase mb-1">
+          <i class="ri-folder-open-line text-sm"></i>
+          <span>Agile QA Management / Tablero Kanban</span>
         </div>
-        <div>
-          <h2 class="text-base font-bold text-gray-900 leading-tight tracking-tight">Tablero de Certificación</h2>
-          <p class="text-[11px] text-gray-500 font-medium tracking-widest uppercase">Kanban · Seguimiento ISTQB</p>
+        <h1 class="text-2xl font-bold text-slate-100 tracking-tight flex items-center gap-2">
+          Tablero Ágil QA <span class="text-xs font-mono px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">Estandarizado</span>
+        </h1>
+        <p class="text-xs text-slate-400 mt-0.5">Gestión visual de tareas de pruebas, preparación de casos y verificación de bugs en flujo continuo.</p>
+      </div>
+
+      <!-- Action Button -->
+      <div class="flex items-center gap-3">
+        <button
+          (click)="loadBoard()"
+          [disabled]="loading()"
+          class="px-3.5 py-2 rounded-xl bg-slate-900/80 border border-emerald-500/20 text-slate-300 hover:text-emerald-300 hover:border-emerald-500/40 text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm active:scale-95 disabled:opacity-50"
+          title="Recargar tablero">
+          <i class="ri-refresh-line text-sm" [ngClass]="{ 'animate-spin': loading() }"></i>
+          <span class="hidden sm:inline">Actualizar</span>
+        </button>
+        <button
+          (click)="openCreateModal('col-todo')"
+          class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center gap-2 transition-all shadow-[0_0_15px_rgba(16,185,129,0.35)] hover:shadow-[0_0_20px_rgba(16,185,129,0.5)] active:scale-95">
+          <i class="ri-add-box-line text-base"></i>
+          <span>Nueva Tarjeta QA</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Bento-Style Strip: Selectors + Sprint Progress + Quick Metrics -->
+    <div class="p-4 rounded-xl bg-[#111e30]/80 border border-emerald-500/20 backdrop-blur-md flex flex-col lg:flex-row gap-5 items-stretch lg:items-center justify-between">
+      
+      <!-- Selectors: Project & Sprint -->
+      <div class="flex flex-wrap items-center gap-3">
+        
+        <!-- Project Selector -->
+        <div class="flex items-center gap-2 bg-[#0b1421] border border-emerald-500/20 rounded-xl px-3 py-2 hover:border-emerald-500/40 transition-colors">
+          <i class="ri-folder-shared-line text-emerald-400 text-base"></i>
+          <div>
+            <label for="kanban-project-select" class="block text-[10px] uppercase tracking-wider text-slate-400 font-mono font-semibold">Proyecto Activo</label>
+            <select
+              id="kanban-project-select"
+              [ngModel]="selectedProjectId()"
+              (change)="onProjectChange($event)"
+              class="bg-transparent text-xs font-bold text-slate-100 border-none p-0 pr-6 focus:ring-0 cursor-pointer appearance-none">
+              <option value="ALL" class="bg-[#0e1a2b] text-slate-100">Todos los Proyectos ({{ projects().length }})</option>
+              <option *ngFor="let p of projects()" [value]="p.id" class="bg-[#0e1a2b] text-slate-100">{{ p.name }}</option>
+            </select>
+          </div>
+          <i class="ri-arrow-down-s-line text-slate-500 text-xs pointer-events-none"></i>
+        </div>
+
+        <!-- Sprint Selector -->
+        <div class="flex items-center gap-2 bg-[#0b1421] border border-emerald-500/20 rounded-xl px-3 py-2 hover:border-emerald-500/40 transition-colors">
+          <i class="ri-calendar-event-line text-emerald-400 text-base"></i>
+          <div>
+            <label for="kanban-sprint-select" class="block text-[10px] uppercase tracking-wider text-slate-400 font-mono font-semibold">Sprint / Ciclo</label>
+            <select
+              id="kanban-sprint-select"
+              [ngModel]="selectedSprint()"
+              (change)="onSprintChange($event)"
+              class="bg-transparent text-xs font-bold text-slate-100 border-none p-0 pr-6 focus:ring-0 cursor-pointer appearance-none">
+              <option *ngFor="let sp of sprints()" [value]="sp" class="bg-[#0e1a2b] text-slate-100">{{ sp }}</option>
+            </select>
+          </div>
+          <i class="ri-arrow-down-s-line text-slate-500 text-xs pointer-events-none"></i>
+        </div>
+
+      </div>
+
+      <!-- Sprint Progress Bar -->
+      <div class="flex-1 lg:max-w-xs xl:max-w-sm flex flex-col justify-center">
+        <div class="flex justify-between items-center text-xs mb-1.5 font-mono">
+          <span class="text-slate-400">Avance del Tablero</span>
+          <span class="text-emerald-400 font-bold drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]">{{ sprintProgress() }}%</span>
+        </div>
+        <div class="h-2 w-full bg-[#0b1421] rounded-full overflow-hidden border border-emerald-500/20 p-0.5">
+          <div
+            class="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full shadow-[0_0_10px_rgba(16,185,129,0.8)] transition-all duration-700 relative"
+            [style.width.%]="sprintProgress()">
+            <div class="absolute inset-0 bg-white/20 animate-pulse"></div>
+          </div>
         </div>
       </div>
 
-      <!-- Selector de proyecto -->
-      <div class="flex items-center gap-3 flex-wrap">
-        <div class="relative">
-          <i class="ri-folder-3-line absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none"></i>
-          <label for="kanban-project-select" class="sr-only">Seleccionar Proyecto</label>
+      <!-- Quick Metrics Bento Counters -->
+      <div class="flex items-center gap-3 font-mono text-center divide-x divide-emerald-500/20">
+        <div class="px-2.5">
+          <span class="text-[10px] uppercase tracking-wider text-slate-400 block">Total</span>
+          <span class="text-base font-bold text-slate-100">{{ boardStats().total }}</span>
+        </div>
+        <div class="px-2.5">
+          <span class="text-[10px] uppercase tracking-wider text-slate-400 block">En Curso</span>
+          <span class="text-base font-bold text-blue-400">{{ boardStats().inProgress }}</span>
+        </div>
+        <div class="px-2.5">
+          <span class="text-[10px] uppercase tracking-wider text-rose-400 block">Defectos</span>
+          <span class="text-base font-bold text-rose-400">{{ boardStats().withDefects }}</span>
+        </div>
+        <div class="px-2.5">
+          <span class="text-[10px] uppercase tracking-wider text-emerald-400 block">Listas</span>
+          <span class="text-base font-bold text-emerald-400 drop-shadow-[0_0_6px_rgba(16,185,129,0.6)]">{{ boardStats().done }}</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Toolbar: Search Bar + Quick Filter Pills -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+      
+      <!-- Quick Filter Pills -->
+      <div class="flex items-center gap-1.5 flex-wrap">
+        <button
+          *ngFor="let f of quickFilters"
+          [id]="'filter-' + f.key"
+          (click)="setFilter(f.key)"
+          [ngClass]="activeFilter() === f.key
+            ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50 shadow-[0_0_10px_rgba(16,185,129,0.2)] font-bold'
+            : 'bg-[#111e30]/60 text-slate-400 border-emerald-500/15 hover:text-slate-200 hover:border-emerald-500/30'"
+          class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all">
+          <i [class]="f.icon + ' text-xs'"></i>
+          <span>{{ f.label }}</span>
+        </button>
+      </div>
+
+      <!-- Search Input -->
+      <div class="relative min-w-[220px]">
+        <i class="ri-search-line absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-xs pointer-events-none"></i>
+        <input
+          type="text"
+          [ngModel]="searchQuery()"
+          (input)="onSearchChange($event)"
+          placeholder="Buscar tareas, código, QA-..."
+          class="w-full pl-9 pr-8 py-1.5 bg-[#111e30]/90 border border-emerald-500/20 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-500/50 transition-all font-mono" />
+        <button
+          *ngIf="searchQuery()"
+          (click)="clearSearch()"
+          class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 text-xs">
+          <i class="ri-close-line"></i>
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════ SYNC MICRO-TOAST ══════════════════════ -->
+  <div *ngIf="syncMessage() || syncing()"
+       class="fixed bottom-6 right-6 z-50 px-4 py-2.5 bg-[#0e1a2b]/95 text-emerald-300 text-xs font-semibold
+              rounded-xl shadow-2xl border border-emerald-500/40 backdrop-blur-md flex items-center gap-2.5 animate-in slide-in-from-bottom-3">
+    <i *ngIf="syncing()" class="ri-loader-4-line animate-spin text-emerald-400 text-sm"></i>
+    <i *ngIf="!syncing() && syncMessage()" class="ri-check-double-line text-emerald-400 text-sm"></i>
+    <span>{{ syncing() ? 'Sincronizando estado en vivo…' : syncMessage() }}</span>
+  </div>
+
+  <!-- ══════════════════════ ESTADO DE CARGA ══════════════════════ -->
+  <div *ngIf="loading()" class="flex-1 flex flex-col items-center justify-center gap-3 p-12 text-slate-500">
+    <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">
+      <i class="ri-loader-4-line text-2xl text-emerald-400 animate-spin"></i>
+    </div>
+    <p class="text-xs font-mono font-semibold text-slate-400 uppercase tracking-wider">Cargando Tablero Estandarizado…</p>
+  </div>
+
+  <!-- ══════════════════════ SIN TAREAS TRAS FILTRO ══════════════════════ -->
+  <div *ngIf="isFilterEmpty()" class="py-12 text-center">
+    <div class="w-12 h-12 rounded-2xl bg-slate-800/80 border border-slate-700/50 flex items-center justify-center mx-auto mb-3 text-slate-500">
+      <i class="ri-filter-off-line text-2xl"></i>
+    </div>
+    <p class="text-sm font-semibold text-slate-300">Ninguna tarjeta coincide con los filtros</p>
+    <p class="text-xs text-slate-500 mt-1">Prueba cambiando el término de búsqueda o seleccionando "Todas".</p>
+    <button (click)="setFilter('all'); clearSearch()" class="mt-3 text-xs text-emerald-400 hover:underline font-semibold">
+      Restablecer filtros
+    </button>
+  </div>
+
+  <!-- ══════════════════════ TABLERO KANBAN ESTANDARIZADO (5 COLUMNAS) ══════════════════════ -->
+  <div *ngIf="!loading() && board()"
+       class="flex-1 overflow-x-auto overflow-y-hidden p-6 kanban-scroll flex gap-6 items-start h-full"
+       cdkDropListGroup>
+
+    <!-- Column Loop -->
+    <div *ngFor="let column of filteredBoard()?.columns"
+         [class]="'flex flex-col w-80 shrink-0 h-full max-h-full rounded-2xl border transition-all shadow-lg ' + getColumnAccentClass(column.id)">
+      
+      <!-- Column Header -->
+      <div class="px-4 py-3 flex items-center justify-between border-b border-emerald-500/15 bg-[#0e1a2b]/90 rounded-t-2xl">
+        <div class="flex items-center gap-2">
+          <i [class]="getColumnIcon(column.id) + ' text-base col-icon'"></i>
+          <h3 class="text-xs font-bold font-mono text-slate-100 uppercase tracking-wider">{{ column.name }}</h3>
+          <span *ngIf="column.id === 'col-in-progress'" class="w-2 h-2 rounded-full bg-emerald-400 pulse-indicator ml-1"></span>
+        </div>
+        <span class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold col-badge">
+          {{ column.tasks.length }}
+        </span>
+      </div>
+
+      <!-- Drop List Area -->
+      <div [id]="'column-' + column.id"
+           cdkDropList
+           [cdkDropListData]="column.tasks"
+           [cdkDropListConnectedTo]="getColumnConnectedIds()"
+           (cdkDropListDropped)="drop($event)"
+           class="flex-1 overflow-y-auto kanban-scroll p-3 space-y-3 min-h-[300px] bg-[#0b1421]/40 rounded-b-2xl">
+
+        <!-- Card Loop -->
+        <div *ngFor="let task of column.tasks"
+             cdkDrag
+             class="group relative bg-[#111e30]/90 rounded-xl border border-emerald-500/20 overflow-hidden
+                    hover:border-emerald-400/50 transition-all duration-200 cursor-grab active:cursor-grabbing
+                    hover:shadow-[0_4px_20px_rgba(16,185,129,0.15)] hover:-translate-y-0.5">
+
+          <!-- Left Border Status Indicator -->
+          <div class="absolute left-0 top-0 bottom-0 w-1"
+               [style.background]="getStatusColor(task.lastExecutionStatusCode)"></div>
+
+          <!-- Drag Placeholder -->
+          <div *cdkDragPlaceholder
+               class="h-28 rounded-xl border-2 border-dashed border-emerald-500/40 bg-emerald-500/10 m-1">
+          </div>
+
+          <!-- Card Content (Clickable) -->
+          <div class="p-3.5 pl-4.5" (click)="openExecution(task)">
+            
+            <!-- Row 1: Priority + Code -->
+            <div class="flex items-center justify-between gap-2 mb-2">
+              <span [ngClass]="{
+                'bg-rose-500/20 text-rose-300 border-rose-500/40': task.priorityCode === 'P0' || task.priorityCode === 'P1',
+                'bg-amber-500/20 text-amber-300 border-amber-500/40': task.priorityCode === 'P2',
+                'bg-blue-500/20 text-blue-300 border-blue-500/40': task.priorityCode === 'P3'
+              }" class="text-[9px] font-mono font-bold px-2 py-0.5 rounded-md border tracking-wider uppercase flex items-center gap-1">
+                <i [class]="task.priorityCode === 'P0' || task.priorityCode === 'P1' ? 'ri-arrow-up-double-line' : (task.priorityCode === 'P2' ? 'ri-equal-line' : 'ri-arrow-down-s-line')"></i>
+                {{ task.priorityCode }} · {{ task.priorityName }}
+              </span>
+
+              <span class="font-mono text-[11px] font-bold text-emerald-400/90 group-hover:text-emerald-300 transition-colors">
+                {{ task.taskCode || 'QA-TASK' }}
+              </span>
+            </div>
+
+            <!-- Title -->
+            <h4 class="text-xs font-bold text-slate-100 leading-snug line-clamp-2 group-hover:text-emerald-300 transition-colors mb-2">
+              {{ task.title }}
+            </h4>
+
+            <!-- Test Case Subtitle Link -->
+            <div *ngIf="task.testCaseTitle" class="text-[11px] text-slate-400 mb-2.5 flex items-center gap-1.5 line-clamp-1 font-mono">
+              <i class="ri-test-tube-line text-emerald-400 shrink-0"></i>
+              <span class="truncate">{{ task.testCaseTitle }}</span>
+            </div>
+
+            <!-- Tags -->
+            <div *ngIf="task.tags && task.tags.length > 0" class="flex flex-wrap gap-1.5 mb-3">
+              <span *ngFor="let tag of task.tags"
+                    class="bg-[#060e1b] text-slate-300 text-[10px] font-mono px-2 py-0.5 rounded-full border border-emerald-500/20">
+                {{ tag }}
+              </span>
+            </div>
+
+            <!-- Progress Bar of Test Steps (if available) -->
+            <div *ngIf="task.totalSteps > 0" class="mb-3">
+              <div class="flex items-center justify-between text-[10px] font-mono mb-1 text-slate-400">
+                <span>Pasos: {{ task.completedSteps }}/{{ task.totalSteps }}</span>
+                <span class="text-emerald-400 font-bold">{{ task.stepProgressPercent }}%</span>
+              </div>
+              <div class="h-1.5 bg-[#060e1b] rounded-full overflow-hidden border border-emerald-500/20">
+                <div class="h-full bg-emerald-400 rounded-full" [style.width.%]="task.stepProgressPercent"></div>
+              </div>
+            </div>
+
+            <!-- Footer: Assignee + Hours + Defects + Due Date -->
+            <div class="flex items-center justify-between pt-2.5 border-t border-emerald-500/15 text-xs text-slate-400 font-mono">
+              
+              <!-- Left: Assignee avatar & name -->
+              <div class="flex items-center gap-2 overflow-hidden">
+                <div *ngIf="task.assigneeName"
+                     class="w-6 h-6 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-[10px] font-black text-emerald-300 shrink-0">
+                  {{ task.assigneeName.charAt(0) | uppercase }}
+                </div>
+                <span class="text-[10px] text-slate-300 truncate max-w-[90px]">
+                  {{ task.assigneeName || 'Sin asignar' }}
+                </span>
+              </div>
+
+              <!-- Right: Estimation / Defects / Date -->
+              <div class="flex items-center gap-2 shrink-0">
+                
+                <!-- Defects Pill -->
+                <div *ngIf="task.openDefectsCount > 0"
+                     class="flex items-center gap-1 px-1.5 py-0.5 rounded bg-rose-500/20 border border-rose-500/30 text-rose-300 text-[10px] font-bold">
+                  <i class="ri-bug-line text-rose-400"></i>
+                  {{ task.openDefectsCount }}
+                </div>
+
+                <!-- Hours Estimated -->
+                <div *ngIf="task.estimatedHours" class="flex items-center gap-1 text-[10px] text-slate-400" title="Horas estimadas">
+                  <i class="ri-time-line text-emerald-400"></i>
+                  <span>{{ task.estimatedHours }}h</span>
+                </div>
+
+                <!-- Due Date -->
+                <div *ngIf="task.dueDate"
+                     class="text-[10px]"
+                     [ngClass]="task.isOverdue ? 'text-rose-400 font-bold' : 'text-slate-500'">
+                  {{ task.dueDate | date:'dd MMM' }}
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Add Task Button at bottom of column -->
+        <button
+          (click)="openCreateModal(column.id)"
+          class="w-full py-2 border border-dashed border-emerald-500/20 rounded-xl text-slate-400 hover:text-emerald-300 hover:border-emerald-500/40 hover:bg-emerald-500/5 text-xs font-mono font-semibold flex items-center justify-center gap-1.5 transition-all">
+          <i class="ri-add-line text-sm"></i>
+          <span>Agregar tarjeta</span>
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════ MODAL: NUEVA TARJETA QA ══════════════════════ -->
+  <div *ngIf="isModalOpen()"
+       class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200">
+    <div class="bg-[#111e30] rounded-2xl border border-emerald-500/30 shadow-2xl max-w-lg w-full overflow-hidden text-slate-100">
+      
+      <!-- Modal Header -->
+      <div class="px-6 py-4 bg-[#060e1b]/90 border-b border-emerald-500/20 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+            <i class="ri-add-box-line text-lg"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-slate-100">Nueva Tarjeta QA</h3>
+            <p class="text-[11px] text-slate-400 font-mono">Crear tarea en tablero ágil estandarizado</p>
+          </div>
+        </div>
+        <button (click)="closeModal()" class="text-slate-400 hover:text-slate-100 p-1">
+          <i class="ri-close-line text-xl"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body Form -->
+      <div class="p-6 space-y-4 max-h-[75vh] overflow-y-auto kanban-scroll">
+        
+        <!-- Título -->
+        <div>
+          <label for="task-title" class="block text-xs font-mono font-semibold text-slate-300 mb-1">Título de la Tarea *</label>
+          <input
+            id="task-title"
+            type="text"
+            [(ngModel)]="newTaskForm.title"
+            placeholder="Ej: Validar flujo de checkout con tarjeta rechazada"
+            class="w-full px-3.5 py-2.5 bg-[#0b1421] border border-emerald-500/20 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-500/50" />
+        </div>
+
+        <!-- Descripción -->
+        <div>
+          <label for="task-desc" class="block text-xs font-mono font-semibold text-slate-300 mb-1">Descripción / Alcance</label>
+          <textarea
+            id="task-desc"
+            [(ngModel)]="newTaskForm.description"
+            rows="3"
+            placeholder="Detalles sobre precondiciones, pasos clave o requerimientos a verificar..."
+            class="w-full px-3.5 py-2.5 bg-[#0b1421] border border-emerald-500/20 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-500/50"></textarea>
+        </div>
+
+        <!-- Columna Destino & Prioridad -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          
+          <!-- Columna -->
+          <div>
+            <label for="task-column" class="block text-xs font-mono font-semibold text-slate-300 mb-1">Columna Inicial</label>
+            <select
+              id="task-column"
+              [(ngModel)]="newTaskForm.kanbanColumnId"
+              class="w-full px-3.5 py-2.5 bg-[#0b1421] border border-emerald-500/20 rounded-xl text-xs font-semibold text-slate-100 focus:outline-none focus:border-emerald-400">
+              <option *ngFor="let col of standardColumns" [value]="col.id">{{ col.name }}</option>
+            </select>
+          </div>
+
+          <!-- Prioridad -->
+          <div>
+            <label for="task-priority" class="block text-xs font-mono font-semibold text-slate-300 mb-1">Prioridad</label>
+            <select
+              id="task-priority"
+              [ngModel]="newTaskForm.priorityCode"
+              (ngModelChange)="onPriorityChange($event)"
+              class="w-full px-3.5 py-2.5 bg-[#0b1421] border border-emerald-500/20 rounded-xl text-xs font-semibold text-slate-100 focus:outline-none focus:border-emerald-400">
+              <option value="P0" class="text-rose-400">P0 - Crítica</option>
+              <option value="P1" class="text-rose-300">P1 - Alta</option>
+              <option value="P2" class="text-amber-300">P2 - Media</option>
+              <option value="P3" class="text-blue-300">P3 - Baja</option>
+            </select>
+          </div>
+
+        </div>
+
+        <!-- Caso de Prueba Asociado -->
+        <div>
+          <label for="task-testcase" class="block text-xs font-mono font-semibold text-slate-300 mb-1">Caso de Prueba Vinculado (Opcional)</label>
           <select
-            id="kanban-project-select"
-            class="pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-xl text-sm text-gray-700
-                   focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all cursor-pointer"
-            (change)="onProjectChange($event)">
-            <option value="">— Seleccionar Proyecto —</option>
-            <option *ngFor="let p of projects()" [value]="p.id">{{ p.name }}</option>
+            id="task-testcase"
+            [(ngModel)]="newTaskForm.testCaseId"
+            class="w-full px-3.5 py-2.5 bg-[#0b1421] border border-emerald-500/20 rounded-xl text-xs font-semibold text-slate-100 focus:outline-none focus:border-emerald-400">
+            <option value="">— Ninguno / Tarea Independiente —</option>
+            <option *ngFor="let tc of testCases()" [value]="tc.id">{{ tc.title }} ({{ tc.priority || 'Normal' }})</option>
           </select>
         </div>
 
-        <!-- Barra de búsqueda -->
-        <div class="relative" *ngIf="board()">
-          <i class="ri-search-line absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm pointer-events-none"></i>
-          <label for="kanban-search" class="sr-only">Buscar tarea</label>
+        <!-- Asignado & Estimación (Horas) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          
+          <!-- Asignado -->
+          <div>
+            <label for="task-assignee" class="block text-xs font-mono font-semibold text-slate-300 mb-1">Responsable</label>
+            <select
+              id="task-assignee"
+              [(ngModel)]="newTaskForm.assigneeId"
+              class="w-full px-3.5 py-2.5 bg-[#0b1421] border border-emerald-500/20 rounded-xl text-xs font-semibold text-slate-100 focus:outline-none focus:border-emerald-400">
+              <option value="">— Sin Asignar —</option>
+              <option *ngFor="let u of users()" [value]="u.id">{{ u.fullName || u.username }} ({{ u.username }})</option>
+            </select>
+          </div>
+
+          <!-- Estimación -->
+          <div>
+            <label for="task-hours" class="block text-xs font-mono font-semibold text-slate-300 mb-1">Estimación (Horas)</label>
+            <input
+              id="task-hours"
+              type="number"
+              min="0.5"
+              step="0.5"
+              [(ngModel)]="newTaskForm.estimatedHours"
+              class="w-full px-3.5 py-2.5 bg-[#0b1421] border border-emerald-500/20 rounded-xl text-xs text-slate-100 focus:outline-none focus:border-emerald-400" />
+          </div>
+
+        </div>
+
+        <!-- Etiquetas (Tags) -->
+        <div>
+          <label for="task-tags" class="block text-xs font-mono font-semibold text-slate-300 mb-1">Etiquetas (separadas por comas)</label>
           <input
-            id="kanban-search"
+            id="task-tags"
             type="text"
-            placeholder="Buscar tarea…"
-            class="pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-xl text-sm text-gray-700
-                   placeholder:text-gray-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all w-44"
-            (input)="onSearchChange($event)" />
-        </div>
-      </div>
-    </div>
-
-    <!-- ── Stats rápidas del tablero ── -->
-    <div *ngIf="board() && !loading()" class="mt-4 flex flex-wrap gap-2">
-      <div class="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-200 text-xs font-medium text-gray-600">
-        <span class="w-2 h-2 rounded-full bg-gray-400"></span>
-        <span>Total: <strong class="text-gray-800">{{ boardStats().total }}</strong></span>
-      </div>
-      <div class="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 rounded-lg border border-emerald-200 text-xs font-medium text-emerald-700">
-        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-        <span>Aprobados: <strong>{{ boardStats().passed }}</strong></span>
-      </div>
-      <div class="flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 rounded-lg border border-rose-200 text-xs font-medium text-rose-700">
-        <span class="w-2 h-2 rounded-full bg-rose-500"></span>
-        <span>Fallidos: <strong>{{ boardStats().failed }}</strong></span>
-      </div>
-      <div class="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 rounded-lg border border-blue-200 text-xs font-medium text-blue-700">
-        <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-        <span>En progreso: <strong>{{ boardStats().inProgress }}</strong></span>
-      </div>
-      <div *ngIf="boardStats().withDefects > 0"
-           class="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 rounded-lg border border-amber-200 text-xs font-medium text-amber-700">
-        <i class="ri-bug-line"></i>
-        <span>Con defectos: <strong>{{ boardStats().withDefects }}</strong></span>
-      </div>
-    </div>
-
-    <!-- ── Filtros rápidos ── -->
-    <div *ngIf="board() && !loading()" class="mt-3 flex flex-wrap gap-1.5">
-      <button *ngFor="let f of quickFilters" [id]="'filter-' + f.key" (click)="setFilter(f.key)" [ngClass]="{'border-indigo-500 text-indigo-600 bg-indigo-50': activeFilter() === f.key}" class="flex items-center gap-1.5 px-3 py-1 rounded-lg border border-gray-200 bg-gray-50 text-[11px] font-semibold text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-100 transition-all tracking-wide">
-        <i [class]="f.icon"></i> {{ f.label }}
-      </button>
-    </div>
-  </div>
-
-  <!-- ══════════════════════ SYNC TOAST ══════════════════════ -->
-  <div *ngIf="syncMessage() || syncing()"
-       class="fixed bottom-6 right-6 z-50 px-5 py-3 bg-indigo-600 text-white text-sm font-semibold
-              rounded-2xl shadow-2xl shadow-indigo-900/50 flex items-center gap-3 animate-in slide-in-from-bottom-4
-              border border-indigo-400/30 backdrop-blur-sm transition-all">
-    <i *ngIf="syncing()" class="ri-loader-4-line animate-spin text-indigo-200"></i>
-    <i *ngIf="!syncing() && syncMessage()" class="ri-check-double-line text-emerald-300"></i>
-    <span>{{ syncing() ? 'Sincronizando con ejecución de prueba…' : syncMessage() }}</span>
-  </div>
-
-  <!-- ══════════════════════ ESTADOS ══════════════════════ -->
-
-  <!-- Loading -->
-  <div *ngIf="loading()" class="flex-1 flex flex-col items-center justify-center gap-4 text-gray-500">
-    <div class="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center">
-      <i class="ri-loader-4-line text-2xl text-indigo-500 animate-spin"></i>
-    </div>
-    <p class="text-sm font-medium text-gray-500">Cargando tablero…</p>
-  </div>
-
-  <!-- Sin proyecto -->
-  <div *ngIf="!loading() && !board()" class="flex-1 flex flex-col items-center justify-center gap-4 text-center px-8">
-    <div class="p-4 bg-indigo-50 rounded-2xl border border-indigo-100">
-      <i class="ri-kanban-view text-4xl text-indigo-400"></i>
-    </div>
-    <div>
-      <h3 class="text-base font-bold text-gray-700 mb-1">Selecciona un Proyecto</h3>
-      <p class="text-sm text-gray-500 max-w-xs">Elige un proyecto del selector para cargar su tablero de certificación Kanban.</p>
-    </div>
-  </div>
-
-  <!-- Sin tareas con filtro -->
-  <div *ngIf="isFilterEmpty()" class="mx-auto mt-12 text-center px-8">
-    <i class="ri-filter-off-line text-4xl text-gray-700"></i>
-    <p class="text-sm text-gray-500 mt-2">Ninguna tarea coincide con el filtro activo.</p>
-  </div>
-
-  <!-- ══════════════════════ TABLERO ══════════════════════ -->
-  <div *ngIf="!loading() && board()"
-       class="flex-1 overflow-x-auto p-5 bg-gray-50/80" cdkDropListGroup>
-    <div class="flex gap-5 h-full" style="min-width: max-content;">
-
-      <!-- ── Columna ── -->
-      <div *ngFor="let column of filteredBoard()?.columns"
-           [class]="'flex flex-col w-80 rounded-2xl border overflow-hidden transition-all ' + getColumnAccentClass(column.name)">
-
-        <!-- Encabezado de columna -->
-        <div class="px-4 py-3.5 flex items-center justify-between border-b border-gray-100 bg-white/80">
-          <div class="flex items-center gap-2.5">
-            <i [class]="getColumnIcon(column.name) + ' text-base col-icon'"></i>
-            <span class="text-sm font-bold text-gray-700 tracking-tight">{{ column.name }}</span>
-          </div>
-          <span class="px-2 py-0.5 rounded-full text-[10px] font-black col-badge">
-            {{ column.tasks.length }}
-          </span>
+            [(ngModel)]="newTaskForm.tagsString"
+            placeholder="Ej: Regresión, API, Automation, E2E"
+            class="w-full px-3.5 py-2.5 bg-[#0b1421] border border-emerald-500/20 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-400" />
         </div>
 
-        <!-- Drop area -->
-        <div [id]="'column-' + column.id"
-             cdkDropList
-             [cdkDropListData]="column.tasks"
-             [cdkDropListConnectedTo]="getColumnConnectedIds()"
-             (cdkDropListDropped)="drop($event)"
-             class="flex-1 overflow-y-auto p-3 space-y-3 min-h-[200px] custom-scrollbar">
+      </div>
 
-          <!-- ── Tarjeta de Tarea ── -->
-          <div *ngFor="let task of column.tasks"
-               cdkDrag
-               class="group relative bg-white rounded-xl border border-gray-100 overflow-hidden
-                      hover:border-indigo-300 transition-all duration-200 cursor-grab active:cursor-grabbing
-                      hover:shadow-md hover:-translate-y-0.5">
-
-            <!-- Borde de estado de ejecución -->
-            <div class="absolute top-0 left-0 w-1 h-full"
-                 [style.background]="getStatusColor(task.lastExecutionStatusCode)"></div>
-
-            <!-- Drag handle placeholder -->
-            <div *cdkDragPlaceholder
-                 class="h-24 rounded-xl border-2 border-dashed border-indigo-500/30 bg-indigo-500/5 m-1">
-            </div>
-
-            <button class="w-full text-left p-4 pl-5" (click)="openExecution(task)" (keydown.enter)="openExecution(task)">
-
-              <!-- Row 1: Prioridad + Alerta vencido + Botón abrir -->
-              <div class="flex items-start justify-between mb-3 gap-2">
-                <div class="flex items-center gap-1.5 flex-wrap">
-                  <!-- Badge prioridad -->
-                  <span [ngClass]="{
-                    'bg-rose-50 text-rose-700 border-rose-200':    task.priorityCode === 'P0' || task.priorityCode === 'P1',
-                    'bg-amber-50 text-amber-700 border-amber-200': task.priorityCode === 'P2',
-                    'bg-blue-50 text-blue-700 border-blue-200':  task.priorityCode === 'P3',
-                    'bg-gray-50 text-gray-600 border-gray-200':  task.priorityCode === 'P4'
-                  }" class="text-[9px] font-black px-2 py-0.5 rounded-md border tracking-widest uppercase">
-                    {{ task.priorityCode }} · {{ task.priorityName }}
-                  </span>
-                  <!-- Vencida -->
-                  <span *ngIf="task.isOverdue"
-                        class="text-[9px] font-black px-2 py-0.5 rounded-md border border-red-500/30
-                               bg-red-500/10 text-red-400 tracking-widest uppercase">
-                    <i class="ri-alarm-warning-line"></i> Vencida
-                  </span>
-                </div>
-                <i class="ri-external-link-line text-gray-600 group-hover:text-indigo-400 transition-colors text-sm shrink-0 mt-0.5"></i>
-              </div>
-
-              <!-- Título -->
-              <h4 class="text-sm font-bold text-gray-800 leading-snug line-clamp-2
-                         group-hover:text-indigo-700 transition-colors mb-3">
-                {{ task.title }}
-              </h4>
-
-              <!-- Subtítulo (caso de prueba vinculado) -->
-              <p *ngIf="task.testCaseTitle" class="text-[11px] text-gray-500 mb-3 flex items-center gap-1.5 line-clamp-1">
-                <i class="ri-test-tube-line text-gray-400 shrink-0"></i>
-                {{ task.testCaseTitle }}
-              </p>
-
-              <!-- Barra de progreso de pasos -->
-              <div *ngIf="task.totalSteps > 0" class="mb-3">
-                <div class="flex items-center justify-between mb-1.5">
-                  <span class="text-[10px] font-semibold text-gray-500">
-                    Pasos {{ task.completedSteps }}/{{ task.totalSteps }}
-                  </span>
-                  <span [ngClass]="{
-                    'text-emerald-400': task.stepProgressPercent === 100,
-                    'text-blue-400':    task.stepProgressPercent > 0 && task.stepProgressPercent < 100,
-                    'text-gray-500':    task.stepProgressPercent === 0
-                  }" class="text-[10px] font-black">{{ task.stepProgressPercent }}%</span>
-                </div>
-                <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                  <div class="h-full rounded-full transition-all duration-500"
-                       [style.width.%]="task.stepProgressPercent"
-                       [ngClass]="{
-                         'bg-emerald-500': task.stepProgressPercent === 100,
-                         'bg-blue-500':    task.stepProgressPercent > 0 && task.stepProgressPercent < 100,
-                         'bg-gray-300':    task.stepProgressPercent === 0
-                       }">
-                  </div>
-                </div>
-              </div>
-
-              <!-- Footer: assignee + SUT + defectos + fecha -->
-              <div class="flex items-center justify-between pt-3 border-t border-gray-100">
-                <!-- Izquierda: avatar + SUT -->
-                <div class="flex items-center gap-2 overflow-hidden">
-                  <div *ngIf="task.assigneeName"
-                       class="w-6 h-6 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600
-                              flex items-center justify-center text-[9px] font-black text-white shrink-0">
-                    {{ task.assigneeName.charAt(0) | uppercase }}
-                  </div>
-                  <span class="text-[10px] text-gray-500 font-medium truncate">
-                    {{ task.assigneeName || 'Sin asignar' }}
-                  </span>
-                  <span *ngIf="task.sutName"
-                        class="hidden sm:flex items-center gap-1 text-[9px] text-gray-500 bg-gray-50
-                               px-1.5 py-0.5 rounded-md border border-gray-200 truncate max-w-[80px]">
-                    <i class="ri-computer-line"></i>
-                    {{ task.sutName }}
-                  </span>
-                </div>
-
-                <!-- Derecha: defectos + fecha -->
-                <div class="flex items-center gap-2 shrink-0">
-                  <!-- Defectos abiertos -->
-                  <div *ngIf="task.openDefectsCount > 0"
-                       class="flex items-center gap-1 px-1.5 py-0.5 rounded-md
-                              bg-red-500/10 border border-red-500/20 text-red-400 text-[9px] font-black">
-                    <i class="ri-bug-line"></i>
-                    {{ task.openDefectsCount }}
-                  </div>
-                  <!-- Fecha -->
-                  <div *ngIf="task.dueDate"
-                       class="text-[10px] font-medium flex items-center gap-1"
-                       [ngClass]="task.isOverdue ? 'text-red-400' : 'text-gray-500'">
-                    <i class="ri-calendar-event-line"></i>
-                    {{ task.dueDate | date:'dd MMM' }}
-                  </div>
-                </div>
-              </div>
-
-              <!-- Chip estado última ejecución -->
-              <div *ngIf="task.lastExecutionStatusCode"
-                   class="mt-2.5 flex items-center gap-1.5 text-[10px] font-semibold"
-                   [ngClass]="{
-                     'text-emerald-600': task.lastExecutionStatusCode === 'PASSED',
-                     'text-rose-600':    task.lastExecutionStatusCode === 'FAILED',
-                     'text-blue-600':    task.lastExecutionStatusCode === 'IN_PROGRESS',
-                     'text-amber-600':   task.lastExecutionStatusCode === 'BLOCKED',
-                     'text-gray-500':    task.lastExecutionStatusCode === 'PENDING'
-                   }">
-                <span class="w-1.5 h-1.5 rounded-full"
-                      [ngClass]="{
-                        'bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.6)]': task.lastExecutionStatusCode === 'PASSED',
-                        'bg-red-500 shadow-[0_0_6px_rgba(239,68,68,0.6)]':     task.lastExecutionStatusCode === 'FAILED',
-                        'bg-blue-500 animate-pulse':                             task.lastExecutionStatusCode === 'IN_PROGRESS',
-                        'bg-amber-500':                                          task.lastExecutionStatusCode === 'BLOCKED',
-                        'bg-gray-600':                                           task.lastExecutionStatusCode === 'PENDING'
-                      }">
-                </span>
-                {{ task.lastExecutionStatusName }}
-              </div>
-
-            </button>
-          </div>
-
-          <!-- Añadir tarea (placeholder) -->
-          <button class="w-full py-2.5 px-4 bg-transparent border border-gray-200 border-dashed rounded-xl
-                         text-[11px] font-bold text-gray-400 hover:text-gray-600 hover:border-gray-300
-                         hover:bg-gray-50 transition-all flex items-center justify-center gap-2">
-            <i class="ri-add-line text-sm"></i>
-            <span>Añadir tarea</span>
-          </button>
-
-        </div>
+      <!-- Modal Footer Actions -->
+      <div class="px-6 py-4 bg-[#060e1b]/90 border-t border-emerald-500/20 flex items-center justify-end gap-3">
+        <button
+          (click)="closeModal()"
+          class="px-4 py-2 rounded-xl bg-slate-900 border border-slate-700/50 text-slate-300 hover:text-slate-100 text-xs font-semibold">
+          Cancelar
+        </button>
+        <button
+          (click)="saveNewTask()"
+          [disabled]="isSavingTask()"
+          class="px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center gap-2 shadow-[0_0_15px_rgba(16,185,129,0.35)] disabled:opacity-50">
+          <i *ngIf="isSavingTask()" class="ri-loader-4-line animate-spin text-sm"></i>
+          <span>{{ isSavingTask() ? 'Guardando…' : 'Crear Tarjeta' }}</span>
+        </button>
       </div>
 
     </div>

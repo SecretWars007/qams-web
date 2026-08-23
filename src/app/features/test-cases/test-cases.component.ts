@@ -1,7 +1,7 @@
 import Swal from 'sweetalert2';
-import { Component, OnInit, signal, computed, inject, DestroyRef } from '@angular/core';
+import { Component, OnInit, signal, computed, inject, DestroyRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TestCasesService } from '../../core/services/test-cases.service';
 import { TestSuitesService } from '../../core/services/test-suites.service';
@@ -16,15 +16,28 @@ import { Requirement } from '../../core/models/requirement.model';
 import { CatalogsService } from '../../core/services/catalogs.service';
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { HasPermissionDirective } from '../../shared/directives/has-permission.directive';
+import { PageHeaderComponent, Breadcrumb } from '../../shared/components/page-header/page-header.component';
+import { FilterPanelComponent, FilterField } from '../../shared/components/filter-panel/filter-panel.component';
+import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
+import { StatusBadgeComponent, BadgeType } from '../../shared/components/status-badge/status-badge.component';
 
 @Component({
   selector: 'app-test-cases',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, HasPermissionDirective],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule,
+    PageHeaderComponent,
+    FilterPanelComponent,
+    ConfirmDialogComponent,
+    StatusBadgeComponent,
+  ],
   templateUrl: './test-cases.component.html',
   styleUrls: ['./test-cases.component.scss']
 })
 export class TestCasesComponent implements OnInit {
+  @ViewChild('confirmDelete') confirmDeleteDialog!: ConfirmDialogComponent;
   private readonly destroyRef = inject(DestroyRef);
   projects = signal<Project[]>([]);
   testCases = signal<TestCase[]>([]);
@@ -44,13 +57,40 @@ export class TestCasesComponent implements OnInit {
   selectedTestCaseSteps = signal<any[]>([]);
   selectedTestCaseTitle = signal<string>('');
   editingTestCaseId = signal<string | null>(null);
+  /** ID del caso a eliminar (para el confirm-dialog) */
+  pendingDeleteCase = signal<TestCase | null>(null);
   
   // CSV Import / Export Signals
   showImportModal = signal<boolean>(false);
   importedRows = signal<any[]>([]);
   isImporting = signal<boolean>(false);
   importErrors = signal<string[]>([]);
-  
+
+  // ===== Filtros avanzados =====
+  filterValues = signal<Record<string, any>>({});
+
+  /** Definición de campos del FilterPanel */
+  get filterFields(): FilterField[] {
+    return [
+      { key: 'projectId', label: 'Proyecto', type: 'select',
+        options: this.projects().map(p => ({ value: p.id, label: p.name })) },
+      { key: 'testSuiteId', label: 'Escenario / Suite', type: 'select',
+        options: this.testSuites().map(s => ({ value: s.id, label: s.name })) },
+      { key: 'priority', label: 'Prioridad', type: 'select', options: [
+        { value: 'Crítica', label: 'Crítica' }, { value: 'Alta', label: 'Alta' },
+        { value: 'Media', label: 'Media' }, { value: 'Baja', label: 'Baja' }
+      ]},
+      { key: 'assignedUserId', label: 'Tester Asignado', type: 'select',
+        options: this.users().map(u => ({ value: u.id, label: u.fullName })) },
+    ];
+  }
+
+  /** Breadcrumbs de la página */
+  breadcrumbs: Breadcrumb[] = [
+    { label: 'Ciclo QA — ISTQB' },
+    { label: 'Casos de Prueba' }
+  ];
+
   testCaseForm!: FormGroup;
 
   activeTab: 'general' | 'execution' | 'steps' = 'general';
@@ -71,6 +111,28 @@ export class TestCasesComponent implements OnInit {
 
     return groups;
   });
+
+  /** Casos filtrados por los filtros avanzados */
+  filteredTestCases = computed(() => {
+    const filters = this.filterValues();
+    return this.testCases().filter(tc => {
+      if (filters['priority'] && tc.priority?.name !== filters['priority']) return false;
+      if (filters['testSuiteId'] && tc.suite?.id !== filters['testSuiteId']) return false;
+      return true;
+    });
+  });
+
+  // ===== Badge helpers =====
+  getPriorityBadgeType(priorityName: string): BadgeType {
+    const map: Record<string, BadgeType> = {
+      'Crítica': 'danger', 'Alta': 'warning', 'Media': 'info', 'Baja': 'gray'
+    };
+    return map[priorityName] ?? 'gray';
+  }
+
+  getStatusBadgeType(isActive: boolean): BadgeType {
+    return isActive ? 'success' : 'gray';
+  }
 
   private readonly testCasesService = inject(TestCasesService);
   private readonly testSuitesService = inject(TestSuitesService);
@@ -126,6 +188,14 @@ export class TestCasesComponent implements OnInit {
 
     // Disable BDD steps by default since isBdd is false
     this.testCaseForm.get('bddSteps')?.disable();
+
+    // Watch for projectId changes in the modal to load suites and requirements dynamically
+    this.testCaseForm.get('projectId')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(pid => {
+      if (pid) {
+        this.loadTestSuites(pid);
+        this.loadRequirements(pid);
+      }
+    });
 
     this.testCaseForm.get('isBdd')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(isBdd => {
       if (isBdd) {
@@ -219,6 +289,23 @@ export class TestCasesComponent implements OnInit {
       next: (data) => this.projects.set(data),
       error: (err) => console.error('Error loading projects:', err)
     });
+  }
+
+  onProjectSelect(projectId: string | null): void {
+    this.projectId.set(projectId || null);
+    this.testSuiteId.set(null);
+
+    if (projectId) {
+      this.loadProjectDetails(projectId);
+      this.loadTestSuites(projectId);
+      this.loadRequirements(projectId);
+    } else {
+      this.projectTitle.set('');
+      this.projectStatus.set('');
+      this.testSuites.set([]);
+      this.requirements.set([]);
+    }
+    this.loadTestCases();
   }
 
   onProjectChange(event: any) {
@@ -337,7 +424,7 @@ export class TestCasesComponent implements OnInit {
           icon: 'error',
           title: 'Error',
           text: 'Error al cargar los pasos del caso de prueba',
-          confirmButtonColor: '#150fbd'
+          confirmButtonColor: '#10B981'
         });
       }
     });
@@ -493,7 +580,7 @@ export class TestCasesComponent implements OnInit {
               icon: 'error',
               title: 'Error',
               text: 'Error al actualizar el caso de prueba. Verifica los datos.',
-              confirmButtonColor: '#150fbd'
+              confirmButtonColor: '#10B981'
             });
           }
         });
@@ -511,7 +598,7 @@ export class TestCasesComponent implements OnInit {
               icon: 'error',
               title: 'Error',
               text: 'Error al crear el caso de prueba. Verifica los datos.',
-              confirmButtonColor: '#150fbd'
+              confirmButtonColor: '#10B981'
             });
           }
         });
@@ -520,33 +607,28 @@ export class TestCasesComponent implements OnInit {
   }
 
   /**
-   * Elimina un caso de prueba con confirmación de SweetAlert2
+   * Elimina un caso de prueba — abre confirm-dialog nativo en lugar de SweetAlert2
    */
   deleteTestCase(testCase: TestCase, event: Event) {
     event.stopPropagation();
-    Swal.fire({
-      title: '¿Estás seguro?',
-      text: `Se eliminará el caso de prueba "${testCase.title}". Esta acción no se puede deshacer.`,
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#e3342f',
-      cancelButtonColor: '#6b7280',
-      confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        this.loading.set(true);
-        this.testCasesService.deleteTestCase(testCase.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-          next: () => {
-            Swal.fire('Eliminado', 'El caso de prueba ha sido eliminado.', 'success');
-            this.loadTestCases();
-          },
-          error: (err) => {
-            console.error('Error deleting test case', err);
-            this.loading.set(false);
-            Swal.fire('Error', 'No se pudo eliminar el caso de prueba.', 'error');
-          }
-        });
+    this.pendingDeleteCase.set(testCase);
+    this.confirmDeleteDialog.open();
+  }
+
+  /** Confirma la eliminación desde el confirm-dialog */
+  onDeleteConfirmed() {
+    const testCase = this.pendingDeleteCase();
+    if (!testCase) return;
+    this.loading.set(true);
+    this.testCasesService.deleteTestCase(testCase.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: () => {
+        this.pendingDeleteCase.set(null);
+        this.loadTestCases();
+      },
+      error: (err) => {
+        console.error('Error deleting test case', err);
+        this.loading.set(false);
+        Swal.fire('Error', 'No se pudo eliminar el caso de prueba.', 'error');
       }
     });
   }
@@ -720,7 +802,7 @@ export class TestCasesComponent implements OnInit {
               icon: 'success',
               title: 'Importación Exitosa',
               text: `Se importaron ${completed} caso(s) de prueba exitosamente.`,
-              confirmButtonColor: '#150fbd'
+              confirmButtonColor: '#10B981'
             });
             this.loadTestCases();
           }

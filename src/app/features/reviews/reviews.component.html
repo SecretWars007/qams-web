@@ -4,7 +4,7 @@
   <!-- HEADER -->
   <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-white/5">
     <div class="flex items-center gap-3">
-      <div class="p-3 bg-indigo-500/10 rounded-2xl border border-indigo-500/20 text-indigo-400">
+      <div class="p-3 bg-emerald-500/10 rounded-2xl border border-emerald-500/20 text-emerald-400">
         <i class="ri-git-pull-request-line text-2xl"></i>
       </div>
       <div>
@@ -16,13 +16,13 @@
     <!-- Actions & Project Selector -->
     <div class="flex items-center gap-3">
       <select [value]="selectedProjectId()" (change)="onProjectChange($event)"
-              class="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-sm text-gray-200 focus:outline-none focus:border-indigo-500">
+              class="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-sm text-gray-200 focus:outline-none focus:border-emerald-500">
         <option value="">— Seleccionar Proyecto —</option>
         <option *ngFor="let p of projects()" [value]="p.id">{{ p.name }}</option>
       </select>
 
       <button (click)="openCreateModal()" [disabled]="!selectedProjectId()"
-              class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white rounded-xl text-sm font-semibold flex items-center gap-2 shadow-lg shadow-indigo-600/30 transition-all">
+              class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white rounded-xl text-sm font-semibold flex items-center gap-2 shadow-lg shadow-indigo-600/30 transition-all">
         <i class="ri-add-line text-lg"></i>
         <span>Nueva Revisión</span>
       </button>
@@ -55,7 +55,7 @@
     <!-- LIST OF REVIEWS -->
     <div class="lg:col-span-5 flex flex-col gap-3 overflow-y-auto pr-2 custom-scrollbar">
       <div *ngIf="loading()" class="py-12 text-center text-gray-500">
-        <i class="ri-loader-4-line text-3xl animate-spin text-indigo-400"></i>
+        <i class="ri-loader-4-line text-3xl animate-spin text-emerald-400"></i>
         <p class="text-sm mt-2">Cargando revisiones...</p>
       </div>
 
@@ -64,9 +64,9 @@
         <p class="text-sm mt-2">No hay sesiones de revisión registradas en este proyecto.</p>
       </div>
 
-      <div *ngFor="let s of sessions()" tabindex="0" (keydown.enter)="selectSession(s)" (click)="selectSession(s)" [ngClass]="{'border-indigo-500/50 bg-indigo-500/5': selectedSession()?.id === s.id}" class="p-4 bg-white/3 border border-white/5 rounded-2xl hover:border-white/20 cursor-pointer transition-all focus:outline-none focus:border-indigo-500">
+      <div *ngFor="let s of sessions()" tabindex="0" (keydown.enter)="selectSession(s)" (click)="selectSession(s)" [ngClass]="{'border-emerald-500/50 bg-emerald-500/5': selectedSession()?.id === s.id}" class="p-4 bg-white/3 border border-white/5 rounded-2xl hover:border-white/20 cursor-pointer transition-all focus:outline-none focus:border-emerald-500">
         <div class="flex items-center justify-between mb-2">
-          <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+          <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
             {{ s.reviewTypeName }}
           </span>
           <span [class]="'px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase border ' + getReviewStatusClass(s.statusCode)">
@@ -93,7 +93,7 @@
         <div class="flex items-start justify-between border-b border-white/5 pb-4">
           <div>
             <div class="flex items-center gap-2 mb-1">
-              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
                 {{ session.reviewTypeName }}
               </span>
               <span class="text-xs text-gray-400">Creado por: {{ session.createdByUserName || 'N/A' }}</span>
@@ -118,7 +118,7 @@
         <!-- Criteria ISTQB -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div class="p-3 bg-white/3 border border-white/5 rounded-xl">
-            <span class="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">Criterios de Entrada (Entry Criteria)</span>
+            <span class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">Criterios de Entrada (Entry Criteria)</span>
             <p class="text-xs text-gray-300 mt-1">{{ session.entryCriteria || 'No especificados.' }}</p>
           </div>
           <div class="p-3 bg-white/3 border border-white/5 rounded-xl">
@@ -177,19 +177,19 @@
       <div>
         <label for="reviewTitle" class="text-xs font-semibold text-gray-400">Título de la Sesión</label>
         <input id="reviewTitle" [(ngModel)]="newSession.title" type="text" placeholder="Ej. Revisión de Requerimientos v1.2"
-               class="w-full mt-1 px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500" />
+               class="w-full mt-1 px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" />
       </div>
 
       <div>
         <label for="reviewArtifact" class="text-xs font-semibold text-gray-400">Artefacto a Revisar</label>
         <input id="reviewArtifact" [(ngModel)]="newSession.artifactUnderReview" type="text" placeholder="Ej. Documentación SRS / Código Backend"
-               class="w-full mt-1 px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500" />
+               class="w-full mt-1 px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" />
       </div>
 
       <div>
         <label for="reviewType" class="text-xs font-semibold text-gray-400">Tipo de Revisión (ISTQB)</label>
         <select id="reviewType" [(ngModel)]="newSession.reviewTypeId"
-                class="w-full mt-1 px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500">
+                class="w-full mt-1 px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500">
           <option [value]="1">Informal</option>
           <option [value]="2">Walkthrough</option>
           <option [value]="3">Revisión Técnica</option>
@@ -199,7 +199,7 @@
 
       <div class="flex items-center justify-end gap-3 pt-4 border-t border-white/5">
         <button (click)="closeCreateModal()" class="px-4 py-2 bg-white/5 text-gray-300 rounded-xl text-sm font-semibold">Cancelar</button>
-        <button (click)="createSession()" class="px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-semibold">Guardar Sesión</button>
+        <button (click)="createSession()" class="px-4 py-2 bg-emerald-600 text-white rounded-xl text-sm font-semibold">Guardar Sesión</button>
       </div>
     </div>
   </div>
@@ -212,13 +212,13 @@
       <div>
         <label for="findingDesc" class="text-xs font-semibold text-gray-400">Descripción</label>
         <textarea id="findingDesc" [(ngModel)]="newFinding.description" rows="3" placeholder="Detalle la inconsistencia o mejora encontrada..."
-                  class="w-full mt-1 px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500"></textarea>
+                  class="w-full mt-1 px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500"></textarea>
       </div>
 
       <div>
         <label for="findingLoc" class="text-xs font-semibold text-gray-400">Ubicación en el Artefacto</label>
         <input id="findingLoc" [(ngModel)]="newFinding.location" type="text" placeholder="Ej. Sección 3.2 / Línea 45"
-               class="w-full mt-1 px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500" />
+               class="w-full mt-1 px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-emerald-500" />
       </div>
 
       <div class="grid grid-cols-2 gap-3">

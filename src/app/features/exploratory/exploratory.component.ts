@@ -168,7 +168,7 @@ export class ExploratoryComponent implements OnInit {
       showCancelButton: true,
       confirmButtonText: 'Sí, iniciar',
       cancelButtonText: 'Cancelar',
-      confirmButtonColor: '#150fbd'
+      confirmButtonColor: '#10B981'
     }).then((result) => {
       if (result.isConfirmed) {
         this.exploratoryService.startSession(session.id)
