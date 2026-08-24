@@ -180,9 +180,14 @@ export class MainLayoutComponent implements OnInit {
     this.projectsService.getProjects().subscribe({
       next: (projs) => {
         this.projects.set(projs);
-        if (projs.length > 0 && !this.activeProjectId()) {
-          const initialId = projs[0].id;
-          this.projectContext.setActiveProject(initialId);
+        const currentId = this.activeProjectId();
+        if (projs.length > 0) {
+          const isValid = currentId && projs.some(p => p.id === currentId);
+          if (!isValid) {
+            this.projectContext.setActiveProject(projs[0].id);
+          }
+        } else {
+          this.projectContext.clearActiveProject();
         }
       },
       error: (err) => console.error('[MainLayout] Error loading projects:', err)

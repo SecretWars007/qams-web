@@ -117,8 +117,12 @@ export class RequirementsComponent implements OnInit {
   constructor() {
     effect(() => {
       const pid = this.projectContext.activeProjectId();
-      if (pid) {
-        this.onProjectSelect(pid);
+      const currentProjects = this.projects();
+      if (pid && currentProjects.length > 0 && pid !== this.projectId()) {
+        const matchingProj = currentProjects.find(p => p.id === pid);
+        if (matchingProj) {
+          this.onProjectSelect(pid);
+        }
       }
     });
   }
@@ -131,11 +135,14 @@ export class RequirementsComponent implements OnInit {
     this.projectsService.getProjects().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (data) => {
         this.projects.set(data);
-        const pid = this.projectContext.activeProjectId();
-        if (!pid && data.length > 0) {
-          // Si no hay proyecto activo en contexto, autoselecciona el primero
-          this.onProjectSelect(data[0].id);
-        } else if (!pid && data.length === 0) {
+        if (data.length > 0) {
+          const pid = this.projectContext.activeProjectId();
+          const validProject = data.find(p => p.id === pid);
+          const targetId = validProject ? validProject.id : data[0].id;
+          this.onProjectSelect(targetId);
+        } else {
+          this.project.set(null);
+          this.requirements.set([]);
           this.loading.set(false);
         }
       },
@@ -157,7 +164,9 @@ export class RequirementsComponent implements OnInit {
         this.loadRequirements(projectId);
       },
       error: (err) => {
-        console.error('Error loading project', err);
+        console.warn('[Requirements] Error loading project detail:', err);
+        this.project.set(null);
+        this.requirements.set([]);
         this.loading.set(false);
       }
     });
