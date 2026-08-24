@@ -1,10 +1,8 @@
 services:
   # Frontend SPA Angular 19 (Static Site en Render Edge CDN)
-  - type: web
+  - type: static
     name: qams-web
-    runtime: static
     plan: free
-    region: oregon
     buildCommand: npm install && npm run build
     staticPublishPath: dist/qams-web/browser
     autoDeploy: false
