@@ -1,0 +1,38 @@
+name: Deploy QAMS Frontend to Render
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    name: Build & Trigger Render Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del Código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Instalar Dependencias
+        run: npm ci
+
+      - name: Compilar Angular para Producción
+        run: npm run build
+
+      - name: Disparar Despliegue en Render (Deploy Hook)
+        if: success()
+        run: |
+          if [ -n "${{ secrets.RENDER_FRONTEND_DEPLOY_HOOK }}" ]; then
+            echo "Disparando webhook de despliegue en Render..."
+            curl -s -X POST "${{ secrets.RENDER_FRONTEND_DEPLOY_HOOK }}"
+            echo "Despliegue activado con éxito en Render."
+          else
+            echo "Secreto RENDER_FRONTEND_DEPLOY_HOOK no configurado. Omitiendo trigger."
+          fi
