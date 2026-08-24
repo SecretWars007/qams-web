@@ -39,7 +39,6 @@ services:
       - JwtSettings__Audience=QAMS.Client
       - EncryptionSettings__Key=12345678901234567890123456789012
       - EncryptionSettings__IV=1234567890123456
-      - Redis__Configuration=qams-redis:6379
       - FRONTEND_URL=http://localhost:4200
       - SmtpSettings__Username=enriquezariasedwingustavo@gmail.com
       - SmtpSettings__Password=tliheqrfqlzbdhuh

@@ -5,5 +5,18 @@
   "scss.lint.compatibleVendorPrefixes": "ignore",
   "scss.lint.vendorPrefix": "ignore",
   "scss.lint.unknownAtRules": "ignore",
-  "compile-hero.disable-compile-files-on-did-save-code": false
+  "compile-hero.disable-compile-files-on-did-save-code": false,
+  "sqltools.connections": [
+    {
+      "ssh": "Disabled",
+      "previewLimit": 50,
+      "server": "localhost",
+      "port": 5432,
+      "driver": "PostgreSQL",
+      "name": "postgresql",
+      "database": "qams_db",
+      "password": "postgres123",
+      "username": "postgres"
+    }
+  ]
 }
